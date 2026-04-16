@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-amber: #f59e0b;
+    --accent-emerald: #10b981;
+    --accent-rose: #f43f5e;
+    --accent-orange: #f97316;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --card-inner-bg: rgba(255,255,255,0.02);
+    --card-inner-hover: rgba(255,255,255,0.04);
+    --grid-line: rgba(255,255,255,0.04);
+    --chart-border: rgba(26,32,53,0.8);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-secondary: #e8ecf4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-cyan: #0891b2;
+    --accent-purple: #7c3aed;
+    --accent-pink: #db2777;
+    --accent-amber: #d97706;
+    --accent-emerald: #059669;
+    --accent-rose: #e11d48;
+    --accent-orange: #ea580c;
+    --card-inner-bg: rgba(0,0,0,0.02);
+    --card-inner-hover: rgba(0,0,0,0.04);
+    --grid-line: rgba(0,0,0,0.07);
+    --chart-border: rgba(255,255,255,0.85);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(139,92,246,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 40% at 50% 90%, rgba(6,182,212,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    transition: background 0.4s;
+  }
+
+  [data-theme="light"] body::before {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(37,99,235,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(124,58,237,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 40% at 50% 90%, rgba(8,145,178,0.03) 0%, transparent 50%);
+  }
+
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .header-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(59,130,246,0.4));
+  }
+
+  .header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #8b95b0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  [data-theme="light"] .header h1 {
+    background: linear-gradient(135deg, #1a1f36 0%, #475569 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* Upload Zone */
+  .upload-zone {
+    max-width: 620px;
+    margin: 0 auto 40px;
+    padding: 48px 32px;
+    border: 2px dashed var(--border-hover);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s, background 0.3s, transform 0.2s;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent-blue);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .upload-zone .upload-icon { font-size: 48px; margin-bottom: 16px; display: block; opacity: 0.7; }
+  .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+  .upload-zone p { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .upload-zone .upload-hint { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
+  .upload-zone input[type="file"] { display: none; }
+
+  .upload-zone .upload-or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .upload-zone .upload-or::before,
+  .upload-zone .upload-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .example-btn {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 9px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--accent-blue);
+    background: rgba(59,130,246,0.1);
+    color: var(--accent-blue);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .example-btn:hover {
+    background: rgba(59,130,246,0.2);
+    transform: translateY(-1px);
+  }
+
+  .upload-zone .auto-load-msg {
+    font-size: 12px;
+    color: var(--accent-emerald);
+    font-weight: 500;
+    display: none;
+  }
+
+  .upload-zone .auto-load-msg.show { display: block; }
+
+  .upload-zone .error-msg {
+    font-size: 12px;
+    color: var(--accent-rose);
+    font-weight: 500;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .upload-zone .error-msg.show { display: block; }
+
+  .reload-btn {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    z-index: 2;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+
+  .reload-btn:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  .reload-btn.show { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Hero Stats */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--stat-accent, var(--accent-blue));
+    opacity: 0.7;
+  }
+
+  .stat-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* Map */
+  .map-section { margin-bottom: 28px; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.4s ease;
+  }
+
+  .card:hover { border-color: var(--border-hover); }
+
+  .card-header {
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-header h2 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+
+  .card-header .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(59,130,246,0.12);
+    color: var(--accent-blue);
+    margin-left: auto;
+  }
+
+  #map { height: 480px; background: var(--bg-secondary); }
+
+  /* Charts Grid */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .charts-grid .card { min-height: 380px; }
+
+  .chart-body {
+    padding: 20px;
+    position: relative;
+    height: calc(100% - 54px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-body canvas { max-height: 300px; }
+
+  /* Two-column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  /* Top Routes / Airport list */
+  .list-body { padding: 10px 22px 18px; }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 14px;
+  }
+
+  .list-item:last-child { border-bottom: none; }
+
+  .list-rank {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .list-route {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .list-route .arrow { color: var(--text-muted); font-size: 12px; }
+
+  .list-count {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-cyan);
+  }
+
+  .list-bar-bg {
+    height: 4px;
+    background: var(--card-inner-bg);
+    border-radius: 2px;
+    width: 60px;
+    flex-shrink: 0;
+  }
+
+  .list-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent-cyan);
+    transition: width 0.5s ease;
+  }
+
+  /* Class breakdown */
+  .class-timeline { padding: 18px 22px; }
+
+  .class-row { display: flex; align-items: center; gap: 14px; padding: 8px 0; }
+
+  .class-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .class-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  .class-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--card-inner-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .class-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    color: white;
+    transition: width 0.6s ease;
+  }
+
+  /* Aircraft cards */
+  .aircraft-highlight { padding: 18px 22px; }
+
+  .aircraft-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: var(--card-inner-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    transition: background 0.2s;
+  }
+
+  .aircraft-card:hover { background: var(--card-inner-hover); }
+  .aircraft-card:last-child { margin-bottom: 0; }
+
+  .ac-icon { font-size: 28px; flex-shrink: 0; }
+  .ac-info { flex: 1; }
+  .ac-type { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .ac-detail { font-size: 12px; color: var(--text-secondary); }
+
+  .ac-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Heatmap */
+  .heatmap-body { padding: 18px 22px; overflow-x: auto; }
+
+  .heatmap-table { width: 100%; border-collapse: separate; border-spacing: 3px; }
+
+  .heatmap-table th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 6px;
+    text-align: center;
+  }
+
+  .heatmap-table td {
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.2s;
+  }
+
+  .heatmap-table td:hover { transform: scale(1.1); }
+
+  .heatmap-table .year-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+    padding-right: 12px;
+  }
+
+  /* Footer */
+  .footer { text-align: center; padding: 30px 0 10px; color: var(--text-muted); font-size: 12px; }
+
+  /* Spending breakdown */
+  .spend-breakdown { padding: 18px 22px; }
+
+  .spend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .spend-row:last-child { border-bottom: none; }
+
+  .spend-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .spend-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .spend-amount {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+  }
+
+  /* Leaflet custom */
+  .leaflet-container { background: var(--bg-primary) !important; }
+  .leaflet-tile-pane { opacity: 0.85; }
+  [data-theme="light"] .leaflet-tile-pane { opacity: 1; }
+  [data-theme="light"] .card { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+  [data-theme="light"] .stat-card { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+  [data-theme="light"] .class-bar-fill { color: #fff; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    z-index: 2;
+    width: 52px;
+    height: 28px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+
+  .theme-toggle .toggle-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: transform 0.3s ease;
+    transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  [data-theme="light"] .theme-toggle .toggle-thumb {
+    transform: translateX(25px);
+    background: var(--accent-amber);
+  }
+
+  /* Dashboard hidden until data loaded */
+  #dashboard { display: none; }
+  #dashboard.show { display: block; }
+
+  /* Column schema hint */
+  .schema-hint {
+    margin-top: 16px;
+    text-align: left;
+    background: var(--card-inner-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+
+  .schema-hint.open { max-height: 400px; padding: 14px 18px; }
+  .schema-hint.closed { max-height: 0; padding: 0 18px; }
+
+  .schema-toggle {
+    font-size: 12px;
+    color: var(--accent-blue);
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  .schema-toggle:hover { text-decoration: underline; }
+
+  .schema-hint code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: block;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .schema-hint .col-required { color: var(--accent-blue); font-weight: 600; }
+  .schema-hint .col-optional { color: var(--text-muted); }
+
+  .example-banner {
+    display: none;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--accent-amber);
+    background: rgba(245,158,11,0.08);
+    color: var(--accent-amber);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .example-banner.show { display: flex; }
+
+  .example-banner .dismiss-example {
+    padding: 4px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--accent-amber);
+    background: transparent;
+    color: var(--accent-amber);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .example-banner .dismiss-example:hover { background: rgba(245,158,11,0.15); }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .hero-stats { grid-template-columns: repeat(3, 1fr); }
+    .charts-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .header h1 { font-size: 30px; }
+    #map { height: 350px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+    <button class="reload-btn" id="reloadBtn">&#8635; Load new CSV</button>
+    <span class="header-icon">&#9992;</span>
+    <h1>Flight Dashboard</h1>
+    <p id="headerSub">Drop a CSV file to get started</p>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <span class="upload-icon">&#128196;</span>
+    <h3>Drop your flight-data.csv here</h3>
+    <p>or click to browse</p>
+    <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+    <div class="upload-or">or</div>
+    <p style="font-size:13px;color:var(--text-secondary)">Serve via HTTP and place <code style="color:var(--accent-blue)">flight-data.csv</code> alongside this file</p>
+    <button class="example-btn" id="exampleBtn">Try with example data</button>
+    <span class="auto-load-msg" id="autoLoadMsg">Auto-loaded flight-data.csv</span>
+    <span class="error-msg" id="errorMsg"></span>
+    <span class="schema-toggle" id="schemaToggleBtn">Show expected columns</span>
+    <div class="schema-hint closed" id="schemaHint">
+      <code><span class="col-required">Required columns:</span>
+Seq, From(IATA), To(IATA), Year, Date, Hour, Carrier, Class,
+Departure, Arrival
+
+<span class="col-optional">Optional columns (enrich the dashboard):</span>
+Airplane, Registration, Build Date, Age, Age(num),
+Seat, Flight, Price(self), Price(self upgrade),
+Price(Company), Price, Note</code>
+    </div>
+  </div>
+
+  <!-- Dashboard (hidden until data loaded) -->
+  <div id="dashboard">
+    <div class="example-banner" id="exampleBanner">
+      Viewing example data -- load your own CSV to see your flights
+      <button class="dismiss-example" id="dismissExample">Load my CSV</button>
+    </div>
+    <div class="hero-stats" id="heroStats"></div>
+
+    <div class="map-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>Route Map</h2>
+          <span class="badge" id="routeBadge">0 routes</span>
+        </div>
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-header"><h2>Flights by Year</h2></div>
+        <div class="chart-body"><canvas id="chartYear"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Airlines</h2></div>
+        <div class="chart-body"><canvas id="chartAirline"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Aircraft Models</h2></div>
+        <div class="chart-body"><canvas id="chartAircraft"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-header"><h2>Flight Duration</h2></div>
+        <div class="chart-body"><canvas id="chartDuration"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Spending by Year</h2></div>
+        <div class="chart-body"><canvas id="chartSpending"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Cabin Class</h2></div>
+        <div class="chart-body"><canvas id="chartClass"></canvas></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><h2>Top Routes</h2></div>
+        <div class="list-body" id="topRoutes"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Most Visited Airports</h2></div>
+        <div class="list-body" id="topAirports"></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><h2>Spending Breakdown</h2></div>
+        <div class="spend-breakdown" id="spendBreakdown"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Aircraft Highlights</h2></div>
+        <div class="aircraft-highlight" id="aircraftHighlights"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 28px;">
+      <div class="card-header"><h2>Monthly Travel Heatmap</h2></div>
+      <div class="heatmap-body" id="heatmapBody"></div>
+    </div>
+
+    <div class="card" style="margin-bottom: 28px;">
+      <div class="card-header"><h2>Cabin Class Breakdown</h2></div>
+      <div class="class-timeline" id="classTimeline"></div>
+    </div>
+
+    <div class="footer">Built from flight-data.csv</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CSV Parser
+// ============================================================
+function parseCSV(csv) {
+  const lines = csv.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+// ============================================================
+//  Airport Coordinates Database
+// ============================================================
+const AIRPORTS = {
+  // Australia
+  SYD:{lat:-33.946,lng:151.177,name:'Sydney'},MEL:{lat:-37.673,lng:144.843,name:'Melbourne'},
+  BNE:{lat:-27.384,lng:153.117,name:'Brisbane'},PER:{lat:-31.940,lng:115.967,name:'Perth'},
+  ADL:{lat:-34.945,lng:138.531,name:'Adelaide'},HBA:{lat:-42.836,lng:147.510,name:'Hobart'},
+  CBR:{lat:-35.307,lng:149.195,name:'Canberra'},OOL:{lat:-28.164,lng:153.505,name:'Gold Coast'},
+  CNS:{lat:-16.886,lng:145.755,name:'Cairns'},DRW:{lat:-12.415,lng:130.877,name:'Darwin'},
+  // New Zealand
+  AKL:{lat:-37.008,lng:174.792,name:'Auckland'},WLG:{lat:-41.327,lng:174.805,name:'Wellington'},
+  CHC:{lat:-43.489,lng:172.532,name:'Christchurch'},ZQN:{lat:-45.021,lng:168.739,name:'Queenstown'},
+  ROT:{lat:-38.109,lng:176.317,name:'Rotorua'},
+  // China
+  PVG:{lat:31.144,lng:121.808,name:'Shanghai Pudong'},SHA:{lat:31.198,lng:121.336,name:'Shanghai Hongqiao'},
+  PEK:{lat:40.080,lng:116.603,name:'Beijing Capital'},PKX:{lat:39.510,lng:116.411,name:'Beijing Daxing'},
+  CAN:{lat:23.393,lng:113.299,name:'Guangzhou'},SZX:{lat:22.639,lng:113.811,name:'Shenzhen'},
+  CTU:{lat:30.578,lng:103.947,name:'Chengdu'},CKG:{lat:29.719,lng:106.642,name:'Chongqing'},
+  KWE:{lat:26.539,lng:106.801,name:'Guiyang'},CGO:{lat:34.520,lng:113.841,name:'Zhengzhou'},
+  WUH:{lat:30.784,lng:114.208,name:'Wuhan'},NKG:{lat:31.742,lng:118.862,name:'Nanjing'},
+  HGH:{lat:30.229,lng:120.434,name:'Hangzhou'},XMN:{lat:24.544,lng:118.128,name:'Xiamen'},
+  KMG:{lat:24.992,lng:102.744,name:'Kunming'},XIY:{lat:34.447,lng:108.752,name:'Xian'},
+  TSN:{lat:39.124,lng:117.346,name:'Tianjin'},TAO:{lat:36.266,lng:120.374,name:'Qingdao'},
+  DLC:{lat:38.966,lng:121.539,name:'Dalian'},SHE:{lat:41.640,lng:123.483,name:'Shenyang'},
+  HRB:{lat:45.623,lng:126.250,name:'Harbin'},CSX:{lat:28.189,lng:113.220,name:'Changsha'},
+  FOC:{lat:25.935,lng:119.663,name:'Fuzhou'},NNG:{lat:22.608,lng:108.172,name:'Nanning'},
+  HAK:{lat:19.935,lng:110.459,name:'Haikou'},SYX:{lat:18.303,lng:109.412,name:'Sanya'},
+  URC:{lat:43.907,lng:87.474,name:'Urumqi'},LHW:{lat:36.515,lng:103.621,name:'Lanzhou'},
+  TNA:{lat:36.857,lng:117.216,name:'Jinan'},CGQ:{lat:43.996,lng:125.685,name:'Changchun'},
+  // Hong Kong & Macau & Taiwan
+  HKG:{lat:22.308,lng:113.919,name:'Hong Kong'},MFM:{lat:22.150,lng:113.592,name:'Macau'},
+  TPE:{lat:25.078,lng:121.232,name:'Taipei Taoyuan'},TSA:{lat:25.070,lng:121.552,name:'Taipei Songshan'},
+  KHH:{lat:22.577,lng:120.350,name:'Kaohsiung'},
+  // Japan
+  NRT:{lat:35.764,lng:140.386,name:'Tokyo Narita'},HND:{lat:35.553,lng:139.780,name:'Tokyo Haneda'},
+  KIX:{lat:34.434,lng:135.244,name:'Osaka Kansai'},ITM:{lat:34.785,lng:135.438,name:'Osaka Itami'},
+  CTS:{lat:42.775,lng:141.692,name:'Sapporo'},FUK:{lat:33.586,lng:130.451,name:'Fukuoka'},
+  NGO:{lat:34.858,lng:136.812,name:'Nagoya'},OKA:{lat:26.196,lng:127.646,name:'Okinawa'},
+  // South Korea
+  ICN:{lat:37.469,lng:126.451,name:'Seoul Incheon'},GMP:{lat:37.559,lng:126.791,name:'Seoul Gimpo'},
+  PUS:{lat:35.180,lng:128.938,name:'Busan'},CJU:{lat:33.511,lng:126.493,name:'Jeju'},
+  // India
+  DEL:{lat:28.556,lng:77.100,name:'Delhi'},BOM:{lat:19.090,lng:72.866,name:'Mumbai'},
+  BLR:{lat:13.199,lng:77.707,name:'Bengaluru'},MAA:{lat:12.990,lng:80.169,name:'Chennai'},
+  CCU:{lat:22.655,lng:88.447,name:'Kolkata'},HYD:{lat:17.240,lng:78.429,name:'Hyderabad'},
+  GOI:{lat:15.381,lng:73.831,name:'Goa'},COK:{lat:10.152,lng:76.402,name:'Kochi'},
+  JAI:{lat:26.824,lng:75.812,name:'Jaipur'},AMD:{lat:23.077,lng:72.635,name:'Ahmedabad'},
+  IXU:{lat:19.863,lng:75.398,name:'Aurangabad'},BEK:{lat:28.422,lng:79.451,name:'Bareilly'},
+  GAU:{lat:26.106,lng:91.586,name:'Guwahati'},LKO:{lat:26.761,lng:80.889,name:'Lucknow'},
+  IXC:{lat:30.674,lng:76.789,name:'Chandigarh'},
+  // Southeast Asia
+  SIN:{lat:1.350,lng:103.994,name:'Singapore'},KUL:{lat:2.746,lng:101.710,name:'Kuala Lumpur'},
+  BKK:{lat:13.681,lng:100.747,name:'Bangkok Suvarnabhumi'},DMK:{lat:13.912,lng:100.607,name:'Bangkok Don Mueang'},
+  SGN:{lat:10.819,lng:106.652,name:'Ho Chi Minh'},HAN:{lat:21.221,lng:105.807,name:'Hanoi'},
+  MNL:{lat:14.508,lng:121.020,name:'Manila'},CGK:{lat:-6.126,lng:106.656,name:'Jakarta'},
+  DPS:{lat:-8.748,lng:115.167,name:'Bali'},RGN:{lat:16.907,lng:96.133,name:'Yangon'},
+  PNH:{lat:11.547,lng:104.844,name:'Phnom Penh'},REP:{lat:13.411,lng:103.813,name:'Siem Reap'},
+  // Middle East
+  DXB:{lat:25.253,lng:55.366,name:'Dubai'},AUH:{lat:24.443,lng:54.651,name:'Abu Dhabi'},
+  DOH:{lat:25.261,lng:51.565,name:'Doha'},IST:{lat:41.262,lng:28.742,name:'Istanbul'},
+  TLV:{lat:32.011,lng:34.887,name:'Tel Aviv'},RUH:{lat:24.958,lng:46.699,name:'Riyadh'},
+  JED:{lat:21.670,lng:39.157,name:'Jeddah'},BAH:{lat:26.270,lng:50.634,name:'Bahrain'},
+  MCT:{lat:23.593,lng:58.284,name:'Muscat'},AMM:{lat:31.723,lng:35.993,name:'Amman'},
+  // Europe
+  LHR:{lat:51.470,lng:-0.454,name:'London Heathrow'},LGW:{lat:51.148,lng:-0.190,name:'London Gatwick'},
+  STN:{lat:51.885,lng:0.235,name:'London Stansted'},CDG:{lat:49.010,lng:2.548,name:'Paris CDG'},
+  ORY:{lat:48.723,lng:2.379,name:'Paris Orly'},FRA:{lat:50.034,lng:8.562,name:'Frankfurt'},
+  MUC:{lat:48.354,lng:11.787,name:'Munich'},AMS:{lat:52.309,lng:4.764,name:'Amsterdam'},
+  MAD:{lat:40.472,lng:-3.561,name:'Madrid'},BCN:{lat:41.297,lng:2.078,name:'Barcelona'},
+  FCO:{lat:41.800,lng:12.239,name:'Rome'},MXP:{lat:45.630,lng:8.724,name:'Milan Malpensa'},
+  ZRH:{lat:47.458,lng:8.548,name:'Zurich'},VIE:{lat:48.110,lng:16.570,name:'Vienna'},
+  CPH:{lat:55.618,lng:12.656,name:'Copenhagen'},OSL:{lat:60.194,lng:11.100,name:'Oslo'},
+  ARN:{lat:59.651,lng:17.919,name:'Stockholm'},HEL:{lat:60.317,lng:24.963,name:'Helsinki'},
+  LIS:{lat:38.774,lng:-9.134,name:'Lisbon'},ATH:{lat:37.936,lng:23.945,name:'Athens'},
+  DUB:{lat:53.421,lng:-6.270,name:'Dublin'},EDI:{lat:55.950,lng:-3.373,name:'Edinburgh'},
+  BRU:{lat:50.901,lng:4.484,name:'Brussels'},WAW:{lat:52.166,lng:20.967,name:'Warsaw'},
+  PRG:{lat:50.101,lng:14.260,name:'Prague'},BUD:{lat:47.437,lng:19.261,name:'Budapest'},
+  // North America
+  JFK:{lat:40.640,lng:-73.779,name:'New York JFK'},EWR:{lat:40.693,lng:-74.169,name:'Newark'},
+  LAX:{lat:33.943,lng:-118.408,name:'Los Angeles'},SFO:{lat:37.615,lng:-122.390,name:'San Francisco'},
+  ORD:{lat:41.978,lng:-87.904,name:'Chicago'},ATL:{lat:33.637,lng:-84.428,name:'Atlanta'},
+  DFW:{lat:32.897,lng:-97.038,name:'Dallas'},MIA:{lat:25.796,lng:-80.287,name:'Miami'},
+  SEA:{lat:47.449,lng:-122.309,name:'Seattle'},BOS:{lat:42.365,lng:-71.010,name:'Boston'},
+  IAD:{lat:38.944,lng:-77.456,name:'Washington Dulles'},DEN:{lat:39.849,lng:-104.673,name:'Denver'},
+  YYZ:{lat:43.677,lng:-79.631,name:'Toronto'},YVR:{lat:49.195,lng:-123.179,name:'Vancouver'},
+  YUL:{lat:45.471,lng:-73.736,name:'Montreal'},MEX:{lat:19.436,lng:-99.072,name:'Mexico City'},
+  CUN:{lat:21.037,lng:-86.877,name:'Cancun'},
+  // South America
+  GRU:{lat:-23.432,lng:-46.470,name:'Sao Paulo'},GIG:{lat:-22.810,lng:-43.251,name:'Rio de Janeiro'},
+  EZE:{lat:-34.822,lng:-58.536,name:'Buenos Aires'},SCL:{lat:-33.393,lng:-70.786,name:'Santiago'},
+  BOG:{lat:4.702,lng:-74.147,name:'Bogota'},LIM:{lat:-12.022,lng:-77.114,name:'Lima'},
+  // Africa
+  JNB:{lat:-26.139,lng:28.246,name:'Johannesburg'},CPT:{lat:-33.969,lng:18.597,name:'Cape Town'},
+  CAI:{lat:30.122,lng:31.406,name:'Cairo'},NBO:{lat:-1.319,lng:36.928,name:'Nairobi'},
+  ADD:{lat:8.978,lng:38.799,name:'Addis Ababa'},CMN:{lat:33.367,lng:-7.590,name:'Casablanca'},
+  LOS:{lat:6.577,lng:3.321,name:'Lagos'},
+};
+
+// Country lookup by airport code
+const AIRPORT_COUNTRY = {};
+const COUNTRY_MAP = {
+  'Australia':'Australia','New Zealand':'New Zealand','China':'China',
+  'Hong Kong':'Hong Kong','Macau':'Macau','Taiwan':'Taiwan',
+  'Japan':'Japan','South Korea':'South Korea',
+  'India':'India','Singapore':'Singapore','Malaysia':'Malaysia',
+  'Thailand':'Thailand','Vietnam':'Vietnam','Philippines':'Philippines',
+  'Indonesia':'Indonesia','Myanmar':'Myanmar','Cambodia':'Cambodia',
+  'UAE':'UAE','Qatar':'Qatar','Turkey':'Turkey','Israel':'Israel',
+  'Saudi Arabia':'Saudi Arabia','Bahrain':'Bahrain','Oman':'Oman','Jordan':'Jordan',
+  'UK':'UK','France':'France','Germany':'Germany','Netherlands':'Netherlands',
+  'Spain':'Spain','Italy':'Italy','Switzerland':'Switzerland','Austria':'Austria',
+  'Denmark':'Denmark','Norway':'Norway','Sweden':'Sweden','Finland':'Finland',
+  'Portugal':'Portugal','Greece':'Greece','Ireland':'Ireland','Belgium':'Belgium',
+  'Poland':'Poland','Czech Republic':'Czech Republic','Hungary':'Hungary',
+  'USA':'USA','Canada':'Canada','Mexico':'Mexico',
+  'Brazil':'Brazil','Argentina':'Argentina','Chile':'Chile','Colombia':'Colombia','Peru':'Peru',
+  'South Africa':'South Africa','Egypt':'Egypt','Kenya':'Kenya','Ethiopia':'Ethiopia',
+  'Morocco':'Morocco','Nigeria':'Nigeria',
+};
+
+// Auto-assign countries from airport names and known groupings
+(function() {
+  const countryForCode = {
+    SYD:'Australia',MEL:'Australia',BNE:'Australia',PER:'Australia',ADL:'Australia',
+    HBA:'Australia',CBR:'Australia',OOL:'Australia',CNS:'Australia',DRW:'Australia',
+    AKL:'New Zealand',WLG:'New Zealand',CHC:'New Zealand',ZQN:'New Zealand',ROT:'New Zealand',
+    PVG:'China',SHA:'China',PEK:'China',PKX:'China',CAN:'China',SZX:'China',CTU:'China',
+    CKG:'China',KWE:'China',CGO:'China',WUH:'China',NKG:'China',HGH:'China',XMN:'China',
+    KMG:'China',XIY:'China',TSN:'China',TAO:'China',DLC:'China',SHE:'China',HRB:'China',
+    CSX:'China',FOC:'China',NNG:'China',HAK:'China',SYX:'China',URC:'China',LHW:'China',
+    TNA:'China',CGQ:'China',
+    HKG:'Hong Kong',MFM:'Macau',TPE:'Taiwan',TSA:'Taiwan',KHH:'Taiwan',
+    NRT:'Japan',HND:'Japan',KIX:'Japan',ITM:'Japan',CTS:'Japan',FUK:'Japan',NGO:'Japan',OKA:'Japan',
+    ICN:'South Korea',GMP:'South Korea',PUS:'South Korea',CJU:'South Korea',
+    DEL:'India',BOM:'India',BLR:'India',MAA:'India',CCU:'India',HYD:'India',GOI:'India',
+    COK:'India',JAI:'India',AMD:'India',IXU:'India',BEK:'India',GAU:'India',LKO:'India',IXC:'India',
+    SIN:'Singapore',KUL:'Malaysia',
+    BKK:'Thailand',DMK:'Thailand',SGN:'Vietnam',HAN:'Vietnam',
+    MNL:'Philippines',CGK:'Indonesia',DPS:'Indonesia',RGN:'Myanmar',PNH:'Cambodia',REP:'Cambodia',
+    DXB:'UAE',AUH:'UAE',DOH:'Qatar',IST:'Turkey',TLV:'Israel',
+    RUH:'Saudi Arabia',JED:'Saudi Arabia',BAH:'Bahrain',MCT:'Oman',AMM:'Jordan',
+    LHR:'UK',LGW:'UK',STN:'UK',CDG:'France',ORY:'France',FRA:'Germany',MUC:'Germany',
+    AMS:'Netherlands',MAD:'Spain',BCN:'Spain',FCO:'Italy',MXP:'Italy',ZRH:'Switzerland',
+    VIE:'Austria',CPH:'Denmark',OSL:'Norway',ARN:'Sweden',HEL:'Finland',LIS:'Portugal',
+    ATH:'Greece',DUB:'Ireland',EDI:'UK',BRU:'Belgium',WAW:'Poland',PRG:'Czech Republic',BUD:'Hungary',
+    JFK:'USA',EWR:'USA',LAX:'USA',SFO:'USA',ORD:'USA',ATL:'USA',DFW:'USA',MIA:'USA',
+    SEA:'USA',BOS:'USA',IAD:'USA',DEN:'USA',
+    YYZ:'Canada',YVR:'Canada',YUL:'Canada',MEX:'Mexico',CUN:'Mexico',
+    GRU:'Brazil',GIG:'Brazil',EZE:'Argentina',SCL:'Chile',BOG:'Colombia',LIM:'Peru',
+    JNB:'South Africa',CPT:'South Africa',CAI:'Egypt',NBO:'Kenya',ADD:'Ethiopia',CMN:'Morocco',LOS:'Nigeria',
+  };
+  Object.assign(AIRPORT_COUNTRY, countryForCode);
+})();
+
+// ============================================================
+//  Theme helpers
+// ============================================================
+function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function getChartTextColor() { return isDark() ? '#8b95b0' : '#475569'; }
+function getGridColor() { return isDark() ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.07)'; }
+function getChartBorder() { return isDark() ? 'rgba(26,32,53,0.8)' : 'rgba(255,255,255,0.85)'; }
+
+function applyChartDefaults() {
+  Chart.defaults.color = getChartTextColor();
+  Chart.defaults.borderColor = isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyleWidth = 8;
+}
+
+const chartColors = ['#3b82f6','#06b6d4','#8b5cf6','#ec4899','#f59e0b','#10b981','#f43f5e','#f97316','#6366f1','#14b8a6','#a855f7','#84cc16','#e879f9','#22d3ee'];
+
+const TILE_DARK = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+// ============================================================
+//  Dashboard state (mutable, reset on each build)
+// ============================================================
+let leafletMap = null;
+let currentTileLayer = null;
+let allCharts = [];
+let currentRenderHeatmap = null; // stored so theme toggle can re-render
+
+// ============================================================
+//  Build Dashboard
+// ============================================================
+function buildDashboard(flights) {
+  // ── Tear down previous state ──
+  allCharts.forEach(c => c.destroy());
+  allCharts = [];
+  if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+
+  // Re-create the map container (Leaflet needs a fresh one)
+  const mapParent = document.getElementById('map').parentElement;
+  document.getElementById('map').remove();
+  const newMap = document.createElement('div');
+  newMap.id = 'map';
+  mapParent.appendChild(newMap);
+
+  // Reset canvas elements (Chart.js needs fresh canvases)
+  ['chartYear','chartAirline','chartAircraft','chartDuration','chartSpending','chartClass'].forEach(id => {
+    const el = document.getElementById(id);
+    const parent = el.parentElement;
+    el.remove();
+    const c = document.createElement('canvas');
+    c.id = id;
+    parent.appendChild(c);
+  });
+
+  applyChartDefaults();
+
+  // ── Derive countries for any airports not in our static DB ──
+  // Try to guess country from Departure/Arrival text
+  flights.forEach(f => {
+    [['From(IATA)', 'Departure'], ['To(IATA)', 'Arrival']].forEach(([codeKey, nameKey]) => {
+      const code = f[codeKey];
+      if (code && !AIRPORT_COUNTRY[code] && f[nameKey]) {
+        const parts = f[nameKey].split(',');
+        if (parts.length > 1) {
+          AIRPORT_COUNTRY[code] = parts[parts.length - 1].trim();
+        }
+      }
+    });
+  });
+
+  // ── Compute stats ──
+  const totalFlights = flights.length;
+  const totalHours = flights.reduce((s, f) => s + parseFloat(f.Hour || 0), 0);
+  const uniqueAirports = new Set(flights.flatMap(f => [f['From(IATA)'], f['To(IATA)']]).filter(Boolean));
+  const uniqueCarriers = new Set(flights.map(f => f.Carrier).filter(Boolean));
+  const uniqueCountries = new Set(
+    flights.flatMap(f => [AIRPORT_COUNTRY[f['From(IATA)']], AIRPORT_COUNTRY[f['To(IATA)']]]).filter(Boolean)
+  );
+  const totalSpend = flights.reduce((s, f) => s + parseFloat(f.Price || 0), 0);
+  const yearRange = flights.map(f => parseInt(f.Year)).filter(Boolean);
+  const minYear = Math.min(...yearRange);
+  const maxYear = Math.max(...yearRange);
+  const span = maxYear - minYear + 1;
+
+  // ── Update header ──
+  document.getElementById('headerSub').textContent =
+    `${totalFlights} flights \u00b7 ${minYear} \u2013 ${maxYear} \u00b7 ${uniqueAirports.size} airports \u00b7 ${uniqueCountries.size} countries`;
+
+  // ── Hero Stats ──
+  const stats = [
+    { label: 'Total Flights', value: totalFlights, sub: `${(totalFlights/span).toFixed(1)}/year avg`, accent: 'var(--accent-blue)' },
+    { label: 'Hours in Air', value: totalHours.toFixed(1), sub: `${(totalHours/24).toFixed(1)} days`, accent: 'var(--accent-cyan)' },
+    { label: 'Airports', value: uniqueAirports.size, sub: `across ${uniqueCountries.size} countries`, accent: 'var(--accent-purple)' },
+    { label: 'Airlines', value: uniqueCarriers.size, sub: 'carriers flown', accent: 'var(--accent-pink)' },
+    { label: 'Countries', value: uniqueCountries.size, sub: [...uniqueCountries].slice(0, 3).join(', ') + (uniqueCountries.size > 3 ? '...' : ''), accent: 'var(--accent-amber)' },
+    { label: 'Total Spend', value: '$' + Math.round(totalSpend).toLocaleString(), sub: 'total recorded', accent: 'var(--accent-emerald)' },
+  ];
+
+  document.getElementById('heroStats').innerHTML = stats.map(s => `
+    <div class="stat-card" style="--stat-accent: ${s.accent}">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>
+  `).join('');
+
+  // Make dashboard visible BEFORE Leaflet init so the map container has real dimensions
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+
+  // ── Route Map ──
+  leafletMap = L.map('map', { center: [5, 100], zoom: 3, zoomControl: false, attributionControl: false });
+  L.control.zoom({ position: 'topright' }).addTo(leafletMap);
+  currentTileLayer = L.tileLayer(isDark() ? TILE_DARK : TILE_LIGHT, { maxZoom: 19 }).addTo(leafletMap);
+
+  const routeSet = new Set();
+  const routeCount = {};
+  flights.forEach(f => {
+    const key = [f['From(IATA)'], f['To(IATA)']].sort().join('-');
+    routeSet.add(key);
+    routeCount[key] = (routeCount[key] || 0) + 1;
+  });
+
+  document.getElementById('routeBadge').textContent = routeSet.size + ' unique routes';
+
+  const routeColorPalette = ['#3b82f6','#06b6d4','#8b5cf6','#ec4899','#f59e0b','#10b981'];
+  let colorIdx = 0;
+
+  routeSet.forEach(route => {
+    const [a, b] = route.split('-');
+    if (!AIRPORTS[a] || !AIRPORTS[b]) return;
+    const from = AIRPORTS[a], to = AIRPORTS[b];
+    const count = routeCount[route];
+    const latlngs = getCurvedPoints(from, to);
+    const color = routeColorPalette[colorIdx % routeColorPalette.length];
+    colorIdx++;
+    L.polyline(latlngs, {
+      color, weight: Math.min(1.5 + count * 0.5, 4), opacity: 0.6, smoothFactor: 1,
+    }).addTo(leafletMap);
+  });
+
+  // Airport markers
+  const airportVisits = {};
+  flights.forEach(f => {
+    if (f['From(IATA)']) airportVisits[f['From(IATA)']] = (airportVisits[f['From(IATA)']] || 0) + 1;
+    if (f['To(IATA)']) airportVisits[f['To(IATA)']] = (airportVisits[f['To(IATA)']] || 0) + 1;
+  });
+
+  Object.entries(AIRPORTS).forEach(([code, info]) => {
+    if (!airportVisits[code]) return;
+    const visits = airportVisits[code];
+    const r = Math.min(4 + visits * 0.8, 12);
+    L.circleMarker([info.lat, info.lng], {
+      radius: r, fillColor: '#3b82f6', fillOpacity: 0.8,
+      color: '#f0f4ff', weight: 1.5, opacity: 0.9,
+    }).addTo(leafletMap).bindTooltip(`<b>${code}</b> \u00b7 ${info.name}<br>${visits} visits`, {
+      direction: 'top', offset: [0, -r],
+    });
+  });
+
+  // Fit map bounds to visited airports
+  const visitedCoords = Object.keys(airportVisits)
+    .filter(c => AIRPORTS[c])
+    .map(c => [AIRPORTS[c].lat, AIRPORTS[c].lng]);
+  if (visitedCoords.length > 1) {
+    leafletMap.fitBounds(visitedCoords, { padding: [40, 40] });
+  }
+
+  // ── Flights by Year ──
+  const yearCounts = {};
+  flights.forEach(f => { if (f.Year) yearCounts[f.Year] = (yearCounts[f.Year] || 0) + 1; });
+  const years = Object.keys(yearCounts).sort();
+
+  allCharts.push(new Chart(document.getElementById('chartYear'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [{
+        data: years.map(y => yearCounts[y]),
+        backgroundColor: years.map((_, i) => chartColors[i % chartColors.length] + 'cc'),
+        borderColor: years.map((_, i) => chartColors[i % chartColors.length]),
+        borderWidth: 1, borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 2 }, grid: { color: getGridColor() } },
+        x: { grid: { display: false } }
+      }
+    }
+  }));
+
+  // ── Airlines Donut ──
+  const carrierCounts = {};
+  flights.forEach(f => { if (f.Carrier) carrierCounts[f.Carrier] = (carrierCounts[f.Carrier] || 0) + 1; });
+  const sortedCarriers = Object.entries(carrierCounts).sort((a, b) => b[1] - a[1]);
+
+  allCharts.push(new Chart(document.getElementById('chartAirline'), {
+    type: 'doughnut',
+    data: {
+      labels: sortedCarriers.map(c => c[0]),
+      datasets: [{
+        data: sortedCarriers.map(c => c[1]),
+        backgroundColor: sortedCarriers.map((_, i) => chartColors[i % chartColors.length] + 'dd'),
+        borderColor: getChartBorder(), borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '55%',
+      plugins: { legend: { position: 'right', labels: { padding: 12, font: { size: 11 } } } }
+    }
+  }));
+
+  // ── Aircraft Models ──
+  const modelCounts = {};
+  flights.forEach(f => {
+    if (f.Airplane) {
+      const base = f.Airplane.replace(/-\d+.*/, '').replace(/v$/, '');
+      modelCounts[base] = (modelCounts[base] || 0) + 1;
+    }
+  });
+  const sortedModels = Object.entries(modelCounts).sort((a, b) => b[1] - a[1]);
+
+  if (sortedModels.length > 0) {
+    allCharts.push(new Chart(document.getElementById('chartAircraft'), {
+      type: 'bar',
+      data: {
+        labels: sortedModels.map(m => m[0]),
+        datasets: [{
+          data: sortedModels.map(m => m[1]),
+          backgroundColor: sortedModels.map((_, i) => chartColors[i % chartColors.length] + 'cc'),
+          borderColor: sortedModels.map((_, i) => chartColors[i % chartColors.length]),
+          borderWidth: 1, borderRadius: 6, borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: { stepSize: 2 }, grid: { color: getGridColor() } },
+          y: { grid: { display: false } }
+        }
+      }
+    }));
+  }
+
+  // ── Flight Duration ──
+  const durationBuckets = { 'Short (<3h)': 0, 'Medium (3-7h)': 0, 'Long (7-11h)': 0, 'Ultra-long (11h+)': 0 };
+  flights.forEach(f => {
+    const h = parseFloat(f.Hour);
+    if (isNaN(h)) return;
+    if (h < 3) durationBuckets['Short (<3h)']++;
+    else if (h < 7) durationBuckets['Medium (3-7h)']++;
+    else if (h < 11) durationBuckets['Long (7-11h)']++;
+    else durationBuckets['Ultra-long (11h+)']++;
+  });
+
+  allCharts.push(new Chart(document.getElementById('chartDuration'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(durationBuckets),
+      datasets: [{
+        data: Object.values(durationBuckets),
+        backgroundColor: ['#10b981cc','#3b82f6cc','#8b5cf6cc','#ec4899cc'],
+        borderColor: getChartBorder(), borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '55%',
+      plugins: { legend: { position: 'right', labels: { padding: 12, font: { size: 11 } } } }
+    }
+  }));
+
+  // ── Spending by Year ──
+  const spendByYear = {};
+  flights.forEach(f => {
+    const y = f.Year;
+    if (!y) return;
+    if (!spendByYear[y]) spendByYear[y] = { self: 0, company: 0, upgrade: 0 };
+    spendByYear[y].self += parseFloat(f['Price(self)'] || 0);
+    spendByYear[y].company += parseFloat(f['Price(Company)'] || 0);
+    spendByYear[y].upgrade += parseFloat(f['Price(self upgrade)'] || 0);
+  });
+  const spendYears = Object.keys(spendByYear).sort();
+
+  allCharts.push(new Chart(document.getElementById('chartSpending'), {
+    type: 'bar',
+    data: {
+      labels: spendYears,
+      datasets: [
+        { label: 'Self-paid', data: spendYears.map(y => Math.round(spendByYear[y].self)),
+          backgroundColor: '#3b82f6cc', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 4 },
+        { label: 'Company', data: spendYears.map(y => Math.round(spendByYear[y].company)),
+          backgroundColor: '#10b981cc', borderColor: '#10b981', borderWidth: 1, borderRadius: 4 },
+        { label: 'Upgrade', data: spendYears.map(y => Math.round(spendByYear[y].upgrade)),
+          backgroundColor: '#f59e0bcc', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: { size: 11 }, padding: 12 } } },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => '$' + v }, grid: { color: getGridColor() } }
+      }
+    }
+  }));
+
+  // ── Cabin Class ──
+  const classCounts = {};
+  flights.forEach(f => { if (f.Class) classCounts[f.Class] = (classCounts[f.Class] || 0) + 1; });
+  const classEntries = Object.entries(classCounts).sort((a, b) => b[1] - a[1]);
+  const classColorMap = { 'Economy': '#3b82f6', 'Premium Economy': '#f59e0b', 'Business': '#8b5cf6', 'First': '#ec4899' };
+
+  allCharts.push(new Chart(document.getElementById('chartClass'), {
+    type: 'polarArea',
+    data: {
+      labels: classEntries.map(c => c[0]),
+      datasets: [{
+        data: classEntries.map(c => c[1]),
+        backgroundColor: classEntries.map(c => (classColorMap[c[0]] || '#666') + 'aa'),
+        borderColor: classEntries.map(c => classColorMap[c[0]] || '#666'), borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { font: { size: 11 }, padding: 12 } } },
+      scales: { r: { ticks: { display: false }, grid: { color: getGridColor() } } }
+    }
+  }));
+
+  // ── Top Routes ──
+  const routePairCount = {};
+  flights.forEach(f => {
+    const a = f['From(IATA)'], b = f['To(IATA)'];
+    if (!a || !b) return;
+    const key = [a, b].sort().join(' - ');
+    routePairCount[key] = (routePairCount[key] || 0) + 1;
+  });
+  const topRoutes = Object.entries(routePairCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const maxRouteCount = topRoutes[0]?.[1] || 1;
+
+  document.getElementById('topRoutes').innerHTML = topRoutes.map(([route, count], i) => {
+    const [a, b] = route.split(' - ');
+    const pct = (count / maxRouteCount * 100).toFixed(0);
+    return `<div class="list-item">
+      <span class="list-rank">${i + 1}</span>
+      <span class="list-route">${a} <span class="arrow">&harr;</span> ${b}</span>
+      <div class="list-bar-bg"><div class="list-bar" style="width:${pct}%"></div></div>
+      <span class="list-count">${count}x</span>
+    </div>`;
+  }).join('');
+
+  // ── Top Airports ──
+  const sortedAirports = Object.entries(airportVisits).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const maxAirportCount = sortedAirports[0]?.[1] || 1;
+
+  document.getElementById('topAirports').innerHTML = sortedAirports.map(([code, count], i) => {
+    const name = AIRPORTS[code]?.name || code;
+    const pct = (count / maxAirportCount * 100).toFixed(0);
+    return `<div class="list-item">
+      <span class="list-rank">${i + 1}</span>
+      <span class="list-route">${code} <span class="arrow">&middot;</span> ${name}</span>
+      <div class="list-bar-bg"><div class="list-bar" style="width:${pct}%"></div></div>
+      <span class="list-count">${count}</span>
+    </div>`;
+  }).join('');
+
+  // ── Spending Breakdown ──
+  let selfTotal = 0, companyTotal = 0, upgradeTotal = 0;
+  flights.forEach(f => {
+    selfTotal += parseFloat(f['Price(self)'] || 0);
+    companyTotal += parseFloat(f['Price(Company)'] || 0);
+    upgradeTotal += parseFloat(f['Price(self upgrade)'] || 0);
+  });
+  const avgPerFlight = totalFlights ? totalSpend / totalFlights : 0;
+  const paidFlights = flights.filter(f => parseFloat(f.Price) > 0).length;
+  const freeFlights = totalFlights - paidFlights;
+
+  document.getElementById('spendBreakdown').innerHTML = `
+    <div class="spend-row">
+      <span class="spend-label"><span class="dot" style="background:#3b82f6"></span>Self-paid</span>
+      <span class="spend-amount">$${Math.round(selfTotal).toLocaleString()}</span>
+    </div>
+    <div class="spend-row">
+      <span class="spend-label"><span class="dot" style="background:#10b981"></span>Company-paid</span>
+      <span class="spend-amount">$${Math.round(companyTotal).toLocaleString()}</span>
+    </div>
+    <div class="spend-row">
+      <span class="spend-label"><span class="dot" style="background:#f59e0b"></span>Upgrades</span>
+      <span class="spend-amount">$${Math.round(upgradeTotal).toLocaleString()}</span>
+    </div>
+    <div class="spend-row" style="border-top:1px solid var(--border); margin-top:4px; padding-top:14px">
+      <span class="spend-label"><span class="dot" style="background:#8b5cf6"></span>Avg per flight</span>
+      <span class="spend-amount">$${Math.round(avgPerFlight).toLocaleString()}</span>
+    </div>
+    <div class="spend-row">
+      <span class="spend-label"><span class="dot" style="background:#ec4899"></span>Paid flights</span>
+      <span class="spend-amount">${paidFlights} <span style="color:var(--text-muted);font-weight:400">/ ${freeFlights} free</span></span>
+    </div>
+  `;
+
+  // ── Aircraft Highlights ──
+  const withAge = flights.filter(f => f['Age(num)'] && parseInt(f['Age(num)']) > 0);
+  let highlightHTML = '';
+
+  if (withAge.length > 0) {
+    const youngest = withAge.reduce((min, f) => parseInt(f['Age(num)']) < parseInt(min['Age(num)']) ? f : min, withAge[0]);
+    const oldest = withAge.reduce((max, f) => parseInt(f['Age(num)']) > parseInt(max['Age(num)']) ? f : max, withAge[0]);
+
+    highlightHTML += `
+      <div class="aircraft-card">
+        <span class="ac-icon">&#128308;</span>
+        <div class="ac-info">
+          <div class="ac-type">${youngest.Airplane} ${youngest.Registration ? '(' + youngest.Registration + ')' : ''}</div>
+          <div class="ac-detail">${youngest.Age} years old${youngest['Build Date'] ? ' \u00b7 Built ' + youngest['Build Date'] : ''} \u00b7 ${youngest.Carrier}</div>
+        </div>
+        <span class="ac-badge" style="background:rgba(16,185,129,0.15);color:#10b981">Youngest</span>
+      </div>
+      <div class="aircraft-card">
+        <span class="ac-icon">&#128311;</span>
+        <div class="ac-info">
+          <div class="ac-type">${oldest.Airplane} ${oldest.Registration ? '(' + oldest.Registration + ')' : ''}</div>
+          <div class="ac-detail">${oldest.Age} years old${oldest['Build Date'] ? ' \u00b7 Built ' + oldest['Build Date'] : ''} \u00b7 ${oldest.Carrier}</div>
+        </div>
+        <span class="ac-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b">Oldest</span>
+      </div>`;
+  }
+
+  let airbusCount = 0, boeingCount = 0;
+  flights.forEach(f => {
+    if (f.Airplane) {
+      if (f.Airplane.startsWith('A')) airbusCount++;
+      else if (f.Airplane.startsWith('B')) boeingCount++;
+    }
+  });
+
+  if (airbusCount + boeingCount > 0) {
+    highlightHTML += `
+      <div class="aircraft-card">
+        <span class="ac-icon">&#9992;&#65039;</span>
+        <div class="ac-info">
+          <div class="ac-type">Airbus vs Boeing</div>
+          <div class="ac-detail">Airbus: ${airbusCount} flights \u00b7 Boeing: ${boeingCount} flights</div>
+        </div>
+        <span class="ac-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6">${airbusCount >= boeingCount ? 'Airbus' : 'Boeing'} Fan</span>
+      </div>`;
+  }
+
+  if (sortedModels.length > 0) {
+    highlightHTML += `
+      <div class="aircraft-card">
+        <span class="ac-icon">&#11088;</span>
+        <div class="ac-info">
+          <div class="ac-type">${sortedModels[0][0]}</div>
+          <div class="ac-detail">Most flown aircraft family \u00b7 ${sortedModels[0][1]} flights</div>
+        </div>
+        <span class="ac-badge" style="background:rgba(139,92,246,0.15);color:#8b5cf6">Favorite</span>
+      </div>`;
+  }
+
+  document.getElementById('aircraftHighlights').innerHTML = highlightHTML || '<p style="color:var(--text-muted);font-size:13px">No aircraft data available</p>';
+
+  // ── Monthly Heatmap ──
+  const heatData = {};
+  const allYears = [...new Set(flights.map(f => f.Year).filter(Boolean))].sort();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  flights.forEach(f => {
+    if (!f.Date) return;
+    const d = new Date(f.Date);
+    if (isNaN(d)) return;
+    const m = d.getMonth();
+    const key = f.Year + '-' + m;
+    heatData[key] = (heatData[key] || 0) + 1;
+  });
+
+  const maxHeat = Math.max(...Object.values(heatData), 1);
+
+  function heatColor(count) {
+    if (!count) return isDark() ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)';
+    const intensity = count / maxHeat;
+    if (isDark()) {
+      const r = Math.round(59 + (6 - 59) * intensity * 0.3);
+      const g = Math.round(130 + (182 - 130) * intensity * 0.5);
+      const b = Math.round(246 + (212 - 246) * intensity * 0.3);
+      return `rgba(${r},${g},${b},${0.15 + intensity * 0.7})`;
+    } else {
+      const r = Math.round(37 + (8 - 37) * intensity * 0.3);
+      const g = Math.round(99 + (145 - 99) * intensity * 0.5);
+      const b = Math.round(235 + (178 - 235) * intensity * 0.3);
+      return `rgba(${r},${g},${b},${0.12 + intensity * 0.55})`;
+    }
+  }
+
+  function renderHeatmap() {
+    let html = '<table class="heatmap-table"><thead><tr><th></th>';
+    months.forEach(m => html += `<th>${m}</th>`);
+    html += '</tr></thead><tbody>';
+    allYears.forEach(year => {
+      html += `<tr><td class="year-label">${year}</td>`;
+      for (let m = 0; m < 12; m++) {
+        const count = heatData[year + '-' + m] || 0;
+        const textColor = count ? (isDark() ? '#f0f4ff' : '#1a1f36') : 'var(--text-muted)';
+        html += `<td style="background:${heatColor(count)};color:${textColor}">${count || ''}</td>`;
+      }
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('heatmapBody').innerHTML = html;
+  }
+
+  renderHeatmap();
+  currentRenderHeatmap = renderHeatmap;
+
+  // ── Class Breakdown Bars ──
+  const classBarColors = { 'Economy': '#3b82f6', 'Premium Economy': '#f59e0b', 'Business': '#8b5cf6', 'First': '#ec4899' };
+
+  document.getElementById('classTimeline').innerHTML = classEntries.map(([cls, count]) => {
+    const pct = (count / totalFlights * 100).toFixed(0);
+    const color = classBarColors[cls] || chartColors[classEntries.indexOf([cls, count]) % chartColors.length] || '#666';
+    return `<div class="class-row">
+      <span class="class-dot" style="background:${color}"></span>
+      <span class="class-name">${cls}</span>
+      <div class="class-bar-track">
+        <div class="class-bar-fill" style="width:${pct}%;background:${color}cc">${count} flights (${pct}%)</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Dashboard was already shown before map init; just enable the reload button
+  document.getElementById('reloadBtn').classList.add('show');
+}
+
+// ============================================================
+//  Curved path helper
+// ============================================================
+function getCurvedPoints(from, to) {
+  const pts = [];
+  const steps = 40;
+  const midLat = (from.lat + to.lat) / 2;
+  const midLng = (from.lng + to.lng) / 2;
+  const dist = Math.sqrt((from.lat - to.lat) ** 2 + (from.lng - to.lng) ** 2);
+  const offset = dist * 0.15;
+  const angle = Math.atan2(to.lng - from.lng, to.lat - from.lat) + Math.PI / 2;
+  const cpLat = midLat + Math.cos(angle) * offset;
+  const cpLng = midLng + Math.sin(angle) * offset;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const lat = (1 - t) ** 2 * from.lat + 2 * (1 - t) * t * cpLat + t ** 2 * to.lat;
+    const lng = (1 - t) ** 2 * from.lng + 2 * (1 - t) * t * cpLng + t ** 2 * to.lng;
+    pts.push([lat, lng]);
+  }
+  return pts;
+}
+
+// ============================================================
+//  File handling
+// ============================================================
+function loadCSVText(text) {
+  try {
+    const flights = parseCSV(text);
+    if (flights.length === 0) throw new Error('No data rows found');
+    // Validate minimum required columns
+    const required = ['From(IATA)', 'To(IATA)', 'Year', 'Date', 'Hour', 'Carrier'];
+    const headers = Object.keys(flights[0]);
+    const missing = required.filter(r => !headers.includes(r));
+    if (missing.length > 0) {
+      throw new Error('Missing columns: ' + missing.join(', '));
+    }
+    // Hide the example banner when loading real data
+    if (!isExampleData) {
+      document.getElementById('exampleBanner').classList.remove('show');
+    }
+    buildDashboard(flights);
+  } catch (e) {
+    const errEl = document.getElementById('errorMsg');
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.classList.add('show');
+    setTimeout(() => errEl.classList.remove('show'), 5000);
+  }
+}
+
+// File input
+const fileInput = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+
+uploadZone.addEventListener('click', e => {
+  // Don't open file picker when clicking the example button, schema toggle, or schema content
+  if (e.target.closest('.example-btn, .schema-toggle, .schema-hint')) return;
+  fileInput.click();
+});
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => loadCSVText(ev.target.result);
+    reader.readAsText(file);
+  }
+});
+
+// Drag and drop
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => loadCSVText(ev.target.result);
+    reader.readAsText(file);
+  }
+});
+
+// Reload button
+document.getElementById('reloadBtn').addEventListener('click', () => {
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('reloadBtn').classList.remove('show');
+  document.getElementById('exampleBanner').classList.remove('show');
+  document.getElementById('headerSub').textContent = 'Drop a CSV file to get started';
+  isExampleData = false;
+  fileInput.value = '';
+});
+
+// Schema toggle
+document.getElementById('schemaToggleBtn').addEventListener('click', () => {
+  const hint = document.getElementById('schemaHint');
+  const isOpen = hint.classList.contains('open');
+  hint.classList.toggle('open', !isOpen);
+  hint.classList.toggle('closed', isOpen);
+  document.getElementById('schemaToggleBtn').textContent = isOpen ? 'Show expected columns' : 'Hide expected columns';
+});
+
+// Example button: stop propagation so it doesn't trigger the file picker
+let isExampleData = false;
+document.getElementById('exampleBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  isExampleData = true;
+  loadCSVText(EXAMPLE_CSV);
+  document.getElementById('exampleBanner').classList.add('show');
+});
+
+// Dismiss example banner → go back to upload
+document.getElementById('dismissExample').addEventListener('click', () => {
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('reloadBtn').classList.remove('show');
+  document.getElementById('exampleBanner').classList.remove('show');
+  document.getElementById('headerSub').textContent = 'Drop a CSV file to get started';
+  isExampleData = false;
+  fileInput.value = '';
+});
+
+const EXAMPLE_CSV = `Seq,From(IATA),To(IATA),Year,Airplane,Registration,Build Date,Age,Age(num),Carrier,Seat,Date,Flight,Hour,Departure,Arrival,Class,Price(self),Price(self upgrade),Price(Company),Price,Note
+1,SYD,SIN,2023,A380-841,9V-SKA,2007-10-15,16.2,5920,Singapore,31K,2023-03-12,SQ232,7.5,"Sydney, Australia",Singapore,Economy,680,,,680,
+2,SIN,LHR,2023,A380-841,9V-SKB,2008-01-22,15.1,5540,Singapore,44D,2023-03-12,SQ322,13,"Singapore","London, UK",Economy,,,,0,
+3,LHR,CDG,2023,A320-232,G-EUYA,2010-06-14,12.8,4690,BritishAirways,14A,2023-03-18,BA306,1.5,"London, UK","Paris, France",Economy,120,,,120,
+4,CDG,FCO,2023,A321-211,F-GTAM,2003-09-04,19.6,7150,AirFrance,22C,2023-03-22,AF1404,2,"Paris, France","Rome, Italy",Economy,95,,,95,
+5,FCO,IST,2023,B737-800,TC-JVL,2015-03-20,8.0,2922,TurkishAirlines,18F,2023-03-26,TK1864,2.5,"Rome, Italy","Istanbul, Turkey",Economy,110,,,110,
+6,IST,SIN,2023,B777-300ER,TC-LJA,2013-06-10,9.9,3600,TurkishAirlines,35A,2023-03-30,TK54,10,"Istanbul, Turkey",Singapore,Business,,,2200,2200,
+7,SIN,SYD,2023,B787-9,9V-OJC,2015-03-27,8.0,2920,Scoot,5D,2023-03-31,TR2,7,"Singapore","Sydney, Australia",Economy,450,,,450,
+8,SYD,NRT,2023,B787-9,JA882A,2016-11-05,6.4,2350,ANA,42K,2023-06-15,NH880,9.5,"Sydney, Australia","Tokyo, Japan",Economy,890,,,890,
+9,NRT,KIX,2023,A321-272N,JA150A,2021-02-18,2.3,855,ANA,8A,2023-06-20,NH95,1.5,"Tokyo, Japan","Osaka, Japan",Economy,,,,0,
+10,KIX,ICN,2023,A330-343,HL7584,2008-05-28,15.0,5500,KoreanAir,25B,2023-06-24,KE724,2,"Osaka, Japan","Seoul, South Korea",Economy,180,,,180,
+11,ICN,SYD,2023,A380-861,HL7625,2014-08-20,8.10,3228,KoreanAir,52H,2023-06-28,KE401,10,"Seoul, South Korea","Sydney, Australia",Economy,750,,,750,
+12,SYD,MEL,2023,A320-232,VH-VGQ,2010-05-05,13.5,4930,Jetstar,19C,2023-09-08,JQ501,1.5,"Sydney, Australia","Melbourne, Australia",Economy,89,,,89,
+13,MEL,SYD,2023,B737-800,VH-YIA,2012-07-11,11.2,4100,VirginAustralia,24D,2023-09-12,VA837,1.5,"Melbourne, Australia","Sydney, Australia",Economy,102,,,102,
+14,SYD,BKK,2024,A350-941,HS-THN,2019-04-22,4.8,1760,ThaiAirways,36A,2024-01-10,TG476,9,"Sydney, Australia","Bangkok, Thailand",Economy,620,,,620,
+15,BKK,SIN,2024,B787-8,9V-OFA,2015-06-05,8.7,3175,Scoot,12B,2024-01-16,TR609,2.5,"Bangkok, Thailand","Singapore",Economy,,,,0,
+16,SIN,DEL,2024,A350-941,9V-SMR,2019-12-10,4.1,1495,Singapore,21K,2024-01-17,SQ406,6,"Singapore","Delhi, India",Business,,643,,643,
+17,DEL,BLR,2024,A321-252NX,VT-NCO,2025-04-23,0.2,87,Indigo,15E,2024-01-20,6E2127,2.5,"Delhi, India","Bengaluru, India",Economy,45,,,45,YOUNGEST
+18,BLR,SYD,2024,A330-202,VH-EBP,2010-11-19,13.2,4820,Qantas,58J,2024-01-22,QF68,11,"Bengaluru, India","Sydney, Australia",Economy,,,1800,1800,
+19,SYD,AKL,2024,B787-9,ZK-NZI,2015-06-22,8.6,3148,AirNewZealand,33A,2024-04-05,NZ104,3,"Sydney, Australia","Auckland, New Zealand",Economy,380,,,380,
+20,AKL,SYD,2024,B787-9,ZK-NZG,2014-07-09,9.8,3580,AirNewZealand,33A,2024-04-12,NZ103,3,"Auckland, New Zealand","Sydney, Australia",Economy,395,,,395,
+21,SYD,LAX,2024,A380-842,VH-OQI,2011-03-02,13.0,4745,Qantas,64K,2024-07-01,QF11,13.5,"Sydney, Australia","Los Angeles, USA",Premium Economy,2100,,,2100,
+22,LAX,SFO,2024,A321-253NX,N408UA,2022-10-12,1.8,658,United,9A,2024-07-05,UA1278,1.5,"Los Angeles, USA","San Francisco, USA",Economy,85,,,85,
+23,SFO,NRT,2024,B777-300ER,JA735A,2012-12-18,11.5,4220,ANA,30H,2024-07-10,NH7021,11,"San Francisco, USA","Tokyo, Japan",Economy,790,,,790,
+24,NRT,SYD,2024,B787-9,JA890A,2018-05-14,6.1,2248,ANA,45C,2024-07-14,NH879,9.5,"Tokyo, Japan","Sydney, Australia",Economy,,,,0,
+25,SYD,DXB,2024,A380-842,A6-EVA,2017-02-28,7.8,2860,Emirates,44B,2024-10-20,EK415,14,"Sydney, Australia","Dubai, UAE",Economy,950,,,950,
+26,DXB,LHR,2024,A380-861,A6-EOM,2015-09-08,9.1,3330,Emirates,28K,2024-10-22,EK29,7,"Dubai, UAE","London, UK",Business,,,3500,3500,
+27,LHR,DXB,2024,A380-861,A6-EOB,2014-12-15,9.10,3585,Emirates,30A,2024-10-30,EK30,7,"London, UK","Dubai, UAE",Business,,,3500,3500,
+28,DXB,SYD,2024,A380-842,A6-EVG,2018-06-05,6.4,2340,Emirates,52D,2024-10-31,EK414,14,"Dubai, UAE","Sydney, Australia",Premium Economy,1350,,,1350,
+29,SYD,HBA,2025,A320-232,VH-XSJ,2013-01-29,12.0,4380,Jetstar,21D,2025-01-18,JQ727,2,"Sydney, Australia","Hobart, Australia",Economy,130,,,130,
+30,HBA,SYD,2025,A320-232,VH-VQJ,2006-02-15,18.11,6900,Jetstar,21D,2025-01-25,JQ726,2,"Hobart, Australia","Sydney, Australia",Economy,145,,,145,OLDEST`;
+
+// ============================================================
+//  Theme Toggle
+// ============================================================
+function updateChartsForTheme() {
+  applyChartDefaults();
+  const gridClr = getGridColor();
+  const borderClr = getChartBorder();
+  const textClr = getChartTextColor();
+
+  allCharts.forEach(chart => {
+    if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = textClr;
+    if (chart.options.scales) {
+      Object.values(chart.options.scales).forEach(scale => {
+        if (scale.grid) scale.grid.color = gridClr;
+        if (scale.ticks) scale.ticks.color = textClr;
+      });
+    }
+    chart.data.datasets.forEach(ds => {
+      if (typeof ds.borderColor === 'string' &&
+          (ds.borderColor.startsWith('rgba(26') || ds.borderColor.startsWith('rgba(255,255,255,0.8'))) {
+        ds.borderColor = borderClr;
+      }
+    });
+    chart.update('none');
+  });
+
+  if (currentRenderHeatmap) currentRenderHeatmap();
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isCurrentlyDark = html.getAttribute('data-theme') !== 'light';
+  const newTheme = isCurrentlyDark ? 'light' : 'dark';
+
+  if (newTheme === 'light') {
+    html.setAttribute('data-theme', 'light');
+  } else {
+    html.removeAttribute('data-theme');
+  }
+
+  try { localStorage.setItem('flight-dash-theme', newTheme); } catch (_) {}
+  document.getElementById('toggleIcon').innerHTML = newTheme === 'light' ? '&#9728;' : '&#127769;';
+
+  // Swap map tiles
+  if (leafletMap && currentTileLayer) {
+    leafletMap.removeLayer(currentTileLayer);
+    currentTileLayer = L.tileLayer(newTheme === 'light' ? TILE_LIGHT : TILE_DARK, { maxZoom: 19 }).addTo(leafletMap);
+  }
+
+  updateChartsForTheme();
+}
+
+// Register click handler FIRST, before anything that could throw
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+// Init theme from saved preference (wrapped in try-catch for file:// safety)
+(function initTheme() {
+  try {
+    const saved = localStorage.getItem('flight-dash-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (_) {}
+})();
+
+// ============================================================
+//  Auto-load: try to fetch flight-data.csv from same directory
+// ============================================================
+(function autoLoad() {
+  fetch('data/flight-data.csv').then(r => {
+    if (!r.ok) throw new Error('not found');
+    return r.text();
+  }).then(text => {
+    document.getElementById('autoLoadMsg').classList.add('show');
+    loadCSVText(text);
+  }).catch(() => {
+    // Also try same directory
+    fetch('flight-data.csv').then(r => {
+      if (!r.ok) throw new Error('not found');
+      return r.text();
+    }).then(text => {
+      document.getElementById('autoLoadMsg').classList.add('show');
+      loadCSVText(text);
+    }).catch(() => {
+      // No auto-load available, user will upload manually
+    });
+  });
+})();
+</script>
+</body>
+</html>
