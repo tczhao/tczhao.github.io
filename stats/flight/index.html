@@ -197,6 +197,66 @@
     transform: translateY(-1px);
   }
 
+  .paste-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 auto;
+    max-width: 480px;
+    text-align: left;
+  }
+
+  .paste-area textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-hover);
+    background: var(--card-inner-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .paste-area textarea::placeholder {
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .paste-area textarea:focus {
+    border-color: var(--accent-blue);
+    background: var(--card-inner-hover);
+  }
+
+  .paste-area button {
+    align-self: center;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--accent-blue);
+    background: var(--accent-blue);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .paste-area button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  .paste-area button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+  }
+
   .upload-zone .auto-load-msg {
     font-size: 12px;
     color: var(--accent-emerald);
@@ -567,6 +627,23 @@
   [data-theme="light"] .stat-card { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
   [data-theme="light"] .class-bar-fill { color: #fff; }
 
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-link:hover { border-color: var(--border-hover); background: var(--bg-card-hover); color: var(--text-primary); }
+
   /* Theme toggle */
   .theme-toggle {
     position: absolute;
@@ -709,6 +786,7 @@
     <span class="header-icon">&#9992;</span>
     <h1>Flight Dashboard</h1>
     <p id="headerSub">Drop a CSV file to get started</p>
+    <a class="back-link" href="../">&larr; Stats</a>
   </div>
 
   <!-- Upload Zone -->
@@ -717,6 +795,11 @@
     <h3>Drop your flight-data.csv here</h3>
     <p>or click to browse</p>
     <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+    <div class="upload-or">or</div>
+    <div class="paste-area">
+      <textarea id="pasteInput" placeholder="Paste copied cells from Google Sheets / Excel here (include the header row)"></textarea>
+      <button type="button" id="loadPasteBtn">Load pasted data</button>
+    </div>
     <div class="upload-or">or</div>
     <p style="font-size:13px;color:var(--text-secondary)">Serve via HTTP and place <code style="color:var(--accent-blue)">flight-data.csv</code> alongside this file</p>
     <button class="example-btn" id="exampleBtn">Try with example data</button>
@@ -823,25 +906,28 @@ Price(Company), Price, Note</code>
 // ============================================================
 //  CSV Parser
 // ============================================================
-function parseCSV(csv) {
-  const lines = csv.trim().split('\n');
-  const headers = parseCSVLine(lines[0]);
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const sample = lines[0] || '';
+  const delim = (sample.split('\t').length - 1) > (sample.split(',').length - 1) ? '\t' : ',';
+  const headers = parseCSVLine(lines[0], delim);
   return lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = parseCSVLine(line);
+    const vals = parseCSVLine(line, delim);
     const obj = {};
     headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
     return obj;
   });
 }
 
-function parseCSVLine(line) {
+function parseCSVLine(line, delim) {
+  const d = delim || ',';
   const result = [];
   let current = '';
   let inQuotes = false;
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') { inQuotes = !inQuotes; }
-    else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
+    else if (ch === d && !inQuotes) { result.push(current); current = ''; }
     else { current += ch; }
   }
   result.push(current);
@@ -1594,8 +1680,7 @@ const fileInput = document.getElementById('fileInput');
 const uploadZone = document.getElementById('uploadZone');
 
 uploadZone.addEventListener('click', e => {
-  // Don't open file picker when clicking the example button, schema toggle, or schema content
-  if (e.target.closest('.example-btn, .schema-toggle, .schema-hint')) return;
+  if (e.target.closest('.example-btn, .schema-toggle, .schema-hint, .paste-area')) return;
   fileInput.click();
 });
 fileInput.addEventListener('change', e => {
@@ -1621,6 +1706,25 @@ uploadZone.addEventListener('drop', e => {
   }
 });
 
+// Pasted spreadsheet cells (TSV from Google Sheets / Excel, or CSV)
+const pasteInput = document.getElementById('pasteInput');
+const loadPasteBtn = document.getElementById('loadPasteBtn');
+
+function loadFromPaste() {
+  const errEl = document.getElementById('errorMsg');
+  errEl.classList.remove('show');
+  const text = pasteInput.value;
+  if (!text.trim()) {
+    errEl.textContent = 'Error: paste area is empty';
+    errEl.classList.add('show');
+    return;
+  }
+  loadCSVText(text);
+}
+
+loadPasteBtn.addEventListener('click', e => { e.stopPropagation(); loadFromPaste(); });
+pasteInput.addEventListener('click', e => e.stopPropagation());
+
 // Reload button
 document.getElementById('reloadBtn').addEventListener('click', () => {
   document.getElementById('dashboard').classList.remove('show');
@@ -1630,6 +1734,7 @@ document.getElementById('reloadBtn').addEventListener('click', () => {
   document.getElementById('headerSub').textContent = 'Drop a CSV file to get started';
   isExampleData = false;
   fileInput.value = '';
+  pasteInput.value = '';
 });
 
 // Schema toggle
@@ -1659,6 +1764,7 @@ document.getElementById('dismissExample').addEventListener('click', () => {
   document.getElementById('headerSub').textContent = 'Drop a CSV file to get started';
   isExampleData = false;
   fileInput.value = '';
+  pasteInput.value = '';
 });
 
 const EXAMPLE_CSV = `Seq,From(IATA),To(IATA),Year,Airplane,Registration,Build Date,Age,Age(num),Carrier,Seat,Date,Flight,Hour,Departure,Arrival,Class,Price(self),Price(self upgrade),Price(Company),Price,Note

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-emerald: #10b981;
+    --accent-purple: #8b5cf6;
+    --accent-amber: #f59e0b;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-emerald: #059669;
+    --accent-purple: #7c3aed;
+    --accent-amber: #d97706;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 30%, rgba(139,92,246,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 50% at 30% 90%, rgba(16,185,129,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 24px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .theme-toggle {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 52px; height: 28px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+    display: flex; align-items: center;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: transform 0.3s ease;
+    transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb {
+    transform: translateX(25px);
+    background: var(--accent-amber);
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #8b95b0 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 14px;
+  }
+  [data-theme="light"] .hero h1 {
+    background: linear-gradient(135deg, #1a1f36 0%, #475569 100%);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .hero p { font-size: 16px; color: var(--text-secondary); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 32px 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent);
+    opacity: 0.7;
+    transition: opacity 0.3s, height 0.3s;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+  }
+  .card:hover::before { height: 5px; opacity: 1; }
+  [data-theme="light"] .card { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+  [data-theme="light"] .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06); }
+
+  .card-icon {
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .card-arrow {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--card-accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.2s;
+  }
+  .card:hover .card-arrow { gap: 10px; }
+
+  .footer {
+    margin-top: 60px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 56px 18px 40px; }
+    .hero h1 { font-size: 40px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+</button>
+
+<div class="container">
+  <div class="hero">
+    <h1>Stats</h1>
+    <p>Personal data dashboards built from CSV exports</p>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="flight/" style="--card-accent: var(--accent-blue)">
+      <div class="card-icon">&#9992;</div>
+      <div class="card-title">Flight</div>
+      <div class="card-desc">Routes on a world map, airlines, aircraft models, hours in the air, spending and country coverage.</div>
+      <div class="card-arrow">Open dashboard &rarr;</div>
+    </a>
+    <a class="card" href="run/" style="--card-accent: var(--accent-emerald)">
+      <div class="card-icon">&#127939;</div>
+      <div class="card-title">Run</div>
+      <div class="card-desc">Daily distance, day-of-week patterns, cumulative km, shoe leaderboard and a monthly heatmap.</div>
+      <div class="card-arrow">Open dashboard &rarr;</div>
+    </a>
+    <a class="card" href="travel/" style="--card-accent: var(--accent-purple)">
+      <div class="card-icon">&#127758;</div>
+      <div class="card-title">Travel</div>
+      <div class="card-desc">Trip-level expenses by category and location, daily spend timeline and photo counts in AUD.</div>
+      <div class="card-arrow">Open dashboard &rarr;</div>
+    </a>
+    <a class="card" href="competition/" style="--card-accent: var(--accent-amber)">
+      <div class="card-icon">&#127942;</div>
+      <div class="card-title">Competition</div>
+      <div class="card-desc">Race results across distances, personal bests per category, pace progression and a full race history.</div>
+      <div class="card-arrow">Open dashboard &rarr;</div>
+    </a>
+  </div>
+
+  <div class="footer">Drop a CSV into any dashboard to load your own data</div>
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') !== 'light';
+  const next = isDark ? 'light' : 'dark';
+  if (next === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('flight-dash-theme', next); } catch (_) {}
+  document.getElementById('toggleIcon').innerHTML = next === 'light' ? '&#9728;' : '&#127769;';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function init() {
+  try {
+    const saved = localStorage.getItem('flight-dash-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (_) {}
+})();
+</script>
+</body>
+</html>
