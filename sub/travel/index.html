@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-amber: #f59e0b;
+    --accent-emerald: #10b981;
+    --accent-rose: #f43f5e;
+    --accent-orange: #f97316;
+    --primary: var(--accent-purple);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --card-inner-bg: rgba(255,255,255,0.02);
+    --card-inner-hover: rgba(255,255,255,0.04);
+    --grid-line: rgba(255,255,255,0.04);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-secondary: #e8ecf4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-cyan: #0891b2;
+    --accent-purple: #7c3aed;
+    --accent-pink: #db2777;
+    --accent-amber: #d97706;
+    --accent-emerald: #059669;
+    --accent-rose: #e11d48;
+    --accent-orange: #ea580c;
+    --card-inner-bg: rgba(0,0,0,0.02);
+    --card-inner-hover: rgba(0,0,0,0.04);
+    --grid-line: rgba(0,0,0,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(139,92,246,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(236,72,153,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 40% at 50% 90%, rgba(245,158,11,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1440px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+  .header { text-align: center; margin-bottom: 40px; position: relative; }
+  .header-icon { font-size: 40px; margin-bottom: 12px; display: block; filter: drop-shadow(0 0 20px rgba(139,92,246,0.4)); }
+  .header h1 {
+    font-size: 42px; font-weight: 800; letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #8b95b0 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  [data-theme="light"] .header h1 { background: linear-gradient(135deg, #1a1f36 0%, #475569 100%); -webkit-background-clip: text; background-clip: text; }
+  .header p { font-size: 15px; color: var(--text-secondary); }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-link:hover { border-color: var(--border-hover); background: var(--bg-card-hover); color: var(--text-primary); }
+
+  .upload-zone {
+    max-width: 620px; margin: 0 auto 40px; padding: 48px 32px;
+    border: 2px dashed var(--border-hover); border-radius: var(--radius);
+    background: var(--bg-card); text-align: center; cursor: pointer;
+    transition: border-color 0.3s, background 0.3s, transform 0.2s;
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--primary); background: var(--bg-card-hover); transform: translateY(-2px); }
+  .upload-zone .upload-icon { font-size: 48px; margin-bottom: 16px; display: block; opacity: 0.7; }
+  .upload-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .upload-zone input[type="file"] { display: none; }
+  .upload-zone .upload-or {
+    display: flex; align-items: center; gap: 12px; margin: 18px 0;
+    color: var(--text-muted); font-size: 12px;
+  }
+  .upload-zone .upload-or::before, .upload-zone .upload-or::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .upload-zone .auto-load-msg, .upload-zone .error-msg { font-size: 12px; font-weight: 500; margin-top: 8px; display: none; }
+  .upload-zone .auto-load-msg.show, .upload-zone .error-msg.show { display: block; }
+  .upload-zone .auto-load-msg { color: var(--accent-emerald); }
+  .upload-zone .error-msg { color: var(--accent-rose); }
+
+  .paste-area {
+    display: flex; flex-direction: column; gap: 10px;
+    margin: 0 auto; max-width: 480px; text-align: left;
+  }
+  .paste-area textarea {
+    width: 100%; min-height: 90px; padding: 10px 14px;
+    border-radius: 8px; border: 1px solid var(--border-hover);
+    background: var(--card-inner-bg); color: var(--text-primary);
+    font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    outline: none; resize: vertical;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .paste-area textarea::placeholder { color: var(--text-muted); font-family: 'Inter', sans-serif; }
+  .paste-area textarea:focus { border-color: var(--primary); background: var(--card-inner-hover); }
+  .paste-area button {
+    align-self: center; padding: 10px 24px;
+    border-radius: 8px; border: 1px solid var(--primary);
+    background: var(--primary); color: white;
+    font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .paste-area button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+  .example-btn {
+    display: inline-block; margin-top: 6px; padding: 9px 24px;
+    border-radius: 8px; border: 1px solid var(--primary);
+    background: rgba(139,92,246,0.1); color: var(--primary);
+    font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .example-btn:hover { background: rgba(139,92,246,0.2); transform: translateY(-1px); }
+
+  .reload-btn {
+    position: absolute; top: 4px; left: 0; z-index: 2;
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); font-size: 12px; font-weight: 500;
+    font-family: inherit; cursor: pointer; display: none;
+  }
+  .reload-btn:hover { border-color: var(--border-hover); background: var(--bg-card-hover); color: var(--text-primary); }
+  .reload-btn.show { display: inline-flex; align-items: center; gap: 6px; }
+
+  .theme-toggle {
+    position: absolute; top: 4px; right: 0; z-index: 2;
+    width: 52px; height: 28px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    cursor: pointer; padding: 0; transition: all 0.3s ease;
+    display: flex; align-items: center;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: transform 0.3s ease;
+    transform: translateX(3px); box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
+
+  .hero-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 18px;
+    text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden;
+  }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--stat-accent, var(--primary)); opacity: 0.7; }
+  .stat-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+  .stat-sub { font-size: 12px; color: var(--text-secondary); }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: border-color 0.3s, background 0.4s ease;
+  }
+  .card:hover { border-color: var(--border-hover); }
+  .card-header { padding: 18px 22px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .card-header h2 { font-size: 15px; font-weight: 600; }
+  .card-header .badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    background: rgba(139,92,246,0.12); color: var(--primary); margin-left: auto;
+  }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 28px; }
+  .charts-grid .card { min-height: 380px; }
+  .chart-body { padding: 20px; position: relative; height: calc(100% - 54px); display: flex; align-items: center; justify-content: center; }
+  .chart-body canvas { max-height: 320px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+
+  .list-body { padding: 10px 22px 18px; }
+  .list-item { display: flex; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); gap: 14px; }
+  .list-item:last-child { border-bottom: none; }
+  .list-rank { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); width: 24px; text-align: center; }
+  .list-route { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
+  .list-route .activity-line { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-count { font-size: 13px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent-amber); }
+  .list-bar-bg { height: 4px; background: var(--card-inner-bg); border-radius: 2px; width: 60px; }
+  .list-bar { height: 100%; border-radius: 2px; background: var(--primary); transition: width 0.5s ease; }
+
+  .trip-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 18px 22px; }
+  .trip-card {
+    background: var(--card-inner-bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .trip-card:hover { background: var(--card-inner-hover); border-color: var(--border-hover); }
+  .trip-card .trip-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .trip-card .trip-dates { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+  .trip-card .trip-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; color: var(--text-secondary); }
+  .trip-card .trip-row strong { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  .footer { text-align: center; padding: 30px 0 10px; color: var(--text-muted); font-size: 12px; }
+
+  [data-theme="light"] .card, [data-theme="light"] .stat-card { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+
+  #dashboard { display: none; }
+  #dashboard.show { display: block; }
+
+  @media (max-width: 1200px) {
+    .hero-stats { grid-template-columns: repeat(3, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .header h1 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+    <button class="reload-btn" id="reloadBtn">&#8635; Load new CSV</button>
+    <span class="header-icon">&#127758;</span>
+    <h1>Travel Dashboard</h1>
+    <p id="headerSub">Drop a CSV file to get started</p>
+    <a class="back-link" href="../">&larr; Subsites</a>
+  </div>
+
+  <div class="upload-zone" id="uploadZone">
+    <span class="upload-icon">&#128196;</span>
+    <h3>Drop your travel.csv here</h3>
+    <p>or click to browse</p>
+    <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+    <div class="upload-or">or</div>
+    <div class="paste-area">
+      <textarea id="pasteInput" placeholder="Paste copied cells from Google Sheets / Excel here (include the header row)"></textarea>
+      <button type="button" id="loadPasteBtn">Load pasted data</button>
+    </div>
+    <div class="upload-or">or</div>
+    <button class="example-btn" id="exampleBtn">Try with example data</button>
+    <span class="auto-load-msg" id="autoLoadMsg">Auto-loaded travel.csv</span>
+    <span class="error-msg" id="errorMsg"></span>
+  </div>
+
+  <div id="dashboard">
+    <div class="hero-stats" id="heroStats"></div>
+
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-header"><h2>Spend by Category</h2></div>
+        <div class="chart-body"><canvas id="chartCategory"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Daily Spend</h2>
+          <span class="badge" id="dailyBadge">$0 / day</span>
+        </div>
+        <div class="chart-body"><canvas id="chartDaily"></canvas></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <h2>Spend by Location</h2>
+          <span class="badge" id="locationBadge">0 places</span>
+        </div>
+        <div class="list-body" id="topLocations"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Top Expenses</h2></div>
+        <div class="list-body" id="topExpenses"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 28px;">
+      <div class="card-header">
+        <h2>Trips</h2>
+        <span class="badge" id="tripsBadge">0 trips</span>
+      </div>
+      <div class="trip-cards" id="tripCards"></div>
+    </div>
+
+    <div class="footer">Built from travel.csv · all amounts in AUD</div>
+  </div>
+</div>
+
+<script>
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const sample = lines[0] || '';
+  const delim = (sample.split('\t').length - 1) > (sample.split(',').length - 1) ? '\t' : ',';
+  const headers = parseCSVLine(lines[0], delim);
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = parseCSVLine(line, delim);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+function parseCSVLine(line, delim) {
+  const d = delim || ',';
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === d && !inQuotes) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function getChartTextColor() { return isDark() ? '#8b95b0' : '#475569'; }
+function getGridColor() { return isDark() ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.07)'; }
+function getChartBorder() { return isDark() ? 'rgba(26,32,53,0.8)' : 'rgba(255,255,255,0.85)'; }
+
+function applyChartDefaults() {
+  Chart.defaults.color = getChartTextColor();
+  Chart.defaults.borderColor = isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyleWidth = 8;
+}
+
+const chartColors = ['#8b5cf6','#ec4899','#f59e0b','#06b6d4','#10b981','#f43f5e','#3b82f6','#f97316','#a855f7','#14b8a6','#84cc16','#e879f9'];
+
+// "$1,234.56" or "1234" → 1234.56 ; empty → 0
+function parseCost(s) {
+  if (!s) return 0;
+  const cleaned = String(s).replace(/[$,\s]/g, '');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+let allCharts = [];
+
+function buildDashboard(rows) {
+  allCharts.forEach(c => c.destroy());
+  allCharts = [];
+
+  ['chartCategory','chartDaily'].forEach(id => {
+    const el = document.getElementById(id);
+    const parent = el.parentElement;
+    el.remove();
+    const c = document.createElement('canvas');
+    c.id = id;
+    parent.appendChild(c);
+  });
+
+  applyChartDefaults();
+
+  const items = rows.map(r => ({
+    trip: r.Trip || 'Untitled',
+    date: r.Date,
+    cost: parseCost(r.Cost),
+    people: parseInt(r.People) || 1,
+    activity: r.Activity || '',
+    type: (r['Activity Type'] || 'other').toLowerCase().trim(),
+    location: (r.Location || '').trim(),
+    tripCost: parseCost(r['Trip Cost']),
+    ts: r.Date ? new Date(r.Date).getTime() : 0,
+  })).filter(r => r.date);
+
+  if (items.length === 0) throw new Error('no rows with a Date column');
+
+  // Photos: parse "X pictures" / "X picures" / "X pics" from Activity field on photo-typed rows
+  const photoRe = /(\d+)\s*(pictures?|picures?|pics?|photos?)/i;
+  const photoItems = items.filter(r => r.type === 'photo' || photoRe.test(r.activity));
+  const totalPhotos = photoItems.reduce((s, r) => {
+    const m = r.activity.match(photoRe);
+    return s + (m ? parseInt(m[1]) : 0);
+  }, 0);
+
+  // Spending excludes photo entries
+  const spendItems = items.filter(r => r.type !== 'photo');
+  const totalSpend = spendItems.reduce((s, r) => s + r.cost, 0);
+
+  const trips = [...new Set(items.map(r => r.trip))];
+  const dates = [...new Set(items.map(r => r.date))].sort();
+  const locations = [...new Set(items.map(r => r.location).filter(Boolean))];
+  const days = dates.length;
+  const avgPerDay = days ? totalSpend / days : 0;
+
+  document.getElementById('headerSub').textContent =
+    `${trips.length} trip${trips.length === 1 ? '' : 's'} · ${days} days · ${locations.length} locations · A$${Math.round(totalSpend).toLocaleString()} total`;
+
+  const fmtAUD = n => 'A$' + Math.round(n).toLocaleString();
+
+  const stats = [
+    { label: 'Total Spend', value: fmtAUD(totalSpend), sub: 'all trips combined', accent: 'var(--accent-purple)' },
+    { label: 'Trips', value: trips.length, sub: trips.length === 1 ? 'so far' : `${trips.length} adventures`, accent: 'var(--accent-pink)' },
+    { label: 'Days', value: days, sub: `avg ${fmtAUD(avgPerDay)}/day`, accent: 'var(--accent-amber)' },
+    { label: 'Locations', value: locations.length, sub: locations.slice(0, 2).join(', ') + (locations.length > 2 ? '…' : ''), accent: 'var(--accent-cyan)' },
+    { label: 'Photos', value: totalPhotos.toLocaleString(), sub: totalPhotos ? `${(totalPhotos/Math.max(days,1)).toFixed(0)}/day` : 'none counted', accent: 'var(--accent-emerald)' },
+    { label: 'Avg / Day', value: fmtAUD(avgPerDay), sub: 'spend per travel day', accent: 'var(--accent-blue)' },
+  ];
+
+  document.getElementById('heroStats').innerHTML = stats.map(s => `
+    <div class="stat-card" style="--stat-accent: ${s.accent}">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`).join('');
+
+  // Spend by Category donut
+  const catSpend = {};
+  spendItems.forEach(r => { catSpend[r.type] = (catSpend[r.type] || 0) + r.cost; });
+  const catEntries = Object.entries(catSpend).sort((a, b) => b[1] - a[1]);
+  allCharts.push(new Chart(document.getElementById('chartCategory'), {
+    type: 'doughnut',
+    data: {
+      labels: catEntries.map(c => c[0]),
+      datasets: [{
+        data: catEntries.map(c => c[1]),
+        backgroundColor: catEntries.map((_, i) => chartColors[i % chartColors.length]),
+        borderColor: getChartBorder(),
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed;
+              const pct = (v / totalSpend * 100).toFixed(1);
+              return `${ctx.label}: ${fmtAUD(v)} (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  }));
+
+  // Daily spend bar (one bar per date)
+  const dailySpend = {};
+  spendItems.forEach(r => { dailySpend[r.date] = (dailySpend[r.date] || 0) + r.cost; });
+  const sortedDates = Object.keys(dailySpend).sort();
+  document.getElementById('dailyBadge').textContent = fmtAUD(avgPerDay) + ' / day';
+  allCharts.push(new Chart(document.getElementById('chartDaily'), {
+    type: 'bar',
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        label: 'Spend',
+        data: sortedDates.map(d => dailySpend[d]),
+        backgroundColor: '#8b5cf6',
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmtAUD(ctx.parsed.y) } },
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: getGridColor() }, ticks: { color: getChartTextColor(), callback: v => 'A$' + v } },
+        x: { grid: { display: false }, ticks: { color: getChartTextColor(), maxRotation: 45, minRotation: 45 } },
+      },
+    },
+  }));
+
+  // Top locations
+  const locSpend = {};
+  spendItems.forEach(r => { if (r.location) locSpend[r.location] = (locSpend[r.location] || 0) + r.cost; });
+  const topLoc = Object.entries(locSpend).sort((a, b) => b[1] - a[1]);
+  const maxLoc = topLoc[0]?.[1] || 1;
+  document.getElementById('locationBadge').textContent = locations.length + ' places';
+  document.getElementById('topLocations').innerHTML = topLoc.map((l, i) => `
+    <div class="list-item">
+      <div class="list-rank">${i + 1}</div>
+      <div class="list-route">${l[0]}</div>
+      <div class="list-bar-bg"><div class="list-bar" style="width:${(l[1] / maxLoc * 100).toFixed(0)}%"></div></div>
+      <div class="list-count">${fmtAUD(l[1])}</div>
+    </div>`).join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px">No location data</div>';
+
+  // Top expenses
+  const topExp = [...spendItems].sort((a, b) => b.cost - a.cost).slice(0, 12);
+  document.getElementById('topExpenses').innerHTML = topExp.map((r, i) => `
+    <div class="list-item">
+      <div class="list-rank">${i + 1}</div>
+      <div class="list-route">
+        <div>${r.activity || r.type}</div>
+        <div class="activity-line">${r.type} · ${r.date}${r.location ? ' · ' + r.location : ''}</div>
+      </div>
+      <div class="list-count">${fmtAUD(r.cost)}</div>
+    </div>`).join('');
+
+  // Trip cards
+  document.getElementById('tripsBadge').textContent = `${trips.length} trip${trips.length === 1 ? '' : 's'}`;
+  const tripCardsHtml = trips.map(t => {
+    const tripItems = items.filter(r => r.trip === t);
+    const tripDates = [...new Set(tripItems.map(r => r.date))].sort();
+    const tripSpend = tripItems.filter(r => r.type !== 'photo').reduce((s, r) => s + r.cost, 0);
+    const tripPhotos = tripItems.filter(r => r.type === 'photo' || photoRe.test(r.activity))
+      .reduce((s, r) => { const m = r.activity.match(photoRe); return s + (m ? parseInt(m[1]) : 0); }, 0);
+    const tripLocs = [...new Set(tripItems.map(r => r.location).filter(Boolean))];
+    const declaredTripCost = tripItems.find(r => r.tripCost > 0)?.tripCost;
+    return `
+      <div class="trip-card">
+        <div class="trip-name">${t}</div>
+        <div class="trip-dates">${tripDates[0]} → ${tripDates[tripDates.length - 1]} · ${tripDates.length} days</div>
+        <div class="trip-row"><span>Spend</span><strong>${fmtAUD(tripSpend)}</strong></div>
+        ${declaredTripCost && Math.abs(declaredTripCost - tripSpend) > 1
+          ? `<div class="trip-row"><span>Declared total</span><strong>${fmtAUD(declaredTripCost)}</strong></div>` : ''}
+        <div class="trip-row"><span>Locations</span><strong>${tripLocs.length}</strong></div>
+        <div class="trip-row"><span>Photos</span><strong>${tripPhotos.toLocaleString()}</strong></div>
+      </div>`;
+  }).join('');
+  document.getElementById('tripCards').innerHTML = tripCardsHtml;
+
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  document.getElementById('reloadBtn').classList.add('show');
+}
+
+function loadCSVText(text) {
+  try {
+    const rows = parseCSV(text);
+    if (rows.length === 0) throw new Error('No data rows found');
+    const headers = Object.keys(rows[0]);
+    const required = ['Date', 'Cost'];
+    const missing = required.filter(r => !headers.includes(r));
+    if (missing.length > 0) throw new Error('Missing columns: ' + missing.join(', '));
+    buildDashboard(rows);
+  } catch (e) {
+    const errEl = document.getElementById('errorMsg');
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.classList.add('show');
+    setTimeout(() => errEl.classList.remove('show'), 5000);
+  }
+}
+
+const fileInput = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+const pasteInput = document.getElementById('pasteInput');
+const loadPasteBtn = document.getElementById('loadPasteBtn');
+
+uploadZone.addEventListener('click', e => {
+  if (e.target.closest('.paste-area, .example-btn')) return;
+  fileInput.click();
+});
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => loadCSVText(ev.target.result);
+    reader.readAsText(file);
+  }
+});
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => loadCSVText(ev.target.result);
+    reader.readAsText(file);
+  }
+});
+
+function loadFromPaste() {
+  const errEl = document.getElementById('errorMsg');
+  errEl.classList.remove('show');
+  const text = pasteInput.value;
+  if (!text.trim()) {
+    errEl.textContent = 'Error: paste area is empty';
+    errEl.classList.add('show');
+    return;
+  }
+  loadCSVText(text);
+}
+loadPasteBtn.addEventListener('click', e => { e.stopPropagation(); loadFromPaste(); });
+pasteInput.addEventListener('click', e => e.stopPropagation());
+
+document.getElementById('exampleBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  loadCSVText(EXAMPLE_CSV);
+});
+
+const EXAMPLE_CSV = `Trip,Date,Cost,People,Activity,Activity Type,Location,Trip Cost
+202503 Tokyo,2025-03-14,$1280,2,Qantas flights,flight,Tokyo,4250
+202503 Tokyo,2025-03-14,38,1,JR Pass exchange order,other,Tokyo,4250
+202503 Tokyo,2025-03-14,210,2,Hotel Gracery Shinjuku,accommondation,Shinjuku,4250
+202503 Tokyo,2025-03-14,$24,2,Tonkatsu dinner,food,Shinjuku,4250
+202503 Tokyo,2025-03-15,210,2,Hotel Gracery Shinjuku,accommondation,Shinjuku,4250
+202503 Tokyo,2025-03-15,12,2,Tsukiji breakfast,food,Tokyo,4250
+202503 Tokyo,2025-03-15,18,2,Sushi lunch Ginza,food,Ginza,4250
+202503 Tokyo,2025-03-15,$32,2,Shibuya dinner,food,Shibuya,4250
+202503 Tokyo,2025-03-16,210,2,Hotel Gracery Shinjuku,accommondation,Shinjuku,4250
+202503 Tokyo,2025-03-16,90,2,TeamLab Borderless tickets,activity,Tokyo,4250
+202503 Tokyo,2025-03-16,$28,2,Ramen Ichiran,food,Shibuya,4250
+202503 Tokyo,2025-03-17,180,2,Park Hyatt Kyoto,accommondation,Kyoto,4250
+202503 Tokyo,2025-03-17,$140,2,Shinkansen Tokyo→Kyoto,other,Kyoto,4250
+202503 Tokyo,2025-03-17,$48,2,Kaiseki dinner,food,Kyoto,4250
+202503 Tokyo,2025-03-18,180,2,Park Hyatt Kyoto,accommondation,Kyoto,4250
+202503 Tokyo,2025-03-18,15,2,Fushimi Inari snacks,food,Kyoto,4250
+202503 Tokyo,2025-03-18,$36,2,Pontocho dinner,food,Kyoto,4250
+202503 Tokyo,2025-03-19,$1280,2,Qantas flights,flight,Tokyo,4250
+202503 Tokyo,2025-03-15,0,2,860 pictures,photo,,4250
+202503 Tokyo,2025-03-16,0,2,1140 pictures,photo,,4250
+202503 Tokyo,2025-03-17,0,2,720 pictures,photo,,4250
+202503 Tokyo,2025-03-18,0,2,920 pictures,photo,,4250`;
+
+document.getElementById('reloadBtn').addEventListener('click', () => {
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('reloadBtn').classList.remove('show');
+  document.getElementById('headerSub').textContent = 'Drop a CSV file to get started';
+  fileInput.value = '';
+  pasteInput.value = '';
+});
+
+function updateChartsForTheme() {
+  applyChartDefaults();
+  const gridClr = getGridColor();
+  const textClr = getChartTextColor();
+  const borderClr = getChartBorder();
+  allCharts.forEach(chart => {
+    if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = textClr;
+    if (chart.options.scales) {
+      Object.values(chart.options.scales).forEach(scale => {
+        if (scale.grid) scale.grid.color = gridClr;
+        if (scale.ticks) scale.ticks.color = textClr;
+      });
+    }
+    chart.data.datasets.forEach(ds => {
+      if (typeof ds.borderColor === 'string' &&
+          (ds.borderColor.startsWith('rgba(26') || ds.borderColor.startsWith('rgba(255,255,255,0.8'))) {
+        ds.borderColor = borderClr;
+      }
+    });
+    chart.update('none');
+  });
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isCurrentlyDark = html.getAttribute('data-theme') !== 'light';
+  const newTheme = isCurrentlyDark ? 'light' : 'dark';
+  if (newTheme === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('travel-dash-theme', newTheme); } catch (_) {}
+  document.getElementById('toggleIcon').innerHTML = newTheme === 'light' ? '&#9728;' : '&#127769;';
+  updateChartsForTheme();
+}
+
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function initTheme() {
+  try {
+    const saved = localStorage.getItem('travel-dash-theme') || localStorage.getItem('flight-dash-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (_) {}
+})();
+
+(function autoLoad() {
+  fetch('travel.csv').then(r => {
+    if (!r.ok) throw new Error('not found');
+    return r.text();
+  }).then(text => {
+    document.getElementById('autoLoadMsg').classList.add('show');
+    loadCSVText(text);
+  }).catch(() => { /* user will load manually */ });
+})();
+</script>
+</body>
+</html>

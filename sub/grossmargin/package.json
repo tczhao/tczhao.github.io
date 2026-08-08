@@ -1,0 +1,11 @@
+{
+  "name": "grossmargin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gross Margin - the architecture decisions a CFO later reports. One entry a day, every one cited.",
+  "scripts": {
+    "build": "node lib/build.js",
+    "test": "node test/engine.test.js && node test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}

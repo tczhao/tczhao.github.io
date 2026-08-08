@@ -1,0 +1,363 @@
+/* Track: Cohesion and coherence. Ordered foundational first. */
+(window.LESSONS = window.LESSONS || []).push(
+{
+  id: "cohesion-old-before-new",
+  track: "cohesion", level: "sentence",
+  title: "Begin a sentence with what the reader already knows and end it with what is new",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "Take your paragraph and mark the first six words of every sentence. For each one, write G if that material has already appeared or is obviously shared context, and N if it is new here. Count the Ns.",
+  fallback: "A per-namespace concurrency cap of forty was introduced in the 1.9 scheduler release. Backpressure signalling from the queue depth metric, which the cap reads on every admission decision, is emitted only by workers running the new sidecar. Sidecar rollout to the remaining three regions is scheduled for the sprint after next.",
+  idea: "Open each sentence on material the reader already holds, and put the new material at the end.",
+  why: "Reading is incremental. A reader builds one structure in working memory and attaches each new sentence to it, so the first thing they do with your opening words is look for the hook. If the opening words are new, there is nothing to attach them to, and the reader has to hold them unresolved until the connection arrives somewhere later in the sentence.\n\nThe cost is not confusion, which the reader would notice and reread. The cost is a small unpaid tax per sentence that shows up as the vague sense that a technically correct document is heavy going.",
+  failureMode: "Every sentence lands a fresh noun phrase in the first slot and the reader reverses into the link afterwards. \"Backpressure signalling from the queue depth metric, which the cap reads on every admission decision, is emitted only by workers running the new sidecar.\" The connection to the previous sentence exists, but it arrives eleven words late.",
+  experiment: "Open the last thing you wrote that ran longer than three paragraphs. Mark the opening six words of every sentence as given or new. If more than a third are new, rewrite those sentences so the given part comes first, and note whether you had to add information or only move it.",
+  reflection: "Which sentence needed the most reordering, and was the given material already in the sentence or did you have to supply it?",
+  recall: {
+    q: "What does a reader do with the first few words of a sentence, and what happens when those words are new?",
+    a: "They use them to attach this sentence to the structure they have already built. New material in that slot has nothing to attach to, so it is held in working memory until the link turns up.\n\nThe symptom is not confusion but effort. Correct prose that reads as heavy usually opens too many sentences on the unfamiliar."
+  },
+  deepDive: "Take this draft of mine and mark the opening words of each sentence as given or new, then show me the two worst offenders reordered."
+},
+{
+  id: "cohesion-where-readers-look",
+  track: "cohesion", level: "sentence",
+  title: "These are facts about where readers look, not rules about what is correct",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "Run your paragraph through whatever grammar or style checker you have to hand. Write down what it flagged. Then mark, by hand, the one sentence whose point you think a reader would miss, and check whether the checker said anything about it.",
+  fallback: "There are a number of considerations that were taken into account by the working group when the retention policy was drafted. Compliance requirements, cost, and the recovery needs of the support team were among them, although cost was the deciding factor in the end. It should be noted that no exceptions to the ninety day window have been granted to date.",
+  idea: "Reader expectation principles describe fixed positions where readers hunt for particular kinds of meaning, which is why they catch faults that no correctness check can see.",
+  why: "Readers do not scan a sentence evenly. They look for the topic in the subject slot, for the action in the verb, and for the emphasis just before a full stop. Those habits are structural, not stylistic preferences, so they hold whether or not the writer knew about them.\n\nThis is why the diagnosis is different in kind from grammar. A grammar checker asks whether the sentence is well formed. A reader expectation reading asks whether the material the writer cares about is sitting in the slot the reader will search. A sentence can pass the first test perfectly and fail the second completely, and the second failure is the one that loses the argument.",
+  failureMode: "Prose with nothing to correct in it that still fails to land. The deciding factor in the fallback is \"cost\", and it appears inside a concessive clause after \"although\", which is the least emphatic position in the sentence. No checker will ever flag that, and no reader will remember it.",
+  experiment: "Find a document of yours that came back with no substantive comments but did not get the decision you wanted. For each paragraph, write the one thing you needed the reader to take away, then find where in the sentence that thing actually sits. Count how many are in a subordinate clause.",
+  reflection: "Where did your important material end up sitting, and what kind of check would ever have caught that?",
+  recall: {
+    q: "Why can a sentence be flawless by every correctness standard and still fail?",
+    a: "Because correctness and reader expectation are different tests. Correctness asks whether the sentence is well formed; reader expectation asks whether the writer's important material is sitting where the reader will look for it.\n\nReaders search the subject for the topic and the position before the full stop for emphasis. Material placed elsewhere is grammatically fine and functionally invisible."
+  },
+  deepDive: "Read this document as a reader-expectation analysis rather than a copy edit, and tell me which points are sitting in positions where they will not be found."
+},
+{
+  id: "cohesion-stress-position",
+  track: "cohesion", level: "sentence",
+  title: "The end of the sentence is the stress position, so spend it on purpose",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "In your paragraph, underline the last five words of every sentence. Beside each, write in three words or fewer what that sentence was actually for. Circle every sentence where the two do not match.",
+  fallback: "The migration cut p99 scheduling latency from 4.2 seconds to 900 milliseconds, according to the dashboards we reviewed on Tuesday. The rollout completed across every cluster, with the exception of ap-south-1, where a separate ticket is open. We will continue to monitor the metrics over the coming weeks as usual.",
+  idea: "Put the material you want emphasised immediately before the full stop, because that is where the reader will place emphasis regardless of your intention.",
+  why: "A reader arriving at a full stop has finished holding the structure open and can finally discharge it. That moment of closure is where emphasis lands, in the same way a spoken sentence rises to its last stressed syllable. The reader does not choose to do this and cannot switch it off.\n\nThe consequence is that the stress position is always spent. If you end on a hedge, a date, a source or a piece of throat-clearing, the reader emphasises the hedge. Your real point, sitting comfortably in the middle of the sentence, is read as background.",
+  failureMode: "The number that justifies the whole project is delivered mid-sentence and the emphasis goes to the housekeeping. \"The migration cut p99 scheduling latency from 4.2 seconds to 900 milliseconds, according to the dashboards we reviewed on Tuesday.\" The reader leaves that sentence thinking about Tuesday.",
+  experiment: "Take the summary section of your most recent write-up. For each sentence, write down the last five words on their own, then read that list back as if it were the whole document. If the list is a set of caveats, sources and dates, move one payload into the final position in each sentence and reread.",
+  reflection: "What did your list of sentence endings say the document was about, and how far was that from what you meant?",
+  recall: {
+    q: "Why does the material just before a full stop get emphasised even when the writer did not intend it?",
+    a: "Because the reader has been holding the sentence structure open and the full stop is the point of release. Emphasis attaches to that moment of closure automatically.\n\nSo the slot is always spent on something. Ending on a date, a source or a caveat makes that the emphasised element and demotes the real point to background."
+  },
+  deepDive: "List the final five words of every sentence in this draft and tell me which endings are wasted on housekeeping."
+},
+{
+  id: "cohesion-given-new-contract",
+  track: "cohesion", level: "sentence",
+  title: "The given and new contract is a comprehension mechanism, not a preference",
+  source: "Herbert Clark and Susan Haviland, \"Comprehension and the Given-New Contract\"",
+  gatePrompt: "Pick the sentence in your paragraph that you think is hardest to read. Identify the definite noun phrases in it, the ones with \"the\" or \"this\" or a name, and mark each as already introduced or not. Count the unintroduced ones.",
+  fallback: "The second-order effect of the leader election timeout is what actually caused the outage. Etcd's compaction pause exceeded the lease renewal window, so the API server lost its lock and every controller stalled for ninety seconds. We had raised that timeout in March for unrelated reasons.",
+  idea: "Write so that every sentence offers the reader something already known to attach the new material to, because comprehension measurably slows when no anchor is available.",
+  why: "Clark and Haviland showed that readers process a sentence in two steps: find the given information, locate it in memory, then attach the new information to it. When the given information is present, the search succeeds immediately. When it is missing, the reader has to construct a bridging inference, and that construction is slow enough to measure in reading time.\n\nThis matters because bridging usually succeeds. The reader works out what you must have meant, so nothing looks broken. What you have done is charge them for the reconstruction, sentence after sentence, and the bill arrives as fatigue rather than as a question.",
+  failureMode: "A confident opening about an entity the reader has never been given. \"The second-order effect of the leader election timeout is what actually caused the outage.\" There is no first-order effect on the page and no leader election timeout introduced, so the reader manufactures both before the sentence can be understood.",
+  experiment: "Take an incident write-up or design doc of yours and list every definite noun phrase in the first two paragraphs. Mark each one as introduced earlier or assumed. For every assumed one, either introduce it in a preceding clause or make it indefinite, then reread the opening cold.",
+  reflection: "How many entities were you treating as given, and where had you actually introduced them, if anywhere?",
+  recall: {
+    q: "What is the experimental finding behind putting old information before new?",
+    a: "Clark and Haviland found that readers first locate the given information in memory and then attach the new information to it. Where no given anchor exists, the reader builds a bridging inference, which measurably slows reading.\n\nThe inference usually succeeds, so the prose does not look broken. The cost shows up as effort rather than as confusion."
+  },
+  deepDive: "Go through this draft and list every noun phrase I treat as given that I never actually introduced."
+},
+{
+  id: "cohesion-topic-position",
+  track: "cohesion", level: "sentence",
+  title: "Readers take whatever sits in the subject as the topic, whether or not you meant it",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Write out the grammatical subject of every sentence in your paragraph as a bare list, in order. Cross out any that are \"it\", \"there\", \"the fact that\", or a noun that names no real actor.",
+  fallback: "There are several reasons why the queue depth alert fired twice on Sunday. It is worth noting that the deduplication window is currently set to five minutes. The fact that both firings referenced the same shard suggests a single underlying cause rather than two.",
+  idea: "Whatever occupies the grammatical subject becomes the sentence's topic in the reader's mind, so put the thing the sentence is about there.",
+  why: "The topic position is assigned by grammar, not by intention. A reader reaching a subject commits to it as the thing being discussed and reads the rest of the sentence as a comment on it. That commitment happens before the reader knows what the sentence will say.\n\nSo a subject spent on \"there\", \"it\" or \"the fact that\" does not simply waste words. It tells the reader that this sentence is about nothing in particular, and the real topic, which arrives later as an object or inside a clause, gets read as detail. Do that three sentences in a row and the paragraph has no discernible subject even though every sentence is about something.",
+  failureMode: "Subjects that name no actor while the real actors hide in the predicate. In the fallback the subject list reads \"There\", \"It\", \"The fact\", so the reader is told the paragraph is about nothing three times, while the alert, the deduplication window and the shard all sit downstream.",
+  experiment: "Take a page of your own writing and list the subjects of all its sentences in order. Count how many are placeholders or abstractions. Rewrite five of them so the subject names something that could actually act, and check whether the list now reads as a topic sequence.",
+  reflection: "What did your bare subject list turn out to be about, and was that the paragraph you thought you had written?",
+  recall: {
+    q: "Who decides what a sentence is about, the writer or the grammar?",
+    a: "The grammar. Readers take whatever occupies the subject position as the topic and read everything after it as a comment on that topic.\n\nA placeholder subject therefore reassigns the sentence to nothing in particular, and the real topic, arriving later as an object or in a clause, is downgraded to detail."
+  },
+  deepDive: "Pull out the grammatical subjects of every sentence in this piece and tell me what the sequence says the piece is about."
+},
+{
+  id: "cohesion-old-means-in-the-reader",
+  track: "cohesion", level: "sentence",
+  title: "\"Old\" means already in the reader's head, not already on the page",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Name the actual reader of your paragraph in one line, including how much of your project they have seen. Then mark every term in the paragraph that is given only because you have been living in this problem.",
+  fallback: "Following the PLAT-118 cutover, marketplace packages no longer resolve through the legacy path. Tenants on the shared plane should see no change to package installation. The remaining tenant-facing workflows will move in the next maintenance window.",
+  idea: "Treat information as given only if this particular reader already holds it, not if it merely appeared earlier in your document or your week.",
+  why: "The given and new contract is scored in the reader's memory, not in the text. Shared context, earlier sections they actually read, and background the audience genuinely has all count as given. A ticket number you have typed forty times this week counts as given to you and as new to everyone else.\n\nThis is why the same opening paragraph works in a team channel and fails in a customer note, with no word changed. You have not written worse; you have swapped the memory the sentence was calibrated against. Deciding who the reader is therefore is not a courtesy step before writing, it is the input that determines which words are allowed in the opening slot.",
+  failureMode: "An opening that is anchored for the author's team and unanchored for everyone else. \"Following the PLAT-118 cutover, marketplace packages no longer resolve through the legacy path.\" For the six people in the migration channel that is a given; for a tenant it is three unfamiliar things in twelve words.",
+  experiment: "Take something you wrote for your team and rewrite the first two sentences for a reader one step further out, a new starter or a customer. Change only what sits in the opening slot of each sentence. Then list the terms you had to move or gloss.",
+  reflection: "Which terms turned out to be given only to you, and how many of them were in the first sentence?",
+  recall: {
+    q: "Where is the given and new contract actually scored?",
+    a: "In this reader's memory, not in the document. Context they hold from elsewhere counts as given, and material you repeated earlier in your own draft may still be new to them.\n\nThat is why an unchanged paragraph can read cleanly internally and badly externally. The text did not change; the memory it was calibrated against did."
+  },
+  deepDive: "Assume the reader of this draft is a customer rather than my team, and tell me which openings stop being anchored."
+},
+{
+  id: "cohesion-syntactic-closure",
+  track: "cohesion", level: "sentence",
+  title: "Every point of syntactic closure opens another stress position",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "Count the full stops, semicolons and colons in your paragraph. That is how many emphasis slots you have. Write down what currently occupies each one.",
+  fallback: "The new scheduler reduces tail latency and it also removes the dependency on the shared Redis lock and we were able to delete about nine hundred lines of coordination code as a result, which the team was pleased about.",
+  idea: "Colons, semicolons and full stops each create a moment of closure that carries emphasis, so use punctuation to manufacture the landing places you need.",
+  why: "Emphasis attaches to closure, and closure happens wherever the syntax finishes a unit rather than only at the end of the sentence. A colon closes the frame and hands the following material a spotlight. A semicolon closes one full clause and starts another, giving you two stress positions where a comma splice would have given you one.\n\nThis turns punctuation into a placement tool rather than a correctness question. If a sentence contains three things worth emphasising, it currently has one stress position and two of the three will be lost. You either split it or repunctuate it so that each has somewhere to land.",
+  failureMode: "Several genuine results strung together with \"and\" so that only the last one is emphasised, and that last one is the least important. In the fallback, three real outcomes compete for one slot and the slot goes to how the team felt about it.",
+  experiment: "Find your longest sentence from the past week. List the things in it that deserve emphasis. If there is more than one, repunctuate with a colon or a semicolon, or split it, until each has its own point of closure, then count the stress positions before and after.",
+  reflection: "How many things were competing for one stress position, and which one had been winning?",
+  recall: {
+    q: "Why is punctuation a tool for emphasis rather than only a correctness question?",
+    a: "Because emphasis attaches to syntactic closure, and colons, semicolons and full stops each create one. Each mark therefore manufactures an additional place a point can land.\n\nA sentence with three worthwhile claims and one full stop has one stress position, so two of the claims will be read as background."
+  },
+  deepDive: "Find the sentences in this draft where several claims are competing for a single stress position, and show me one repunctuated."
+},
+{
+  id: "cohesion-long-opening-clause",
+  track: "cohesion", level: "sentence",
+  title: "A long opening clause spends the slot where the reader looks for the link",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Count the words before the main subject of each sentence in your paragraph. Circle every sentence where that count is above about eight.",
+  fallback: "In the event that a workflow exceeds its configured deadline and no terminal event has been recorded within the grace window, the executor marks the run as timed out. As of the March release, following the change to the heartbeat interval described above, the grace window is thirty seconds. Where a tenant has opted into extended retention, timed-out runs are preserved for audit.",
+  idea: "Keep the material before the main subject short, because the reader is using that space to find the connection back to the previous sentence.",
+  why: "The opening of a sentence does two jobs at once: it links backwards and it announces the topic. A short introductory phrase can do the first without displacing the second. A long one takes over the whole space, so the reader spends the linking slot processing a condition or a date and only meets the topic once the qualifier finally releases them.\n\nThe qualifier is usually not wrong, just badly placed. Conditions, timestamps and scope caveats are almost always safe to move behind the subject and verb, where they read as refinements of a claim the reader has already grasped rather than as a hurdle before it.",
+  failureMode: "Sentences that make the reader wait through the conditions before learning what is being discussed. \"In the event that a workflow exceeds its configured deadline and no terminal event has been recorded within the grace window, the executor marks the run as timed out.\" Twenty-three words arrive before the executor does.",
+  experiment: "Take a policy or runbook paragraph you have written. For each sentence, count the words before the main subject. Move every qualifier longer than about eight words to a position after the verb, then reread and note which ones genuinely had to stay in front.",
+  reflection: "Which qualifiers actually needed to come first, and what made those different from the ones you moved?",
+  recall: {
+    q: "What does a long introductory clause cost, given that it is usually grammatically fine?",
+    a: "It occupies the space the reader uses to link this sentence to the last one and to find the topic. The topic then arrives late, after the reader has already processed a condition they had no frame for.\n\nMost such qualifiers read better after the subject and verb, as refinements of a claim already understood."
+  },
+  deepDive: "Flag every sentence here with more than eight words before its main subject and show me two of them with the qualifier moved."
+},
+{
+  id: "cohesion-subject-verb-gap",
+  track: "cohesion", level: "sentence",
+  title: "Separating subject from verb makes the reader carry everything in between",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "In each sentence of your paragraph, draw a line from the main subject to its verb. Count the words on that line. Mark any gap over about six words.",
+  fallback: "The reconciler, which was rewritten last quarter to use the shared informer cache rather than polling the API server directly and which now runs one goroutine per namespace, drops events when the cache is cold. Our on-call runbook, updated after the February incident, says to restart the pod.",
+  idea: "Keep the main verb close to its subject, and move any interruption that does not earn its place out of the gap.",
+  why: "A reader who has taken a subject is waiting for its verb, because until the verb arrives the sentence has made no assertion. Everything placed in that gap is held in working memory alongside the unresolved subject, at full cost, while the reader continues to wait.\n\nThat cost is sometimes worth paying. An interruption in the subject-verb gap is conspicuous precisely because the reader is holding something open, so it can be used deliberately for a qualification the reader must have before the claim. What it cannot be is a convenient place to park background you did not want to give its own sentence.",
+  failureMode: "The assertion arrives thirty words after its subject, and the interruption is only history. In the fallback, \"The reconciler ... drops events when the cache is cold\" is the entire point, and the reader carries two relative clauses about last quarter's rewrite before reaching it.",
+  experiment: "Take a design doc paragraph of yours and measure the subject-to-verb distance in every sentence. For each gap over six words, decide whether the interruption is a qualification the reader must have first. Move the rest to their own sentence and record how many survived.",
+  reflection: "Of the interruptions you found, how many were genuinely earning the emphasis the gap gives them?",
+  recall: {
+    q: "Why is material between a subject and its verb expensive, and when is it worth it?",
+    a: "The reader holds the unresolved subject in working memory until the verb arrives, so everything in the gap is carried at full cost alongside it. No assertion has been made yet.\n\nIt is worth it when the interruption is a qualification the reader must have before the claim, because the gap is conspicuous. It is not worth it for background you did not want to give its own sentence."
+  },
+  deepDive: "Measure the subject-to-verb distance in this draft and tell me which interruptions are not buying the emphasis they cost."
+},
+{
+  id: "cohesion-new-term-handoff",
+  track: "cohesion", level: "paragraph",
+  title: "Introduce a new term in the stress position, then make it the next subject",
+  source: "George Gopen and Judith Swan, \"The Science of Scientific Writing\"",
+  gatePrompt: "Find the newest or most technical term in your paragraph. Mark where it first appears in its sentence, and mark the subject of the sentence that follows it.",
+  fallback: "Because the executor cannot distinguish a slow activity from a dead one, we added heartbeat-based liveness, which is described in the design doc, to the activity contract in June. Teams should set a heartbeat timeout shorter than the start-to-close timeout. The scheduler is unaffected by any of this.",
+  idea: "Land a new term at the end of the sentence that introduces it, then open the next sentence with that term as the subject.",
+  why: "The handoff does two things at once. Ending on the new term puts it in the stress position, so the reader marks it as important and holds it. Opening the next sentence with it makes it given, so the reader immediately gets to use what they just learned rather than storing it against a future need.\n\nThat second step is what turns a definition into working vocabulary. A term introduced and then abandoned for three sentences has to be re-learned when it reappears. A term introduced and then immediately made the topic has been used once already by the time the reader needs it, which is why well-built technical prose rarely needs a glossary.",
+  failureMode: "The new term appears mid-sentence, wrapped in an aside, and the next sentence starts somewhere else entirely. In the fallback, \"heartbeat-based liveness\" is buried behind a relative clause and the following sentence opens on \"Teams\", so the term never becomes something the reader has handled.",
+  experiment: "Find a paragraph of yours that introduces a concept your reader does not have. Rewrite it so the term ends the sentence that introduces it and opens the sentence after. Then read both versions aloud and note where you stop needing to look back.",
+  reflection: "Where in the original sentence had the new term been sitting, and what was the next sentence about instead?",
+  recall: {
+    q: "What is the two-step move for introducing a term without a glossary?",
+    a: "Put the term in the stress position at the end of the sentence that introduces it, then make it the grammatical subject of the next sentence.\n\nThe first step marks it as important so the reader holds it. The second makes it given, so the reader uses it immediately rather than storing it against a later need, which is what turns a definition into working vocabulary."
+  },
+  deepDive: "Find the terms this draft introduces and tell me which ones are never picked up as a subject afterwards."
+},
+{
+  id: "cohesion-clefts",
+  track: "cohesion", level: "sentence",
+  title: "Clefts exist to drag a phrase into the stress position",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Search your paragraph for \"it was\", \"it is\", \"what we\" and \"what this\". For each hit, write down the phrase the construction is emphasising, or write \"nothing\" if there isn't one.",
+  fallback: "What we observed during the incident was that the queue drained normally throughout. It was the config reload that we checked next, and it had not run since Tuesday. What this means is that the stale concurrency limit was in force for four days.",
+  idea: "Use \"it was X that\" and \"what we found was X\" when you need to force a specific phrase into the emphasis slot, and delete them when they emphasise nothing.",
+  why: "A cleft splits one clause into two so that a phrase which would otherwise sit in an ordinary position gets a syntactic frame of its own. That frame is an emphasis machine: \"it was the config reload that failed\" tells the reader that the identity of the failing thing is the news, and implicitly that something else was suspected.\n\nSo the construction is doing real work when there is a contrast to mark and no work at all when there is not. \"What this means is that X\" with no competing reading is four words of scaffolding around a claim that could simply be asserted, and it costs a stress position as well, because the frame pushes the payload away from the end.",
+  failureMode: "Cleft after cleft, none of them marking a contrast. Three in the fallback, and only the middle one has a candidate it is ruling out. \"What this means is that the stale concurrency limit was in force for four days\" says exactly what \"the stale concurrency limit was in force for four days\" says, with a slower start.",
+  experiment: "Grep your last two documents for \"it was\", \"it is\" and \"what \" at sentence starts. For each hit, ask what alternative the construction is ruling out. Delete every cleft with no answer and count how many survived.",
+  reflection: "Of your clefts, how many were marking a genuine contrast, and what were the rest doing?",
+  recall: {
+    q: "What is a cleft for, and how do you tell when one is dead weight?",
+    a: "It splits a clause so that a chosen phrase gets its own frame and lands in the emphasis slot, which is worth doing when there is a competing reading to rule out.\n\nIf you cannot name the alternative it excludes, it is emphasising nothing. Delete it and assert the claim directly, since the frame also pushes the payload away from the end of the sentence."
+  },
+  deepDive: "List the clefts in this draft and tell me which ones are not ruling out any alternative."
+},
+{
+  id: "cohesion-bare-this",
+  track: "cohesion", level: "sentence",
+  title: "A bare \"this\" makes the reader guess what you are pointing at",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Circle every \"this\", \"that\", \"these\" and \"it\" in your paragraph that is not followed by a noun. For each, write the noun you meant in the margin, and mark any where you had to think for more than a second.",
+  fallback: "The connector now writes a checkpoint after every batch instead of once per run. This means we lose at most one batch on restart. This was raised in review, and this is why the batch size dropped to five hundred. That should be revisited once the write path is cheaper.",
+  idea: "Attach a summarising noun to every demonstrative, so the reader is told what you are pointing at instead of working it out.",
+  why: "A demonstrative is a pointing word, and pointing only works if the target is unambiguous. After a sentence containing a change, a reason, a consequence and a number, a bare \"this\" has four candidate antecedents. The reader picks one, usually correctly, and carries a small unresolved doubt into the next sentence.\n\nAdding the noun does more than disambiguate. \"This trade-off\", \"this failure\", \"this constraint\" tells the reader how to file the previous sentence, so the noun you choose is itself an act of interpretation. A writer who cannot pick the noun has usually not decided what the previous sentence established, which is the more useful thing the exercise reveals.",
+  failureMode: "A run of demonstratives whose antecedents drift. In the fallback the second \"this\" points at the change, the third at the risk of loss, the fourth at some combination, and \"That should be revisited\" points at a decision that was never named. Each one is individually resolvable and the paragraph as a whole is slippery.",
+  experiment: "Search your last write-up for \"this\" and \"that\" not followed by a noun. Supply a noun for each. Where you cannot choose one in five seconds, rewrite the preceding sentence instead, and count how many of those there were.",
+  reflection: "Which demonstrative was hardest to name a noun for, and what did that tell you about the sentence before it?",
+  recall: {
+    q: "What does adding a noun after a demonstrative do beyond disambiguating it?",
+    a: "It tells the reader how to file the previous sentence. \"This trade-off\" and \"this failure\" characterise what came before, so the choice of noun is an act of interpretation.\n\nBeing unable to choose the noun usually means you have not decided what the previous sentence established."
+  },
+  deepDive: "Find every bare demonstrative in this draft and propose the summarising noun each one needs."
+},
+{
+  id: "cohesion-elegant-variation",
+  track: "cohesion", level: "paragraph",
+  title: "Elegant variation makes the reader wonder whether you changed the subject",
+  source: "H. W. Fowler, A Dictionary of Modern English Usage",
+  gatePrompt: "Pick the central technical object in your paragraph. List every word you used to refer to it. If there is more than one, mark which sentences use which.",
+  fallback: "Each tenant gets a dedicated workflow queue. The task pipeline is sharded by tenant id, and the job channel is drained by a pool of four workers. Sizing the buffer correctly matters, because a backed-up stream blocks admission for that tenant.",
+  idea: "Repeat the technical term exactly and vary something else, because a synonym signals a new referent.",
+  why: "Fowler named the habit of reaching for a synonym to avoid repeating a word, and in technical prose the cost is specific. Readers assume that a different word means a different thing, and in a document full of genuinely distinct components that assumption is usually correct. So when the queue becomes the pipeline and then the channel, the reader does not read elegance, they start building a model with three parts.\n\nRepetition of the term is what keeps the referent stable, and the boredom the writer is trying to escape is nearly always in the sentence openings rather than in the noun. Vary the structure, vary the verbs, and leave the name alone.",
+  failureMode: "Four names for one component in three sentences. Queue, pipeline, channel, buffer and stream may all be the same thing in the fallback, and the reader cannot tell, so they either build a five-part model or stop trusting the vocabulary.",
+  experiment: "Take a design doc section of yours and list every noun you used for its central object. Pick one name, replace all the others, and then fix any sentence that now reads as repetitive by changing its opening rather than its noun.",
+  reflection: "How many names had you given one thing, and where had you introduced the second one?",
+  recall: {
+    q: "Why is a synonym for a technical term more expensive than a repetition of it?",
+    a: "Readers treat a different word as a different referent, which in technical writing is usually the right assumption. Swapping in a synonym therefore invites them to model an extra component.\n\nThe monotony the writer is avoiding is normally in the sentence openings. Vary those and keep the term fixed."
+  },
+  deepDive: "List every noun this draft uses for the same underlying component and tell me where the variation could mislead."
+},
+{
+  id: "cohesion-topic-string",
+  track: "cohesion", level: "paragraph",
+  title: "Read the topic string on its own and you have the paragraph's outline",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Write the subject of each sentence in your paragraph on its own line, in order, and nothing else. Read that list back and write one sentence saying what it is about.",
+  fallback: "The migration plan has three phases. Cost was the main driver for phase one. Our customers will not see downtime, though the support team has been briefed. Phase two depends on the new IAM roles, and the Terraform changes for those are in review. Timelines are in the appendix.",
+  idea: "The sequence of grammatical subjects is the paragraph's real outline, so read it separately and judge it on its own.",
+  why: "Readers track a paragraph through its topics. Each subject tells them what the next assertion is about, and the accumulated sequence is what they experience as the paragraph's shape. That shape exists whether or not you designed it.\n\nExtracting the topic string is a diagnostic because it separates two things that are hard to see together. Sentence by sentence, everything can look reasonable. Read as a list, an incoherent sequence is obvious in seconds, and once it is obvious no amount of local polishing will help, because the problem is the order and choice of topics rather than the prose wrapped around them.",
+  failureMode: "A topic string that reads as an agenda rather than an argument. The fallback yields: migration plan, cost, our customers, phase two, timelines. Five topics in five sentences, no two of them consecutive, and nothing that says what the paragraph is for.",
+  experiment: "Take three consecutive paragraphs from your most recent document and write out each one's topic string. Judge each list before you look back at the prose. Rewrite the worst paragraph by fixing the list first and only then the sentences.",
+  reflection: "What did the worst topic string turn out to be, and could you fix it without cutting or merging sentences?",
+  recall: {
+    q: "What is a topic string and what is it good for?",
+    a: "It is the sequence of grammatical subjects in a paragraph, read as a list on its own. Readers experience that sequence as the paragraph's shape.\n\nRead separately, an incoherent sequence is visible immediately, and it identifies a problem that sentence-level editing cannot fix because the fault is in the choice and order of topics."
+  },
+  deepDive: "Extract the topic string of each paragraph in this piece and tell me which ones do not hold together as a list."
+},
+{
+  id: "cohesion-two-topic-patterns",
+  track: "cohesion", level: "paragraph",
+  title: "There are two legitimate topic patterns: hold one topic, or hand off down a chain",
+  source: "František Daneš, Functional Sentence Perspective and the Organization of the Text",
+  gatePrompt: "Write out your paragraph's topic string, then label it: same topic throughout, each topic taken from the previous sentence's ending, or neither. Mark the exact sentence where the pattern changes.",
+  fallback: "The scheduler admits work against a per-tenant budget. The scheduler recomputes that budget every thirty seconds. The budget is derived from the tenant's plan tier, and plan tiers are synced from billing overnight. Billing exports land in the warehouse at 02:00, and the warehouse job that reads them has been failing since Friday.",
+  idea: "Either keep one topic across the paragraph or hand each sentence's ending to the next sentence's subject, and do not switch between the two without marking it.",
+  why: "Daneš described these as thematic progressions. Constant progression keeps the same theme and varies what is said about it, which suits description and argument about a single object. Linear progression takes the new material from one sentence and makes it the theme of the next, which suits derivation, causal chains and walkthroughs.\n\nBoth are coherent because both give the reader a rule for predicting the next subject. Trouble starts when a paragraph establishes one rule and silently swaps to the other, because the reader keeps predicting under the old rule and keeps being wrong. The switch is legitimate at a boundary you mark, and disorienting in the middle of a run.",
+  failureMode: "A paragraph that starts constant and drifts down a chain until it is somewhere else. The fallback opens twice on the scheduler, hands off to the budget, then to plan tiers, then to billing, then to the warehouse, and ends on a broken job in a paragraph the reader thought was about admission control.",
+  experiment: "Label the progression of five paragraphs from your last document as constant, chained or neither. For every paragraph that switches mid-run, either split it at the switch or rewrite the tail to hold the original topic, and note which fix the content wanted.",
+  reflection: "Where did your pattern change, and was the switch carrying a real change of subject or just drift?",
+  recall: {
+    q: "Name the two coherent topic progressions and the failure that sits between them.",
+    a: "Constant progression holds one topic and varies the comment on it. Linear or chained progression makes each sentence's new material the next sentence's topic.\n\nBoth work because each gives the reader a rule for predicting the next subject. The failure is switching rules mid-paragraph without marking it, so the reader keeps predicting wrongly."
+  },
+  deepDive: "Classify each paragraph in this draft as constant or chained and show me where a paragraph switches without warning."
+},
+{
+  id: "cohesion-transitions-cannot-repair",
+  track: "cohesion", level: "paragraph",
+  title: "Transition words cannot repair a broken sequence of subjects",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Delete every \"however\", \"therefore\", \"moreover\" and \"in addition\" from your paragraph. Read what is left and mark each join as still clear or now broken.",
+  fallback: "The rollout was paused on Thursday after the canary showed elevated error rates. However, cost per run has been trending down since April, which was the original justification for the change. Therefore, the remaining three regions will be picked up next sprint. Moreover, the dashboard still needs an owner.",
+  idea: "Fix the sequence of topics first, because a connective asserts a relationship rather than creating one.",
+  why: "Connectives are labels. \"However\" tells the reader that the coming sentence contradicts the last one, and the reader will look for the contradiction. If the two sentences are about different subjects, the search fails, and the reader is left holding a promised relationship they cannot locate. That is worse than no connective, which at least leaves them to make their own sense of the join.\n\nThe underlying point is that coherence lives in the topic sequence. When subjects follow one another sensibly, most joins need no signposting and the few connectives you do use are believed. When subjects jump, adding connectives converts a paragraph that is merely disjointed into one that is disjointed and misleading.",
+  failureMode: "Three connectives asserting three relationships that are not there. Nothing in the fallback contradicts anything, so \"however\" misfires; the falling cost does not cause the regions to be picked up, so \"therefore\" is false; and the dashboard's owner is not a further instance of anything.",
+  experiment: "Strip every connective from a page of your writing. Read the result and mark the joins that broke. Fix those by changing subjects rather than by restoring the words, then put back only the connectives that name a relationship you can point at.",
+  reflection: "How many of your connectives survived, and were the joins that broke fixable by reordering alone?",
+  recall: {
+    q: "Why does adding connectives to an incoherent paragraph make it worse rather than better?",
+    a: "A connective asserts a relationship instead of creating one. The reader takes \"however\" as a promise of contradiction and goes looking for it.\n\nWhen the subjects do not follow one another, the search fails and the reader is left holding a relationship they cannot find, which is worse than an unsignposted join."
+  },
+  deepDive: "Remove the connectives from this draft, tell me which joins collapse, and diagnose those as topic problems."
+},
+{
+  id: "cohesion-cohesion-vs-coherence",
+  track: "cohesion", level: "paragraph",
+  title: "Cohesion is the joints; coherence is whether the paragraph is about anything",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Check two things separately on your paragraph. First, does each sentence connect to the one before it? Second, write in one line what the paragraph is about. Mark which of the two checks failed.",
+  fallback: "We moved the retention job to the new cluster in April. The new cluster runs on Graviton nodes, which cost about twenty per cent less per core. That saving was folded into the observability budget for the half. The observability budget is owned by the platform team, who also carry the on-call rota.",
+  idea: "Diagnose local linkage and global aboutness as two separate faults, because a paragraph can pass one and fail the other.",
+  why: "Cohesion is a property of adjacent pairs: does sentence two attach to sentence one. Coherence is a property of the whole: is there a single thing this paragraph is establishing. They are produced by different mechanisms, so they fail independently.\n\nThe dangerous case is the one that is cohesive and incoherent, because it reads smoothly. Each handoff is clean, nothing jars, and the reader gets to the end having followed every step and retained no claim. Writers rarely catch it by rereading, since rereading exercises exactly the local linkage that is working. You catch it by asking what the paragraph asserts, and noticing that the honest answer is a route rather than a claim.",
+  failureMode: "A chain that never becomes a point. In the fallback every sentence picks up the previous sentence's ending, and the paragraph travels from a retention job to the on-call rota without asserting anything. Ask what it is about and the only true answer is that it is about four things in a row.",
+  experiment: "Take three paragraphs from your last document and write a single-line claim for each. Where the line comes out as a summary of a journey rather than an assertion, cut the paragraph at the point where the subject changed and see whether you have two paragraphs or one paragraph and a stray.",
+  reflection: "Did the paragraph fail on linkage, on aboutness, or on both, and which did you notice first?",
+  recall: {
+    q: "How can a paragraph be perfectly cohesive and still incoherent?",
+    a: "Cohesion is a property of adjacent sentences and coherence is a property of the whole, so they fail independently. A paragraph can chain cleanly from each sentence's ending to the next sentence's subject and never assert anything.\n\nIt reads smoothly, which is why rereading does not catch it. Ask what the paragraph claims, and if the answer describes a route rather than a claim it is incoherent."
+  },
+  deepDive: "For each paragraph here, tell me separately whether the joints hold and whether there is a single claim being made."
+},
+{
+  id: "cohesion-point-sentence",
+  track: "cohesion", level: "paragraph",
+  title: "Put the point sentence at the end of the paragraph's opening, not in the middle",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Underline the sentence in your paragraph that carries its point. Write down its position: first, second, middle, last. If you cannot find one, write that down instead.",
+  fallback: "Phase two of the migration was planned for June. We ran the dual write for six weeks and compared checksums across roughly forty million rows. Three tables diverged, all of them with nullable timestamp columns, and the divergence traces to a driver-level timezone default rather than to anything in our code. The migration is therefore safe to proceed once we pin the driver version. The tooling held up well throughout.",
+  idea: "State the paragraph's claim at the close of its opening unit, before the evidence rather than inside it.",
+  why: "Readers look for a paragraph's point at the end of its opening, which is one sentence in a short paragraph and two or three in a long one. That is where they expect to be told what the following material is for, and they read everything after it as support.\n\nA point that arrives in the fourth sentence is therefore read twice: once as another piece of evidence, because that is the role the position assigns, and then again as the claim once the reader has worked out that the paragraph has stopped supplying detail. Many readers do not perform the second reading. The claim was on the page and it was not made, which is indistinguishable from not having written it.",
+  failureMode: "The conclusion sitting fourth out of five, wearing the same clothes as the evidence. In the fallback, \"The migration is therefore safe to proceed once we pin the driver version\" is the whole paragraph, and it arrives after two sentences of method and one of findings, then gets a sentence about tooling on top of it.",
+  experiment: "Take five paragraphs from a document you are about to send. Mark the position of each point sentence. Move every one that is not in the opening unit, then read only the opening sentences of the five paragraphs in order and check whether they still form the argument.",
+  reflection: "Where were your point sentences actually sitting, and did moving them change what the surrounding sentences needed to say?",
+  recall: {
+    q: "Where do readers look for a paragraph's claim, and what happens to a claim placed later?",
+    a: "At the end of the paragraph's opening unit, which is the first sentence or two. Everything after it is read as support for it.\n\nA claim placed in the middle is first read as more evidence, because that is what the position assigns, and only recognised as the claim on a second pass many readers never make."
+  },
+  deepDive: "Mark where the point sentence sits in each paragraph of this draft and tell me which points are buried in their own evidence."
+},
+{
+  id: "cohesion-paragraph-stress",
+  track: "cohesion", level: "paragraph",
+  title: "The last sentence of a paragraph is the paragraph's stress position",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Read only the final sentence of each paragraph in something you wrote this week, in order. Write down what that sequence claims. Compare it with what you meant to claim.",
+  fallback: "Cutting the poll interval from ten seconds to one dropped detection time for stuck runs from a median of eleven seconds to under two. We have run it in staging for a fortnight with no measurable increase in API server load. It is worth noting that we have not tested above two thousand concurrent runs, and the staging cluster is about a third the size of production.",
+  idea: "End the paragraph on what you want carried forward, because the final sentence is what the reader takes away.",
+  why: "The emphasis that attaches to syntactic closure at the end of a sentence attaches again, more strongly, at the end of a paragraph. The reader is closing a larger unit, and what sits at that boundary is what survives into the next paragraph and into their summary of the document.\n\nThis is why trailing caveats are so expensive. Honest writers put the limitation last because it feels like integrity to finish with the qualification, and the structural effect is to make the limitation the finding. Keep the caveat, but put it in the middle where the reader will read it as a bound on the claim rather than as the news.",
+  failureMode: "A real result reported first and surrendered last. The fallback's finding is a five-fold improvement in detection time, and the sentence the reader carries away is that it has not been tested at scale on a small staging cluster. Everyone who skims that paragraph remembers the untested part.",
+  experiment: "Take a document of yours and read only the last sentence of each paragraph, in order, as a list. If the list is mostly caveats and next steps, move one caveat into the middle of its paragraph and put the finding last, then reread the list.",
+  reflection: "What did your list of last sentences say the document concluded, and how many of them were caveats?",
+  recall: {
+    q: "What happens to a caveat placed in the last sentence of a paragraph?",
+    a: "It becomes the takeaway. The end of a paragraph is a larger point of closure than the end of a sentence, so it carries more emphasis, and the final sentence is what survives into the reader's summary.\n\nKeep the caveat but move it into the middle, where it reads as a bound on the claim instead of as the finding."
+  },
+  deepDive: "Read out the last sentence of every paragraph in this draft as a list and tell me what a skimmer would conclude."
+},
+{
+  id: "cohesion-section-topic-position",
+  track: "cohesion", level: "document",
+  title: "The first paragraph of a section is that section's topic position",
+  source: "George Gopen, The Sense of Structure",
+  gatePrompt: "Take a document of yours with headings. Read only each heading and the first paragraph under it. For each pair, write yes or no: does the opening paragraph tell you what the section will establish?",
+  fallback: "Rollback plan\n\nThe dual write has been running since March, and the checksum tooling was written by the data platform team, who also maintain the warehouse loaders. Cost has not been a material factor in the design so far. We would need roughly two hours to revert, assuming the old topic still exists.",
+  idea: "Use the opening paragraph of a section to say what the section establishes, because readers treat it as the section's topic in exactly the way they treat a subject as a sentence's topic.",
+  why: "Reader expectation scales. The same instinct that makes a reader take the grammatical subject as the sentence's topic makes them take the opening paragraph as the section's topic and the opening section as the document's. Position carries the same function at every level of the structure.\n\nSo an opening paragraph spent on history, methodology or acknowledgements does not merely delay the section, it redefines it. The reader forms a hypothesis about what this section is for and then reads several pages against that hypothesis, discarding as digression whatever does not fit. A heading cannot correct this on its own, because the heading is a label and the opening paragraph is the argument.",
+  failureMode: "A section whose first paragraph is about the past. Under the heading \"Rollback plan\", the fallback opens on who wrote the tooling and whether cost mattered, and reaches the actual rollback in a subordinate clause of the third sentence. The reader now believes this section is a status update.",
+  experiment: "Take your longest recent document and read only the headings and the opening paragraph of each section. For every section where the opening does not match the heading, rewrite the first two sentences to state what the section establishes, then check whether any section turns out to establish nothing.",
+  reflection: "Which section's opening paragraph was furthest from its heading, and what had you put there instead?",
+  recall: {
+    q: "What is the document-level equivalent of the subject of a sentence?",
+    a: "The opening paragraph of a section, and the opening section of a document. Readers apply the same positional expectation at every level of the structure.\n\nAn opening paragraph spent on history or method therefore redefines what the section is about, and a heading cannot override it, because the heading is a label while the opening paragraph is the argument."
+  },
+  deepDive: "Read only the headings and opening paragraphs of this document and tell me where the opening paragraph contradicts its heading."
+}
+);

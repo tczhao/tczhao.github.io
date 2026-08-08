@@ -1,0 +1,296 @@
+/* Track: Evaluating models and judges. Ordered foundational first. */
+(window.LESSONS = window.LESSONS || []).push(
+{
+  id: "evals-judge-is-an-instrument",
+  track: "evals", level: "core",
+  title: "An LLM judge is a measurement instrument and needs validating against human labels",
+  source: "Shreya Shankar, J. D. Zamfirescu-Pereira, Bjorn Hartmann, Aditya G. Parameswaran and Ian Arawjo, Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences, UIST 2024",
+  idea: "A judge prompt is an unvalidated instrument until you have measured its agreement with human grades on the same items.",
+  why: "A judge emits a number whether or not that number tracks anything. The only evidence connecting the score to the quality you care about is a set of items graded both ways, by the judge and by a person, and compared item by item. That is what the EvalGen work builds: candidate criteria are generated, a human grades a sample, and criteria are kept or discarded on how well they align with those grades. Alignment is measured per criterion, not for \"the judge\" as a single thing, because a rubric with five clauses is five instruments stapled together and they do not all work equally well.\n\nRead the agreement against the base rate or you will fool yourself. If eight per cent of your outputs are bad, a judge that says \"good\" to everything scores ninety-two per cent agreement. The number you need is the confusion matrix split by class: of the outputs you called failures, what fraction did the judge catch, and of the ones it flagged, what fraction were real.",
+  failureMode: "A groundedness judge reports a mean of 4.2 out of 5 across production traffic. Nobody has ever hand-graded fifty of those outputs. The rubric wording pushes everything to 4 or 5, so the metric has a range of one point, and a prompt change that a human reviewer would call a clear regression moves the mean from 4.2 to 4.3.",
+  experiment: "Pull fifty agent outputs from last week out of ClickHouse or a Temporal workflow history. Grade each one yourself as pass or fail against a single written criterion, before you look at any judge score. Then join to the judge's verdict and write out all four cells of the confusion matrix. Report recall on the failing class, not overall accuracy.",
+  reflection: "Which disagreement cell was larger, and after reading five of those items did you change your mind about the judge or about the criterion?",
+  recall: {
+    q: "Your judge agrees with your own grades on 90 of 100 sampled outputs. What have you still not learned?",
+    a: "Whether it agrees on the items that matter. If ten per cent of outputs are bad, a judge that answers \"good\" every single time also scores 90.\n\nThe informative numbers are recall on the failing class and precision on the flags. Overall agreement is dominated by the majority class and hides an instrument with no discrimination at all.",
+  },
+  forecast: { q: "When I hand-grade fifty outputs against my current judge prompt, will the judge's recall on the items I mark as failures come out below 0.7?" },
+  deepDive: "Here is my judge prompt and fifty outputs I graded by hand; compute agreement per class, tell me where the judge and I disagree systematically, and propose one rubric change that would close the largest cell."
+},
+{
+  id: "evals-construct-measurement-model",
+  track: "evals", level: "core",
+  title: "Measuring an unobservable construct requires a measurement model you can argue about",
+  source: "Abigail Z. Jacobs and Hanna Wallach, Measurement and Fairness, FAccT 2021",
+  idea: "Helpfulness, safety and answer quality are unobservable constructs, and the only way to contest a score is to write down the measurement model that connects it to observables.",
+  why: "The psychometrics framing that Jacobs and Wallach import says a measurement has two halves that must be stated separately: the construct you claim to measure, and the operationalisation that turns observables into a number. Once both are written down, the link between them can be tested, and the tests have names. Content validity asks whether the observables cover the construct. Convergent validity asks whether the score agrees with a different measure of the same thing. Predictive validity asks whether it predicts what you say it predicts. Consequential validity asks what happens once the number becomes a target.\n\nWithout that separation, an argument about a metric collapses into taste, because two people disagreeing about a weighting have no shared object to point at. With it, the disagreement becomes specific: you are claiming tone belongs in the construct, I am claiming the operationalisation weights it four times too heavily, and one of those is settleable with data.",
+  failureMode: "The agent quality score is the unweighted mean of five judge sub-scores from 1 to 5. Nobody ever argued about whether tone should count as much as factual correctness, because the equal weighting was never presented as a decision. Quality rises for a quarter while support tickets rise with it, and there is no way to say which of the two numbers is wrong.",
+  experiment: "Write your headline agent quality metric on one line. Underneath, write the construct in one sentence, then list every observable that feeds the number with its weight. Show it to two people on the team and ask each, separately, to name one thing the construct includes that the observables miss. Different answers mean you have found the live ambiguity; identical answers mean you have found the gap to close this week.",
+  reflection: "Which validity does your metric fail first: does it fail to cover the construct, or does it fail to predict anything downstream?",
+  recall: {
+    q: "Name three of the validities in the measurement modelling vocabulary and the question each one asks.",
+    a: "Content validity asks whether the observables cover the construct. Convergent validity asks whether the score agrees with a different measure of the same thing. Predictive validity asks whether it predicts the outcome you claim it predicts.\n\nConsequential validity is the fourth worth carrying: what the score does to behaviour once people are held to it.",
+  },
+  deepDive: "Here is my agent quality metric and exactly how it is computed; write out the measurement model it implies and name the validity most at risk."
+},
+{
+  id: "evals-benchmark-overclaim",
+  track: "evals", level: "core",
+  title: "A benchmark is a claim about a task, and most benchmarks overclaim their scope",
+  source: "Inioluwa Deborah Raji, Emily M. Bender, Amandalynne Paullada, Emily Denton and Alex Hanna, AI and the Everything in the Whole Wide World Benchmark, NeurIPS Datasets and Benchmarks 2021",
+  idea: "A benchmark score is evidence about the dataset that produced it, and becomes evidence about a general ability only if somebody argues the construct.",
+  why: "Benchmarks that get read as measures of general capability were assembled from whatever data was convenient to collect and label, with a task definition chosen to make scoring tractable. The paper's argument is that these datasets have limited construct validity for the general abilities they are named after, and limited task scope besides, so the generality is a label applied after the fact rather than a property demonstrated. The title is the joke: a museum of everything in the whole wide world cannot exist, and neither can a benchmark for general intelligence.\n\nThe operational form for you is transfer. A vendor's tool-use score tells you about that distribution of tools and requests. Whether it says anything about forty internal APIs with overlapping names, tenant-scoped auth and a metadata graph is an assumption, and it is your assumption rather than the benchmark's.",
+  failureMode: "You choose a model because it leads a public tool-calling benchmark. The benchmark's tools are weather, calculator and search, called one at a time from unambiguous requests. Your agent has to disambiguate three similarly named lineage endpoints under a tenant scope, and it regresses against the model you replaced. The benchmark cannot explain the regression because it never contained the failure.",
+  experiment: "Take the benchmark you cite most often when choosing a model. Write down its task definition in one sentence, then read ten sampled items. Score each item yes or no on whether it resembles a request that actually appears in your product logs. Report the count out of ten. Below three and the score is not about you.",
+  reflection: "After reading ten items, what is that benchmark actually a benchmark of, stated in one sentence you would defend?",
+  recall: {
+    q: "What has to be true before a benchmark score is evidence about a general capability rather than about a dataset?",
+    a: "Somebody has to argue the construct: that the items sample the ability broadly enough, and that the scoring rule rewards the ability rather than a shortcut in the data.\n\nAbsent that argument the score is a measurement of performance on those items, which is a real fact and a much smaller one than the benchmark's name suggests.",
+  },
+  deepDive: "Here are ten sampled items from the benchmark I use for model selection and ten real requests from my logs; tell me which capabilities the benchmark exercises that my traffic does not, and which of mine it never touches."
+},
+{
+  id: "evals-behavioural-testing",
+  track: "evals", level: "applied",
+  title: "Build the eval from the behaviours you ship, not the examples you have",
+  source: "Marco Tulio Ribeiro, Tongshuang Wu, Carlos Guestrin and Sameer Singh, Beyond Accuracy: Behavioral Testing of NLP Models with CheckList, ACL 2020",
+  idea: "Enumerate the capabilities your system claims and test each one directly, because aggregate accuracy on a held-out sample cannot surface a capability-shaped hole.",
+  why: "A held-out set drawn from the same distribution as training is dominated by frequent, easy cases, so a systematic failure affecting five per cent of traffic costs five points and looks like noise. CheckList replaces the single number with a matrix: capabilities down one axis, three test types across the other. Minimum functionality tests are small targeted cases the system must get right. Invariance tests apply a perturbation that must not change the output. Directional expectation tests apply a perturbation that must move the output in a known direction.\n\nThe directional tests are the ones that pay for an agent, because they encode monotone properties you can check without knowing the right answer. Add a constraint to a query and the result set must not grow. Restrict a tenant and the assets returned must be a subset. You do not need a labelled expected output to run those, which removes the usual excuse for not testing.",
+  failureMode: "The eval is three hundred sampled production queries and it passes at ninety-two per cent. Every one of the twenty-four failures is the same behaviour: when the user adds a second filter, the agent widens the search instead of narrowing it. The aggregate says ninety-two and the product has one systematic hole nobody has named.",
+  experiment: "Pick one agent capability, say filtering assets by owner. Write three minimum functionality tests, three invariance tests (rename the entity, reorder the clauses, swap a synonym) and three directional tests (add a constraint, and assert the result count does not increase). Run all nine today and record the pass rate per test type. The type with the lowest rate is the next thing you fix.",
+  reflection: "Which of the three test types found something your sampled eval had been passing over, and why did the sampled eval not see it?",
+  recall: {
+    q: "What are the three CheckList test types, and which of them needs no labelled expected output?",
+    a: "Minimum functionality tests, invariance tests and directional expectation tests. Invariance and directional tests need no gold label, because the assertion is about the relationship between two outputs rather than about the content of one.\n\nThat is why they are the cheap way into behavioural testing for a system where labelling a correct answer is expensive.",
+  },
+  deepDive: "Here is one capability my agent claims; help me enumerate the invariances it should satisfy and write the directional tests as assertions I can run in the eval harness."
+},
+{
+  id: "evals-guideline-is-the-spec",
+  track: "evals", level: "applied",
+  title: "The annotation guideline is the real specification of your metric",
+  source: "James Pustejovsky and Amber Stubbs, Natural Language Annotation for Machine Learning, O'Reilly 2012",
+  idea: "The annotation guideline, not the metric's name, is the specification of what you are measuring.",
+  why: "Guidelines cannot be written correctly in advance, because the ambiguities that matter live in the data and you have not seen them yet. The book's model-annotate loop is the drafting instrument: annotate a batch, find the disagreements, rewrite the rule that caused each one, re-annotate a fresh batch, and repeat until the disagreement rate stops falling. Disagreement is the input to the process, not a sign the process failed.\n\nThe test of a finished guideline is not that it reads well. It is that a second person following it produces the same labels on items neither of you discussed. Every clause you resolve in your own head with \"you know it when you see it\" gets resolved differently in six weeks by whoever inherits the eval.",
+  failureMode: "Your hallucination label is defined as \"the answer contains a claim not supported by the retrieved context\". Two annotators split on hedged outputs of the form \"I could not find a documented owner, but assets in this schema are usually owned by the data platform team\". One calls the second clause unsupported, the other calls it appropriate caveating. That single unwritten case is a fifth of all your disagreements.",
+  experiment: "Treat your current judge rubric as the guideline. You and one colleague independently label thirty outputs against it. List every disagreement, and for each one write the single sentence that would have prevented it. Add those sentences to the rubric, then both label thirty fresh outputs. Compare disagreement counts before and after; if the second count is not lower, the sentences you added were not the ones doing the work.",
+  reflection: "Of the sentences you had to add, how many were rules you already held privately and had simply never written down?",
+  recall: {
+    q: "Why can an annotation guideline not be finished before annotation starts?",
+    a: "Because the ambiguities that cause disagreement are properties of the data, and you discover them by annotating. The guideline is drafted through cycles of annotate, measure disagreement, rewrite the offending rule, re-annotate.\n\nThe stopping condition is a disagreement rate that has stopped falling, not a document that reads well.",
+  },
+  deepDive: "Here are twelve items where my colleague and I disagreed under the current rubric; cluster them by the underlying ambiguity and draft the rule that resolves each cluster."
+},
+{
+  id: "evals-disagreement-is-signal",
+  track: "evals", level: "advanced",
+  title: "Annotator disagreement is often signal about the item, not noise about the annotator",
+  source: "Lora Aroyo and Chris Welty, Truth Is a Lie: Crowd Truth and the Seven Myths of Human Annotation, AI Magazine 2015",
+  idea: "Forcing a single ground-truth label onto a genuinely ambiguous item destroys information you needed.",
+  why: "The CrowdTruth position is that annotation involves three interacting things, the worker, the item and the annotation, and disagreement can be attributed to any of them. With several judgements per item those attributions are separable: a worker who disagrees with everyone on everything is low quality, while an item on which good workers split evenly is ambiguous. Collapsing to a majority label throws away the second case and records it as though the crowd had spoken.\n\nThe consequence for an eval is a ceiling made of your own noise. An item where five people said pass and five said fail scores the model wrong roughly half the time no matter what the model does, so those items contribute variance and no discrimination. Keeping the vote distribution as the target, or at minimum separating unanimous from split items when you report, tells you which part of your remaining error is the model's.",
+  failureMode: "The golden set was built by majority vote of three annotators, and fifteen per cent of items came out 2 to 1. The model is scored wrong on about half of those regardless of its answer, so the achievable score is around ninety-two. The team spends a quarter chasing the last eight points, which are annotation disagreement.",
+  experiment: "Find a golden set that still has per-annotator labels, or relabel forty items with three people this afternoon. Compute the share of items where all annotators agreed. Then recompute your model's score on the unanimous subset alone. If the score jumps by more than a couple of points, that gap is ambiguity you have been charging to the model.",
+  reflection: "On the split items, was the split caused by a real ambiguity in the world or by a gap in the guideline you could close?",
+  recall: {
+    q: "You have three labels per item and want to know whether a disagreement is a bad annotator or a hard item. What distinguishes them?",
+    a: "Scope. A bad annotator disagrees with the others across many items, including easy ones; a hard item produces disagreement among annotators who agree elsewhere.\n\nBecause you have multiple workers per item and multiple items per worker, the two effects are separable, which is exactly what a single majority vote per item discards.",
+  },
+  deepDive: "Here is my golden set with per-annotator labels; split model error into the unanimous and the split subsets and tell me how much of my headline error rate is annotation disagreement."
+},
+{
+  id: "evals-human-agreement-ceiling",
+  track: "evals", level: "applied",
+  title: "Judge agreement has a ceiling set by how much humans agree with each other",
+  source: "Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang and colleagues, Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena, NeurIPS Datasets and Benchmarks 2023",
+  idea: "A judge cannot be shown to be more accurate than the humans you validate it against, and the strong judges already sit at that bound.",
+  why: "The MT-Bench work reports that a strong judge model reaches over eighty per cent agreement with human preferences, which is the same level of agreement two humans reach with each other on the same comparisons. That is the good news and the wall in the same sentence. Humans are the reference, so the highest agreement you can demonstrate is the agreement the reference has with itself, and anything above it is indistinguishable from the judge learning your annotators' idiosyncrasies.\n\nSo measure human-human agreement first. It is the number the judge should be compared to, not one hundred. And correct for chance while you are there: raw agreement on a task with a ninety per cent pass rate starts around eighty-two per cent for free. Cohen's kappa is (observed agreement minus chance agreement) divided by (1 minus chance agreement), where chance agreement is computed from each rater's own label marginals.",
+  failureMode: "A report says the judge agrees with humans seventy-eight per cent of the time, concludes the judge is too weak, and proposes a larger model. Nobody measured that the two humans agree with each other seventy-six per cent of the time. No model can beat that ceiling; a rewritten rubric that removes the ambiguity can raise it.",
+  experiment: "Have two people independently grade the same forty outputs. Compute three numbers: raw human-human agreement, judge agreement with each human separately, and chance agreement from the label marginals. Convert each to kappa with (observed minus chance) over (1 minus chance) and put the three side by side in a spreadsheet.",
+  reflection: "Given your human-human number, is your judge underperforming or is your criterion underspecified?",
+  recall: {
+    q: "Your judge agrees with your annotators seventy-eight per cent of the time. What is the second number you need before deciding whether that is bad?",
+    a: "Human-human agreement on the same items. If two annotators agree seventy-six per cent of the time, the judge is at the ceiling and the problem is the rubric, not the model.\n\nBoth numbers should be chance-corrected, because raw agreement is inflated by any skew in the label marginals.",
+  },
+  forecast: { q: "On my next forty-item double-graded sample, will judge-human agreement land within five percentage points of human-human agreement?" },
+  deepDive: "Here are forty items graded by two people and by my judge; compute raw agreement and kappa for each pair and tell me whether the judge or the rubric is the binding constraint."
+},
+{
+  id: "evals-criteria-drift",
+  track: "evals", level: "applied",
+  title: "Your grading criteria drift as you look at outputs, and that is not cheating",
+  source: "Shreya Shankar, J. D. Zamfirescu-Pereira, Bjorn Hartmann, Aditya G. Parameswaran and Ian Arawjo, Who Validates the Validators?, UIST 2024",
+  idea: "Criteria and grades co-evolve, so the rubric is a versioned artefact and scores from different versions are not comparable.",
+  why: "The EvalGen study named criteria drift: people only work out what counts as good after grading real outputs, and the act of grading changes the criteria they then apply. Any workflow that assumes the rubric was settled before grading started is describing a process nobody follows. Refining as you go is how judgement forms, and pretending otherwise just means the refinement happens off the record.\n\nWhat that costs you is comparability. A score is a reading from an instrument, and changing the instrument mid-series produces a step change with no cause in the system under test. The fix is bookkeeping rather than restraint: version the rubric, log the version with every score, and when the version changes, re-grade a fixed archive set with the new rubric so you have both readings on the same items.",
+  failureMode: "The weekly quality score jumps from 3.6 to 4.1. No model, prompt or retrieval change shipped that week. Someone tightened the citation clause and loosened the tone clause the same afternoon. The rubric version is not in the trace, so the jump is now a permanent unexplained step in a chart that leadership reads monthly.",
+  experiment: "Add a version string to your judge prompt and write it into the row alongside every score in ClickHouse. Then look back at the last three months of quality scores and count how many distinct prompt or rubric versions produced them, and whether you can attribute any given score to one. If you cannot, that series has no baseline. Re-grade a hundred archived outputs with the current rubric and plot the new score against the original.",
+  reflection: "How far apart were the old and new gradings on the same hundred items, and does that gap exceed any delta you have shipped on this quarter?",
+  recall: {
+    q: "You change the judge rubric mid-quarter. What do you owe the time series?",
+    a: "A version tag on every score and a re-grade of a fixed archive set under the new rubric, so the same items have readings under both versions.\n\nWithout that, the step change caused by the instrument is indistinguishable from a change in the system, and every comparison across the boundary is invalid.",
+  },
+  deepDive: "Here are my current rubric and the version it replaced, plus a hundred outputs scored under both; quantify the shift the rubric change alone introduced."
+},
+{
+  id: "evals-position-bias",
+  track: "evals", level: "applied",
+  title: "Judges prefer whichever answer came first",
+  source: "Peiyi Wang, Lei Li, Liang Chen, Zefan Cai, Dawei Zhu and colleagues, Large Language Models Are Not Fair Evaluators, arXiv 2305.17926, 2023",
+  idea: "Swapping the presentation order of two candidate answers flips a judge's verdict often enough to decide an A/B by itself.",
+  why: "The paper shows that a judge asked to compare two responses is sensitive to which one appears first, to the point where reversing the order reverses the winner on a substantial fraction of pairs. This is a property of the instrument, so it does not average out: if your template always puts the incumbent in slot A and the challenger in slot B, every comparison carries the same bias in the same direction and the aggregate inherits it.\n\nThe mitigation is cheap and doubles your judge cost. Evaluate every pair in both orders. Pairs where the verdict is consistent are your signal; pairs that flip are ties, or evidence the judge cannot tell them apart on this criterion. The flip rate is a free diagnostic on top: a high rate means either the systems are genuinely close or the criterion is not discriminating, and you should find out which before running the experiment again.",
+  failureMode: "A prompt A/B where the candidate always sits in slot B because that is how the template was written. The candidate wins 54 to 46 and gets shipped. Rerun with the slots swapped and it wins 47 to 53. What you measured was the layout of the prompt.",
+  experiment: "Take a hundred pairwise judgements from your last eval and rerun them with the order swapped. Report three counts: consistent wins for A, consistent wins for B, and flips. Recompute the win rate treating every flip as a tie and check whether the decision you made still holds.",
+  reflection: "What was your flip rate, and does it read as two close systems or as a criterion that is not discriminating?",
+  recall: {
+    q: "Why does position bias not wash out across a hundred pairwise comparisons?",
+    a: "Because it is a fixed property of the prompt layout, not random noise. If the challenger always occupies the same slot, every comparison is biased in the same direction and the bias accumulates in the aggregate.\n\nRandomising the order removes the systematic tilt; running both orders and keeping only consistent verdicts also tells you how often the judge could not tell.",
+  },
+  forecast: { q: "When I rerun a hundred pairwise judgements with the order swapped, will more than fifteen per cent of the verdicts flip?" },
+  deepDive: "Here is my pairwise eval harness; show me how to run each pair in both orders, and how to report the win rate with flips treated as ties."
+},
+{
+  id: "evals-bradley-terry",
+  track: "evals", level: "advanced",
+  title: "Pairwise wins become a score through the Bradley-Terry model",
+  source: "Ralph Allan Bradley and Milton E. Terry, Rank Analysis of Incomplete Block Designs: I. The Method of Paired Comparisons, Biometrika 1952",
+  idea: "Fitting one latent strength per system to a matrix of pairwise outcomes is what turns comparisons into a ranking, and it comes with standard errors.",
+  why: "Bradley-Terry gives each system a positive strength p, and says the probability that system i beats system j is p_i divided by (p_i plus p_j). The strengths are fitted by maximum likelihood over every comparison observed. The 1952 paper's point was incompleteness: you do not need every pair compared, because a system's strength is identified through the chain of opponents it shares with the others. That is what lets a sparse pile of \"A beat B\" rows become one number per system.\n\nBecause it is a fitted model, each strength has a standard error, and that error shrinks with the number of comparisons the system took part in. Two adjacent systems whose intervals overlap are not ranked; they are tied, with an ordering assigned by noise. The model also assumes there is no order effect and that preferences are transitive, and the previous entry says the first of those is worth checking before you trust the fit.",
+  failureMode: "Five prompt variants ranked from three hundred pairwise votes, and the top one is adopted. Variant 1 appeared in a hundred and forty comparisons, variant 4 in thirty-two. The second has an interval roughly twice as wide and a point estimate close behind. Three of the five slots are indistinguishable and the ranking does not say so.",
+  experiment: "Use whatever pairwise data you have, or make two hundred synthetic comparisons among four systems in a spreadsheet. Fit Bradley-Terry with the standard iterative update: set each p_i to the wins of i divided by the sum over opponents j of (the number of i-versus-j comparisons divided by (p_i plus p_j)), normalise, and repeat until the values stop moving. Then resample the comparison rows with replacement five hundred times, refit each time, and take the 2.5th and 97.5th percentiles per system. Count how many adjacent pairs overlap.",
+  reflection: "After bootstrapping, how many of your systems are genuinely ordered rather than tied?",
+  recall: {
+    q: "State the Bradley-Terry probability that system i beats system j, and say what the model buys you beyond a raw win rate.",
+    a: "The probability i beats j is p_i divided by (p_i plus p_j), with one fitted strength per system. Beyond a raw win rate it handles incomplete and unbalanced designs, because a system's strength is identified through shared opponents rather than requiring every pair to be played.\n\nIt also yields a standard error per system, which is what tells you which adjacent ranks are actually tied.",
+  },
+  deepDive: "Here is my table of pairwise comparisons between agent configurations; fit Bradley-Terry, bootstrap the intervals, and tell me which adjacent ranks I cannot distinguish."
+},
+{
+  id: "evals-arena-intervals",
+  track: "evals", level: "applied",
+  title: "Arena rankings carry uncertainty that the leaderboard row hides",
+  source: "Wei-Lin Chiang, Lianmin Zheng, Ying Sheng, Anastasios N. Angelopoulos, Tianle Li and colleagues, Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference, ICML 2024",
+  idea: "Arena ratings are estimates from a finite number of votes and come with published confidence intervals that leave much of the leaderboard statistically tied.",
+  why: "The arena fits a Bradley-Terry style model to crowdsourced pairwise votes and bootstraps it to get an interval on every rating. It also reports rank in a way that accounts for those intervals, so a model is only ranked above another when the data supports it. The ordered list you see is a rendering choice; the interval is the measurement, and once you read the intervals a large block of adjacent rows collapses into a single tied group.\n\nThere is a second thing the row hides. Each rating is an average over the arena's prompt distribution, which is whatever people happened to type. That mixture is not your traffic, and the arena's own category breakdowns reorder the models when you condition on coding or on long prompts. A rating is aggregate preference over a crowd's questions, not preference on your task.",
+  failureMode: "A model selection doc reads \"X is ranked fourth and Y is seventh, so we standardise on X\". The published gap is eight rating points and both intervals are around plus or minus six. A migration has been justified with a difference the source itself does not claim to have measured.",
+  experiment: "Open the arena leaderboard, take the top fifteen rows, and write each rating with its interval into a spreadsheet. Count how many of those intervals overlap the top model's. Then do the same to your own internal model leaderboard; if it has no intervals at all, adding them from a bootstrap over your comparison rows is today's task.",
+  reflection: "On your internal leaderboard, how many of the ranks you have been quoting survive once the intervals are drawn?",
+  recall: {
+    q: "Two models sit three rows apart on the arena leaderboard. What has to be true before that is evidence one is better for you?",
+    a: "Their confidence intervals must be separated, and the arena's prompt distribution must resemble your traffic. Overlapping intervals mean the ordering is noise, and even a real gap is a gap on the crowd's questions.\n\nThe category breakdowns are the cheap check on the second condition, because they reorder the table when you condition on a task type.",
+  },
+  deepDive: "Here are the leaderboard rows and intervals I am using to justify a model choice; tell me which comparisons are supported and which are within noise."
+},
+{
+  id: "evals-dawid-skene",
+  track: "evals", level: "advanced",
+  title: "Estimate rater accuracy and true labels at the same time",
+  source: "A. P. Dawid and A. M. Skene, Maximum Likelihood Estimation of Observer Error-Rates Using the EM Algorithm, Journal of the Royal Statistical Society Series C, 1979",
+  idea: "With several noisy raters per item you can recover each rater's confusion matrix and a posterior over the true label jointly, which beats majority vote when raters differ in skill.",
+  why: "Treat the true label of each item as latent and run EM. Initialise the label estimates with majority vote. In the M step, estimate each observer's confusion matrix from the items and the current label estimates: how often this rater says pass when the truth is fail, and so on. In the E step, recompute a posterior over each item's true label by combining the observers' votes weighted by those error rates. Iterate until it settles.\n\nWhat this buys over majority vote is that a rater's reliability is estimated from all their items and then applied to each one, so an accurate rater's vote counts for more than a careless one's. It also generalises past humans: a judge model with an estimated confusion matrix is simply another observer with a weight, which is a cleaner way to combine cheap and expensive labels than choosing between them.",
+  failureMode: "Three annotators, one of whom marks nearly everything as pass. Under majority vote, every item the other two split on resolves to pass. The golden set now has a systematic optimistic bias whose entire cause is one person's behaviour, and the aggregation step is what made it invisible.",
+  experiment: "Take a set with three or more labels per item. First compute each rater's agreement with the majority vote, which already exposes an outlier. Then run Dawid-Skene, either from an existing implementation or forty lines of EM. Count the items where the Dawid-Skene label differs from the majority vote label, and read ten of them. If the differences look right to you, majority vote was costing you those items.",
+  reflection: "Did the estimated confusion matrices match your intuition about who on the team grades strictly?",
+  recall: {
+    q: "What does Dawid-Skene estimate that majority vote cannot, and how does the estimation get off the ground with no ground truth?",
+    a: "It estimates a per-rater confusion matrix alongside a posterior over each item's true label. It bootstraps by EM: initialise the labels with majority vote, estimate error rates given those labels, re-estimate labels given the error rates, and iterate.\n\nThe leverage comes from having many items per rater and many raters per item, so reliability and truth are separately identified.",
+  },
+  deepDive: "Here is a table of item, rater and label; run Dawid-Skene, give me each rater's confusion matrix, and list the items where the aggregated label disagrees with majority vote."
+},
+{
+  id: "evals-power",
+  track: "evals", level: "applied",
+  title: "Typical eval sets are too small to detect the differences people report from them",
+  source: "Dallas Card, Peter Henderson, Urvashi Khandelwal, Robin Jia, Kyle Mahowald and Dan Jurafsky, With Little Power Comes Great Responsibility, EMNLP 2020",
+  idea: "State the minimum detectable effect for your eval set size, and treat any claimed improvement below it as unsupported.",
+  why: "Power is the probability of detecting a real effect of a given size. Card and colleagues computed it for standard NLP benchmarks and found that many are too small to reliably detect the one-point differences routinely claimed from them, which means a paper reporting such a difference is roughly as likely to be reading noise as an effect. Turn that around and it becomes a design number you can compute before running anything: for your n and your pass rate, there is a smallest difference the eval can detect, and claims below it are not supported by that eval whatever the p-value says.\n\nPaired designs are the cheapest way to move the number. Run both systems on the same items and analyse the per-item differences; the item-to-item variance, which is usually the dominant term, cancels. If your harness scores each system against its own sample you are throwing away power for nothing.",
+  failureMode: "A two hundred item eval, incumbent at eighty-one per cent, candidate at eighty-four. With p near 0.8 and n of 200, the standard error of one proportion is about 0.028, and for two independent samples the standard error of the difference is about 0.04. A three point gap is inside one standard error. It ships, and the next run reverses it.",
+  experiment: "For your eval set size n and current pass rate p, compute the standard error of a proportion as the square root of p times (1 minus p) divided by n. For an unpaired comparison of two systems, the standard error of the difference is that times the square root of two, and the minimum detectable difference at five per cent alpha and eighty per cent power is about 2.8 times it. Write that number at the top of the eval dashboard, then check the last three changes you shipped against it.",
+  reflection: "How many of the deltas you have acted on this year were smaller than your minimum detectable effect?",
+  recall: {
+    q: "Your eval has 200 items and both systems score near 80 per cent. Roughly how big must the difference be before an unpaired comparison can detect it?",
+    a: "The standard error of one proportion is the square root of 0.8 times 0.2 divided by 200, about 0.028. For two independent samples the standard error of the difference is about 0.04, and the minimum detectable difference at 80 per cent power is roughly 2.8 times that, so around 11 points.\n\nA paired design over the same items removes the item variance and brings that number down substantially for free.",
+  },
+  forecast: { q: "Will the minimum detectable effect I compute for my current eval set turn out to be larger than the last improvement I claimed from it?" },
+  deepDive: "Here is my eval set size, pass rate and whether it is paired; compute the minimum detectable effect and tell me which of my recent shipped deltas were below it."
+},
+{
+  id: "evals-seed-variance",
+  track: "evals", level: "applied",
+  title: "Rerun the same eval with a different seed before you believe the delta",
+  source: "Nils Reimers and Iryna Gurevych, Reporting Score Distributions Makes a Difference: Performance Study of LSTM-Networks for Sequence Tagging, EMNLP 2017",
+  idea: "The spread across repeated runs of one configuration is the yardstick every between-configuration difference has to beat.",
+  why: "Reimers and Gurevych ran the same configurations many times with different random seeds and found the spread of scores within a single configuration was frequently as large as the differences between configurations that papers were reporting as findings. A single run per configuration samples one point from a distribution and compares it to one point from another distribution, which produces a difference with no error term attached. Their recommendation was to report score distributions rather than single numbers.\n\nFor an LLM system the seed is anything nondeterministic: sampling temperature, tie-breaking in retrieval, tool ordering, time-varying context, and the judge itself if it is sampled rather than greedy. Run the whole pipeline unchanged n times and you get the within-configuration spread. Any candidate change has to clear that spread before it is a result rather than a draw.",
+  failureMode: "One eval run per prompt variant. Variant B scores two points above variant A and ships on Friday. The following week someone reruns variant A three times out of curiosity and gets 79, 83 and 81. The two point win was inside the incumbent's own spread the whole time.",
+  experiment: "Run your current eval five times tonight with nothing changed. Report the minimum, maximum and standard deviation of the headline score, and put the range next to the last delta you shipped on. If the delta sits inside the range, the decision it justified was a coin flip.",
+  reflection: "What is your eval's within-configuration spread, and what does it imply about the smallest change worth reporting?",
+  recall: {
+    q: "You have one eval run per configuration and B beats A by two points. What is missing, and how do you get it?",
+    a: "An error term. Two single runs give a difference with no estimate of the variability it should be compared against.\n\nRun one configuration unchanged several times to get the within-configuration spread. A between-configuration difference smaller than that spread is not evidence of anything.",
+  },
+  deepDive: "Here are five repeated runs of my unchanged eval; give me the within-configuration spread and tell me the smallest between-configuration delta I should be willing to act on."
+},
+{
+  id: "evals-prediction-powered",
+  track: "evals", level: "advanced",
+  title: "Use a cheap judge on everything and a small human sample to make the number valid",
+  source: "Anastasios N. Angelopoulos, Stephen Bates, Clara Fannjiang, Michael I. Jordan and Tijana Zrnic, Prediction-Powered Inference, Science 2023",
+  idea: "A judge score on the full set, corrected by the judge-versus-human difference measured on a small random labelled sample, gives a confidence interval that is valid whatever the judge's quality.",
+  why: "Take the judge's estimate over all the items, which is precise but possibly biased. On a random subsample you also have human labels, so you can estimate the bias directly as the mean difference between judge and human on those items. Subtract it. The corrected estimate is unbiased regardless of how good the judge is, because any systematic error the judge makes on the population shows up in the subsample too, and the interval widens to account for the uncertainty in estimating the correction.\n\nThe two limiting cases are what make this worth knowing. A useless judge degrades the interval to roughly what the human sample alone would have given, so you lose nothing. A good judge gives you an interval far narrower than the human sample alone. That turns labelling budget into a dial on interval width rather than a precondition for making any defensible claim at all. The one requirement you must not break is that the labelled subsample is drawn at random, not chosen because those items looked interesting.",
+  failureMode: "The choice on the table is hand-label a thousand items over three weeks, or quote the judge's raw mean with no validity argument. The team quotes the judge and the number goes on a slide. A random hundred-item labelled subsample plus the judge on all five thousand would have produced a defensible interval in an afternoon.",
+  experiment: "Take an eval where the judge has scored everything. Draw a random fifty items and hand-label them. Compute three things: the judge's mean over all items, the mean of (judge minus human) on the fifty, and the difference of the two. Then compare the corrected estimate against the raw judge mean and against the human-only mean of the fifty, and note the width of the interval you would have got from the fifty alone.",
+  reflection: "How large was the judge's bias on the labelled sample, and would correcting for it have changed a decision you have already made?",
+  recall: {
+    q: "What makes a prediction-powered interval valid even when the judge is bad, and what is the one assumption you cannot break?",
+    a: "The estimate is corrected by the measured mean difference between judge and human on the labelled sample, so any systematic judge bias is subtracted out, and the interval widens to cover the uncertainty in that correction. A useless judge degrades the interval to roughly the human-only one rather than breaking it.\n\nThe labelled subsample must be drawn at random from the same set the judge scored. Choosing interesting items destroys the guarantee.",
+  },
+  forecast: { q: "Will the prediction-powered interval on my next eval be at least thirty per cent narrower than the interval from the hand-labelled sample alone?" },
+  deepDive: "Here is my judge's score on every eval item plus fifty randomly sampled human labels; compute the prediction-powered estimate and interval and compare it with both naive alternatives."
+},
+{
+  id: "evals-contamination",
+  track: "evals", level: "applied",
+  title: "A benchmark number is a claim about a training set you cannot inspect",
+  source: "Shahriar Golchin and Mihai Surdeanu, Time Travel in LLMs: Tracing Data Contamination in Large Language Models, ICLR 2024",
+  idea: "Until you have probed for contamination, a high public benchmark score is unfalsifiable as evidence of capability.",
+  why: "If the eval items were in pretraining, the score measures recall of the answer rather than the ability the benchmark names, and you cannot check because you cannot see the training data. The Time Travel method probes it from outside: prompt the model with the dataset name and split plus the first part of an instance and ask it to complete, then do the same without the guiding information about the source. If the guided completion is much closer to the true continuation than the unguided one, or reproduces it near exactly, that is evidence the instance was seen. Aggregating over instances gives a partition-level verdict.\n\nThe exposure that actually costs you is your own eval set rather than someone else's benchmark. Anything sitting in a public repository, a docs page, a support article or a Jira project that syncs somewhere public is a candidate for the next crawl. The defence is a held-back private slice that you never publish and never send to a third-party endpoint whose retention policy you have not read.",
+  failureMode: "Your golden set was built from the example questions on your public documentation site. A new model release scores twelve points higher on it and the release note attributes the jump to better reasoning. It read the documentation.",
+  experiment: "Take ten items from your eval set. For each, prompt the model with the first half and ask it to continue, once with the source named and once with no hint about where the item came from. Score whether any completion reproduces the true continuation near exactly. Separately, audit provenance: count how many of your eval items trace back to a publicly reachable URL. Report both counts.",
+  reflection: "What fraction of your eval set is publicly reachable, and do you have any slice that is not?",
+  recall: {
+    q: "How can you get evidence of contamination without access to the training data?",
+    a: "Prompt the model with part of an instance and ask it to complete, once with the dataset name and split supplied and once without. A large gap in similarity to the true continuation, or a near-exact reproduction, is evidence the instance was seen in training.\n\nIt is evidence rather than proof, and it is the only kind available from outside, which is why an unprobed public score cannot be falsified.",
+  },
+  deepDive: "Here are ten items from my eval set; design the guided and unguided completion probes for them and tell me what similarity gap would count as evidence of contamination."
+},
+{
+  id: "evals-leaderboard-access",
+  track: "evals", level: "applied",
+  title: "Leaderboards are shaped by who gets to submit how many times",
+  source: "Shivalika Singh and colleagues, The Leaderboard Illusion, arXiv 2504.20879, 2025",
+  idea: "Leaderboard position partly measures submission policy and access rather than model quality.",
+  why: "The paper documents three mechanisms on a major arena leaderboard: undisclosed private testing, where a provider evaluates many variants and only the best one is retained publicly; unequal sampling rates, where some providers' models receive far more comparison data than others; and asymmetric deprecation, where weak entries are quietly withdrawn. Best-of-N selection is the load-bearing one. If you submit N noisy variants and keep the maximum, the retained score is inflated by the expected maximum of N draws even when all the variants are identical, and the inflation grows with N.\n\nThe same mechanism runs inside your own organisation, at smaller scale and with nobody watching for it. If your team iterated against the shared eval twenty times during development and the other team ran it twice, your configuration is at the top by construction. The fixes are pre-registering which run counts, or publishing every run rather than the best one.",
+  failureMode: "Two teams' agent configurations are compared on the shared eval to settle which one ships. Yours has been tuned against that exact eval for six weeks; theirs was run once, the week before the review. You win the comparison, and what you have demonstrated is six weeks of tuning.",
+  experiment: "For every configuration on your internal leaderboard, count how many eval runs it has had, from the harness logs or CI history. Rank the configurations by run count and by best score, and put the two orderings side by side. If they largely match, your leaderboard is measuring attention. Then re-rank on each configuration's most recent run rather than its best and see what changes.",
+  reflection: "Does the leading configuration on your internal leaderboard still lead when you use its latest run instead of its best?",
+  recall: {
+    q: "Why does keeping only the best of N submissions inflate a leaderboard score even when every submission is equally good?",
+    a: "Because each run is a noisy draw and the maximum of N draws has a higher expectation than a single draw. The retained score contains the noise you selected for, and the inflation grows with N.\n\nThe defence is reporting all runs, or pre-registering which single run counts before it is executed.",
+  },
+  deepDive: "Here is my internal leaderboard with run counts per configuration; tell me how much of the ordering could be explained by unequal numbers of attempts."
+},
+{
+  id: "evals-golden-set-decay",
+  track: "evals", level: "applied",
+  title: "A golden set decays because the world it described moved",
+  source: "Joao Gama, Indre Zliobaite, Albert Bifet, Mykola Pechenizkiy and Abdelhamid Bouchachia, A Survey on Concept Drift Adaptation, ACM Computing Surveys 2014",
+  idea: "An eval set is a frozen sample of a moving distribution, so it needs a drift monitor and a refresh policy or it silently measures last year's product.",
+  why: "The survey separates change into sudden, incremental, gradual and recurring forms, and frames detection as monitoring a signal over a stream with an explicit change detector rather than noticing eventually. Applied to an eval set, the frozen sample stops representing production the moment the traffic mix moves: a new connector ships, a new tenant segment onboards, a new entry point in the UI changes how people phrase requests. The score can stay flat and high while its relationship to production quality quietly breaks.\n\nMonitor two things separately or you will not be able to tell them apart. Input drift is the distribution of production requests today against the distribution your eval set sampled: length, intent mix, connector mix, tenant type. Performance drift is measured on a stable reference stream you re-grade at fixed intervals, which holds the input constant so that a move means the system changed. Without the second, every drop in score has two explanations and no way to choose.",
+  failureMode: "The golden set was built in January from traffic that was heavily Snowflake lineage. By June, forty per cent of requests are dbt model questions and the eval set contains none. The eval reports ninety-one per cent all half while support tickets triple, and the eval is not wrong, it is answering a question about January.",
+  experiment: "In ClickHouse, bucket last week's agent requests by intent or by connector and compute each bucket's share. Do the same over the items in your golden set. Report the largest absolute difference in share between the two distributions. Any bucket over ten points is a category you are shipping and not testing. Put a monthly reminder on the same query.",
+  reflection: "Which production category is most under-represented in your eval set, and when did it start growing?",
+  recall: {
+    q: "Your eval score is flat and high while production complaints rise. What two distributions do you compare, and what does a stable reference stream add?",
+    a: "Compare the distribution of current production requests against the distribution your eval set sampled, bucketed by something meaningful like intent or connector. A large share gap is a category you ship and do not test.\n\nA stable reference stream that you re-grade at fixed intervals holds the input fixed, so a movement there means the system changed rather than the traffic. Without it, input drift and performance drift are confounded.",
+  },
+  deepDive: "Here is the intent mix of last week's production traffic and of my golden set; tell me which categories are under-represented and how many items I need to add to close the gap."
+}
+);

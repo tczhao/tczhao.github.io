@@ -1,0 +1,86 @@
+<title>Practicum - a daily logbook for management practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles.css">
+
+<a class="skip" href="#field">Skip to today's entry</a>
+
+<div class="logbook">
+  <aside class="spine">
+    <div class="spine__head">
+      <p class="eyebrow">Logbook</p>
+      <h1 class="wordmark">Practicum</h1>
+      <p class="spine__sub">A daily logbook for management practice</p>
+    </div>
+
+    <div class="stamp" id="stamp">
+      <span class="stamp__label">Entry</span>
+      <span class="stamp__num" id="stamp-num">—</span>
+      <span class="stamp__date" id="stamp-date"></span>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Sections">
+      <button class="nav__item" data-view="today" aria-current="page">
+        <span class="nav__key">Today</span>
+        <span class="nav__badge" id="badge-today" hidden></span>
+      </button>
+      <button class="nav__item" data-view="review">
+        <span class="nav__key">Review</span>
+        <span class="nav__badge" id="badge-review" hidden></span>
+      </button>
+      <button class="nav__item" data-view="library">
+        <span class="nav__key">Library</span>
+      </button>
+      <button class="nav__item" data-view="journal">
+        <span class="nav__key">Journal</span>
+      </button>
+      <button class="nav__item" data-view="progress">
+        <span class="nav__key">Progress</span>
+      </button>
+    </nav>
+
+    <dl class="gauge" id="gauge">
+      <div class="gauge__cell">
+        <dt>Streak</dt>
+        <dd id="gauge-streak">0</dd>
+      </div>
+      <div class="gauge__cell">
+        <dt>Logged</dt>
+        <dd id="gauge-logged">0</dd>
+      </div>
+      <div class="gauge__cell">
+        <dt>Retained</dt>
+        <dd id="gauge-retained">0</dd>
+      </div>
+    </dl>
+
+    <div class="spine__foot">
+      <button class="ghost" id="theme-toggle" aria-label="Switch colour theme">
+        <span id="theme-label">Lamplight</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="field" id="field" tabindex="-1">
+    <section class="view" id="view-today" aria-label="Today"></section>
+    <section class="view" id="view-review" aria-label="Review" hidden></section>
+    <section class="view" id="view-library" aria-label="Library" hidden></section>
+    <section class="view" id="view-journal" aria-label="Journal" hidden></section>
+    <section class="view" id="view-progress" aria-label="Progress" hidden></section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="content/01-leverage-and-time.js"></script>
+<script src="content/02-people-and-growth.js"></script>
+<script src="content/03-trust-and-safety.js"></script>
+<script src="content/04-decisions.js"></script>
+<script src="content/05-communication.js"></script>
+<script src="content/06-systems-and-org-design.js"></script>
+<script src="content/07-strategy-and-scope.js"></script>
+<script src="content/08-influence.js"></script>
+<script src="content/09-performance.js"></script>
+<script src="content/10-hiring-and-onboarding.js"></script>
+<script src="content/11-change-and-incidents.js"></script>
+<script src="content/12-self.js"></script>
+<script src="app.js"></script>

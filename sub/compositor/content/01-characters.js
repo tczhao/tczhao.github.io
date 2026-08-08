@@ -1,0 +1,363 @@
+/* Track: Characters and actions. Ordered foundational first. */
+(window.LESSONS = window.LESSONS || []).push(
+{
+  id: "characters-character-in-subject",
+  track: "characters", level: "sentence",
+  title: "Every sentence tells a story, so put the character in the subject and the action in the verb",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Take the longest sentence in your paragraph. Write down its grammatical subject and its main verb as a bare two-word pair. If that pair is not the actor and the action you meant, rewrite the sentence until it is.",
+  fallback: "Consideration of a phased cutover was given by the platform team after the discovery of a dependency between the ingestion workers and the legacy scheduler. The expectation is that completion of the migration will occur before the end of Q3, assuming the availability of review capacity from the data team.",
+  idea: "Put the main character of the sentence in the grammatical subject and the main action in the main verb.",
+  why: "Readers assign agency to whatever occupies the subject slot, whether or not you meant them to, and they hold that subject in working memory unattached until the verb tells them what it did. When the subject names the actor and the verb names the action, the reader resolves the clause at the earliest possible point and every remaining phrase has an obvious place to attach.\n\nThis is the move the rest of this track is made of. Nominalization, empty subjects, light verbs and agentless passives are all the same failure seen from different angles: the actor is somewhere other than the subject, or the action is somewhere other than the verb. Fix the alignment and most of them disappear without being addressed individually.",
+  failureMode: "\"Consideration of a phased cutover was given by the platform team.\" The subject is an abstraction, the verb is \"was given\", and the two things a reader wants - who, and what they did - are parked in a prepositional phrase and a noun. Six words of the sentence exist only to hold the structure together.",
+  experiment: "Take the three longest sentences from something you wrote this week. For each, write the grammatical subject and the main verb as a two-word pair, nothing else. Count how many pairs name a person, team or system doing something. Below three out of three is the day's work.",
+  reflection: "Which sentence resisted the rewrite, and was it because you did not know who the actor was, or because you did not want to name them?",
+  recall: {
+    q: "You are handed a sentence you find hard to follow. What two things do you locate first, and what do you check about each?",
+    a: "Locate the grammatical subject and the main verb. Check whether the subject names the main character of the sentence and whether the verb names the main action.\n\nAlmost all difficulty in professional prose is one or both of those slots being occupied by something else: an abstraction in the subject, a copula or a light verb in the verb."
+  },
+  deepDive: "Here is a paragraph from a design doc I am writing; for each sentence, tell me its subject and main verb as a pair, and name which sentences have the character and the action misaligned."
+},
+{
+  id: "characters-nominalization",
+  track: "characters", level: "sentence",
+  title: "Nominalization is where your verbs go to die",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Circle every noun in your paragraph ending in -tion, -ment, -ance, -ence, -ity or -al. Take the first one you circled and rewrite that sentence with the buried verb as the main verb.",
+  fallback: "The implementation of retry logic in the Snowflake connector resulted in a reduction of failed syncs, but the introduction of additional latency was an observation made during the rollout. Further investigation of that tradeoff is a requirement before the enablement of the change for the remaining tenants.",
+  idea: "A nominalization is a verb turned into a noun, so find it and turn it back into the verb of its clause.",
+  why: "A nominalization does not just relocate the action, it strips information. A verb obliges you to mark tense and aspect and, in practice, to supply a subject. The noun form makes all of that optional. \"We implemented retry logic\" says who and when; \"the implementation of retry logic\" says neither, and the writer never has to notice the omission.\n\nThe knock-on effect is that something has to fill the vacated verb slot, and the candidates are all empty: was, occurred, resulted in, took place. The reader arrives at the position where English delivers the action and finds a word that describes nothing, then has to reach forward into a noun phrase to recover it.",
+  failureMode: "\"The application of the new quota resulted in the suppression of retries.\" Two nominalizations and a verb phrase that names no event anybody performed. The sentence is eleven words and contains no people, no tense that means anything, and one actual action.",
+  experiment: "Search a doc you wrote for \"-tion\". Take the five sentences with the most hits and rewrite each so an actor is the subject and the buried verb is the verb. Record the word count before and after. A genuine fix usually cuts 20 to 30 per cent; if a rewrite gets longer, you probably kept the nominalization and added an actor in front of it.",
+  reflection: "In the sentences you rewrote, did the actor you had to supply turn out to be you, your team, or someone you had been avoiding naming?",
+  recall: {
+    q: "What grammatical information does a verb carry obligatorily that a nominalization makes optional?",
+    a: "Tense, aspect, and in practice the actor. A finite verb forces you to say when it happened and requires a subject; the noun form lets you omit both.\n\nThat is why nominalizing loses information rather than merely changing style, and why writers reach for it when they do not want to commit to who or when."
+  },
+  deepDive: "Take this paragraph, list every nominalization in it, and for each one tell me the buried verb and who the missing actor most likely is."
+},
+{
+  id: "characters-subject-column",
+  track: "characters", level: "paragraph",
+  title: "Read only your subjects, in a column, and you will see who the paragraph is about",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Write the grammatical subject of each sentence in your paragraph on its own line, in order, nothing else. Read the column top to bottom, then mark every line that is a different character from the line above it.",
+  fallback: "The migration was scheduled for the second week of March. Capacity headroom on the shared cluster turned out to be the real constraint. There was also concern from the data team about overlapping backfill windows. A decision to split the cutover into two waves was eventually reached in the architecture forum.",
+  idea: "List the grammatical subjects of consecutive sentences in a column; that column is the paragraph's cast list, and a column with no repeat character is a paragraph with no subject.",
+  why: "Readers build a model of a passage by attaching each new sentence to a topic they are already holding, and the subject slot is where they look for that topic. Change the occupant every sentence and the reader restarts the model four times in four sentences, which is felt as difficulty long before it is identified as a structural problem.\n\nThe reason to do this as a column rather than by reading is that it removes judgement from the diagnosis. You are not asking whether the paragraph flows. You are looking at a list and counting repeats, which you can do on your own prose at 5pm without any taste at all.",
+  failureMode: "The column reads: the migration, capacity headroom, there, a decision. Four sentences, four unrelated occupants, one of them a placeholder. Every sentence is defensible on its own and the paragraph is about nothing in particular.",
+  experiment: "Do the column on the last three paragraphs of a doc you wrote. Count distinct subjects per paragraph. Any paragraph of four or more sentences with four different subjects gets rewritten so that at least three of them share a character, and note whether the rewrite forced you to drop a sentence that did not belong.",
+  reflection: "When you forced a consistent subject, did any sentence refuse to fit, and was that sentence actually about something else?",
+  recall: {
+    q: "Why run the subject list as a column rather than just rereading the paragraph?",
+    a: "Because it converts a judgement call into a counting task. Reading tells you the paragraph feels choppy; the column tells you it has four subjects in four sentences.\n\nThe diagnostic also survives your own familiarity with the draft, which ordinary rereading does not."
+  },
+  deepDive: "Take these three paragraphs and give me the subject of every sentence as a plain column per paragraph, then tell me which paragraph has no consistent character."
+},
+{
+  id: "characters-expletive-openings",
+  track: "characters", level: "sentence",
+  title: "\"There is\" and \"it is\" announce that a character has gone missing",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Search your paragraph for \"there is\", \"there are\", \"there was\" and \"it is\". Rewrite each hit so the sentence opens with whoever or whatever is doing something, then count the words you saved.",
+  fallback: "There is a need for clearer ownership of the alerting rules that the on-call rotation currently inherits. It is also the case that there are several dashboards in the reliability folder with no named maintainer. There was agreement in last week's review that this should be addressed before the next planning cycle.",
+  idea: "An expletive opening fills the subject slot with a placeholder, so name the actor instead.",
+  why: "The \"there\" and \"it\" in these constructions are grammatical filler with no referent. They occupy the position the reader reads as the topic and hand over nothing, so the reader has to carry the entire clause unresolved until the real noun arrives after the verb. Naming the actor puts something in that slot and, as a side effect, usually deletes three or four words that existed only to hold the placeholder up.\n\nThe construction is not always wrong. Expletives exist to assert existence, and \"There are three ways to bound the blast radius\" is doing real work introducing a list. The test is whether you are genuinely announcing that something exists, or postponing the moment you name who is responsible.",
+  failureMode: "\"There is a need for the team to complete an assessment of the failure modes.\" Nine words before an actor appears, a nominalization where the action should be, and a \"need\" that nobody owns. \"The team must assess the failure modes\" is seven words and says who.",
+  experiment: "Grep a doc you wrote for \"there is\", \"there are\", \"there was\" and \"it is\". Rewrite every hit with a real subject, then count how many you put back because you were genuinely introducing something new. In engineering prose it is usually under a fifth.",
+  reflection: "Of the expletives you removed, how many were hiding a requirement with no owner?",
+  recall: {
+    q: "When is \"There is\" the right opening rather than a symptom?",
+    a: "When you are genuinely asserting that something exists or introducing an item the reader has not met, particularly ahead of a list: \"There are three ways to bound the blast radius.\"\n\nEverywhere else it is a placeholder standing in the position where the reader is looking for the actor."
+  },
+  deepDive: "Find every expletive construction in this draft, rewrite one of them for me as a demonstration, and tell me which ones you think are legitimate."
+},
+{
+  id: "characters-be-in-disguise",
+  track: "characters", level: "sentence",
+  title: "\"Was\" is often a real verb wearing a disguise",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Underline every form of \"be\" used as a main verb in your paragraph: is, are, was, were, been. For each one, find the noun or prepositional phrase nearby that holds the real action, and rewrite one sentence with that action promoted to the verb.",
+  fallback: "The root cause was a mismatch between the connector's retry budget and the upstream rate limit. Our response was the addition of jittered backoff, and the effect on p99 latency was minimal. The team's assumption is that this is sufficient cover until the rate limiter itself is replaced next quarter.",
+  idea: "When the main verb is a form of \"be\", the real action is usually sitting in a nearby noun or prepositional phrase and should be promoted into the verb slot.",
+  why: "A copula asserts identity or state. That is a legitimate thing to assert, and \"the root cause was a mismatch\" is a fine sentence because identity is genuinely the claim. But when something actually happened, the copula tells the reader \"X equals Y\" at the exact point where they are parsing for an event, and they then have to unpack Y to find out what occurred.\n\nThe promotion is nearly always available and nearly always shortens. \"Our response was the addition of jittered backoff\" becomes \"We added jittered backoff\": four words shorter, and it names who responded, which the original never did.",
+  failureMode: "\"Our response was the addition of jittered backoff, and the effect on p99 latency was minimal.\" Two copulas, two events described as nouns, and no agent in either clause. Nothing in the sentence happens; two things merely are.",
+  experiment: "Count the forms of \"be\" used as main verbs on one page you wrote, and divide by the sentence count. Above roughly one per sentence, go through and convert every instance where something is actually happening, leaving the ones that genuinely assert identity or state. Recount and write down both ratios.",
+  reflection: "How many of your copulas turned out to be asserting identity, and how many were hiding an event?",
+  recall: {
+    q: "A copula is not automatically a fault. What distinguishes the ones worth keeping?",
+    a: "Keep it when identity or state is genuinely the claim: \"The root cause was a schema mismatch.\" Nothing is happening there and no promotion is available.\n\nReplace it when an event is being described as a noun, which the neighbouring noun phrase or \"of\" phrase will reveal: \"our response was the addition of\" is \"we added\"."
+  },
+  deepDive: "Go through this draft, list every copula used as a main verb, and separate the ones asserting identity from the ones hiding an event."
+},
+{
+  id: "characters-light-verbs",
+  track: "characters", level: "sentence",
+  title: "\"Conduct\", \"perform\", \"provide\" and \"make\" are verbs with the meaning taken out",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Search your paragraph for conduct, perform, provide, make, give, take and undertake. For each hit, look at the noun immediately following it and rewrite the sentence with that noun as the verb.",
+  fallback: "The SRE group will conduct a review of the escalation policy and provide recommendations to the platform leads by Friday. We also intend to perform an analysis of paging volume by service and make a determination about whether the current thresholds are doing any useful work.",
+  idea: "A light verb hands the real action to the noun that follows it, so turn that noun back into the verb of the clause.",
+  why: "\"Conduct a review\" is one action split across a meaningless verb and a nominalized object. The reader parses the verb, gets nothing, and has to read on into the object to find out what happened. That is a small cost per instance and a large one at density, because it happens at the precise position where the reader is trying to close the clause.\n\nThe structural damage is worse than the delay. \"Review the escalation policy\" attaches the thing reviewed directly to the verb. \"Conduct a review of the escalation policy\" has to reattach it with \"of\", because the object slot is already occupied by the nominalization. Every light verb construction generates at least one extra preposition, and prepositions are where sentences go to sprawl.",
+  failureMode: "\"Make a determination about whether the thresholds are useful.\" The verb is \"decide\", and the sentence has spent four words avoiding it. These forms survive because they sound institutional, and institutional is the register people default to when they are not certain they are allowed to simply say the thing.",
+  experiment: "Grep your last design doc for \"conduct\", \"perform\", \"provide\", \"undertake\" and \"make a\". Rewrite each hit as a single verb and record the words saved. Under ten hits a page is normal noise; over twenty means the whole document is written in a register, not that you wrote a few sloppy sentences.",
+  reflection: "Did the light verbs cluster in the sections written for a particular audience, and if so, which one?",
+  recall: {
+    q: "Beyond delaying the action, what structural cost does a light verb impose on the rest of the sentence?",
+    a: "It occupies the object slot with a nominalization, so the real object has to be reattached with a preposition, usually \"of\".\n\n\"Review the policy\" becomes \"conduct a review of the policy\", and every added preposition is another attachment the reader has to resolve and another place the sentence can grow."
+  },
+  deepDive: "Find every light verb construction in this document, rewrite the worst one as a demonstration, and tell me whether the density suggests a sentence problem or a register problem."
+},
+{
+  id: "characters-verb-adjectives",
+  track: "characters", level: "sentence",
+  title: "\"Dependent\", \"indicative\" and \"reflective\" are verbs pretending to be adjectives",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find every adjective in your paragraph followed by \"of\", \"on\" or \"with\". Rewrite the first one you find as a verb, and note whether the sentence lost anything.",
+  fallback: "The rollout schedule is dependent on completion of the schema backfill, and the current error rate is indicative of a problem in the deduplication step rather than the connector. The team is supportive of a pause, but is doubtful that a pause is achievable without a customer-facing announcement.",
+  idea: "Adjectives derived from verbs conceal actions exactly as nominalizations do, so revert them to the verb.",
+  why: "\"Is dependent on\" is \"depends on\". \"Is indicative of\" is \"indicates\". \"Is reflective of\" is \"reflects\". Each form takes a perfectly good verb, adjectivises it, and then requires a copula in front and a preposition behind to hold the wreckage together. The reader gets a copula where the action should be and has to assemble a meaning from three words that one word carried.\n\nThe reason this is worth naming separately from nominalization is that the pattern is invisible if you are only scanning for nouns ending in -tion. It hides in the adjective, and the search string that finds it is \" is \" followed by a word ending in -ent, -ive or -ant.",
+  failureMode: "\"The current error rate is indicative of a problem in the deduplication step.\" Eleven words, no action, and a copula holding the verb slot. \"The error rate points to the deduplication step\" is eight words and moves.",
+  experiment: "Search a folder of your docs for \"is dependent\", \"is indicative\", \"is reflective\", \"is supportive\", \"is applicable\" and \"is representative\". Rewrite each as its verb and check the word count. Every one of them should shorten; if one does not, you have found the rare case where the adjective is doing work the verb cannot.",
+  reflection: "Which of these did you write on purpose to soften a claim, and did the verb form actually make the claim stronger than you meant?",
+  recall: {
+    q: "Why does scanning for nominalizations miss this pattern, and what do you search for instead?",
+    a: "Because the buried verb has become an adjective, not a noun, so the -tion and -ment endings do not catch it.\n\nSearch for a form of \"be\" followed by a word ending in -ent, -ive or -ant and then a preposition: is dependent on, is indicative of, is reflective of."
+  },
+  deepDive: "Scan this draft for verbs hiding as adjectives, list them with their verb forms, and tell me if any of them are load-bearing as written."
+},
+{
+  id: "characters-actor-in-of-by",
+  track: "characters", level: "sentence",
+  title: "The character is usually hiding in a prepositional phrase, wearing \"of\" or \"by\"",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "For every sentence in your paragraph with an abstract subject, scan forward to the first \"of\" or \"by\" phrase and underline the noun inside it. Rewrite one of those sentences with that noun as the subject.",
+  fallback: "The prioritisation of reliability work over feature delivery by the platform group has led to a slowdown in the shipping cadence of two product teams. A reassessment of that tradeoff by the leadership group is expected during the next planning cycle, following collection of the relevant delivery metrics by the programme office.",
+  idea: "When the subject is abstract, the human actor is nearly always downstream in an \"of\" or \"by\" phrase, and it belongs at the front.",
+  why: "Nominalizing a verb strips the actor from the verb, but writers rarely delete the actor outright. They demote it into a modifier, because the sentence still has to say who and there is nowhere else to put it. The actor is therefore still on the page, sitting in a position the reader does not read as agentive, which is why the sentence feels ownerless even though the owner is named in it.\n\nThat makes the fix a move operation rather than an act of invention. \"of\" and \"by\" are where English parks the arguments a verb would otherwise take directly: \"the prioritisation of X by Y\" is \"Y prioritised X\" with both arguments relegated. Once you know to look there, most abstract-subject sentences repair themselves in one pass.",
+  failureMode: "\"The prioritisation of reliability work over feature delivery by the platform group has led to a slowdown.\" Sixteen words before the verb, an abstraction in the subject, and the actual actor sitting in a \"by\" phrase two-thirds of the way through where nobody reads for agency.",
+  experiment: "Take a paragraph of yours with abstract subjects. For each sentence, write down the first noun appearing after \"of\" or \"by\". Mark how many of those nouns are the real actor. If it is most of them, you have a mechanical fix in front of you rather than a thinking problem.",
+  reflection: "Once you promoted the actors, did any sentence turn out to have no actor anywhere in it, and what did you do about that one?",
+  recall: {
+    q: "You have a sentence with an abstract subject and you want the actor. Where do you look first, and why is it usually there?",
+    a: "In the first \"of\" or \"by\" phrase after the subject. Nominalization removes the actor from the verb but the writer still has to say who, so the actor gets demoted into a prepositional modifier rather than deleted.\n\nThat means recovering it is moving a noun already on the page, not inventing one."
+  },
+  deepDive: "For each abstract-subject sentence in this draft, tell me which noun in an \"of\" or \"by\" phrase is the real actor, and flag the sentences where there is none."
+},
+{
+  id: "characters-nominalization-chains",
+  track: "characters", level: "sentence",
+  title: "Stacked \"-tion of -tion of\" chains are the compound form of the disease",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find the longest run of \"X of Y of Z\" in your paragraph. Decide which of those nouns holds the real action, and rewrite the run as a clause with that noun as its verb.",
+  fallback: "The delay in the completion of the validation of the migration scripts was a consequence of the reallocation of two engineers to the payments incident. The expectation of a resolution of the remaining backlog by the end of the sprint is no longer realistic given the reduction in available review capacity.",
+  idea: "Two or three nominalizations linked by \"of\" collapse into a single clear clause once you decide which of them is the real action.",
+  why: "\"of\" is the most semantically empty preposition in English. It can encode possession, agency, patient, composition, membership or partitivity, and nothing in the phrase says which. Each \"of\" in a chain is therefore a relationship the reader has to guess, and three of them in a row require three guesses before the verb arrives to confirm or overturn any of them.\n\nThe chain persists precisely because the fix requires a decision. \"The completion of the validation of the migration scripts\" contains three candidate actions and the writer never chose one. The stacked form preserves that indecision perfectly, which is why it feels safe to write and impossible to read.",
+  failureMode: "\"The delay in the completion of the validation of the migration scripts was a consequence of the reallocation of two engineers.\" Five nominalizations, five \"of\" or \"in\" links, one copula, and a reader who now has to work out that two engineers moved and validation stopped.",
+  experiment: "Grep your last doc for \" of \" and pull out every sentence containing three or more. Rewrite each one. Note which sentence you could not fix without going back and deciding what you actually meant; that is where your thinking was unfinished, not your prose.",
+  reflection: "Which chain did you have to resolve by making a decision you had been deferring, and what was the decision?",
+  recall: {
+    q: "Why is a chain of nominalizations harder on a reader than the same number of nominalizations spread across separate sentences?",
+    a: "Because \"of\" encodes no specific relationship, so each link is an inference the reader must make and hold. Three links means three unresolved guesses stacked before the verb arrives.\n\nSpread across sentences, each nominalization gets its own verb to disambiguate it."
+  },
+  deepDive: "Find every nominalization chain of three or more in this document and tell me, for each, which noun should have been the verb."
+},
+{
+  id: "characters-noun-strings",
+  track: "characters", level: "sentence",
+  title: "Four nouns in a row is a sentence somebody declined to write",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find the longest run of consecutive nouns in your paragraph. Say out loud what relates each noun to the next, then rewrite the run with those relationships written down as prepositions and a verb.",
+  fallback: "The tenant workflow execution history retention policy change was reviewed at the architecture forum on Tuesday. Ownership of the customer data platform ingestion pipeline failure notification path remains unassigned, and the connector deprecation communication timeline draft is still with the product marketing team.",
+  idea: "Unpack a long noun string into a clause with a verb and prepositions, because the string compresses relationships the reader is then made to guess.",
+  why: "English noun compounding is left-branching and completely unmarked. Nothing inside \"tenant workflow execution history retention policy\" tells the reader which nouns modify which, so they try groupings until one coheres. With six nouns the number of plausible bracketings runs into the dozens, and the reader is doing that search while also holding the rest of the sentence.\n\nThe string is also a knowledge test. Anyone already inside the system parses it instantly, because they know the referent and are matching rather than parsing. That makes it excellent shorthand between four people and a wall for the fifth, which is usually the person the document was written for.",
+  failureMode: "\"Ownership of the customer data platform ingestion pipeline failure notification path remains unassigned.\" Eight nouns before the verb. Is it the failure notification path of the ingestion pipeline, or the notification path for ingestion pipeline failures? The two are owned by different teams and the sentence does not say.",
+  experiment: "Search a doc you wrote for any run of four or more nouns with no preposition between them. Expand each with prepositions and a verb, then keep the compressed form only where you can name the specific audience that already parses it. Count how many survive that test.",
+  reflection: "Which noun string turned out to be ambiguous once you tried to expand it, and did you have to ask someone which reading was right?",
+  recall: {
+    q: "What is the specific cost a long noun string imposes, and why does it feel free to the writer?",
+    a: "The cost is modifier attachment: nothing marks which nouns modify which, so the reader searches through possible bracketings. It feels free to the writer because they already know the referent and are recognising the string rather than parsing it.\n\nThe string is a fine shorthand inside the team that coined it and unreadable one desk over."
+  },
+  deepDive: "Pull out every noun string of four or more from this doc, expand each one with prepositions, and tell me which expansions were ambiguous."
+},
+{
+  id: "characters-zombie-density",
+  track: "characters", level: "paragraph",
+  title: "Zombie nouns travel in packs, so measure density rather than instances",
+  source: "Helen Sword, \"Zombie Nouns\" (The New York Times, 2012)",
+  gatePrompt: "Highlight every abstract noun in your paragraph, meaning anything you cannot point at or picture. Count them, count the total words, and write the percentage at the top of the paragraph.",
+  fallback: "Alignment on the operational readiness criteria remains an area of ambiguity, and the absence of clear accountability has contributed to variability in the quality of handover documentation. Improvement in this area will require a commitment to consistency in the application of the standard across all teams, alongside greater visibility into adherence at the service level.",
+  idea: "Measure abstract-noun density across a whole paragraph, because one nominalization is a sentence problem and a cluster is a register problem.",
+  why: "Sword's argument is that these nouns cannibalise: they consume the verbs and adjectives around them and then consume the human beings, until the passage describes states of affairs with nobody in them. A single abstract noun in an otherwise concrete paragraph is usually a term of art doing its job. A paragraph that is mostly abstract nouns gives the reader nothing to picture, so they process it as tone rather than content and come away with an impression instead of information.\n\nDensity is the right instrument because instances are arguable and counts are not. You can defend any one of \"alignment\", \"ambiguity\", \"accountability\" and \"variability\" on its own terms. You cannot defend four of them in twenty-eight words.",
+  failureMode: "\"Alignment on the operational readiness criteria remains an area of ambiguity, and the absence of clear accountability has contributed to variability in the quality of handover documentation.\" Twenty-seven words, no people, no events, and nothing a reader could act on tomorrow morning.",
+  experiment: "Take a page you wrote and highlight every noun ending in -tion, -ment, -ity, -ness, -ance or -ency. Work out the percentage of total words. Under about 5 per cent still reads as prose; past 10 per cent it reads as policy. Then run the same count on a page you actually enjoyed reading, because the comparison is the real instrument and the thresholds are only a rough guide.",
+  reflection: "Was the densest paragraph in your doc the one where you had the least to say, or the one where you were least willing to say it?",
+  recall: {
+    q: "Why is counting abstract nouns per hundred words more useful than flagging individual nominalizations?",
+    a: "Because individual nominalizations are often correct: a field term, a back-reference, the object of a verb of knowing. Each one can be defended in isolation and the argument goes nowhere.\n\nDensity is not arguable in the same way. A paragraph that is 12 per cent abstract nouns has lost its characters regardless of whether each noun survives on its own."
+  },
+  deepDive: "Compute the abstract-noun density of each paragraph in this document and tell me which one has lost its characters entirely."
+},
+{
+  id: "characters-abstraction-as-character",
+  track: "characters", level: "sentence",
+  title: "An abstraction can be your character, as long as it is the same abstraction every time",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "If your paragraph's subjects are abstract, write them in a column and mark every place you used a different word or phrase for the same underlying idea. Pick one wording and apply it to all of them.",
+  fallback: "Retention policy is the real constraint here. The rules governing how long we keep execution history were written before the multi-tenant split, and this data lifecycle question now touches three services. What we keep and for how long has never had a named owner, and the storage retention approach still differs per cluster.",
+  idea: "An abstract subject works when the abstraction is genuinely what the passage is about and you name it with the same words every time.",
+  why: "Williams does not ban abstract subjects, and a track that taught otherwise would be useless for design docs, where the topic really is a policy or a system rather than a team. The condition is consistency. The reader is tracking a topic across sentences, and a stable noun phrase in subject position is the thing that makes it trackable.\n\nSynonym variation breaks that outright. When \"retention policy\" becomes \"this data lifecycle question\" and then \"the storage retention approach\", the reader has to decide whether a new entity has entered the passage. They usually decide it has, because that is what a new noun phrase normally signals, and from then on they are tracking three things instead of one.",
+  failureMode: "Four sentences, one topic, four names for it: retention policy, the rules governing how long we keep execution history, what we keep and for how long, the storage retention approach. Each rewording was an attempt to avoid repetition and each one cost the reader a decision about whether the subject had changed.",
+  experiment: "Pick a doc whose topic is genuinely a system or a policy rather than a team. List the subject of every sentence and count how many distinct noun phrases refer to the same one thing. Collapse them to a single wording, then check whether the doc got shorter as well as clearer.",
+  reflection: "Where you varied the wording, were you avoiding repetition or hedging because you were not sure the two phrases meant the same thing?",
+  recall: {
+    q: "Williams does not ban abstract subjects. What is the condition under which they work?",
+    a: "The abstraction has to be what the passage is genuinely about, and it has to be named with the same noun phrase every time it appears in subject position.\n\nConsistency is what lets the reader track it as a character. Elegant variation destroys the tracking, because a new noun phrase signals a new entity."
+  },
+  deepDive: "This doc is about a system rather than a team; list every noun phrase I used for the main topic and tell me which single wording I should standardise on."
+},
+{
+  id: "characters-keep-the-nominalization",
+  track: "characters", level: "sentence",
+  title: "Some nominalizations are the right word, and Williams tells you which",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find one nominalization in your paragraph you should keep. Write a single sentence saying which of the three reasons applies: back-reference, established field term, or object of a verb of knowing.",
+  fallback: "We throttled the connector and we rewrote the deduplication step. Because we did both of those, syncs stopped failing overnight. The review will look at whether we ought to have throttled first. Nobody has worked out yet how much it would cost if we moved off the legacy scheduler, and that not being worked out is what is blocking the plan.",
+  idea: "Keep a nominalization when it refers back to a previous sentence, names a concept your field already owns, or serves as the object of a verb of knowing.",
+  why: "A nominalization can package an entire previous clause into a single noun phrase that fits in subject position, and that is the only mechanism English offers for making an event the topic of the next sentence. \"Both changes cut the failure rate\" works; \"because we did both of those\" is the same idea with the packaging refused and four words spent on deixis instead.\n\nThe other two cases are simpler. Field terms are nouns because the field agreed to treat them as things: backpressure, eventual consistency, amortisation. Unpacking them into verbs makes you sound like you do not know the vocabulary. And verbs of knowing take nominal objects naturally, so \"nobody understands the failure\" is not improved by any transformation available to you.",
+  failureMode: "\"That not being worked out is what is blocking the plan.\" Someone has learned the rule and applied it past the point where it helps. \"The missing estimate is what is blocking the plan\" uses the nominalization the sentence was crying out for.",
+  experiment: "Go back to a doc you already de-nominalised. Find every sentence that opens by pointing at what you just said. If any of them uses \"because of this\", \"as a result of that\" or \"doing so\", replace it with a specific summarising noun and decide which version you would rather read.",
+  reflection: "Did the summarising noun you chose force you to name what the previous sentences added up to, and was that harder than expected?",
+  recall: {
+    q: "Name the three cases where a nominalization is the right word.",
+    a: "One, it packages a previous clause so an event can be the topic of the next sentence: \"Both changes cut the failure rate.\" Two, it is an established term the field already owns: backpressure, eventual consistency.\n\nThree, it is the object of a verb of knowing or explaining: \"nobody understands the failure\", \"the doc explains the tradeoff\"."
+  },
+  deepDive: "I over-corrected this draft by removing nominalizations; find the places where one should go back in and tell me which of the three reasons applies to each."
+},
+{
+  id: "characters-long-subjects",
+  track: "characters", level: "sentence",
+  title: "A subject that runs past eight words makes the reader hold their breath",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "For each sentence in your paragraph, count the words before the main verb and write the number in the margin. Circle every count above eight and rewrite the worst one so the verb arrives early.",
+  fallback: "The decision by the platform team to defer the multi-region failover work until after the connector migration completes, which was communicated at last week's architecture review, has consequences for the recovery commitments we made to two enterprise accounts. Any change to the sequencing of those two workstreams that would bring the failover forward requires sign-off from both leads.",
+  idea: "Keep the grammatical subject short and get the reader to the main verb early.",
+  why: "A reader cannot begin interpreting a clause until the verb arrives, because the verb determines what roles the preceding material plays. Everything before it is held in working memory unattached and unassigned. A twenty-eight word subject is twenty-eight words of held material, and the cost is paid before any of it becomes meaningful.\n\nThis is also why an interruption between subject and verb hurts more than a merely long subject. \"The decision, which was communicated at last week's architecture review, has consequences\" splits the exact pair the reader is waiting to join, and forces them to keep the subject live through a whole relative clause that is not about the same thing.",
+  failureMode: "\"The decision by the platform team to defer the multi-region failover work until after the connector migration completes, which was communicated at last week's architecture review, has consequences for the recovery commitments.\" Twenty-nine words before \"has\". By the time the verb lands the reader has forgotten which noun it belongs to.",
+  experiment: "Take one page you wrote. For every sentence, count the words before the main verb and write the counts in a column. Rewrite anything over eight; anything over fifteen probably needs to become two sentences. Recount afterwards and compare the two columns.",
+  reflection: "In the sentences you split, was the material you moved out of the subject actually a second claim you had smuggled in?",
+  recall: {
+    q: "Why is a long subject costly in a way that an equally long object is not?",
+    a: "The reader cannot assign roles to any material until the verb arrives, so everything before the verb is held unattached in working memory. After the verb, each new phrase attaches as it arrives.\n\nThe same twenty words cost far more in front of the verb than behind it, and an interruption between subject and verb costs more still."
+  },
+  deepDive: "Count the words before the main verb in every sentence of this draft, list the ones over eight, and show me how you would split the worst one."
+},
+{
+  id: "characters-choosing-the-character",
+  track: "characters", level: "sentence",
+  title: "When a sentence has two candidate characters, the one you choose is the story",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find one sentence in your paragraph with more than one possible actor. Write both versions with the subjects swapped, then mark the one you would be comfortable reading aloud to the person named in it.",
+  fallback: "The on-call engineer missed the failover step during the first thirty minutes of the incident. The runbook had not been updated since the multi-region change, and gaps in review coverage allowed it to go stale. Customers experienced degraded search for ninety minutes before the correct procedure was found.",
+  idea: "Deciding which of several possible characters occupies the subject is a claim about responsibility, so make it on purpose.",
+  why: "Readers attribute causal responsibility to the grammatical subject even when the sentence makes no explicit causal claim. \"The engineer missed the failover step\" and \"the runbook did not cover the failover path\" can describe the same thirty minutes and land completely differently on the person who was on call, because subjecthood carries agency whether or not the writer intended it.\n\nThe tell is inconsistency inside a single paragraph. Human subjects for the failures you are willing to attribute, abstract or agentless subjects for the ones you are not. That pattern is legible to every reader who was involved, and it is the reason a technically blameless write-up can still read as an accusation.",
+  failureMode: "One paragraph, three subject choices: \"the on-call engineer missed\", \"gaps in review coverage allowed\", \"customers experienced\". A person is named for the failure inside the incident and nobody is named for the failure that set it up. Nothing in the paragraph is false and the allocation of blame is complete.",
+  experiment: "Take an incident write-up you wrote. List the subject of every sentence in the contributing-factors section and mark each one as person, team, system or abstraction. If people appear only in the sentences about mistakes, you have written a blame document with a blameless header.",
+  reflection: "Which subject choice would you defend in front of the person it names, and which one would you quietly change first?",
+  recall: {
+    q: "Two sentences describe the same event with different subjects. What is the reader taking from the choice?",
+    a: "Causal responsibility. Readers attribute agency to the grammatical subject regardless of whether the sentence asserts causation.\n\nThe diagnostic is consistency across a paragraph: if human subjects appear only where you were willing to attribute fault, and systems or abstractions elsewhere, the allocation is visible to everyone who was there."
+  },
+  deepDive: "Classify the subject of every sentence in the contributing-factors section of this write-up as person, team, system or abstraction, and tell me what the pattern says about who I blamed."
+},
+{
+  id: "characters-agentless-passive",
+  track: "characters", level: "sentence",
+  title: "An agentless passive is a decision about who disappears",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Find every passive in your paragraph. For each one with no \"by\" phrase, write the missing actor in the margin, and mark the ones where you could not say who it was.",
+  fallback: "The retention setting was changed in production without a corresponding update to the runbook. The change was not reviewed, and the alert that would have caught it had been disabled some months earlier. It has since been re-enabled, and the policy is being revisited ahead of the next audit.",
+  idea: "Every agentless passive removes an actor from the sentence, so ask each time whether the removal serves the reader or only the writer.",
+  why: "The passive itself is a legitimate construction that promotes the thing acted on into subject position, and the next four entries are about when that is the right call. Dropping the \"by\" phrase is a separate and optional move, and it is the one that loses information. The sentence stays grammatical and readable; what the reader loses is the ability to audit it.\n\nIn incident and review prose that loss is the whole point of the document. A reader following a causal chain needs each link to name who or what acted, and an agentless passive breaks the chain while leaving the sentence looking complete. That is why it survives review: nothing about it looks wrong.",
+  failureMode: "\"The alert that would have caught it had been disabled some months earlier.\" By whom, and did they know what it protected? The sentence is grammatically complete, stylistically unobjectionable and forensically useless.",
+  experiment: "Take an incident review you wrote. Find every agentless passive and write the missing actor above it. Count the ones where you genuinely do not know who acted. Those are gaps in the investigation rather than gaps in the prose, and they belong in the follow-up list.",
+  reflection: "Of the actors you supplied in the margin, how many were you, your team, or someone whose name you did not want in the document?",
+  recall: {
+    q: "What exactly is lost in an agentless passive, and what is not?",
+    a: "The actor is lost. Nothing else is: the passive still names the action and the thing acted on, and it still puts the topic in subject position where the reader wants it.\n\nThe problem is the deleted \"by\" phrase, which is optional and entirely separable from the choice of voice. Blaming the passive for it misdiagnoses the fault."
+  },
+  deepDive: "Find every agentless passive in this incident review and tell me, for each, whether the missing actor is recoverable from the rest of the document."
+},
+{
+  id: "characters-passive-misdiagnosis",
+  track: "characters", level: "sentence",
+  title: "Most of the sentences people call passive are not passive",
+  source: "Geoffrey K. Pullum, \"Fear and Loathing of the English Passive\" (Language and Communication, 2014)",
+  gatePrompt: "Find every sentence in your paragraph you would have called passive. Apply the two-part test to each: a form of \"be\" or \"get\" plus a past participle, with the subject as the thing acted on. Cross out the ones that fail.",
+  fallback: "Nit on the design doc: there is too much passive voice throughout. \"There are three services affected\" should be active. \"The system is dependent on the scheduler\" is passive too, and so is \"the migration is complete\". Can you do a pass and make these all active before it goes to the wider group?",
+  idea: "Verify a passive before you flag one: it needs an auxiliary plus a past participle, with the subject corresponding to the object of the active version.",
+  why: "Pullum's paper documents that the advice literature, Strunk and White included, routinely misidentifies its own examples, and that the label has drifted to mean roughly \"prose I find flat\". That drift matters to you specifically because you review other people's writing. A reviewer whose diagnoses do not hold up loses the authority of the correct advice sitting next to the wrong one.\n\nThe three usual false positives are copula plus adjective (\"the migration is complete\"), verb-derived adjectives (\"is dependent on\"), and existential clauses (\"there are three services affected\"). Each one has a real fault available to name: no character in the subject, a verb hiding in an adjective, a placeholder where the actor should be. Those names are more useful than \"passive\" and they are also true.",
+  failureMode: "A review comment flagging \"the migration is complete\" as passive. It is a copula and an adjective, there is no participle and no demoted agent, and the author now has to choose between a wrong instruction and a disagreement with their reviewer.",
+  experiment: "Pull up the last five review comments you wrote about voice. Apply the two-part test to every sentence you flagged and count how many were genuinely passive. Rewrite the comments that were wrong so they name what you actually objected to, which is usually a missing character or a copula in the verb slot.",
+  reflection: "When you named the real fault instead of saying \"passive\", did the comment get more specific or did you discover you had no objection at all?",
+  recall: {
+    q: "What are the two conditions a clause must meet to be passive in English?",
+    a: "It has an auxiliary, normally a form of \"be\" or \"get\", followed by the past participle of a transitive verb. And its subject corresponds to the object of the active version.\n\nCopulas with adjectives, existential \"there\" clauses and adjectival participles fail one or both, which is why so much of what gets flagged as passive is not."
+  },
+  deepDive: "Here are review comments I wrote about passive voice; check each flagged sentence against the two-part test and tell me which flags were wrong and what I should have said instead."
+},
+{
+  id: "characters-passive-topic",
+  track: "characters", level: "sentence",
+  title: "Passive is correct when the receiver of the action is what the sentence is about",
+  source: "Geoffrey K. Pullum, \"Fear and Loathing of the English Passive\" (Language and Communication, 2014)",
+  gatePrompt: "Find a sentence in your paragraph where the thing acted on is what you are actually writing about. Write it both ways, then read the whole paragraph twice and keep the version whose subject matches the paragraph's topic.",
+  fallback: "We provisioned the new ingestion cluster in March. The capacity planning team sized it for double the current peak. A misconfigured node pool starved it of memory during the first week. The SRE on-call eventually rebuilt it with the correct instance type, and the platform team now owns it.",
+  idea: "When the thing acted on is your topic, the passive puts it in the subject slot where the reader is already looking for the topic.",
+  why: "Subject position is topic position in English. If a paragraph is about the ingestion cluster, then writing every sentence in the active voice moves the cluster into the object slot each time and installs a different actor as the apparent topic, so the reader re-establishes what the paragraph is about four times over.\n\nThe passive is the grammatical device English provides for exactly this problem. It changes which participant is the subject without changing who did what. Refusing it on principle means accepting a scattered topic in every paragraph whose subject matter is a thing rather than a team, which in infrastructure writing is most of them.",
+  failureMode: "Four active sentences about one cluster: we provisioned it, the capacity team sized it, a node pool starved it, the on-call rebuilt it. The subject column reads we, the capacity team, a node pool, the on-call. The cluster is the topic of every sentence and the subject of none.",
+  experiment: "Find a paragraph you wrote about a system or an artefact rather than a team. List the subjects. If the thing you are writing about is the object of most sentences, convert those sentences to passive and read both versions aloud, then decide which one you would send.",
+  reflection: "In the passive version, did any \"by\" phrase turn out to carry information you would have lost by deleting it?",
+  recall: {
+    q: "Your paragraph is about a system, but every sentence has a different team as its subject. What does the passive fix?",
+    a: "It puts the system into subject position, which is where English readers look for the topic, without changing who did what.\n\nThe active version scatters the topic across four object slots and forces the reader to re-establish what the paragraph is about at every sentence boundary."
+  },
+  deepDive: "This paragraph is about a system but every sentence has a different actor as its subject; show me the passive version and tell me whether it reads better."
+},
+{
+  id: "characters-passive-agent-unknown",
+  track: "characters", level: "sentence",
+  title: "Passive is correct when the agent is unknown, generic, or nobody's business",
+  source: "Geoffrey K. Pullum, \"Fear and Loathing of the English Passive\" (Language and Communication, 2014)",
+  gatePrompt: "Find one sentence in your paragraph where you named an actor you are not actually certain about. Rewrite it as a passive and check whether the sentence lost anything the reader needed.",
+  fallback: "Someone disabled the staleness alert at some point last year. A person or process modified the tenant quota shortly after the migration. An engineer set the retention window to seven days, though the commit that did it is unattributed. Users are able to trigger the reconciliation job manually, which one of them appears to have done twice.",
+  idea: "Use the passive when the agent is unknown, generic, or genuinely irrelevant to what the reader needs.",
+  why: "An invented actor is a claim the sentence makes and cannot support. \"Someone disabled the alert\" asserts a human agent; \"the alert was disabled\" asserts only that it happened. In a system with automation, config sync and Terraform apply jobs, that difference is material, and the active version is not more honest for having a subject in it.\n\nThe generic case is smaller but constant. \"Users are able to trigger the job manually\" and \"one can configure the timeout\" put a word in subject position that the reader processes and discards. If the identity of the agent adds nothing, the passive removes it cleanly rather than substituting a placeholder that looks like information.",
+  failureMode: "\"A person or process modified the tenant quota shortly after the migration.\" The writer has been told to prefer the active voice and has invented a subject to comply with. The passive says the same thing without the hedge and without the fabricated actor.",
+  experiment: "Take an incident timeline you wrote. Circle every actor you named and say, for each one, how you know. Convert to passive the ones where the honest answer is that you inferred the actor from the outcome, and count how many that turns out to be.",
+  reflection: "Of the actors you could not justify, did any of them make it into the write-up because a template or a reviewer asked you to avoid the passive?",
+  recall: {
+    q: "Name the three conditions under which deleting the agent is the honest choice rather than an evasion.",
+    a: "The agent is unknown and inventing one would assert something you cannot support. The agent is generic, so naming it adds a word the reader discards. Or the agent is genuinely irrelevant to what the reader is trying to work out.\n\nThe test is whether the reader would act differently knowing who. If not, the \"by\" phrase is noise."
+  },
+  deepDive: "Go through this incident timeline, flag every named actor I cannot justify from the evidence in the document, and show me the passive version of the worst one."
+},
+{
+  id: "characters-passive-old-first",
+  track: "characters", level: "sentence",
+  title: "Passive is correct when it lets old information come first",
+  source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
+  gatePrompt: "Take two consecutive sentences in your paragraph. Check whether the opening of the second picks up something already established in the first. If it opens on something entirely new, flip it to passive and read the pair again.",
+  fallback: "The scheduler now emits a completion event for every run. A downstream consumer in the billing service reads that event. An hourly reconciliation job owned by the finance team audits the resulting billing records. Occasional duplicate charges have prompted several support tickets over the last fortnight.",
+  idea: "Choose the passive when the active would force brand new information into the opening slot where the reader expects something familiar.",
+  why: "English readers expect a sentence to begin with something they already know and end with the new, stressed material. Williams calls it the old-to-new principle, and it is why a paragraph of individually clear sentences can still feel like a series of jolts: every sentence opens a new topic before the reader has finished attaching the last one.\n\nThe passive is the main device English gives you for reversing the order of a clause's participants without changing its meaning, which is exactly what you need when the active puts the new participant first. \"That event is read by a downstream consumer in the billing service\" opens on the event you just introduced and closes on the consumer you have not, which is the order the reader is built for.",
+  failureMode: "\"The scheduler now emits a completion event for every run. A downstream consumer in the billing service reads that event.\" The second sentence opens on eight words of brand new material and delivers the known item at the end. Both sentences are clear and the join between them is not.",
+  experiment: "Take a paragraph you wrote. Underline the first six words of every sentence and mark each one that contains nothing the reader has already met. For every mark, try the passive version and check whether the opening now connects to the sentence before it.",
+  reflection: "Where the passive fixed the join, did the \"by\" phrase at the end land on the word you actually wanted stressed?",
+  recall: {
+    q: "What ordering principle makes the passive the right choice here, and what does it say about where the \"by\" phrase belongs?",
+    a: "Old information before new. Readers expect a sentence to open on something already established and close on the new, stressed material.\n\nThat also explains the \"by\" phrase: at the end of the clause it sits in the stress position, so when the agent is the new information, trailing it is not clutter but the point."
+  },
+  deepDive: "Check the first six words of every sentence in this paragraph for something the reader already knows, and show me which sentences should be passive to fix the joins."
+}
+);

@@ -1,0 +1,255 @@
+/* Track: Register and audience. Ordered foundational first. */
+(window.LESSONS = window.LESSONS || []).push(
+{
+  id: "register-curse-of-knowledge",
+  track: "register", level: "paragraph",
+  title: "The curse of knowledge is the single biggest cause of bad expert writing",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Paste a paragraph you wrote for readers outside your immediate team. Circle every proper noun, acronym, internal system name and shorthand phrase that appears without a gloss, and write the count at the top.",
+  fallback: "We moved the reconciler behind the new gate so the drift path stops double-firing on tenant sync. That means SR-2 can be retired once the shadow reads go quiet. Rollout is behind the usual flag and follows the standard bake.",
+  idea: "Treat every unclear passage in your draft as a place where you assumed knowledge the reader does not have, and name the missing knowledge before you touch the wording.",
+  why: "You cannot simulate not knowing something. Once a concept is in your head it is retrieved automatically, so when you reread your own draft your memory silently supplies every missing referent and the paragraph reads as clear. The clarity is real but it is yours, not the reader's. Your comprehension check on your own prose is therefore invalid by construction.\n\nThis is why the fix is not \"write more simply\". Simplifying a sentence whose problem is a missing referent just produces a shorter sentence with the same hole. The move is to locate the assumed knowledge first, decide whether to supply it or route around it, and only then rewrite.",
+  failureMode: "Prose that is grammatically immaculate and informationally sealed. \"The drift path stops double-firing on tenant sync\" is a fine English sentence and tells an outside reader nothing, because every load-bearing noun is a private name. The tell is that a reader can parse every sentence and still not be able to say what happened.",
+  experiment: "Take the paragraph from your gate. For each circled term, write one of three letters beside it: G if you will gloss it in six words or fewer, C if you will cut it, R if you will replace it with a description. Every term must get a letter. Count how many were G before you started and how many are G now.",
+  reflection: "Which term did you find hardest to gloss, and was that because it is genuinely technical or because you have never actually defined it to yourself?",
+  recall: {
+    q: "Why can't you detect the curse of knowledge by rereading your own draft carefully?",
+    a: "Because rereading uses the same memory that created the gap. Your mind supplies the missing context automatically and reports back that the passage is clear.\n\nDetection has to come from something outside your head: a named reader, a gloss audit, or someone who genuinely lacks the context reading it cold."
+  },
+  deepDive: "Here is a paragraph I wrote for an audience outside my team - list every term where you had to guess at my meaning, and rank them by how much the guess cost you."
+},
+{
+  id: "register-classic-shows-the-world",
+  track: "register", level: "paragraph",
+  title: "Classic style shows the reader something in the world",
+  source: "Francis-Noël Thomas and Mark Turner, Clear and Simple as the Truth",
+  gatePrompt: "Paste a paragraph you wrote. Mark every clause that describes the world with a W, and every clause that describes your process, your feelings, or the document itself with a P. Count the Ps.",
+  fallback: "It could be argued that our current approach to workflow retention may not be optimal. A number of considerations have been raised in recent discussions, and the team has spent some time weighing the tradeoffs involved. On balance we feel a broader review of the area might be warranted at some point in the coming quarter.",
+  idea: "Write as though you are pointing at something real that you have already seen clearly, and let the reader look at it rather than at your reasoning about it.",
+  why: "The classic stance makes a specific bargain with the reader: the truth exists, the writer has seen it, and prose exists only to direct the reader's gaze to it. Everything follows from that. You do not hedge, because you are not arguing towards a conclusion, you are reporting one. You do not narrate your deliberation, because the reader came for the thing, not the search for it.\n\nThe confidence people notice in classic prose is not a tone the writer applies. It is a structural consequence of writing about the world instead of about your own process. Hedges are what appear when a sentence has no object to point at.",
+  failureMode: "Paragraphs whose grammatical objects are all mental states and documents. \"A number of considerations have been raised\" points at nothing you could photograph. Nobody raised anything, no consideration is named, and the sentence survives only because no reader can disagree with it.",
+  experiment: "Take one P-marked clause from your gate and rewrite it so the grammatical object is a thing in the world: a number, a system, a person, an event. If you cannot find one, that clause is a candidate for deletion. Do this for three clauses and note how many you deleted rather than rewrote.",
+  reflection: "Of the process clauses you found, how many were protecting you from committing to a claim you actually believe?",
+  recall: {
+    q: "In classic style, what is the relationship between the writer, the reader and the subject?",
+    a: "The writer has already seen something in the world and is directing the reader's attention to it. The subject is settled before the writing starts; the prose is the pointing, not the discovering.\n\nThat is why classic prose does not hedge or narrate its own deliberation - both would put the writer's mind between the reader and the thing."
+  },
+  deepDive: "Read this paragraph and tell me what, concretely, it is pointing at - if the answer is \"my thinking process\", show me the version that points at the world instead."
+},
+{
+  id: "register-reader-as-equal",
+  track: "register", level: "paragraph",
+  title: "Classic style treats the reader as an equal who could have seen it themselves",
+  source: "Francis-Noël Thomas and Mark Turner, Clear and Simple as the Truth",
+  gatePrompt: "Paste a paragraph you wrote for a wider audience. Underline every phrase that manages the reader rather than informing them: \"as you may know\", \"bear with me\", \"I hope this is clear\", \"simply put\", \"obviously\". Delete each one and read what is left.",
+  fallback: "As you probably already know, our workflow layer runs on Argo, which is a Kubernetes-native workflow engine - apologies if this is old news for some of you. Bear with me while I set out some background, because it took the team a while to get our heads around it too. Hopefully by the end of this section it should all make sense.",
+  idea: "Assume the reader is your intellectual equal who happens not to have been in the room, and cut everything that treats them as either a student or a judge.",
+  why: "Equality is the load-bearing assumption of the classic stance, and it does two jobs at once. Because the reader is competent, you do not need to explain, reassure, or soften; because the reader is not hostile, you do not need to defend, qualify, or pre-empt. Both categories of padding disappear, and what is left is short.\n\nThe result reads as brisk rather than curt because the brevity is a compliment. \"As you probably already know\" tells the reader you suspect they might not, which is why it stings even when it is polite. Cutting it says the opposite without saying anything.",
+  failureMode: "Prose that spends its first third negotiating permission to start. \"Bear with me while I set out some background\" is an apology for the paragraph you are about to write, which means either the paragraph is unnecessary or the apology is. Its sibling is the closing plea: \"hopefully this all makes sense.\"",
+  experiment: "Count the reader-management phrases you underlined in your gate paragraph, delete all of them, then reread. Write down whether any actual information was lost. If the answer is none, the count is your baseline for the next thing you write.",
+  reflection: "Were you managing the reader because they need it, or because you were not sure the content earned its space?",
+  recall: {
+    q: "What two kinds of padding does the equality assumption eliminate, and why?",
+    a: "Explanation and reassurance go, because a competent reader does not need them. Defence and pre-emptive qualification go, because a non-hostile reader is not attacking.\n\nWhat remains is short, and the brevity reads as respect rather than curtness because it is a statement about the reader's competence."
+  },
+  deepDive: "Point out every place in this draft where I am managing the reader instead of informing them, and tell me which ones are load-bearing politeness rather than padding."
+},
+{
+  id: "register-window-not-glass",
+  track: "register", level: "sentence",
+  title: "The prose is a window, and every self-conscious move smudges the glass",
+  source: "Francis-Noël Thomas and Mark Turner, Clear and Simple as the Truth",
+  gatePrompt: "Paste something you wrote. Highlight every sentence that is about the document rather than the subject: signposting, caveats about terminology, notes on what you will cover, jokes, and any phrase containing the word \"section\" or \"below\". Count them.",
+  fallback: "In this section I will attempt to outline the shape of the rerouting change, though a full treatment is beyond our scope here. First, a quick caveat on terminology: what we call a \"route\" below is not quite the same as a route in the networking sense, for reasons that will hopefully become clear. With that throat-clearing out of the way, let us turn to the mechanism itself.",
+  idea: "Delete anything that makes the reader notice the writing, including apparatus, cleverness and scope disclaimers, because attention spent on the prose is attention taken from the subject.",
+  why: "The reader has one attention budget and it is spent either on your subject or on your sentences. A clever construction, a signposting paragraph, a wry aside, a caveat about terminology - each one briefly makes the prose itself the object of attention. That is what a smudge on the glass is: not an error, just something that makes you see the glass.\n\nThis is the hardest rule for good writers, because the moves that smudge are exactly the moves that feel like craft. Signposting feels rigorous. A joke feels human. Both are the writer stepping into the frame.",
+  failureMode: "The paragraph that has not started yet. \"With that throat-clearing out of the way, let us turn to the mechanism itself\" is a sentence whose entire content is an announcement that content is coming, and naming it as throat-clearing does not stop it being throat-clearing.",
+  experiment: "Delete every highlighted sentence from your gate text without replacing it, then read the result. Note which deletions genuinely broke navigation - the reader could not tell where they were - and restore only those. Write down the ratio: deleted versus restored.",
+  reflection: "Which smudge were you most reluctant to cut, and what was it doing for you rather than for the reader?",
+  recall: {
+    q: "What is the cost of a signposting sentence, stated in terms of the reader?",
+    a: "It spends attention on the document instead of the subject. The reader briefly looks at the glass rather than through it, and that attention does not come back.\n\nThe test is not whether the sentence is well written but whether it makes the prose visible."
+  },
+  deepDive: "Go through this piece and flag every sentence that made you notice the writing rather than the subject, including the ones I probably think are the good bits."
+},
+{
+  id: "register-classic-is-not-universal",
+  track: "register", level: "document",
+  title: "Classic style is one style among several, and it is wrong for a runbook",
+  source: "Francis-Noël Thomas and Mark Turner, Clear and Simple as the Truth",
+  gatePrompt: "Take a document you wrote recently. Write one sentence at the top naming the reader's situation when they open it: what they are trying to do, and what happens if they get it wrong. Then decide whether the document's current style matches that situation.",
+  fallback: "Restoring the queue after a backlog event is straightforward. One drains the pending partitions, confirms the consumers have reconnected, and the system settles back into a healthy state within a few minutes. The operator will find that patience is generally rewarded here, since the reconciler prefers to converge on its own rather than be hurried.",
+  idea: "Choose the stand from the reader's situation, and use classic style only where the reader is reading rather than doing.",
+  why: "Thomas and Turner treat a style as a set of answers to questions about truth, presentation, the scene, the cast and the thought. Classic answers them one way: truth is knowable, the scene is one competent person showing another something, the occasion is disinterested. Practical style answers differently, because its reader has a job to finish and a boss waiting.\n\nA runbook reader is not being shown anything. They are executing under time pressure, possibly at 3am, and they need preconditions, ordered steps, expected output and a rollback. Classic style's smoothness actively hurts here: \"one drains the pending partitions\" hides the command, and \"patience is generally rewarded\" hides the timeout. Elegance and executability are different goals.",
+  failureMode: "A runbook that reads beautifully and cannot be followed. The giveaway is the impersonal \"one\" and the absence of anything checkable: no command, no threshold, no branch for the case where the consumers do not reconnect. It describes the happy path as a landscape rather than a procedure.",
+  experiment: "Take one procedural document you own and convert three prose sentences into the practical form: precondition, exact command or action, observable expected result. Count how many hidden decisions you had to make explicit to do it - that count is what the classic version was concealing.",
+  reflection: "Where in your writing do you default to classic style because it sounds like a good writer rather than because the reader's situation calls for it?",
+  recall: {
+    q: "Name the reader's situation in which classic style is the wrong choice, and say what replaces it.",
+    a: "When the reader is executing rather than reading - a runbook, an incident procedure, a migration checklist. They are under time pressure and need to act correctly, not to see something clearly.\n\nPractical style replaces it: preconditions, ordered steps, exact commands, observable results, and an explicit branch for failure."
+  },
+  deepDive: "Here is a document and here is who reads it and why - tell me whether the style I have used matches that situation, and name the style it should be in."
+},
+{
+  id: "register-name-one-reader",
+  track: "register", level: "document",
+  title: "Naming one real reader beats imagining a general audience",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Take a document you are writing now and write at the top the name of one actual person who will read it, plus three things they already know and two things they do not. Keep it visible while you read on.",
+  fallback: "This document is intended for engineers, engineering managers and other stakeholders who may have an interest in the workflow migration. Depending on your role and familiarity with the area, some sections may be more relevant than others, and readers who are already close to the work may wish to skip ahead. Our aim is to provide enough context to be useful without being exhaustive.",
+  idea: "Write to one named person with known gaps, not to a category of reader.",
+  why: "An abstract audience cannot answer a question. Ask \"will the reader know what shadow reads means\" of a general audience and the honest answer is \"some will\", which licenses you to leave it. Ask it of Priya, who joined from data engineering four months ago, and the answer is yes or no, and you have to act on it.\n\nThat is the whole mechanism: a named reader converts every register decision from a judgement call into a factual question about a person you know. It also fixes level, because you stop writing at the average of a bimodal audience, a level that serves neither half.",
+  failureMode: "The audience paragraph that admits the writer never chose. \"Depending on your role, some sections may be more relevant than others\" pushes the routing problem onto the reader, and the document that follows will be pitched at everyone's midpoint: too much background for the specialists, not enough for the newcomers.",
+  experiment: "With your named reader at the top of the page, go through the document and mark every paragraph K if that person already knows it, N if it is new to them. Delete or compress every K paragraph. Count how much of the document was K.",
+  reflection: "When you had to answer yes or no about one person's knowledge rather than a group's, which of your defaults changed?",
+  recall: {
+    q: "What does a named reader give you that an abstract audience cannot?",
+    a: "A testable question. \"Does the reader know this term?\" has a real answer for a person you know and only a distribution for a category, and a distribution lets you avoid deciding.\n\nIt also stops you writing to the midpoint of a split audience, which is a level that serves neither end of it."
+  },
+  deepDive: "My reader for this document is [person, role, what they know] - go through the draft and flag everything pitched above or below them."
+},
+{
+  id: "register-chunking-functional-fixity",
+  track: "register", level: "paragraph",
+  title: "Chunking and functional fixity are why your shorthand is invisible to you",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Paste a paragraph about a system you know well. Pick the three nouns that carry the most weight and, under each, write out the sequence of concrete steps or objects it stands for. If a noun expands to more than two steps, mark it.",
+  fallback: "Onboarding creates the tenant, and once that lands the crawl populates the catalogue. If the crawl stalls, the usual fix is to re-run onboarding, which clears the lineage state as a side effect. Most of the incidents we see in this area come down to onboarding and the crawl racing each other.",
+  idea: "Expand the two or three nouns in your paragraph that stand for multi-step processes, because those chunks are where the reader falls off and you cannot feel it.",
+  why: "Expertise works by chunking: a sequence you have run a hundred times collapses into a single unit with a name, and from then on you manipulate the name. This is what makes you fast, and it is also why \"onboarding\" feels like one thing to you and is an opaque token to the reader. You are not omitting the steps, you have genuinely stopped seeing them as steps.\n\nFunctional fixity is the second mechanism. Once you know what an object is for, you describe it by its role rather than its properties, so you write \"the reconciler\" where the reader needs \"the loop that compares desired state to actual state every thirty seconds\". Both mechanisms are automatic, both are invisible from the inside, and both are fixed by the same move: unpack the chunk once, in the sentence where it first matters.",
+  failureMode: "A paragraph where every noun is a chunk and the verbs do no work. \"Onboarding creates the tenant, and once that lands the crawl populates the catalogue\" has three chunks and two colourless verbs, and a reader outside the team can follow the grammar without acquiring a single fact about what runs when.",
+  experiment: "In your gate paragraph, take the chunk you marked as expanding to the most steps and rewrite the sentence with the expansion in place. Read both versions aloud. Decide whether the expansion belongs inline, in a parenthetical, or once at the top - but make the decision explicitly rather than by default.",
+  reflection: "Which chunk did you find you could not fully expand without looking something up, and what does that tell you about how well you actually know it?",
+  recall: {
+    q: "What are the two mechanisms behind the curse of knowledge, and how do they differ?",
+    a: "Chunking compresses a familiar sequence into a single named unit, so a multi-step process becomes one opaque word to the reader. Functional fixity freezes an object into its familiar use, so you describe it by role rather than by what it actually does.\n\nBoth are side effects of expertise, both are invisible from the inside, and both are repaired by unpacking once at the point where the reader first needs it."
+  },
+  deepDive: "Take this paragraph and list the nouns that are doing chunk duty, with your best guess at what each one expands to - I want to see which ones you had to guess at."
+},
+{
+  id: "register-example-before-definition",
+  track: "register", level: "paragraph",
+  title: "Give the example before the definition",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Find a paragraph where you introduced a new concept. Mark the sentence where the definition appears and the sentence where the first concrete instance appears. If the definition comes first, swap them and read it again.",
+  fallback: "A rerouter is a component that intercepts task queue assignments and rewrites their destination according to a policy resolved at dispatch time, where the policy is drawn from a precedence chain of tenant-level, workflow-level and global rules. Precedence is evaluated most-specific-first, with ties broken by declaration order. For example, a tenant pinned to the legacy queue keeps running there even after the global default moves.",
+  idea: "Lead with one concrete instance the reader can hold, then generalise from it.",
+  why: "Comprehension is not the transfer of a definition, it is the construction of a model. Readers build abstractions by generalising from instances, so a definition arriving with nothing to attach to has to be held in working memory unresolved while they wait for something to test it against. That waiting is the effort they feel, and it is why a technically perfect definition can be exhausting to read.\n\nAn instance first gives the reader a scaffold. The definition then arrives as a compression of something they already have rather than a promissory note, and it takes almost no effort because they are checking it, not building from it.",
+  failureMode: "The paragraph that spends its first forty words on qualifications before the reader knows what is being qualified. \"A rerouter is a component that intercepts task queue assignments and rewrites their destination according to a policy resolved at dispatch time\" has four abstractions stacked before the first thing you could point at, and the example that would have unlocked it is parked in sentence three.",
+  experiment: "Take the paragraph from your gate and move its concrete instance into first position, cutting whatever the swap makes redundant. Count the words in the definition sentence before and after - if the definition did not get shorter, the example is not doing enough work.",
+  reflection: "Did moving the example forward let you delete part of the definition, and if so, which part was only there to compensate for the missing instance?",
+  recall: {
+    q: "Why does a definition-first paragraph cost the reader more effort than an example-first one?",
+    a: "A definition with no instance attached has to be held unresolved in working memory until something arrives to test it against, and that holding is the effort the reader feels.\n\nAn instance first gives them a model to check the definition against, so the definition becomes a compression of something they already have rather than a promise to be redeemed later."
+  },
+  deepDive: "For each new concept in this draft, tell me whether the example or the definition comes first, and give me a concrete instance for any concept that never gets one."
+},
+{
+  id: "register-jargon-as-membership",
+  track: "register", level: "sentence",
+  title: "Jargon is a membership signal before it is a meaning problem",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Paste a paragraph. For each piece of technical or in-house vocabulary, write beside it either the information it carries that no plainer word would, or the word \"belonging\". Count the belongings.",
+  fallback: "The proposal is to leverage the existing eventing substrate to provide a first-class, opinionated abstraction over tenant lifecycle, so that downstream consumers get idiomatic primitives rather than bespoke glue. This gives us a principled seam to build on and keeps the surface area tractable as we scale.",
+  idea: "For each specialist term, name the information it carries that no plainer word would, and cut it if you cannot.",
+  why: "A lot of technical vocabulary is doing social work rather than semantic work. It tells the reader, and more importantly the writer, that the writer is inside the field. This is why jargon survives editing: cutting it does not feel like simplifying, it feels like demotion, and that resistance is a reliable signal that the term was carrying identity rather than content.\n\nThe test is a substitution test, not a taste test. If \"first-class abstraction\" and \"supported thing rather than a workaround\" carry the same information, the first is a badge. If they do not, keep the term and gloss it once. The point is not plain words, it is words that pay rent.",
+  failureMode: "The sentence you cannot paraphrase. \"An opinionated abstraction over tenant lifecycle giving downstream consumers idiomatic primitives\" resists translation not because it is deep but because there is nothing under it - each term is a membership token, and the reader who nods is nodding at the tribe, not the content.",
+  experiment: "Take the terms you marked \"belonging\" in your gate paragraph and rewrite the sentence with plainer substitutes. Read the new version to yourself and note which substitutions made you uncomfortable. That discomfort list is the real finding, not the rewrite.",
+  reflection: "Which term did you defend hardest, and can you state in one sentence what it carries that its plain substitute does not?",
+  recall: {
+    q: "What is the test for whether a piece of jargon earns its place?",
+    a: "Substitute the plainest phrase that means the same thing. If the information content is unchanged, the term was carrying membership rather than meaning and should go.\n\nIf the substitute genuinely loses precision, keep the term and gloss it once. The goal is words that pay rent, not plain words."
+  },
+  deepDive: "List the technical terms in this draft, and for each one tell me the plainest phrase that would carry the same information - I will argue with the ones you get wrong."
+},
+{
+  id: "register-plain-versus-exact",
+  track: "register", level: "sentence",
+  title: "Plain and exact are different goals and you choose between them sentence by sentence",
+  source: "Steven Pinker, The Sense of Style",
+  gatePrompt: "Paste a paragraph that supports a decision. Mark each sentence P where you chose plainness and E where you chose precision. Then, for each one, write the decision the reader is about to make and check whether the choice serves it.",
+  fallback: "The migration will take a while and there may be some impact to users during the cutover window. Specifically, p99.9 latency on the AssetSearch RPC, measured over five-minute windows in ap-southeast-2, rose by 14.2 milliseconds during the rehearsal on the seventeenth, with a standard deviation of 3.1 across the eleven windows sampled. We think the risk is manageable.",
+  idea: "Decide plain or exact per sentence according to the decision that sentence has to support, not according to a house style for the document.",
+  why: "Precision and accessibility trade against each other and the exchange rate changes sentence by sentence. Every qualifier you add narrows the claim and costs the reader a unit of effort; every one you drop makes the sentence easier and the claim looser. Neither is a virtue in itself, which is why \"write plainly\" and \"be rigorous\" are both bad blanket instructions.\n\nThe governing question is what the reader has to do next. A sentence that feeds a go or no-go call must be exact enough that the call cannot flip on a reading. A sentence that supplies orientation should be plain, because precision there is cost without benefit. The failure is not imprecision, it is spending precision in the wrong sentence.",
+  failureMode: "Precision inverted against importance. \"The migration will take a while and there may be some impact\" is the sentence the approver actually acts on and it is vague to the point of uselessness, while the four decimal places arrive in the sentence nobody will use. The paragraph looks rigorous and supports no decision.",
+  experiment: "Find the one sentence in your gate paragraph that the reader's decision actually turns on. Rewrite it so a reasonable reader could not act two different ways on it, and take precision back out of the other sentences to pay for it. Note whether the paragraph got longer or shorter.",
+  reflection: "Where were you being exact because the number was available rather than because the reader needed it?",
+  recall: {
+    q: "What decides whether a given sentence should be plain or exact?",
+    a: "The decision the reader has to make from that sentence. A sentence feeding a go or no-go call has to be exact enough that the call cannot flip on a reading; a sentence supplying orientation should be plain.\n\nThe common failure is not imprecision overall but precision spent in the sentences that do not carry a decision, while the one that does stays vague."
+  },
+  deepDive: "Tell me which single sentence in this document the reader's decision turns on, and whether it is precise enough that they could not act two different ways on it."
+},
+{
+  id: "register-internal-versus-external",
+  track: "register", level: "document",
+  title: "Internal voice leads with the claim; external voice leads with the concrete",
+  source: "William Zinsser, On Writing Well, on the lead. The internal-versus-external split is a working distinction, not Zinsser's term.",
+  gatePrompt: "Take something you are writing. Write one word at the top: INTERNAL or EXTERNAL. Then read your first sentence and mark whether it is a claim or a concrete hook. If it does not match the label, rewrite that sentence before reading on.",
+  fallback: "Over the past quarter the team has spent considerable time looking at how tenant workflows run today. Argo has served us well since 2021 and we have learned a great deal from operating it at this scale. This update walks through what we found, how our thinking evolved, and where we have landed on the question of what comes next.",
+  idea: "Open an internal document with the conclusion and an external one with something concrete, because the two readers arrive with different amounts of attention already granted.",
+  why: "An internal reader has already committed. They opened the document because their job requires it, so their scarce resource is time, not interest, and the most valuable thing you can give them in sentence one is the conclusion. Withholding it makes them read the whole thing to find out whether they needed to.\n\nAn external reader has committed nothing. Zinsser's point about the lead is that its only job is to make the reader read the next sentence, and an abstraction cannot do that because there is nothing to be curious about. A number, a moment, a quote or a counterintuitive fact can. Same writer, same subject, opposite opening, because attention is granted in one case and must be earned in the other.",
+  failureMode: "The internal update written with an external lead, which is the most common version because it feels like good writing. \"Over the past quarter the team has spent considerable time looking at how tenant workflows run today\" is a scene-setting opener in a document whose reader wants the decision, and the decision - that Argo is being shut off in October - is in paragraph four if it is anywhere.",
+  experiment: "Find the sentence in your document that carries the actual conclusion. Count how many words precede it. If the document is internal and that number is over thirty, move it to first position and delete whatever the move orphans.",
+  reflection: "When you moved the conclusion up, what did the opening paragraph turn out to have been for?",
+  recall: {
+    q: "Why does the same subject need opposite openings for internal and external readers?",
+    a: "The internal reader has already granted attention and is short on time, so the conclusion first saves them the document. The external reader has granted nothing, so the opening has to earn the second sentence.\n\nAbstractions cannot earn attention because there is nothing in them to be curious about; a number, a moment or a counterintuitive fact can."
+  },
+  deepDive: "This is an internal document - find the sentence that carries the actual conclusion and tell me how much of what precedes it survives being moved below it."
+},
+{
+  id: "register-official-style",
+  track: "register", level: "paragraph",
+  title: "The Official Style exists so that no person decided anything",
+  source: "Richard Lanham, Revising Prose",
+  gatePrompt: "Paste a paragraph from a status update, review comment or decision note. For every verb, write in the margin who did it. Circle each one where the answer is not in the sentence.",
+  fallback: "A determination was made that implementation of the retention policy change should be deferred pending completion of a review of the associated cost implications. Communication of this decision to the affected teams will be undertaken in due course. It is anticipated that a revised timeline will be made available following consultation with the relevant stakeholders.",
+  idea: "Restore the human actor as the grammatical subject of every sentence that reports a decision.",
+  why: "Lanham's point is that institutional prose is not sloppy, it is a coherent system with a purpose. Nominalise the verb, so \"we decided\" becomes \"a determination\"; make the nominalisation the subject; put the real verb into the passive or into \"is\"; and the actor has nowhere left to appear. Every one of those moves is optional individually and together they are load-bearing.\n\nWhat the system produces is a report of events with no one in them. That is the function, not the side effect: the sentence records that a thing happened while making it impossible to ask who chose it or to hold them to it later. Recognising it as deliberate is what lets you undo it, because the fix is not \"use fewer passives\" but \"put the decider back in the subject slot\".",
+  failureMode: "A decision record from which the decision-maker has been surgically removed. \"A determination was made that implementation should be deferred\" hides three people: whoever decided, whoever will be affected, and whoever now owns the revised date. Six months later, nobody can reconstruct who to ask.",
+  experiment: "Take your gate paragraph and rewrite every circled verb with a named person or team as its subject. Where you cannot name one because you genuinely do not know, write \"UNKNOWN\" in the subject slot rather than reverting to the passive. Count the UNKNOWNs - each one is a real gap in the record, not a writing problem.",
+  reflection: "Of the actors you had to restore, how many did you leave out to protect someone, and how many because you never knew?",
+  recall: {
+    q: "What are the moves that produce the Official Style, and what is its function?",
+    a: "Nominalise the verb, promote the nominalisation to subject, and push the real verb into a passive or a form of \"to be\". The actor then has no slot to occupy.\n\nThe function is to record that something happened while distributing responsibility until it disappears, which is why the fix is restoring the actor to the subject position rather than merely deleting passives."
+  },
+  deepDive: "Go through this document and tell me, for every decision reported, whether a reader could work out who made it."
+},
+{
+  id: "register-orwell-six-rules",
+  track: "register", level: "paragraph",
+  title: "Orwell's six rules, taken seriously and then taken apart",
+  source: "George Orwell, \"Politics and the English Language\"",
+  gatePrompt: "Paste a paragraph where you were arguing for something. Underline every phrase you did not construct yourself: dying metaphors, stock transitions, ready-made assemblies. Count them, then ask of each whether you would have written the sentence at all without it.",
+  fallback: "At the end of the day we need to take a long hard look at the tooling landscape and leverage synergies across the estate. Going forward, a shift in how we approach observability will be required in order to move the needle on reliability. There is no silver bullet here, but with the right level of buy-in we believe this is achievable.",
+  idea: "Treat prefabricated phrases as evidence that a sentence was assembled rather than thought, and check what the sentence claims once you take them out.",
+  why: "Orwell's durable contribution is not the six rules, it is the causal claim underneath them: language and thought corrupt each other in both directions. Slovenly language makes it easier to have foolish thoughts, and the mechanism is that a ready-made phrase lets you produce a grammatical sentence without ever forming the underlying proposition. You did not decide that the tooling landscape needed a long hard look; the phrase arrived complete and you approved it.\n\nThat is why the diagnostic works even where the rules do not. Strip the prefabs and one of two things happens: a claim appears that you can now argue with, or nothing appears at all. The second case is the one Orwell cared about, because it is what makes indefensible positions defensible - a sentence with no proposition in it cannot be refuted.",
+  failureMode: "A paragraph made entirely of parts. \"Take a long hard look at the tooling landscape and leverage synergies across the estate\" survives review because every phrase is familiar, and it commits to nothing: no tool is named, no synergy is specified, and \"move the needle on reliability\" sets no target that could later be missed.",
+  experiment: "Delete every underlined prefab from your gate paragraph without substituting anything, then read what remains. Write one sentence stating what the paragraph actually claims. If you cannot, that is the finding - record it rather than fixing the paragraph.",
+  reflection: "Did stripping the stock phrases reveal a claim you were avoiding making, or reveal that there was no claim?",
+  recall: {
+    q: "What is the mechanism Orwell proposes linking vague language to bad thinking?",
+    a: "It runs both ways. Prefabricated phrases let you produce grammatical sentences without forming the underlying proposition, so the thought is never had; and habitual bad thinking reaches for those phrases in turn.\n\nThe practical consequence is that stripping the prefabs either surfaces a claim you can argue with or reveals that there was none, and the second case is what lets indefensible positions survive."
+  },
+  deepDive: "Strip the ready-made phrases out of this paragraph and tell me what claim, if any, is left standing."
+},
+{
+  id: "register-pullum-on-orwell",
+  track: "register", level: "paragraph",
+  title: "Pullum shows the essay breaks its own rules, and that is evidence rather than a gotcha",
+  source: "Geoffrey K. Pullum, Language Log, \"A load of old Orwellian cobblers from Fisk\"",
+  gatePrompt: "Take a rule you enforce in review - no passives, short words, cut adverbs, whatever it is. Find three sentences in your own recent writing that break it. For each, decide whether the sentence is worse for breaking it.",
+  fallback: "The system does not do the right thing when many jobs come in at once. We saw it happen. Someone must have made the queue too small when they set it up. We made it bigger and now it works. We should look at the other queues too in case they have the same problem.",
+  idea: "Hold every style rule, including the ones you enforce, as a description of taste that has to justify itself sentence by sentence.",
+  why: "Pullum's observation is empirical and awkward: Orwell's own prose in that essay breaks the rules the essay states, repeatedly and in the same paragraphs that state them. The passives are there, the long Latinate words are there, the metaphors he condemns turn up in his own sentences. He is a fine writer, so the conclusion is not that he failed.\n\nThe conclusion is that the rules were never a description of what makes his prose good. They are a post-hoc rationalisation of a taste he had, and Orwell half-knew it, which is why rule six is an instruction to break the other five rather than say anything outright barbarous. This matters practically because the same is true of the rules you enforce in review. Stated as rules they are unfalsifiable and they travel badly; restated as mechanisms - this passive hides the actor a reader needs - they are checkable, and sometimes the check comes back saying the passive was right.",
+  failureMode: "Prose flattened by obedience. Every sentence in the fallback obeys the short-words rule and the active-voice rule, and it is worse for it: \"someone must have made the queue too small\" invents an agent to avoid a passive, \"does not do the right thing\" is vaguer than the technical term it replaced, and the paragraph now reads as a series of unconnected assertions.",
+  experiment: "Take the rule you enforce and one review comment you left in the last month citing it. Reconstruct the mechanism behind it in one sentence: what the reader loses when the rule is broken. If you cannot produce a mechanism, note the rule as taste and stop citing it as an error.",
+  reflection: "Which of your review rules turned out to be taste, and are you willing to say so the next time you leave that comment?",
+  recall: {
+    q: "What does Pullum's finding about Orwell's own prose imply for style rules generally?",
+    a: "Orwell violates his own prescriptions throughout the essay while writing well, which means the rules were not describing the source of the quality. They were a rationalisation of his taste.\n\nThe practical implication is to restate every rule as a mechanism - what a reader loses when it is broken - because a mechanism is checkable per sentence and sometimes returns the answer that breaking the rule was right."
+  },
+  deepDive: "Here is a style rule I enforce in code review - argue the strongest case against it, and show me a sentence of mine that is better for breaking it."
+}
+);

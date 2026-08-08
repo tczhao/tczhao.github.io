@@ -1,0 +1,11 @@
+{
+  "name": "maillard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Maillard - the chemistry under the cooking. One entry a day, with a kitchen log instead of a review deck.",
+  "scripts": {
+    "build": "node lib/build.js",
+    "test": "node test/engine.test.js && node test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}
