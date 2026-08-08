@@ -43,12 +43,20 @@ window.SITE = {
     minChars: 80
   },
 
-  extraRequired: ['fallback', 'gatePrompt'],
+  /* The gate promises a worked example three times over, so the build refuses
+     an entry that does not carry one. For a long while none of them did, and
+     nothing failed: the reader just committed an edit and never saw the answer.
+     A promise the corpus cannot keep has to break the build, not the trust. */
+  extraRequired: ['fallback', 'gatePrompt', 'worked'],
 
   copy: {
     labelIdea: 'The move',
     labelWhy: 'Why it works on a reader',
     labelFailure: 'What it looks like when it is missing',
+    /* Verbatim the phrase the gate promises three times over. If the label and
+       the promise drift apart, the reader has to work out that this is the
+       thing they were told was coming. */
+    labelWorked: 'The worked example',
     labelExperiment: 'Run it on your own prose',
     labelReflect: 'Log the edit',
     labelDeepDive: 'Take it further',

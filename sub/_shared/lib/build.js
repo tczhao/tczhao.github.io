@@ -71,6 +71,25 @@ function checkSource(file, text) {
     const line = text.slice(0, text.indexOf('—')).split('\n').length;
     errs.push(`${file}:${line} em dash found, use spaced hyphens`);
   }
+  /* paras() splits on \n\n and nothing else, so a lone \n renders as a space
+     and silently joins two lines the author meant to keep apart. Invisible in
+     the source, invisible in review, visible only on the day that entry comes
+     up - which is the same reason the escape check above exists. */
+  const runs = /(?:\\n)+/g;
+  let r;
+  while ((r = runs.exec(text)) !== null) {
+    if (r[0].length === 2) {
+      const line = text.slice(0, r.index).split('\n').length;
+      errs.push(`${file}:${line} lone \\n - paragraphs break on \\n\\n, a single one renders as a space`);
+    }
+  }
+  /* Markdown is not rendered anywhere in the page, so a heading or a bullet
+     reaches the reader as literal ## or *. */
+  const md = /\\n#{1,6} |\*\*/.exec(text);
+  if (md) {
+    const line = text.slice(0, md.index).split('\n').length;
+    errs.push(`${file}:${line} markdown found ("${md[0].trim()}") - it is rendered as plain text`);
+  }
   return errs;
 }
 

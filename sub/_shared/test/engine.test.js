@@ -15,6 +15,7 @@ const PLAIN = path.join(__dirname, 'fixtures', 'plain');
 const EVIDENCE = path.join(__dirname, 'fixtures', 'evidence');
 const COMPUTE = path.join(__dirname, 'fixtures', 'compute');
 const COMPUTE_INTRO = path.join(__dirname, 'fixtures', 'compute-intro');
+const WORKED = path.join(__dirname, 'fixtures', 'worked');
 const T0 = new Date(2026, 7, 5, 9, 0, 0).getTime();     // Wed 5 Aug 2026, local
 
 function todayId(env) {
@@ -559,6 +560,45 @@ check('a citation past its re-verification interval is marked stale', () => {
   s.fire('click', target({ act: 'lib-open', id: 'alpha-replicated' }));
   assert.ok(/data-stale="1"/.test(s.els['view-library'].innerHTML),
     'a citation older than reverifyDays must be marked');
+});
+
+/* --- The worked example -------------------------------------------------- */
+/* A gate that promises an answer has to produce one. Compositor's gate copy
+ * said "the worked example opens once you have pasted something of yours" and
+ * nothing rendered, because no entry carried the field. These pin the contract
+ * in both directions: hidden until the gate opens, shown once it does. */
+
+check('a worked example stays hidden until the gate opens', () => {
+  const env = boot(WORKED, T0);
+  const html = env.els['view-today'].innerHTML;
+  assert.ok(!html.includes('Alpha one repaired'), 'the answer must not be in the DOM while gated');
+  assert.ok(!/class="worked"/.test(html), 'nor the block that holds it');
+});
+
+check('committing opens the worked example next to what you wrote', () => {
+  const env = boot(WORKED, T0);
+  const id = todayId(env);
+  env.document.getElementById('gate-field').value = 'my own attempt at the edit';
+  env.fire('click', target({ act: 'gate-unlock', id }));
+
+  const html = env.els['view-today'].innerHTML;
+  assert.ok(html.includes('Alpha one repaired'), 'the worked example must open with the entry');
+  assert.ok(html.includes('my own attempt at the edit'), 'your own edit stays on screen to compare against');
+  // Broken then fixed: the diagnosis has to come before the repair to read as a pair.
+  assert.ok(html.indexOf('Alpha one failure.') < html.indexOf('Alpha one repaired'),
+    'the worked example belongs after the failure mode, not before it');
+});
+
+check('an entry with no worked example still renders', () => {
+  // The field is optional, so a corpus can gain answers entry by entry rather
+  // than needing all of them before any of them ship.
+  const env = boot(WORKED, T0);
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: 'beta-bare' }));
+  const html = env.els['view-library'].innerHTML;
+  assert.ok(html.includes('The idea'), 'the entry must still render');
+  assert.ok(!/class="worked"/.test(html), 'and must not render an empty worked block');
+  assert.ok(!templateHole(html), 'no template hole');
 });
 
 /* --- The arithmetic gate ------------------------------------------------- */

@@ -834,6 +834,15 @@
     h += '<div class="block block--failure"><p class="block__label">' + esc(COPY.labelFailure || 'What goes wrong without it') + '</p>';
     h += '<div class="block__body">' + paras(l.failureMode) + '</div></div>';
 
+    /* Immediately after the diagnosis, because broken then repaired is the pair
+       the reader is actually comparing. Only reachable past the gate: this is
+       the answer a site promised not to show first, so everything above returns
+       early while the entry is locked. */
+    if (l.worked) {
+      h += '<div class="worked"><p class="block__label">' + esc(COPY.labelWorked || 'One good repair') + '</p>';
+      h += '<div class="worked__body">' + paras(l.worked) + '</div></div>';
+    }
+
     h += '<div class="experiment"><p class="experiment__label">' + esc(COPY.labelExperiment || 'Try this today') + '</p>';
     h += '<div class="experiment__body">' + paras(l.experiment) + '</div></div>';
 

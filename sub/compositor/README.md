@@ -67,6 +67,22 @@ build step. Neither needs a server.
 3. Today's entry, then a reflection you answer in the page.
 4. Log it. The entry joins the review rotation and the streak advances.
 
+## The worked example
+
+Every entry ships a `fallback`, a deliberately flawed specimen for a day you wrote
+nothing of your own, and a `worked` example: that same specimen after the move has
+been applied, followed by a short note on what changed and what it cost. It renders
+directly under the failure mode, so the pair reads as diagnosis then repair, and it
+is only reachable past the gate.
+
+The field exists because the gate promised it three separate times - "before you
+read the worked example", "the worked example opens once you have pasted something
+of yours and edited it", "reading the answer first is the one way to learn nothing
+here" - and for a long while no entry carried one. A gate that names a reward it
+cannot produce teaches the reader to stop believing the copy.
+
+`extraRequired` enforces it, so the build refuses an entry without one.
+
 There is also a **Take it further** button that composes a prompt for Claude carrying
 whatever you wrote, including the answer you committed before reading, so the conversation starts from your real situation rather
 than the abstraction.

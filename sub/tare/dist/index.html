@@ -940,6 +940,43 @@ button { font: inherit; color: inherit; }
   border-top: 1px dashed var(--rule-strong);
 }
 
+/* --- Worked example ------------------------------------------------------ */
+/* Sits directly under the failure mode, and has to read as the answer to it
+   rather than as one more block of commentary. The accent rule and the raised
+   stock do that; the first paragraph is the repair itself, so it gets the
+   weight and the rest of the block stays quiet. */
+.worked {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 4) 0;
+  padding: calc(var(--u) * 3);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 2px;
+}
+.worked__body {
+  margin-top: var(--u);
+}
+.worked__body p + p {
+  margin-top: var(--lead);
+}
+/* The repair. Set in the reading face at full size so it can be compared
+   against the specimen without the eye having to change gear. */
+.worked__body p:first-child {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+/* What it changed, and what it cost. */
+.worked__body p:last-child:not(:first-child) {
+  font-family: var(--face-ui);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  padding-top: calc(var(--u) * 1.5);
+  border-top: 1px solid var(--rule);
+}
+
 /* --- Arithmetic gate ----------------------------------------------------- */
 /* Same visual weight as the text gate, because it does the same job one notch
    harder. The gap is the only part that earns colour: over and under are
@@ -2986,6 +3023,15 @@ window.SITE = {
 
     h += '<div class="block block--failure"><p class="block__label">' + esc(COPY.labelFailure || 'What goes wrong without it') + '</p>';
     h += '<div class="block__body">' + paras(l.failureMode) + '</div></div>';
+
+    /* Immediately after the diagnosis, because broken then repaired is the pair
+       the reader is actually comparing. Only reachable past the gate: this is
+       the answer a site promised not to show first, so everything above returns
+       early while the entry is locked. */
+    if (l.worked) {
+      h += '<div class="worked"><p class="block__label">' + esc(COPY.labelWorked || 'One good repair') + '</p>';
+      h += '<div class="worked__body">' + paras(l.worked) + '</div></div>';
+    }
 
     h += '<div class="experiment"><p class="experiment__label">' + esc(COPY.labelExperiment || 'Try this today') + '</p>';
     h += '<div class="experiment__body">' + paras(l.experiment) + '</div></div>';
