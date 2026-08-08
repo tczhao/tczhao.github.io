@@ -29,6 +29,9 @@
     --accent-rose: #f43f5e;
     --accent-ember: #d97706;
     --accent-pink: #ec4899;
+    --accent-steel: #94a3b8;
+    --accent-brass: #c9a44e;
+    --accent-crimson: #e05a6b;
     --radius: 16px;
     --radius-sm: 10px;
   }
@@ -53,6 +56,9 @@
     --accent-rose: #e11d48;
     --accent-ember: #b45309;
     --accent-pink: #db2777;
+    --accent-steel: #475569;
+    --accent-brass: #7a5c1e;
+    --accent-crimson: #b4283c;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -296,6 +302,18 @@ const SECTIONS = [
     title: 'Daily practice',
     sites: [
       {
+        href: 'nomogram/dist/', icon: '\u{1F4D0}', accent: 'crimson',
+        name: 'Nomogram', eyebrow: 'Alignment chart',
+        tagline: 'what training does, and how well that is known',
+        desc: 'Six tracks on physical capacity, from cardiorespiratory fitness to what actually predicts a running injury. Every entry carries its sample size, its effect size and both bounds of a real confidence interval.'
+      },
+      {
+        href: 'tare/dist/', icon: '\u{2696}\u{FE0F}', accent: 'brass',
+        name: 'Tare', eyebrow: 'Docket',
+        tagline: 'what survives fees, tax, inflation and you',
+        desc: 'Australian personal finance, where the entry stays shut until you have worked out its number against your own figures. Every claim carries its source and an honest verdict on how well established it is.'
+      },
+      {
         href: 'practicum/dist/', icon: '\u{1F9ED}', accent: 'pink',
         name: 'Practicum', eyebrow: 'Logbook',
         tagline: 'management practice, one day at a time',
@@ -361,6 +379,12 @@ const SECTIONS = [
         href: 'competition/', icon: '\u{1F3C6}', accent: 'amber',
         name: 'Competition', eyebrow: 'Dashboard',
         desc: 'Race results across distances, personal bests per category, pace progression and a full race history.'
+      },
+      {
+        href: '2009_vw_tiguan/', icon: '\u{1F699}', accent: 'steel',
+        name: 'The Tiguan', eyebrow: 'Service book',
+        tagline: 'every part that has failed and what it cost',
+        desc: '43 service records on a 2008 Tiguan 5N 2.0 TDI, with running spend by system - oil, turbo, Haldex, belts, brakes - and photos of the parts that came out.'
       }
     ]
   }

@@ -940,6 +940,158 @@ button { font: inherit; color: inherit; }
   border-top: 1px dashed var(--rule-strong);
 }
 
+/* --- Arithmetic gate ----------------------------------------------------- */
+/* Same visual weight as the text gate, because it does the same job one notch
+   harder. The gap is the only part that earns colour: over and under are
+   different mistakes and the reader should be able to see which one they keep
+   making without reading the number. */
+.compute {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 4) 0;
+  padding: calc(var(--u) * 3);
+  background: var(--action-soft);
+  border: 1px solid var(--action-line);
+  border-left-width: 3px;
+  border-radius: 2px;
+}
+.compute--done {
+  background: var(--paper-sunk);
+  border-color: var(--rule);
+  border-left-color: var(--rule-strong);
+}
+.compute__q {
+  margin-top: var(--u);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+.compute__note {
+  margin-top: var(--u);
+  font-family: var(--face-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+.compute__fields {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--u) calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0;
+}
+.compute__lab {
+  font-family: var(--face-ui);
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+.compute__unit { color: var(--ink-faint); }
+.compute__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0;
+}
+.compute__input {
+  font-family: var(--face-mono);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  padding: calc(var(--u) * 1.25) calc(var(--u) * 1.5);
+  background: var(--paper-raised);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  min-width: 10ch;
+}
+.compute__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.compute__result {
+  margin-top: calc(var(--u) * 1.5);
+  font-variant-numeric: tabular-nums;
+}
+.compute__gap {
+  margin-top: var(--u);
+  font-family: var(--face-ui);
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.compute__gap[data-dir="exact"] { color: var(--solid); }
+.compute__gap[data-dir="over"],
+.compute__gap[data-dir="under"] { color: var(--action); }
+
+/* --- Evidence gate ------------------------------------------------------- */
+/* Seven verdicts, four colours. The colour answers only "how much weight does
+   this carry", which is the question the reader is actually asking; the label
+   carries the distinction between, say, never-repeated and disputed. Giving
+   each verdict its own hue would imply seven degrees of trust and there are
+   not seven. */
+.evidence {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 3) 0;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2.5);
+  background: var(--paper-sunk);
+  border-left: 3px solid var(--rule-strong);
+}
+.evidence__cite {
+  margin: calc(var(--u) * 0.75) 0 0;
+  font-family: var(--face-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.evidence__interval {
+  margin: calc(var(--u) * 0.5) 0 0;
+  font-family: var(--face-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+.evidence__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 1.5);
+  margin: calc(var(--u) * 1.5) 0 0;
+}
+.rep-chip {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  color: var(--ink-muted);
+}
+.evidence__asat,
+.evidence__stale {
+  font-family: var(--face-ui);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.evidence[data-rep="replicated"] { border-left-color: var(--solid); }
+.evidence[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+.evidence[data-rep="single"],
+.evidence[data-rep="contested"] { border-left-color: var(--shaky); }
+.evidence[data-rep="single"] .rep-chip,
+.evidence[data-rep="contested"] .rep-chip { color: var(--shaky); }
+
+.evidence[data-rep="failed"],
+.evidence[data-rep="overclaimed"] { border-left-color: var(--action); }
+.evidence[data-rep="failed"] .rep-chip,
+.evidence[data-rep="overclaimed"] .rep-chip { color: var(--action); }
+
+.evidence[data-rep="statute"] { border-left-color: var(--accent); }
+.evidence[data-rep="statute"] .rep-chip { color: var(--accent); }
+
+/* Staleness is about the check, not the claim, so it marks the block without
+   overriding the verdict colour the claim earned. */
+.evidence[data-stale="1"] { border-left-style: dashed; }
+.evidence[data-stale="1"] .evidence__stale { color: var(--action); }
+
 /* --- Expiry -------------------------------------------------------------- */
 .tag--lapsed {
   background: none;
@@ -3724,6 +3876,134 @@ window.SITE = {
 
 </script>
 <script>
+/*
+ * A four-operator arithmetic evaluator over named profile fields.
+ *
+ * Entries declare their sum as a string, so something has to turn that string
+ * into a number. Not eval, and not a Function constructor: this runs in a page
+ * that holds the reader's own financial figures, and an expression is content
+ * rather than code. The grammar is an allowlist - decimal numbers, declared
+ * identifiers, the four operators, brackets, and a leading sign. Anything else
+ * fails to tokenise, so a call, a subscript, a semicolon or a property access
+ * never reaches an evaluator at all.
+ *
+ * Both halves of the toolchain use this. build.js compiles every expression at
+ * build time and checks its identifiers against the declared profile, which is
+ * what stops a typo from surfacing as a silent NaN months later on the one day
+ * that entry comes up.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.EXPR = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var NUM = /^\d+(?:\.\d+)?/;
+  var NAME = /^[A-Za-z_][A-Za-z0-9_]*/;
+  var PREC = { '+': 1, '-': 1, '*': 2, '/': 2 };
+
+  function tokenize(src) {
+    var s = String(src), out = [], i = 0;
+    while (i < s.length) {
+      var rest = s.slice(i), c = rest.charAt(0), m;
+      if (c === ' ' || c === '\t' || c === '\n') { i++; continue; }
+      if ((m = NUM.exec(rest))) { out.push({ t: 'num', v: parseFloat(m[0]) }); i += m[0].length; continue; }
+      if ((m = NAME.exec(rest))) { out.push({ t: 'name', v: m[0] }); i += m[0].length; continue; }
+      if (c === '(' || c === ')') { out.push({ t: c }); i++; continue; }
+      if (PREC[c]) { out.push({ t: 'op', v: c }); i++; continue; }
+      throw new Error('unexpected "' + c + '" at position ' + i);
+    }
+    if (!out.length) throw new Error('empty expression');
+    return out;
+  }
+
+  /* Shunting-yard. `expectOperand` is what rejects the shapes that tokenise
+     cleanly but are not arithmetic: two values in a row, a doubled operator
+     such as **, or a bracket opening straight after a value, which is how a
+     function call would have to look. */
+  function toRPN(tokens) {
+    var out = [], ops = [], expectOperand = true, i, tk, top;
+    for (i = 0; i < tokens.length; i++) {
+      tk = tokens[i];
+      if (tk.t === 'num' || tk.t === 'name') {
+        if (!expectOperand) throw new Error('two values in a row near "' + tk.v + '"');
+        out.push(tk);
+        expectOperand = false;
+      } else if (tk.t === 'op') {
+        if (expectOperand) {
+          if (tk.v !== '-' && tk.v !== '+') throw new Error('"' + tk.v + '" needs a value before it');
+          out.push({ t: 'num', v: 0 });          // unary: -x becomes 0 - x
+          ops.push(tk);
+        } else {
+          while (ops.length) {
+            top = ops[ops.length - 1];
+            if (top.t === 'op' && PREC[top.v] >= PREC[tk.v]) out.push(ops.pop());
+            else break;
+          }
+          ops.push(tk);
+        }
+        expectOperand = true;
+      } else if (tk.t === '(') {
+        if (!expectOperand) throw new Error('a bracket cannot follow a value');
+        ops.push(tk);
+        expectOperand = true;
+      } else {
+        if (expectOperand) throw new Error('empty brackets');
+        while (ops.length && ops[ops.length - 1].t !== '(') out.push(ops.pop());
+        if (!ops.length) throw new Error('unbalanced brackets');
+        ops.pop();
+        expectOperand = false;
+      }
+    }
+    if (expectOperand) throw new Error('expression ends with an operator');
+    while (ops.length) {
+      top = ops.pop();
+      if (top.t === '(') throw new Error('unbalanced brackets');
+      out.push(top);
+    }
+    return out;
+  }
+
+  function compile(src) { return toRPN(tokenize(src)); }
+
+  function names(src) {
+    var seen = {}, out = [];
+    tokenize(src).forEach(function (tk) {
+      if (tk.t === 'name' && !seen[tk.v]) { seen[tk.v] = 1; out.push(tk.v); }
+    });
+    return out;
+  }
+
+  /* Returns null rather than NaN for a missing field or a division by zero.
+     A NaN would render as "NaN" and read as a computed answer. */
+  function run(src, vars) {
+    var rpn = compile(src), st = [], i, tk, a, b, v;
+    for (i = 0; i < rpn.length; i++) {
+      tk = rpn[i];
+      if (tk.t === 'num') { st.push(tk.v); continue; }
+      if (tk.t === 'name') {
+        v = vars ? vars[tk.v] : undefined;
+        if (typeof v !== 'number' || !isFinite(v)) return null;
+        st.push(v);
+        continue;
+      }
+      b = st.pop();
+      a = st.pop();
+      if (tk.v === '+') st.push(a + b);
+      else if (tk.v === '-') st.push(a - b);
+      else if (tk.v === '*') st.push(a * b);
+      else if (b === 0) return null;
+      else st.push(a / b);
+    }
+    v = st.pop();
+    return (typeof v === 'number' && isFinite(v)) ? v : null;
+  }
+
+  return { compile: compile, names: names, run: run, tokenize: tokenize };
+});
+
+</script>
+<script>
 /* ==========================================================================
    Daily — shared engine
 
@@ -3740,6 +4020,7 @@ window.SITE = {
 
   var SITE = window.SITE || {};
   var LESSONS = window.LESSONS || [];
+  var EXPR = window.EXPR;                    // engine/expr.js, loaded before this
 
   var KEY = SITE.key;
   var TRACKS = SITE.tracks || [];
@@ -3751,6 +4032,50 @@ window.SITE = {
   var HAS_REVIEW = SITE.review !== 'none';
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
+  var HAS_EVIDENCE = SITE.evidenceGate === true;
+
+  /* Expiry retires a claim the author already knew would rot. This retires the
+     author's confidence in a claim they thought was settled, which is where
+     checking actually finds the failures. Nothing leaves the sequence: a stale
+     citation is still true more often than not, it is just no longer checked. */
+  var REVERIFY_DAYS = SITE.reverifyDays || 0;
+
+  function stale(l) {
+    if (!REVERIFY_DAYS || !l.verifiedOn) return false;
+    return shift(l.verifiedOn, REVERIFY_DAYS) < today();
+  }
+
+  function evidenceHTML(l) {
+    var h = '<div class="evidence" data-rep="' + esc(l.replication) + '"' +
+      (stale(l) ? ' data-stale="1"' : '') + '>';
+    h += '<p class="block__label">' + esc(COPY.labelEvidence || 'The evidence') + '</p>';
+    h += '<p class="evidence__cite">' + esc(l.evidence) + '</p>';
+    if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+      h += '<p class="evidence__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+        l.interval.lo + ' to ' + l.interval.hi + '</p>';
+    }
+    h += '<p class="evidence__meta">';
+    h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+    if (l.replication === 'statute' && l.asAt) {
+      h += '<span class="evidence__asat">as at ' + esc(shortDate(l.asAt)) + '</span>';
+    }
+    if (stale(l)) {
+      h += '<span class="evidence__stale">' +
+        esc(COPY.staleNote || 'not re-checked since ' + shortDate(l.verifiedOn)) + '</span>';
+    }
+    h += '</p></div>';
+    return h;
+  }
+
+  var REP_LABEL = {
+    replicated:  'Replicated',
+    single:      'One study, never repeated',
+    contested:   'Contested',
+    failed:      'Failed to replicate',
+    overclaimed: 'Real, but overclaimed',
+    craft:       'Craft, no trial behind it',
+    statute:     'Statute'
+  };
 
   /* ------------------------------------------------------------------------
      THE POLICY DIAL
@@ -3859,6 +4184,7 @@ window.SITE = {
     days: {},
     streak: { count: 0, best: 0, lastOn: null },
     forecasts: {},
+    profile: {},
     theme: null
   };
 
@@ -3996,7 +4322,118 @@ window.SITE = {
      frozen the moment the answer appears. An editable answer is not a
      commitment, it is a draft, and the whole value is in being able to read
      back what you actually thought before you knew. */
+  /* ------------------------------------------------------------------------
+     THE ARITHMETIC GATE
+
+     A text gate proves you thought about the question. This proves you did the
+     sum. The site holds a small profile of your own figures, each entry
+     declares its answer as an expression over them, and the entry stays shut
+     until you have written your own number to be compared against.
+
+     What it keeps is the signed gap rather than a right/wrong mark, because
+     the useful quantity is which direction you are consistently wrong in. A
+     reader who is reliably optimistic about their own tax position learns more
+     from that than from a score. */
+
+  var PROFILE = SITE.profile || null;
+  var PROFILE_FIELDS = (PROFILE && PROFILE.fields) || [];
+
+  function byId(id) {
+    for (var i = 0; i < LESSONS.length; i++) {
+      if (LESSONS[i].id === id) return LESSONS[i];
+    }
+    return null;
+  }
+
+  function profileField(id) {
+    for (var i = 0; i < PROFILE_FIELDS.length; i++) {
+      if (PROFILE_FIELDS[i].id === id) return PROFILE_FIELDS[i];
+    }
+    return null;
+  }
+
+  /* Which declared fields this entry's sum actually needs. Asking for the whole
+     profile up front is how a settings page gets abandoned; asking for the two
+     numbers today's entry needs is a question someone will answer. */
+  /* No try/catch. build.js compiles every expression and checks every
+     identifier against the declared profile, so a throw here means the page was
+     assembled wrong - and a gate that silently asks for nothing would render as
+     an entry that opens itself, which is the one outcome worth crashing over. */
+  function computeNeeds(l) {
+    if (!l || !l.compute || !l.compute.expr) return [];
+    return EXPR.names(l.compute.expr).filter(function (n) { return !!profileField(n); });
+  }
+
+  function computeMissing(l) {
+    return computeNeeds(l).filter(function (n) {
+      return typeof state.profile[n] !== 'number';
+    });
+  }
+
+  /* null rather than NaN when a field is missing or a divisor is zero. NaN
+     would render as "NaN" and read as an answer. */
+  function computeAnswer(l) {
+    return EXPR.run(l.compute.expr, state.profile);
+  }
+
+  function saveProfile(vals) {
+    var wrote = false;
+    for (var k in vals) {
+      var f = profileField(k);
+      if (!f) continue;
+      var n = parseFloat(vals[k]);
+      if (!isFinite(n)) continue;
+      if (typeof f.min === 'number' && n < f.min) continue;
+      if (typeof f.max === 'number' && n > f.max) continue;
+      state.profile[k] = n;
+      wrote = true;
+    }
+    if (wrote) save();
+    return wrote;
+  }
+
+  function commitCompute(id, raw) {
+    var l = byId(id);
+    if (!l || !l.compute) return false;
+    if (computeMissing(l).length) return false;
+    var r = record(id);
+    if (r.compute) return false;                 // first number stands
+    var yours = parseFloat(raw);
+    if (!isFinite(yours)) return false;
+    var computed = computeAnswer(l);
+    if (computed === null) return false;
+    r.compute = {
+      yours: yours,
+      computed: computed,
+      gap: yours - computed,
+      on: today()
+    };
+    save();
+    return true;
+  }
+
+  function gapStats() {
+    var gaps = [];
+    for (var id in state.log) {
+      var c = state.log[id].compute;
+      if (c && typeof c.gap === 'number') gaps.push(c.gap);
+    }
+    if (!gaps.length) return { n: 0, medianAbs: null, signedMean: null };
+    var abs = gaps.map(Math.abs).sort(function (a, b) { return a - b; });
+    var mid = Math.floor(abs.length / 2);
+    var medianAbs = abs.length % 2 ? abs[mid] : (abs[mid - 1] + abs[mid]) / 2;
+    var mean = gaps.reduce(function (a, b) { return a + b; }, 0) / gaps.length;
+    return { n: gaps.length, medianAbs: medianAbs, signedMean: mean };
+  }
+
+  function computeDone(id) {
+    var r = state.log[id];
+    return !!(r && r.compute);
+  }
+
   function gateOpen(id) {
+    var l = byId(id);
+    if (l && l.compute) return computeDone(id);
     if (!GATE) return true;
     var r = state.log[id];
     return !!(r && r.gate && r.gate.answer);
@@ -4262,6 +4699,59 @@ window.SITE = {
   }
 
   /* --- Gate block -------------------------------------------------------- */
+  function num(n) {
+    var r = Math.round(n * 100) / 100;
+    return String(r);
+  }
+
+  function computeHTML(l) {
+    var missing = computeMissing(l);
+    var r = state.log[l.id] || {};
+    var unit = l.compute.unit ? ' ' + l.compute.unit : '';
+
+    var h = '<div class="compute' + (r.compute ? ' compute--done' : '') + '">';
+    h += '<p class="block__label">' + esc(COPY.labelCompute || 'Work it out first') + '</p>';
+    // Same setup the text gate shows. Without this an entry that switched to
+    // the arithmetic gate would silently drop the situation it was written for.
+    if (l.gateIntro) h += '<div class="gate__intro">' + paras(l.gateIntro) + '</div>';
+    h += '<p class="compute__q">' + esc(l.compute.question) + '</p>';
+
+    if (r.compute) {
+      h += '<p class="compute__result">You wrote <b>' + esc(num(r.compute.yours)) + esc(unit) +
+        '</b>. It computes to <b>' + esc(num(r.compute.computed)) + esc(unit) + '</b>.</p>';
+      h += '<p class="compute__gap" data-dir="' + (r.compute.gap < 0 ? 'under' : r.compute.gap > 0 ? 'over' : 'exact') + '">' +
+        (r.compute.gap === 0 ? 'Exact.'
+          : esc(num(Math.abs(r.compute.gap)) + unit) + (r.compute.gap < 0 ? ' under.' : ' over.')) +
+        '</p>';
+      return h + '</div>';
+    }
+
+    if (missing.length) {
+      h += '<p class="compute__note">' + esc((PROFILE && PROFILE.note) ||
+        'Held in this browser only, and never sent anywhere.') + '</p>';
+      h += '<div class="compute__fields">';
+      missing.forEach(function (id) {
+        var f = profileField(id);
+        h += '<label class="compute__lab" for="prof-' + esc(id) + '">' + esc(f.label) +
+          (f.unit ? ' <span class="compute__unit">' + esc(f.unit) + '</span>' : '') + '</label>';
+        h += '<input class="compute__input" id="prof-' + esc(id) + '" type="number" inputmode="decimal">';
+      });
+      h += '</div>';
+      h += '<button class="btn" data-act="profile-save" data-id="' + esc(l.id) + '">Save and continue</button>';
+    } else {
+      h += '<div class="compute__row">';
+      h += '<input class="compute__input" id="compute-field" type="number" inputmode="decimal" ' +
+        'placeholder="' + esc(COPY.computePlaceholder || 'Your number') + '">';
+      h += '<button class="btn" data-act="compute-commit" data-id="' + esc(l.id) + '">' +
+        esc(COPY.computeCta || 'Commit it') + '</button>';
+      h += '</div>';
+    }
+
+    h += '<p class="gate__curtain">' + esc(COPY.computeCurtain ||
+      'The entry opens once you have written your own number above.') + '</p>';
+    return h + '</div>';
+  }
+
   function gateHTML(l) {
     var r = state.log[l.id] || {};
     var answered = !!(r.gate && r.gate.answer);
@@ -4297,7 +4787,8 @@ window.SITE = {
     opts = opts || {};
     var r = state.log[l.id] || {};
     var done = r.completedOn === today();
-    var locked = GATE && opts.canComplete && !gateOpen(l.id);
+    var computed = !!(l.compute && PROFILE);
+    var locked = (computed || GATE) && opts.canComplete && !gateOpen(l.id);
 
     var h = '';
     h += '<article class="entry">';
@@ -4313,10 +4804,19 @@ window.SITE = {
     h += '<p class="entry__source">' + esc(COPY.sourcePrefix || 'After') + ' <em>' + esc(l.source) + '</em></p>';
     h += '</header>';
 
-    if (GATE && opts.canComplete) h += gateHTML(l);
+    /* An entry that declares a sum uses the arithmetic gate. Anything else on
+       the same site falls back to the text gate if one is configured. */
+    if (opts.canComplete) {
+      if (computed) h += computeHTML(l);
+      else if (GATE) h += gateHTML(l);
+    }
 
     if (locked) {
-      h += '<p class="gate__curtain">' + esc(GATE.curtain || 'The entry opens once you have committed an answer above.') + '</p>';
+      // The arithmetic gate draws its own curtain, because what it says depends
+      // on whether it is still asking for profile figures or for the answer.
+      if (!computed) {
+        h += '<p class="gate__curtain">' + esc(GATE.curtain || 'The entry opens once you have committed an answer above.') + '</p>';
+      }
       h += '</article>';
       return h;
     }
@@ -4329,6 +4829,10 @@ window.SITE = {
 
     h += '<div class="block"><p class="block__label">' + esc(COPY.labelIdea || 'The idea') + '</p>';
     h += '<div class="block__body"><p class="lead">' + esc(l.idea) + '</p></div></div>';
+
+    /* Above the mechanism rather than below it. The prose is what drifts past
+       the citation, so the citation has to be read first to be a check on it. */
+    if (HAS_EVIDENCE && l.evidence) h += evidenceHTML(l);
 
     h += '<div class="block"><p class="block__label">' + esc(COPY.labelWhy || 'Why it holds') + '</p>';
     h += '<div class="block__body">' + paras(l.why) + '</div></div>';
@@ -4750,6 +5254,19 @@ window.SITE = {
       var gated = ids.filter(function (i) { return state.log[i].gate && state.log[i].gate.answer; }).length;
       h += cell(GATE.statLabel || 'Committed', gated, 'answers frozen before reading');
     }
+    /* Two cells rather than one. The median says how far off you are; the
+       signed mean says which side you are wrong on, and a reader who is
+       reliably optimistic about their own position learns more from the
+       direction than from the size. */
+    if (PROFILE) {
+      var g = gapStats();
+      h += cell('Median gap', g.n ? num(g.medianAbs) : '-',
+        g.n ? 'across ' + g.n + (g.n === 1 ? ' sum' : ' sums') : 'nothing computed yet');
+      if (g.n) {
+        h += cell('Typical direction', (g.signedMean > 0 ? '+' : '') + num(g.signedMean),
+          g.signedMean > 0 ? 'you read high' : g.signedMean < 0 ? 'you read low' : 'no lean');
+      }
+    }
     h += '</div>';
 
     h += '<div class="coverage"><p class="block__label">Coverage by track</p>';
@@ -4837,6 +5354,31 @@ window.SITE = {
       var gf = el('gate-field');
       if (!gf || !unlockGate(id, gf.value)) {
         toast(GATE && GATE.tooShort || 'Write something first — that is the whole mechanism');
+        return;
+      }
+      render();
+      return;
+    }
+
+    if (act === 'profile-save') {
+      var l = byId(id);
+      var vals = {};
+      computeNeeds(l).forEach(function (n) {
+        var f = el('prof-' + n);
+        if (f) vals[n] = f.value;
+      });
+      if (!saveProfile(vals)) {
+        toast('Put a number in each field first');
+        return;
+      }
+      render();
+      return;
+    }
+
+    if (act === 'compute-commit') {
+      var cf = el('compute-field');
+      if (!cf || !commitCompute(id, cf.value)) {
+        toast(COPY.computeRefused || 'Write your own number first — that is the whole mechanism');
         return;
       }
       render();
@@ -5018,6 +5560,7 @@ window.SITE = {
     dueList: dueList, markComplete: markComplete, gradeCard: gradeCard, unlockGate: unlockGate,
     gateOpen: gateOpen, lapsed: lapsed, brier: brier, calibration: calibration,
     addForecast: addForecast, resolveForecast: resolveForecast, deepDivePrompt: deepDivePrompt,
+    gapStats: gapStats, commitCompute: commitCompute, saveProfile: saveProfile,
     state: function () { return state; }, seq: function () { return SEQ; }, go: go, render: render
   };
 })();

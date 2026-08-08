@@ -4,8 +4,8 @@
   "private": true,
   "description": "Cascade - what failed, what amplified it, what made recovery slow. One incident a day, gated behind your own call.",
   "scripts": {
-    "build": "node lib/build.js",
-    "test": "node test/engine.test.js && node test/site.test.js",
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
     "check": "npm run build && npm test"
   }
 }

@@ -1,8 +1,8 @@
 {
-  "name": "baserate",
+  "name": "nomogram",
   "version": "1.0.0",
   "private": true,
-  "description": "Base Rate - whether a number means anything. One entry a day, plus a forecast book scored on Brier.",
+  "description": "Nomogram - what training does, and how well that is known",
   "scripts": {
     "build": "node ../_shared/lib/build.js",
     "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",

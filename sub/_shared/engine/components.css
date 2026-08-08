@@ -1,0 +1,386 @@
+/* ==========================================================================
+   Daily — components the base sheet does not carry
+
+   Everything here belongs to a mechanic that only some sites turn on: the
+   commitment gate, expiry, the attempts log, the forecast book. Tokens only,
+   no literal colours, so a site theme retunes these along with everything
+   else.
+   ========================================================================== */
+
+/* --- The gate ------------------------------------------------------------
+   Deliberately heavy. It is the one thing on the page that stops you, and a
+   stop that looks like a form field gets skipped. */
+.gate {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 4) 0;
+  padding: calc(var(--u) * 3);
+  background: var(--action-soft);
+  border: 1px solid var(--action-line);
+  border-left-width: 3px;
+  border-radius: 2px;
+}
+.gate--done {
+  background: var(--paper-sunk);
+  border-color: var(--rule);
+  border-left-color: var(--rule-strong);
+}
+.gate__intro {
+  margin-bottom: calc(var(--u) * 2);
+  padding-bottom: calc(var(--u) * 2);
+  border-bottom: 1px solid var(--action-line);
+}
+.gate__intro p + p { margin-top: var(--lead); }
+.gate__prompt {
+  font-family: var(--face-display);
+  font-size: 1.25rem;
+  line-height: 1.35;
+  margin-bottom: calc(var(--u) * 2);
+}
+.gate__field { min-height: calc(var(--lead) * 4); }
+.gate__note {
+  margin-top: var(--u);
+  font-family: var(--face-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+.gate__stamp {
+  font-family: var(--face-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: var(--u);
+}
+.gate__answer { white-space: pre-wrap; color: var(--ink-muted); font-style: italic; }
+.gate__answer p + p { margin-top: var(--lead); }
+
+.gate__fallback { margin-bottom: calc(var(--u) * 2); }
+.gate__fallback summary {
+  cursor: pointer;
+  font-family: var(--face-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+.gate__fallbacktext {
+  margin: var(--u) 0;
+  padding: calc(var(--u) * 2);
+  background: var(--paper-raised);
+  border: 1px dashed var(--rule-strong);
+  font-size: 0.9375rem;
+}
+
+.gate__curtain {
+  max-width: var(--measure);
+  padding: calc(var(--u) * 4) 0;
+  font-family: var(--face-ui);
+  font-size: 0.9375rem;
+  color: var(--ink-faint);
+  border-top: 1px dashed var(--rule-strong);
+}
+
+/* --- Arithmetic gate ----------------------------------------------------- */
+/* Same visual weight as the text gate, because it does the same job one notch
+   harder. The gap is the only part that earns colour: over and under are
+   different mistakes and the reader should be able to see which one they keep
+   making without reading the number. */
+.compute {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 4) 0;
+  padding: calc(var(--u) * 3);
+  background: var(--action-soft);
+  border: 1px solid var(--action-line);
+  border-left-width: 3px;
+  border-radius: 2px;
+}
+.compute--done {
+  background: var(--paper-sunk);
+  border-color: var(--rule);
+  border-left-color: var(--rule-strong);
+}
+.compute__q {
+  margin-top: var(--u);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+.compute__note {
+  margin-top: var(--u);
+  font-family: var(--face-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+.compute__fields {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--u) calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0;
+}
+.compute__lab {
+  font-family: var(--face-ui);
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+.compute__unit { color: var(--ink-faint); }
+.compute__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0;
+}
+.compute__input {
+  font-family: var(--face-mono);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  padding: calc(var(--u) * 1.25) calc(var(--u) * 1.5);
+  background: var(--paper-raised);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  min-width: 10ch;
+}
+.compute__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.compute__result {
+  margin-top: calc(var(--u) * 1.5);
+  font-variant-numeric: tabular-nums;
+}
+.compute__gap {
+  margin-top: var(--u);
+  font-family: var(--face-ui);
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.compute__gap[data-dir="exact"] { color: var(--solid); }
+.compute__gap[data-dir="over"],
+.compute__gap[data-dir="under"] { color: var(--action); }
+
+/* --- Evidence gate ------------------------------------------------------- */
+/* Seven verdicts, four colours. The colour answers only "how much weight does
+   this carry", which is the question the reader is actually asking; the label
+   carries the distinction between, say, never-repeated and disputed. Giving
+   each verdict its own hue would imply seven degrees of trust and there are
+   not seven. */
+.evidence {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 3) 0;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2.5);
+  background: var(--paper-sunk);
+  border-left: 3px solid var(--rule-strong);
+}
+.evidence__cite {
+  margin: calc(var(--u) * 0.75) 0 0;
+  font-family: var(--face-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.evidence__interval {
+  margin: calc(var(--u) * 0.5) 0 0;
+  font-family: var(--face-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+.evidence__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 1.5);
+  margin: calc(var(--u) * 1.5) 0 0;
+}
+.rep-chip {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  color: var(--ink-muted);
+}
+.evidence__asat,
+.evidence__stale {
+  font-family: var(--face-ui);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.evidence[data-rep="replicated"] { border-left-color: var(--solid); }
+.evidence[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+.evidence[data-rep="single"],
+.evidence[data-rep="contested"] { border-left-color: var(--shaky); }
+.evidence[data-rep="single"] .rep-chip,
+.evidence[data-rep="contested"] .rep-chip { color: var(--shaky); }
+
+.evidence[data-rep="failed"],
+.evidence[data-rep="overclaimed"] { border-left-color: var(--action); }
+.evidence[data-rep="failed"] .rep-chip,
+.evidence[data-rep="overclaimed"] .rep-chip { color: var(--action); }
+
+.evidence[data-rep="statute"] { border-left-color: var(--accent); }
+.evidence[data-rep="statute"] .rep-chip { color: var(--accent); }
+
+/* Staleness is about the check, not the claim, so it marks the block without
+   overriding the verdict colour the claim earned. */
+.evidence[data-stale="1"] { border-left-style: dashed; }
+.evidence[data-stale="1"] .evidence__stale { color: var(--action); }
+
+/* --- Expiry -------------------------------------------------------------- */
+.tag--lapsed {
+  background: none;
+  border: 1px solid var(--action-line);
+  color: var(--action);
+}
+.pip--lapsed {
+  background: none;
+  border: 1px solid var(--rule-strong);
+  width: 5px;
+  height: 5px;
+}
+
+/* --- Attempts log -------------------------------------------------------- */
+.attempt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u);
+  max-width: var(--measure);
+  padding-bottom: calc(var(--u) * 3);
+  margin-bottom: calc(var(--u) * 3);
+  border-bottom: 1px solid var(--rule);
+}
+.attempt__past {
+  padding-left: calc(var(--u) * 2);
+  border-left: 2px solid var(--accent-line);
+  white-space: pre-wrap;
+}
+.attempt__past span {
+  font-family: var(--face-mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  margin-right: var(--u);
+}
+.attempt__new { display: flex; flex-direction: column; gap: var(--u); align-items: flex-start; }
+.attempt__field { min-height: calc(var(--lead) * 2); }
+
+/* --- Journal, gated entries --------------------------------------------- */
+.note__label {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.note__body--gate {
+  color: var(--ink-muted);
+  font-style: italic;
+  padding-left: calc(var(--u) * 2);
+  border-left: 2px solid var(--action-line);
+}
+
+/* --- Forecast seed, inside an entry -------------------------------------- */
+.fc-seed {
+  max-width: var(--measure);
+  margin: calc(var(--u) * 4) 0;
+  padding: calc(var(--u) * 3);
+  background: var(--paper-sunk);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.fc-seed__q {
+  font-family: var(--face-display);
+  font-size: 1.125rem;
+  line-height: 1.35;
+  margin-bottom: calc(var(--u) * 2);
+}
+.fc-seed__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) * 2);
+  align-items: center;
+}
+.fc-seed__lab {
+  font-family: var(--face-ui);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u);
+}
+.fc-seed__p, .fc-seed__d {
+  font-family: var(--face-mono);
+  font-size: 0.875rem;
+  padding: 5px 7px;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+}
+.fc-seed__p { width: 4.5rem; }
+
+/* --- Forecast book ------------------------------------------------------- */
+.fc-group {
+  max-width: var(--measure);
+  margin-bottom: calc(var(--u) * 5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--u);
+}
+.fc-new__q { min-height: calc(var(--lead) * 2); }
+.fc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) * 2);
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: calc(var(--u) * 2);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: 2px;
+}
+.fc-row--ripe { border-left-color: var(--action); background: var(--action-soft); }
+.fc-row--good { border-left-color: var(--solid); }
+.fc-row--mid  { border-left-color: var(--shaky); }
+.fc-row--bad  { border-left-color: var(--action); }
+.fc-row__body { flex: 1 1 18rem; }
+.fc-row__q { line-height: 1.4; }
+.fc-row__meta {
+  margin-top: 4px;
+  font-family: var(--face-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+.fc-row__acts { display: flex; gap: var(--u); flex-wrap: wrap; }
+
+/* --- Calibration plot ----------------------------------------------------
+   Inline SVG because the CSP blocks every chart library, and because a
+   ten-bucket scatter against a diagonal does not need one. */
+.calwrap {
+  max-width: var(--measure);
+  margin-bottom: calc(var(--u) * 5);
+}
+.cal {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  margin: calc(var(--u) * 2) 0;
+}
+.cal__ref { stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+.cal__axis { stroke: var(--rule-strong); stroke-width: 1; }
+.cal__dot { fill: var(--accent); fill-opacity: 0.75; }
+.cal__t {
+  fill: var(--ink-faint);
+  font-family: var(--face-ui);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
