@@ -18,6 +18,7 @@ const SOCIALS = [
   { label: "LinkedIn", url: "https://au.linkedin.com/in/tczhao", icon: ICONS.linkedin },
   { label: "Kaggle",   url: "https://www.kaggle.com/tobycat",  text: "K" },
   { label: "Medium",   url: "https://wklytech.medium.com/",    icon: ICONS.medium },
+  { label: "Substrate", url: "/sub/", text: "S", internal: true },
 ];
 
 function renderTrustedBy(target) {
@@ -33,7 +34,7 @@ function renderTrustedBy(target) {
 function renderSocials(target) {
   target.innerHTML = SOCIALS.map(item => `
     <li>
-      <a href="${item.url}" target="_blank" rel="noopener noreferrer" aria-label="${item.label}">
+      <a href="${item.url}"${item.internal ? "" : ' target="_blank" rel="noopener noreferrer"'} aria-label="${item.label}">
         ${item.icon || item.text}
       </a>
     </li>
