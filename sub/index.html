@@ -32,6 +32,10 @@
     --accent-steel: #94a3b8;
     --accent-brass: #c9a44e;
     --accent-crimson: #e05a6b;
+    --accent-moss: #6fb394;
+    --accent-lime: #a3e635;
+    --accent-fuchsia: #e879f9;
+    --accent-sky: #38bdf8;
     --radius: 16px;
     --radius-sm: 10px;
   }
@@ -59,6 +63,10 @@
     --accent-steel: #475569;
     --accent-brass: #7a5c1e;
     --accent-crimson: #b4283c;
+    --accent-moss: #2e5e4e;
+    --accent-lime: #4d7c0f;
+    --accent-fuchsia: #a21caf;
+    --accent-sky: #0284c7;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -355,6 +363,12 @@ const SECTIONS = [
         name: 'Maillard', eyebrow: 'Kitchen notes',
         tagline: 'the chemistry under the cooking',
         desc: '160 mechanisms across 8 tracks, plus a log of what actually happened in the pan. The one here that is deliberately not about work.'
+      },
+      {
+        href: 'contactpatch/dist/', icon: '\u{1F6DE}', accent: 'moss',
+        name: 'Contact Patch', eyebrow: 'Setup sheet',
+        tagline: 'what four hands of rubber can actually do',
+        desc: 'Vehicle dynamics on one side, crash epidemiology on the other, and they disagree: the physics is settled and the evidence that knowing it makes you safer is not. 30 entries so far, of a planned nine tracks.'
       }
     ]
   },
@@ -386,6 +400,26 @@ const SECTIONS = [
         name: 'The Tiguan', eyebrow: 'Service book',
         tagline: 'every part that has failed and what it cost',
         desc: '43 service records on a 2008 Tiguan 5N 2.0 TDI, with running spend by system - oil, turbo, Haldex, belts, brakes - and photos of the parts that came out.'
+      }
+    ]
+  },
+  {
+    title: 'Tools',
+    sites: [
+      {
+        href: 'diff/', icon: '\u{1F19A}', accent: 'lime',
+        name: 'Diff', eyebrow: 'Utility',
+        desc: 'Line diff by the Myers algorithm, the one git uses, with word-level highlighting inside changed lines. Side-by-side or unified, and options to ignore whitespace and case.'
+      },
+      {
+        href: 'dice/', icon: '\u{1F3B2}', accent: 'fuchsia',
+        name: 'Dice', eyebrow: 'Utility',
+        desc: 'Standard notation - 3d6, 1d20+5, 4d6kh3, d% - rolled from the platform cryptographic random source with the modulo bias removed. Keeps a session tally and a history.'
+      },
+      {
+        href: 'scorepad/', icon: '\u{1F9EE}', accent: 'sky',
+        name: 'Scorepad', eyebrow: 'Utility',
+        desc: 'Round-by-round board game scoring for up to eight players. Quick plus and minus buttons or an editable grid, ties ranked properly, and the game survives a refresh.'
       }
     ]
   }

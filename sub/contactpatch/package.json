@@ -1,0 +1,11 @@
+{
+  "name": "contactpatch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Contact Patch - what four hands of rubber can actually do. One entry a day, with a drive log instead of a review deck.",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}

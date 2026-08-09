@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Diff</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
+    --accent-emerald: #10b981;
+    --accent-rose: #f43f5e;
+    --add-bg: rgba(16,185,129,0.10);
+    --add-line: rgba(16,185,129,0.34);
+    --add-ink: #34d399;
+    --add-strong: rgba(16,185,129,0.30);
+    --del-bg: rgba(244,63,94,0.10);
+    --del-line: rgba(244,63,94,0.34);
+    --del-ink: #fb7185;
+    --del-strong: rgba(244,63,94,0.30);
+    --gutter: rgba(255,255,255,0.02);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
+    --accent-emerald: #059669;
+    --accent-rose: #e11d48;
+    --add-bg: rgba(5,150,105,0.09);
+    --add-line: rgba(5,150,105,0.30);
+    --add-ink: #047857;
+    --add-strong: rgba(5,150,105,0.26);
+    --del-bg: rgba(225,29,72,0.08);
+    --del-line: rgba(225,29,72,0.30);
+    --del-ink: #be123c;
+    --del-strong: rgba(225,29,72,0.24);
+    --gutter: rgba(0,0,0,0.02);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px 60px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text-primary); }
+
+  .theme-toggle {
+    width: 52px; height: 28px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    cursor: pointer; padding: 0; transition: all 0.3s ease;
+    display: flex; align-items: center; flex: none;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: transform 0.3s ease; transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
+
+  .hero { margin-bottom: 24px; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+  .hero p { font-size: 14px; color: var(--text-secondary); }
+
+  .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .pane { display: flex; flex-direction: column; gap: 8px; }
+  .pane label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted);
+  }
+  textarea {
+    width: 100%; min-height: 190px; resize: vertical;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 14px; font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; line-height: 1.6; tab-size: 4;
+  }
+  textarea:focus { outline: none; border-color: var(--accent-blue); }
+  textarea::placeholder { color: var(--text-muted); }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-bottom: 22px; }
+  button {
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 9px 16px; cursor: pointer; transition: all 0.2s ease;
+  }
+  button:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+  button.primary { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+  button.primary:hover { filter: brightness(1.08); }
+  .toggle-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .toggle-group button { border: none; border-radius: 0; background: transparent; padding: 9px 14px; font-weight: 500; }
+  .toggle-group button[aria-pressed="true"] { background: var(--accent-blue); color: #fff; }
+  .opt { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none; }
+  .opt input { accent-color: var(--accent-blue); width: 15px; height: 15px; cursor: pointer; }
+  .spacer { flex: 1; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .stat { border: 1px solid var(--border); border-radius: 999px; padding: 5px 13px; color: var(--text-secondary); }
+  .stat b { font-weight: 600; }
+  .stat.add { color: var(--add-ink); border-color: var(--add-line); }
+  .stat.del { color: var(--del-ink); border-color: var(--del-line); }
+
+  .result {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; }
+  td { vertical-align: top; padding: 0; }
+  td.num {
+    width: 1%; white-space: nowrap; text-align: right;
+    padding: 1px 10px; color: var(--text-muted); background: var(--gutter);
+    user-select: none; border-right: 1px solid var(--border); font-size: 11.5px;
+  }
+  td.txt { padding: 1px 12px; white-space: pre-wrap; overflow-wrap: anywhere; width: 50%; }
+  tr.unified td.txt { width: auto; }
+  td.txt.add { background: var(--add-bg); }
+  td.txt.del { background: var(--del-bg); }
+  td.txt.pad { background: var(--gutter); }
+  mark.w { background: transparent; color: inherit; border-radius: 3px; padding: 0 1px; }
+  td.add mark.w { background: var(--add-strong); }
+  td.del mark.w { background: var(--del-strong); }
+  .sign { display: inline-block; width: 1ch; margin-right: 8px; color: var(--text-muted); }
+  td.add .sign { color: var(--add-ink); }
+  td.del .sign { color: var(--del-ink); }
+
+  .empty { padding: 44px 24px; text-align: center; color: var(--text-muted); font-size: 14px; }
+  .notice { padding: 12px 16px; font-size: 12.5px; color: var(--accent-amber); border-bottom: 1px solid var(--border); }
+
+  .footer { margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 860px) {
+    .container { padding: 28px 14px 40px; }
+    .panes { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 27px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="topbar">
+    <a class="back-link" href="../">&larr; Substrate</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+  </div>
+
+  <div class="hero">
+    <h1>Diff</h1>
+    <p>Line diff with word-level highlighting, by the same algorithm git uses. Nothing leaves the browser.</p>
+  </div>
+
+  <div class="panes">
+    <div class="pane">
+      <label for="left">Original</label>
+      <textarea id="left" spellcheck="false" placeholder="Paste the original text"></textarea>
+    </div>
+    <div class="pane">
+      <label for="right">Changed</label>
+      <textarea id="right" spellcheck="false" placeholder="Paste the changed text"></textarea>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="toggle-group" role="group" aria-label="View mode">
+      <button id="modeSplit" aria-pressed="true">Side by side</button>
+      <button id="modeUnified" aria-pressed="false">Unified</button>
+    </div>
+    <label class="opt"><input type="checkbox" id="optWs"> Ignore whitespace</label>
+    <label class="opt"><input type="checkbox" id="optCase"> Ignore case</label>
+    <label class="opt"><input type="checkbox" id="optWords" checked> Highlight words</label>
+    <div class="spacer"></div>
+    <button id="swap">Swap</button>
+    <button id="sample">Sample</button>
+    <button id="clear">Clear</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="result" id="result"><div class="empty">Paste text into both panes to see a diff.</div></div>
+
+  <div class="footer">Runs entirely in the browser. Nothing is uploaded.</div>
+</div>
+
+<script>
+/* Closed over and strict, so a top-level name can never land on `window` and
+   silently collide with a built-in. The sibling tools each lost a feature to
+   exactly that before this was added. */
+(function () {
+'use strict';
+
+/* ---------------------------------------------------------------------------
+   Myers' O(ND) difference algorithm.
+
+   The obvious alternative is an LCS dynamic-programming table, which is easier
+   to write and allocates N*M cells. Two 3000-line files would ask for nine
+   million cells before rendering anything, so it is not a browser algorithm.
+   Myers walks diagonals in order of edit distance instead and touches work
+   proportional to the size of the difference, which is small for the case this
+   tool actually gets used for: two nearly identical things.
+
+   The trace is kept so the path can be walked back into edit operations. That
+   is the one place memory grows with D rather than with the input, and it is
+   why MAX_D exists below.
+   ------------------------------------------------------------------------- */
+var MAX_D = 3000;
+
+function myers(a, b, eq) {
+  var N = a.length, M = b.length, MAX = Math.min(N + M, MAX_D);
+  var off = MAX, v = new Int32Array(2 * MAX + 2), trace = [];
+
+  for (var d = 0; d <= MAX; d++) {
+    trace.push(v.slice());
+    for (var k = -d; k <= d; k += 2) {
+      var x;
+      if (k === -d || (k !== d && v[off + k - 1] < v[off + k + 1])) x = v[off + k + 1];
+      else x = v[off + k - 1] + 1;
+      var y = x - k;
+      while (x < N && y < M && eq(a[x], b[y])) { x++; y++; }
+      v[off + k] = x;
+      if (x >= N && y >= M) return backtrack(trace, off, N, M);
+    }
+  }
+  return null;   // past MAX_D: the inputs are more different than they are alike
+}
+
+function backtrack(trace, off, N, M) {
+  var ops = [], x = N, y = M;
+  for (var d = trace.length - 1; d >= 0; d--) {
+    var v = trace[d], k = x - y, prevK;
+    if (k === -d || (k !== d && v[off + k - 1] < v[off + k + 1])) prevK = k + 1;
+    else prevK = k - 1;
+    var prevX = v[off + prevK], prevY = prevX - prevK;
+    while (x > prevX && y > prevY) { x--; y--; ops.push({ t: 'eq', a: x, b: y }); }
+    if (d > 0) {
+      if (x === prevX) { y--; ops.push({ t: 'ins', b: y }); }
+      else { x--; ops.push({ t: 'del', a: x }); }
+    }
+  }
+  ops.reverse();
+  return ops;
+}
+
+/* Anything pasted here is somebody else's text and goes straight into innerHTML,
+   so it is escaped at the one boundary rather than trusted anywhere. */
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+function splitLines(t) {
+  if (t === '') return [];
+  return t.replace(/\r\n?/g, '\n').split('\n');
+}
+
+/* Comparison is normalised, display is not. The reader still sees exactly what
+   they pasted; only the decision about whether two lines match is relaxed. */
+function normaliser(ignoreWs, ignoreCase) {
+  return function (s) {
+    if (ignoreWs) s = s.replace(/\s+/g, ' ').trim();
+    if (ignoreCase) s = s.toLowerCase();
+    return s;
+  };
+}
+
+/* Word-level diff inside a changed pair. Splitting on boundaries rather than on
+   spaces keeps punctuation as its own token, so changing "foo(a)" to "foo(b)"
+   highlights the argument instead of the whole call. */
+function tokenise(s) { return s.match(/\s+|\w+|[^\s\w]/g) || []; }
+
+function wordPair(delText, insText, norm) {
+  var A = tokenise(delText), B = tokenise(insText);
+  var ops = myers(A, B, function (x, y) { return norm(x) === norm(y); });
+  if (!ops) return null;
+  var out = { del: [], ins: [] };
+  ops.forEach(function (o) {
+    if (o.t === 'eq') { out.del.push([A[o.a], 0]); out.ins.push([B[o.b], 0]); }
+    else if (o.t === 'del') out.del.push([A[o.a], 1]);
+    else out.ins.push([B[o.b], 1]);
+  });
+  return out;
+}
+
+function renderTokens(parts) {
+  if (!parts) return null;
+  return parts.map(function (p) {
+    return p[1] ? '<mark class="w">' + esc(p[0]) + '</mark>' : esc(p[0]);
+  }).join('');
+}
+
+/* Consecutive deletes followed by consecutive inserts are a replacement, and
+   only a replacement earns word highlighting. Pairing them positionally is a
+   deliberate simplification: a 3-for-2 replacement pairs the first two and
+   leaves the third plain, which is wrong less often than trying to be clever. */
+function group(ops) {
+  var rows = [], i = 0;
+  while (i < ops.length) {
+    if (ops[i].t === 'eq') { rows.push({ t: 'eq', a: ops[i].a, b: ops[i].b }); i++; continue; }
+    var dels = [], inss = [];
+    while (i < ops.length && ops[i].t === 'del') dels.push(ops[i++].a);
+    while (i < ops.length && ops[i].t === 'ins') inss.push(ops[i++].b);
+    rows.push({ t: 'chunk', dels: dels, inss: inss });
+  }
+  return rows;
+}
+
+var state = { mode: 'split' };
+
+function run() {
+  var L = splitLines(document.getElementById('left').value);
+  var R = splitLines(document.getElementById('right').value);
+  var ignoreWs = document.getElementById('optWs').checked;
+  var ignoreCase = document.getElementById('optCase').checked;
+  var doWords = document.getElementById('optWords').checked;
+  var norm = normaliser(ignoreWs, ignoreCase);
+  var result = document.getElementById('result');
+  var statsEl = document.getElementById('stats');
+
+  if (!L.length && !R.length) {
+    statsEl.innerHTML = '';
+    result.innerHTML = '<div class="empty">Paste text into both panes to see a diff.</div>';
+    return;
+  }
+
+  var ops = myers(L, R, function (x, y) { return norm(x) === norm(y); });
+  if (!ops) {
+    statsEl.innerHTML = '';
+    result.innerHTML = '<div class="notice">These two are too different to align inside the edit-distance budget of ' +
+      MAX_D + '. Showing nothing rather than showing a misleading alignment.</div>';
+    return;
+  }
+
+  var rows = group(ops);
+  var added = 0, removed = 0;
+  rows.forEach(function (r) {
+    if (r.t === 'chunk') { removed += r.dels.length; added += r.inss.length; }
+  });
+  var same = ops.filter(function (o) { return o.t === 'eq'; }).length;
+
+  statsEl.innerHTML =
+    '<span class="stat add"><b>+' + added + '</b> added</span>' +
+    '<span class="stat del"><b>-' + removed + '</b> removed</span>' +
+    '<span class="stat"><b>' + same + '</b> unchanged</span>' +
+    '<span class="stat">' + L.length + ' &rarr; ' + R.length + ' lines</span>';
+
+  result.innerHTML = '<div class="scroll">' +
+    (state.mode === 'split' ? renderSplit(rows, L, R, doWords, norm) : renderUnified(rows, L, R, doWords, norm)) +
+    '</div>';
+}
+
+function cell(n, text, cls) {
+  return '<td class="num">' + (n === null ? '' : n) + '</td>' +
+         '<td class="txt ' + cls + '">' + (text === null ? '' : text) + '</td>';
+}
+
+function marked(rowChunk, idx, side, L, R, doWords, norm) {
+  var raw = side === 'del' ? L[rowChunk.dels[idx]] : R[rowChunk.inss[idx]];
+  if (!doWords) return esc(raw);
+  var other = side === 'del' ? rowChunk.inss[idx] : rowChunk.dels[idx];
+  if (other === undefined) return esc(raw);
+  var pair = wordPair(L[rowChunk.dels[idx]], R[rowChunk.inss[idx]], norm);
+  if (!pair) return esc(raw);
+  return renderTokens(side === 'del' ? pair.del : pair.ins) || esc(raw);
+}
+
+function renderSplit(rows, L, R, doWords, norm) {
+  var h = '<table>';
+  rows.forEach(function (r) {
+    if (r.t === 'eq') {
+      h += '<tr>' + cell(r.a + 1, esc(L[r.a]), '') + cell(r.b + 1, esc(R[r.b]), '') + '</tr>';
+      return;
+    }
+    var n = Math.max(r.dels.length, r.inss.length);
+    for (var i = 0; i < n; i++) {
+      var left = i < r.dels.length
+        ? cell(r.dels[i] + 1, marked(r, i, 'del', L, R, doWords, norm), 'del')
+        : cell(null, '', 'pad');
+      var right = i < r.inss.length
+        ? cell(r.inss[i] + 1, marked(r, i, 'ins', L, R, doWords, norm), 'add')
+        : cell(null, '', 'pad');
+      h += '<tr>' + left + right + '</tr>';
+    }
+  });
+  return h + '</table>';
+}
+
+function renderUnified(rows, L, R, doWords, norm) {
+  var h = '<table>';
+  function line(na, nb, sign, text, cls) {
+    return '<tr class="unified"><td class="num">' + (na === null ? '' : na) + '</td>' +
+      '<td class="num">' + (nb === null ? '' : nb) + '</td>' +
+      '<td class="txt ' + cls + '"><span class="sign">' + sign + '</span>' + text + '</td></tr>';
+  }
+  rows.forEach(function (r) {
+    if (r.t === 'eq') { h += line(r.a + 1, r.b + 1, ' ', esc(L[r.a]), ''); return; }
+    for (var i = 0; i < r.dels.length; i++) {
+      h += line(r.dels[i] + 1, null, '-', marked(r, i, 'del', L, R, doWords, norm), 'del');
+    }
+    for (var j = 0; j < r.inss.length; j++) {
+      h += line(null, r.inss[j] + 1, '+', marked(r, j, 'ins', L, R, doWords, norm), 'add');
+    }
+  });
+  return h + '</table>';
+}
+
+/* --- wiring ------------------------------------------------------------- */
+function setMode(m) {
+  state.mode = m;
+  document.getElementById('modeSplit').setAttribute('aria-pressed', String(m === 'split'));
+  document.getElementById('modeUnified').setAttribute('aria-pressed', String(m === 'unified'));
+  run();
+}
+
+document.getElementById('modeSplit').addEventListener('click', function () { setMode('split'); });
+document.getElementById('modeUnified').addEventListener('click', function () { setMode('unified'); });
+['left', 'right'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', run);
+});
+['optWs', 'optCase', 'optWords'].forEach(function (id) {
+  document.getElementById(id).addEventListener('change', run);
+});
+document.getElementById('swap').addEventListener('click', function () {
+  var l = document.getElementById('left'), r = document.getElementById('right');
+  var t = l.value; l.value = r.value; r.value = t;
+  run();
+});
+document.getElementById('clear').addEventListener('click', function () {
+  document.getElementById('left').value = '';
+  document.getElementById('right').value = '';
+  run();
+});
+document.getElementById('sample').addEventListener('click', function () {
+  document.getElementById('left').value =
+    'function total(items) {\n' +
+    '  let sum = 0;\n' +
+    '  for (const i of items) {\n' +
+    '    sum += i.price;\n' +
+    '  }\n' +
+    '  return sum;\n' +
+    '}';
+  document.getElementById('right').value =
+    'function total(items, rate) {\n' +
+    '  let sum = 0;\n' +
+    '  for (const i of items) {\n' +
+    '    sum += i.price * i.qty;\n' +
+    '  }\n' +
+    '  return sum * (1 + rate);\n' +
+    '}';
+  run();
+});
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') !== 'light' ? 'light' : 'dark';
+  if (next === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('diff-tool-theme', next); } catch (e) {}
+  document.getElementById('toggleIcon').innerHTML = next === 'light' ? '&#9728;' : '&#127769;';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function init() {
+  try {
+    var saved = localStorage.getItem('diff-tool-theme') || localStorage.getItem('flight-dash-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || (prefersDark ? 'dark' : 'light');
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (e) {}
+  run();
+})();
+
+/* Exposed for the test harness, which drives this page in a real DOM. */
+window.__diff = {
+  myers: myers, splitLines: splitLines, group: group,
+  tokenise: tokenise, normaliser: normaliser, esc: esc
+};
+
+})();
+</script>
+</body>
+</html>

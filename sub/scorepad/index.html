@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Scorepad</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
+    --accent-sky: #38bdf8;
+    --accent-rose: #f43f5e;
+    --inner: rgba(255,255,255,0.02);
+    --inner-strong: rgba(255,255,255,0.05);
+    --p0: #38bdf8; --p1: #f472b6; --p2: #4ade80; --p3: #fbbf24;
+    --p4: #a78bfa; --p5: #fb923c; --p6: #2dd4bf; --p7: #f87171;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
+    --accent-sky: #0284c7;
+    --accent-rose: #e11d48;
+    --inner: rgba(0,0,0,0.02);
+    --inner-strong: rgba(0,0,0,0.05);
+    --p0: #0284c7; --p1: #db2777; --p2: #16a34a; --p3: #d97706;
+    --p4: #7c3aed; --p5: #ea580c; --p6: #0d9488; --p7: #dc2626;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.4s ease, color 0.4s ease;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 36px 20px 60px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text-primary); }
+
+  .theme-toggle {
+    width: 52px; height: 28px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    cursor: pointer; padding: 0; transition: all 0.3s ease;
+    display: flex; align-items: center; flex: none;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: transform 0.3s ease; transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
+
+  .hero { margin-bottom: 20px; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+  .hero p { font-size: 14px; color: var(--text-secondary); }
+
+  /* --- game bar --- */
+  .gamebar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 20px; }
+  input, button, select { font-family: inherit; }
+  .gname {
+    flex: 1; min-width: 180px;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 11px 14px; font-size: 15px; font-weight: 600;
+  }
+  .gname:focus, .target:focus { outline: none; border-color: var(--accent-sky); }
+  .target {
+    width: 108px; background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 11px 12px; font-size: 14px; font-family: 'JetBrains Mono', monospace;
+  }
+  button {
+    font-size: 13px; font-weight: 600;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 15px; cursor: pointer; transition: all 0.2s ease;
+  }
+  button:hover:not(:disabled) { background: var(--bg-card-hover); border-color: var(--border-hover); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primary { background: var(--accent-sky); border-color: var(--accent-sky); color: #051018; }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  button.danger:hover:not(:disabled) { border-color: var(--accent-rose); color: var(--accent-rose); }
+  .opt { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none; }
+  .opt input { accent-color: var(--accent-sky); width: 15px; height: 15px; cursor: pointer; }
+
+  /* --- player cards --- */
+  .players { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .pcard {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden;
+  }
+  .pcard::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--pc); opacity: 0.85;
+  }
+  .pcard.leader { border-color: var(--pc); }
+  .phead { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .pname {
+    flex: 1; min-width: 0; background: transparent; border: none;
+    color: var(--text-primary); font-size: 14px; font-weight: 600; padding: 2px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .pname:focus { outline: none; border-bottom-color: var(--pc); }
+  .rank {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+    letter-spacing: 0.5px; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 8px; flex: none;
+  }
+  .pcard.leader .rank { color: var(--pc); border-color: var(--pc); }
+  .ptotal {
+    font-family: 'JetBrains Mono', monospace; font-size: 40px; font-weight: 500;
+    line-height: 1; letter-spacing: -1.5px; color: var(--pc); margin-bottom: 12px;
+  }
+  .bumps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .bumps button {
+    padding: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: var(--inner); border-color: transparent;
+  }
+  .bumps button:hover { background: var(--inner-strong); border-color: var(--pc); color: var(--pc); }
+  .pkill {
+    position: absolute; top: 10px; right: 10px; background: none; border: none;
+    color: var(--text-muted); font-size: 16px; line-height: 1; padding: 2px 5px; cursor: pointer;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  /* Transparent is not the same as absent: at opacity 0 this still takes the
+     click, so an invisible button in the corner of every card would delete a
+     player mid-game. */
+  .pkill { pointer-events: none; }
+  .pcard:hover .pkill { opacity: 1; pointer-events: auto; }
+  .pkill:hover { color: var(--accent-rose); background: none; }
+
+  /* --- grid --- */
+  .gridwrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  th, td { padding: 0; border-bottom: 1px solid var(--border); }
+  thead th {
+    padding: 11px 10px; text-align: right; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-secondary);
+    background: var(--inner); white-space: nowrap;
+  }
+  thead th:first-child, td.rlabel { text-align: left; }
+  td.rlabel {
+    padding: 0 10px; color: var(--text-muted); font-size: 11.5px;
+    white-space: nowrap; width: 1%; background: var(--inner);
+  }
+  tr.current td.rlabel { color: var(--accent-sky); font-weight: 600; }
+  td.cell { padding: 0; }
+  td.cell input {
+    width: 100%; min-width: 74px; background: transparent; border: none;
+    color: var(--text-primary); font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px; padding: 11px 10px; text-align: right;
+    -moz-appearance: textfield;
+  }
+  td.cell input::-webkit-outer-spin-button, td.cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  td.cell input:focus { outline: none; background: var(--inner-strong); }
+  td.cell input::placeholder { color: var(--text-muted); opacity: 0.5; }
+  tfoot td {
+    padding: 12px 10px; text-align: right; font-weight: 600; font-size: 14px;
+    background: var(--inner); border-bottom: none; border-top: 1px solid var(--border-hover);
+  }
+  tfoot td.rlabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+  td.rkill { width: 1%; padding: 0 6px; background: var(--inner); }
+  td.rkill button { background: none; border: none; color: var(--text-muted); padding: 4px 6px; font-size: 14px; line-height: 1; }
+  td.rkill button:hover { color: var(--accent-rose); background: none; }
+
+  .foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 24px; }
+  .spacer { flex: 1; }
+  .note { color: var(--text-muted); font-size: 12.5px; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+  .footer { margin-top: 34px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+  .warn { background: var(--inner); border: 1px solid var(--accent-amber); color: var(--accent-amber);
+          border-radius: var(--radius-sm); padding: 11px 14px; font-size: 13px; margin-bottom: 18px; }
+
+  @media (max-width: 620px) {
+    .container { padding: 24px 12px 40px; }
+    .hero h1 { font-size: 27px; }
+    .players { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .ptotal { font-size: 32px; }
+    .pkill { opacity: 1; pointer-events: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="topbar">
+    <a class="back-link" href="../">&larr; Substrate</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+  </div>
+
+  <div class="hero">
+    <h1>Scorepad</h1>
+    <p>Round-by-round scoring for anything on the table. Survives a refresh, and every change can be undone.</p>
+  </div>
+
+  <div id="warn"></div>
+
+  <div class="gamebar">
+    <input class="gname" id="gameName" placeholder="Game" aria-label="Game name" maxlength="60">
+    <input class="target" id="target" type="number" inputmode="numeric" placeholder="Target" aria-label="Target score">
+    <label class="opt"><input type="checkbox" id="lowWins"> Low score wins</label>
+    <button id="addPlayer">Add player</button>
+  </div>
+
+  <div class="players" id="players"></div>
+
+  <div class="gridwrap"><div class="scroll" id="gridwrap"></div></div>
+
+  <div class="foot">
+    <button class="primary" id="endRound">End round</button>
+    <button id="undo">Undo</button>
+    <div class="spacer"></div>
+    <span class="note" id="status"></span>
+    <button id="resetScores">Reset scores</button>
+    <button class="danger" id="newGame">New game</button>
+  </div>
+
+  <div class="footer">Saved in this browser only. Nothing is uploaded.</div>
+</div>
+
+<script>
+/* Everything is inside this closure on purpose. A top-level `var` in a page
+   script does not create a variable, it creates a property of `window`, and
+   where the name is already taken by a built-in the assignment silently does
+   nothing. `var history = []` cost this file every one of its click handlers:
+   `history` stayed the read-only History object and `history.push` threw on
+   the first line of every action. Strict mode turns that silent failure into
+   a thrown error, and the closure means there is nothing to collide with. */
+(function () {
+'use strict';
+
+/* ---------------------------------------------------------------------------
+   Scorepad.
+
+   One data model: a list of rounds, each a map from player id to a number.
+   Both ways people actually score a board game fall out of it. A game with
+   discrete rounds fills a row per round. A game where points trickle in all
+   through play never leaves round one and uses the bump buttons, which write
+   into the current row. There is no mode switch, because there did not need to
+   be one.
+
+   A blank cell is stored as absent rather than as zero. On a scorepad the
+   difference is visible and it matters: it says whether somebody scored
+   nothing that round or has not been counted yet.
+   --------------------------------------------------------------------------- */
+var KEY = 'scorepad.v1';
+var MAX_PLAYERS = 8, MAX_ROUNDS = 60, UNDO_DEPTH = 60;
+var NAMES = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8'];
+
+function blank() {
+  return {
+    game: '', lowWins: false, target: null, seq: 0,
+    players: [], rounds: []
+  };
+}
+
+function newId(state, prefix) { state.seq++; return prefix + state.seq; }
+
+function addPlayer(state, name) {
+  if (state.players.length >= MAX_PLAYERS) return false;
+  var slot = state.players.length;
+  state.players.push({ id: newId(state, 'p'), name: name || NAMES[slot] || 'Player', slot: slot });
+  return true;
+}
+
+/* Removing a player has to take their cells with them, or the scores reappear
+   attached to nothing the next time the file is loaded. */
+function removePlayer(state, pid) {
+  state.players = state.players.filter(function (p) { return p.id !== pid; });
+  state.rounds.forEach(function (r) { delete r.scores[pid]; });
+  state.players.forEach(function (p, i) { p.slot = i; });
+}
+
+function addRound(state) {
+  if (state.rounds.length >= MAX_ROUNDS) return false;
+  state.rounds.push({ id: newId(state, 'r'), scores: {} });
+  return true;
+}
+
+function removeRound(state, rid) {
+  state.rounds = state.rounds.filter(function (r) { return r.id !== rid; });
+}
+
+/* Absent and present-but-zero are different states, so an empty string clears
+   the cell rather than writing a 0 into it. */
+function setCell(state, rIdx, pid, raw) {
+  var r = state.rounds[rIdx];
+  if (!r) return;
+  if (raw === '' || raw === null || raw === undefined) { delete r.scores[pid]; return; }
+  var n = Number(raw);
+  if (!isFinite(n)) return;
+  r.scores[pid] = n;
+}
+
+function bump(state, pid, delta) {
+  if (!state.rounds.length) addRound(state);
+  var r = state.rounds[state.rounds.length - 1];
+  r.scores[pid] = (r.scores[pid] || 0) + delta;
+}
+
+function totals(state) {
+  var out = {};
+  state.players.forEach(function (p) { out[p.id] = 0; });
+  state.rounds.forEach(function (r) {
+    state.players.forEach(function (p) {
+      var v = r.scores[p.id];
+      if (typeof v === 'number' && isFinite(v)) out[p.id] += v;
+    });
+  });
+  return out;
+}
+
+/* Standard competition ranking: equal totals share a rank and the next rank
+   skips accordingly, so two leaders are both 1st and the next player is 3rd.
+   Getting this wrong is invisible until the one game that ends in a tie. */
+function standings(state) {
+  var t = totals(state);
+  var rows = state.players.map(function (p) { return { id: p.id, total: t[p.id] }; });
+  rows.sort(function (a, b) { return state.lowWins ? a.total - b.total : b.total - a.total; });
+  var rank = {};
+  for (var i = 0; i < rows.length; i++) {
+    rank[rows[i].id] = (i > 0 && rows[i].total === rows[i - 1].total) ? rank[rows[i - 1].id] : i + 1;
+  }
+  return { totals: t, order: rows, rank: rank };
+}
+
+function ordinal(n) {
+  var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/* --- persistence -------------------------------------------------------- */
+var storageOK = true;
+
+/* A partial or older record merges onto a blank and a corrupt one falls back
+   to a clean slate, because losing a game in progress to a thrown exception is
+   worse than losing the one field that did not parse. */
+function hydrate(raw) {
+  var s = blank();
+  if (!raw || typeof raw !== 'object') return s;
+  if (typeof raw.game === 'string') s.game = raw.game;
+  if (typeof raw.lowWins === 'boolean') s.lowWins = raw.lowWins;
+  if (typeof raw.target === 'number' && isFinite(raw.target)) s.target = raw.target;
+  if (typeof raw.seq === 'number' && raw.seq >= 0) s.seq = raw.seq;
+  if (Array.isArray(raw.players)) {
+    raw.players.forEach(function (p) {
+      if (p && typeof p.id === 'string') {
+        s.players.push({ id: p.id, name: typeof p.name === 'string' ? p.name : 'Player', slot: s.players.length });
+      }
+    });
+  }
+  var ids = {};
+  s.players.forEach(function (p) { ids[p.id] = 1; });
+  if (Array.isArray(raw.rounds)) {
+    raw.rounds.forEach(function (r) {
+      if (!r || typeof r.id !== 'string') return;
+      var scores = {};
+      if (r.scores && typeof r.scores === 'object') {
+        Object.keys(r.scores).forEach(function (k) {
+          // A score for a player who no longer exists is dropped rather than kept.
+          if (ids[k] && typeof r.scores[k] === 'number' && isFinite(r.scores[k])) scores[k] = r.scores[k];
+        });
+      }
+      s.rounds.push({ id: r.id, scores: scores });
+    });
+  }
+  return s;
+}
+
+function load() {
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    return hydrate(JSON.parse(raw));
+  } catch (e) { return null; }
+}
+
+function save(state) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({
+      game: state.game, lowWins: state.lowWins, target: state.target,
+      seq: state.seq, players: state.players, rounds: state.rounds
+    }));
+  } catch (e) {
+    if (storageOK) {
+      storageOK = false;
+      document.getElementById('warn').innerHTML =
+        '<div class="warn">This browser is blocking local storage, so the game will be lost on refresh.</div>';
+    }
+  }
+}
+
+/* --- app ---------------------------------------------------------------- */
+var state, undoStack = [];
+
+function snapshot() {
+  undoStack.push(JSON.stringify({ players: state.players, rounds: state.rounds, seq: state.seq }));
+  if (undoStack.length > UNDO_DEPTH) undoStack.shift();
+}
+
+function undo() {
+  if (!undoStack.length) return;
+  var prev = JSON.parse(undoStack.pop());
+  state.players = prev.players;
+  state.rounds = prev.rounds;
+  state.seq = prev.seq;
+  save(state);
+  renderAll();
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+function renderPlayers() {
+  var s = standings(state);
+  var host = document.getElementById('players');
+  if (!state.players.length) {
+    host.innerHTML = '<div class="empty">No players yet. Add one to start.</div>';
+    return;
+  }
+  host.innerHTML = state.players.map(function (p) {
+    var lead = s.rank[p.id] === 1 && state.players.length > 1;
+    var hit = state.target !== null &&
+      (state.lowWins ? s.totals[p.id] <= state.target : s.totals[p.id] >= state.target);
+    return '<div class="pcard' + (lead ? ' leader' : '') + '" style="--pc: var(--p' + (p.slot % 8) + ')">' +
+      '<button class="pkill" data-kill="' + esc(p.id) + '" aria-label="Remove player">&times;</button>' +
+      '<div class="phead">' +
+        '<input class="pname" data-name="' + esc(p.id) + '" value="' + esc(p.name) + '" maxlength="24" aria-label="Player name">' +
+        '<span class="rank">' + (hit ? 'target' : ordinal(s.rank[p.id])) + '</span>' +
+      '</div>' +
+      '<div class="ptotal">' + s.totals[p.id] + '</div>' +
+      '<div class="bumps">' +
+        [-5, -1, 1, 5].map(function (d) {
+          return '<button data-bump="' + esc(p.id) + '" data-d="' + d + '">' + (d > 0 ? '+' + d : d) + '</button>';
+        }).join('') +
+      '</div></div>';
+  }).join('');
+}
+
+function renderGrid() {
+  var host = document.getElementById('gridwrap');
+  if (!state.players.length) { host.innerHTML = ''; return; }
+
+  var h = '<table><thead><tr><th>Round</th>' +
+    state.players.map(function (p) { return '<th>' + esc(p.name) + '</th>'; }).join('') +
+    '<th></th></tr></thead><tbody>';
+
+  state.rounds.forEach(function (r, i) {
+    var current = i === state.rounds.length - 1;
+    h += '<tr' + (current ? ' class="current"' : '') + '><td class="rlabel">' + (i + 1) + '</td>';
+    h += state.players.map(function (p) {
+      var v = r.scores[p.id];
+      return '<td class="cell"><input type="number" inputmode="numeric" placeholder="0" ' +
+        'data-r="' + i + '" data-p="' + esc(p.id) + '" value="' +
+        (typeof v === 'number' ? v : '') + '"></td>';
+    }).join('');
+    h += '<td class="rkill"><button data-rkill="' + esc(r.id) + '" aria-label="Delete round">&times;</button></td></tr>';
+  });
+
+  h += '</tbody><tfoot><tr><td class="rlabel">Total</td>';
+  var t = totals(state);
+  h += state.players.map(function (p) { return '<td data-total="' + esc(p.id) + '">' + t[p.id] + '</td>'; }).join('');
+  h += '<td></td></tr></tfoot></table>';
+  host.innerHTML = h;
+}
+
+/* Totals move on every keystroke; the grid does not. Rebuilding the table on
+   input would destroy and recreate the very input being typed into, which
+   drops focus and the caret with it. So structural changes rebuild and value
+   changes patch. */
+function renderTotals() {
+  var s = standings(state);
+  state.players.forEach(function (p) {
+    var cell = document.querySelector('[data-total="' + p.id + '"]');
+    if (cell) cell.textContent = s.totals[p.id];
+  });
+  renderPlayers();
+}
+
+function renderStatus() {
+  document.getElementById('undo').disabled = !undoStack.length;
+  document.getElementById('endRound').disabled = state.rounds.length >= MAX_ROUNDS || !state.players.length;
+  document.getElementById('addPlayer').disabled = state.players.length >= MAX_PLAYERS;
+  var n = state.rounds.length;
+  document.getElementById('status').textContent =
+    state.players.length ? n + (n === 1 ? ' round' : ' rounds') : '';
+}
+
+function renderAll() {
+  document.getElementById('gameName').value = state.game;
+  document.getElementById('target').value = state.target === null ? '' : state.target;
+  document.getElementById('lowWins').checked = state.lowWins;
+  renderPlayers();
+  renderGrid();
+  renderStatus();
+}
+
+function mutate(fn) {
+  snapshot();
+  fn();
+  save(state);
+  renderAll();
+}
+
+/* --- events ------------------------------------------------------------- */
+document.getElementById('players').addEventListener('click', function (e) {
+  var kill = e.target.closest('[data-kill]'), bumpBtn = e.target.closest('[data-bump]');
+  if (kill) { mutate(function () { removePlayer(state, kill.getAttribute('data-kill')); }); return; }
+  if (bumpBtn) {
+    var pid = bumpBtn.getAttribute('data-bump'), d = Number(bumpBtn.getAttribute('data-d'));
+    snapshot();
+    bump(state, pid, d);
+    save(state);
+    // The bump lands in the last row, which may be one this render just created.
+    renderGrid();
+    renderPlayers();
+    renderStatus();
+  }
+});
+
+document.getElementById('players').addEventListener('input', function (e) {
+  var name = e.target.closest('[data-name]');
+  if (!name) return;
+  var p = state.players.filter(function (x) { return x.id === name.getAttribute('data-name'); })[0];
+  if (!p) return;
+  p.name = name.value;
+  save(state);
+  // Header cells carry the name too, and rebuilding the grid here would be
+  // fine, but the name input is in the card, so only the header needs patching.
+  var ths = document.querySelectorAll('thead th');
+  if (ths[p.slot + 1]) ths[p.slot + 1].textContent = name.value;
+});
+
+document.getElementById('gridwrap').addEventListener('input', function (e) {
+  var cell = e.target.closest('[data-r]');
+  if (!cell) return;
+  setCell(state, Number(cell.getAttribute('data-r')), cell.getAttribute('data-p'), cell.value);
+  save(state);
+  renderTotals();
+});
+
+/* A snapshot per keystroke would make undo useless, so one is taken when a
+   cell is first focused and only kept if the value actually changed. */
+var focusValue = null;
+document.getElementById('gridwrap').addEventListener('focusin', function (e) {
+  if (e.target.closest('[data-r]')) focusValue = e.target.value;
+});
+document.getElementById('gridwrap').addEventListener('focusout', function (e) {
+  var cell = e.target.closest('[data-r]');
+  if (!cell || focusValue === null) return;
+  if (cell.value !== focusValue) {
+    var before = focusValue;
+    var r = Number(cell.getAttribute('data-r')), pid = cell.getAttribute('data-p');
+    var after = cell.value;
+    setCell(state, r, pid, before);
+    snapshot();
+    setCell(state, r, pid, after);
+    save(state);
+    renderStatus();
+  }
+  focusValue = null;
+});
+
+document.getElementById('gridwrap').addEventListener('click', function (e) {
+  var kill = e.target.closest('[data-rkill]');
+  if (kill) mutate(function () { removeRound(state, kill.getAttribute('data-rkill')); });
+});
+
+document.getElementById('addPlayer').addEventListener('click', function () {
+  mutate(function () { addPlayer(state); if (!state.rounds.length) addRound(state); });
+});
+document.getElementById('endRound').addEventListener('click', function () {
+  mutate(function () { addRound(state); });
+});
+document.getElementById('undo').addEventListener('click', undo);
+document.getElementById('resetScores').addEventListener('click', function () {
+  mutate(function () { state.rounds = []; addRound(state); });
+});
+document.getElementById('newGame').addEventListener('click', function () {
+  mutate(function () {
+    var keep = state.players.length;
+    state.players = []; state.rounds = []; state.game = ''; state.target = null;
+    for (var i = 0; i < Math.max(2, keep); i++) addPlayer(state);
+    addRound(state);
+  });
+});
+
+document.getElementById('gameName').addEventListener('input', function (e) {
+  state.game = e.target.value; save(state);
+});
+document.getElementById('target').addEventListener('input', function (e) {
+  var v = e.target.value;
+  state.target = v === '' || !isFinite(Number(v)) ? null : Number(v);
+  save(state); renderPlayers();
+});
+document.getElementById('lowWins').addEventListener('change', function (e) {
+  state.lowWins = e.target.checked; save(state); renderPlayers();
+});
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') !== 'light' ? 'light' : 'dark';
+  if (next === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('scorepad-theme', next); } catch (e) {}
+  document.getElementById('toggleIcon').innerHTML = next === 'light' ? '&#9728;' : '&#127769;';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function init() {
+  try {
+    var saved = localStorage.getItem('scorepad-theme') || localStorage.getItem('flight-dash-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if ((saved || (prefersDark ? 'dark' : 'light')) === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (e) {}
+
+  state = load();
+  if (!state || !state.players.length) {
+    state = blank();
+    addPlayer(state); addPlayer(state); addRound(state);
+  }
+  renderAll();
+})();
+
+/* One deliberate, uniquely-named export for the test harness. The tests used
+   to reach these through a bare sandbox, which is what let the `history`
+   collision through: a sandbox has no Window, so the bug could not reproduce
+   there. They now drive this page in a real DOM instead. */
+window.__scorepad = {
+  blank: blank, addPlayer: addPlayer, removePlayer: removePlayer,
+  addRound: addRound, removeRound: removeRound, setCell: setCell, bump: bump,
+  totals: totals, standings: standings, ordinal: ordinal, hydrate: hydrate,
+  esc: esc, MAX_PLAYERS: MAX_PLAYERS, MAX_ROUNDS: MAX_ROUNDS
+};
+
+})();
+</script>
+</body>
+</html>

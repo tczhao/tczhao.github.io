@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Dice</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --accent-rose: #f43f5e;
+    --accent-emerald: #10b981;
+    --die-bg: rgba(139,92,246,0.12);
+    --die-line: rgba(139,92,246,0.40);
+    --inner: rgba(255,255,255,0.02);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
+    --accent-purple: #7c3aed;
+    --accent-rose: #e11d48;
+    --accent-emerald: #059669;
+    --die-bg: rgba(124,58,237,0.09);
+    --die-line: rgba(124,58,237,0.34);
+    --inner: rgba(0,0,0,0.02);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 40px 24px 60px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text-primary); }
+
+  .theme-toggle {
+    width: 52px; height: 28px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    cursor: pointer; padding: 0; transition: all 0.3s ease;
+    display: flex; align-items: center; flex: none;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: transform 0.3s ease; transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
+
+  .hero { margin-bottom: 24px; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+  .hero p { font-size: 14px; color: var(--text-secondary); }
+
+  .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .quick button {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;
+    background: var(--bg-card); color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 15px; cursor: pointer; transition: all 0.2s ease;
+  }
+  .quick button:hover { color: var(--text-primary); border-color: var(--accent-purple); background: var(--bg-card-hover); }
+
+  .row { display: flex; gap: 10px; margin-bottom: 8px; }
+  input[type="text"] {
+    flex: 1; min-width: 0;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 13px 16px; font-family: 'JetBrains Mono', monospace; font-size: 15px;
+  }
+  input[type="text"]:focus { outline: none; border-color: var(--accent-purple); }
+  input[type="text"]::placeholder { color: var(--text-muted); }
+
+  button.roll {
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    background: var(--accent-purple); border: 1px solid var(--accent-purple);
+    color: #fff; border-radius: var(--radius-sm); padding: 13px 30px;
+    cursor: pointer; transition: filter 0.2s ease; flex: none;
+  }
+  button.roll:hover { filter: brightness(1.10); }
+  button.roll:active { filter: brightness(0.94); }
+
+  .err { color: var(--accent-rose); font-size: 13px; min-height: 19px; margin-bottom: 14px; }
+
+  .result {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; text-align: center;
+    margin-bottom: 18px;
+  }
+  .total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 60px; font-weight: 500; line-height: 1;
+    letter-spacing: -2px; color: var(--accent-purple);
+  }
+  .total.pulse { animation: pop 0.28s ease; }
+  @keyframes pop { 0% { transform: scale(0.86); opacity: 0.4; } 100% { transform: scale(1); opacity: 1; } }
+  .breakdown {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--text-muted); margin-top: 12px; word-break: break-word;
+  }
+
+  .dice { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; }
+  .die {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 500;
+    min-width: 44px; padding: 10px 8px; border-radius: var(--radius-sm);
+    background: var(--die-bg); border: 1px solid var(--die-line); color: var(--text-primary);
+  }
+  .die.dropped { opacity: 0.34; text-decoration: line-through; background: var(--inner); border-color: var(--border); }
+  .die.max { border-color: var(--accent-emerald); color: var(--accent-emerald); }
+  .die.min { border-color: var(--accent-rose); color: var(--accent-rose); }
+  .die .mod { font-size: 16px; }
+
+  .session {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .session span { border: 1px solid var(--border); border-radius: 999px; padding: 5px 13px; color: var(--text-secondary); }
+  .session b { font-weight: 600; color: var(--text-primary); }
+
+  h2 {
+    font-size: 12px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;
+  }
+  .history { display: flex; flex-direction: column; gap: 6px; }
+  .hrow {
+    display: flex; align-items: baseline; gap: 12px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+  }
+  .hrow .n { color: var(--text-primary); font-weight: 600; min-width: 66px; }
+  .hrow .d { color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hrow .t { color: var(--accent-purple); font-weight: 600; }
+  .hint { color: var(--text-muted); font-size: 12.5px; line-height: 1.9; }
+  .hint code {
+    font-family: 'JetBrains Mono', monospace; background: var(--inner);
+    border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--text-secondary);
+  }
+  .footer { margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 620px) {
+    .container { padding: 28px 14px 40px; }
+    .hero h1 { font-size: 27px; }
+    .total { font-size: 46px; }
+    button.roll { padding: 13px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="topbar">
+    <a class="back-link" href="../">&larr; Substrate</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+  </div>
+
+  <div class="hero">
+    <h1>Dice</h1>
+    <p>Standard dice notation, rolled from the platform's cryptographic random source.</p>
+  </div>
+
+  <div class="quick" id="quick"></div>
+
+  <div class="row">
+    <input type="text" id="notation" spellcheck="false" autocomplete="off" value="1d20" aria-label="Dice notation">
+    <button class="roll" id="rollBtn">Roll</button>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div class="result">
+    <div class="total" id="total">&ndash;</div>
+    <div class="breakdown" id="breakdown">Press Roll, or hit Enter in the box.</div>
+    <div class="dice" id="dice"></div>
+  </div>
+
+  <div class="session" id="session"></div>
+
+  <h2>History</h2>
+  <div class="history" id="history"></div>
+
+  <div class="footer">
+    <p class="hint">
+      <code>3d6</code> three six-sided &nbsp; <code>1d20+5</code> with a modifier &nbsp;
+      <code>4d6kh3</code> keep highest three &nbsp; <code>2d20kl1</code> keep lowest one &nbsp;
+      <code>2d6+1d4+2</code> combined &nbsp; <code>d%</code> percentile
+    </p>
+    Runs entirely in the browser. Nothing is uploaded.
+  </div>
+</div>
+
+<script>
+/* Everything is inside this closure on purpose. A top-level `var` in a page
+   script creates a property of `window`, and where the name is already a
+   built-in the assignment silently does nothing. `var history = []` left this
+   file throwing on every roll after the total had already been painted, so
+   the History list never filled. Strict mode makes that failure loud. */
+(function () {
+'use strict';
+
+/* ---------------------------------------------------------------------------
+   Randomness.
+
+   Math.random() is seeded per context, is not required to be uniform to any
+   particular standard, and in some engines is observably predictable from a
+   short run of outputs. None of that matters for a toy, and all of it is
+   avoidable for free here.
+
+   The subtle part is not the source, it is the reduction. getRandomValues()
+   gives a uniform 32-bit integer, and taking that modulo the number of sides
+   is biased whenever the sides do not divide 2^32 evenly, because the low
+   residues get one extra representative each. For a d6 the bias is far too
+   small to notice; the rejection loop below removes it anyway, because the
+   correct version costs one comparison.
+   --------------------------------------------------------------------------- */
+var POOL = 4294967296;   // 2^32
+
+function randInt(sides) {
+  var limit = Math.floor(POOL / sides) * sides;
+  var buf = new Uint32Array(1), x;
+  do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
+  return (x % sides) + 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Notation.
+
+     term  := [count] 'd' (sides | '%') [('kh'|'kl') [n]]  |  integer
+     expr  := ['+'|'-'] term (('+'|'-') term)*
+
+   Parsed with one anchored regex walked to the end of the string rather than
+   with a tokeniser, because the grammar has no nesting. The end-of-string
+   check is what makes it strict: "3d6 junk" is refused instead of silently
+   parsing as 3d6, which is the failure mode that matters for a tool whose
+   whole output is a number you are going to trust.
+   --------------------------------------------------------------------------- */
+var MAX_DICE = 500, MAX_SIDES = 1000000;
+
+function parse(input) {
+  var s = String(input).replace(/\s+/g, '').toLowerCase();
+  if (!s) throw new Error('Type something like 2d6+3.');
+  if (!/^[+-]/.test(s)) s = '+' + s;
+
+  var re = /([+-])(?:(\d*)d(\d+|%)((?:kh|kl)\d*)?|(\d+))/g;
+  var terms = [], at = 0, m;
+
+  while ((m = re.exec(s)) !== null) {
+    if (m.index !== at) break;
+    at = re.lastIndex;
+    var sign = m[1] === '-' ? -1 : 1;
+
+    if (m[5] !== undefined) { terms.push({ kind: 'mod', sign: sign, value: parseInt(m[5], 10) }); continue; }
+
+    var count = m[2] === '' ? 1 : parseInt(m[2], 10);
+    var sides = m[3] === '%' ? 100 : parseInt(m[3], 10);
+    if (count < 1 || count > MAX_DICE) throw new Error('Between 1 and ' + MAX_DICE + ' dice per term.');
+    if (sides < 2 || sides > MAX_SIDES) throw new Error('A die needs between 2 and ' + MAX_SIDES + ' sides.');
+
+    var keep = null;
+    if (m[4]) {
+      var n = m[4].slice(2);
+      keep = { mode: m[4].slice(0, 2), n: n === '' ? 1 : parseInt(n, 10) };
+      if (keep.n < 1) throw new Error('Keep at least one die.');
+      if (keep.n > count) throw new Error('Cannot keep ' + keep.n + ' of ' + count + ' dice.');
+    }
+    terms.push({ kind: 'dice', sign: sign, count: count, sides: sides, keep: keep });
+  }
+
+  if (at !== s.length) throw new Error('Could not read "' + input + '".');
+  if (!terms.length) throw new Error('Nothing to roll.');
+  if (!terms.some(function (t) { return t.kind === 'dice'; })) throw new Error('That has no dice in it.');
+  return terms;
+}
+
+function rollTerm(t) {
+  var rolls = [], i;
+  for (i = 0; i < t.count; i++) rolls.push({ v: randInt(t.sides), kept: true });
+
+  /* Dropped dice stay in the array so they can be rendered struck through in
+     the order they were rolled. Sorting a copy of the indices keeps display
+     order and selection order independent. */
+  if (t.keep) {
+    var order = rolls.map(function (_, i) { return i; });
+    order.sort(function (a, b) {
+      return t.keep.mode === 'kh' ? rolls[b].v - rolls[a].v : rolls[a].v - rolls[b].v;
+    });
+    order.slice(t.keep.n).forEach(function (i) { rolls[i].kept = false; });
+  }
+
+  var sum = 0;
+  rolls.forEach(function (r) { if (r.kept) sum += r.v; });
+  return { rolls: rolls, sum: sum };
+}
+
+function roll(terms) {
+  var total = 0, parts = [];
+  terms.forEach(function (t) {
+    if (t.kind === 'mod') {
+      total += t.sign * t.value;
+      parts.push({ kind: 'mod', sign: t.sign, value: t.value });
+      return;
+    }
+    var r = rollTerm(t);
+    total += t.sign * r.sum;
+    parts.push({ kind: 'dice', sign: t.sign, sides: t.sides, rolls: r.rolls, sum: r.sum });
+  });
+  return { total: total, parts: parts };
+}
+
+/* --- rendering ---------------------------------------------------------- */
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+var session = { count: 0, sum: 0, min: null, max: null }, rollLog = [];
+
+function render(notation, result) {
+  var totalEl = document.getElementById('total');
+  totalEl.textContent = result.total;
+  totalEl.classList.remove('pulse');
+  void totalEl.offsetWidth;          // restart the animation on a repeat roll
+  totalEl.classList.add('pulse');
+
+  var dice = '', bits = [];
+  result.parts.forEach(function (p) {
+    if (p.kind === 'mod') {
+      bits.push((p.sign < 0 ? '-' : '+') + ' ' + p.value);
+      dice += '<div class="die"><span class="mod">' + (p.sign < 0 ? '&minus;' : '+') + p.value + '</span></div>';
+      return;
+    }
+    p.rolls.forEach(function (r) {
+      var cls = 'die' + (r.kept ? '' : ' dropped') +
+        (r.kept && r.v === p.sides ? ' max' : '') + (r.kept && r.v === 1 ? ' min' : '');
+      dice += '<div class="' + cls + '">' + r.v + '</div>';
+    });
+    bits.push((p.sign < 0 ? '- ' : bits.length ? '+ ' : '') +
+      '[' + p.rolls.map(function (r) { return r.kept ? r.v : '(' + r.v + ')'; }).join(' ') + ']');
+  });
+
+  document.getElementById('dice').innerHTML = dice;
+  document.getElementById('breakdown').textContent = esc(notation) + '  =  ' + bits.join(' ') + '  =  ' + result.total;
+
+  session.count++;
+  session.sum += result.total;
+  session.min = session.min === null ? result.total : Math.min(session.min, result.total);
+  session.max = session.max === null ? result.total : Math.max(session.max, result.total);
+  document.getElementById('session').innerHTML =
+    '<span><b>' + session.count + '</b> rolls</span>' +
+    '<span>mean <b>' + (session.sum / session.count).toFixed(2) + '</b></span>' +
+    '<span>low <b>' + session.min + '</b></span>' +
+    '<span>high <b>' + session.max + '</b></span>';
+
+  rollLog.unshift({ n: notation, d: bits.join(' '), t: result.total });
+  rollLog = rollLog.slice(0, 30);
+  document.getElementById('history').innerHTML = rollLog.map(function (h) {
+    return '<div class="hrow"><span class="n">' + esc(h.n) + '</span>' +
+      '<span class="d">' + esc(h.d) + '</span><span class="t">' + h.t + '</span></div>';
+  }).join('');
+}
+
+function go() {
+  var input = document.getElementById('notation').value;
+  var err = document.getElementById('err');
+  try {
+    var terms = parse(input);
+    err.textContent = '';
+    render(input.trim(), roll(terms));
+    try { localStorage.setItem('dice-last', input.trim()); } catch (e) {}
+  } catch (e) {
+    err.textContent = e.message;
+  }
+}
+
+['4', '6', '8', '10', '12', '20', '100'].forEach(function (s) {
+  var b = document.createElement('button');
+  b.textContent = 'd' + s;
+  b.addEventListener('click', function () {
+    document.getElementById('notation').value = '1d' + s;
+    go();
+  });
+  document.getElementById('quick').append(b);
+});
+
+document.getElementById('rollBtn').addEventListener('click', go);
+document.getElementById('notation').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') go();
+});
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') !== 'light' ? 'light' : 'dark';
+  if (next === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('dice-tool-theme', next); } catch (e) {}
+  document.getElementById('toggleIcon').innerHTML = next === 'light' ? '&#9728;' : '&#127769;';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function init() {
+  try {
+    var saved = localStorage.getItem('dice-tool-theme') || localStorage.getItem('flight-dash-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if ((saved || (prefersDark ? 'dark' : 'light')) === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+    var last = localStorage.getItem('dice-last');
+    if (last) document.getElementById('notation').value = last;
+  } catch (e) {}
+})();
+
+/* Exposed for the test harness, which drives this page in a real DOM. */
+window.__dice = { parse: parse, roll: roll, rollTerm: rollTerm, randInt: randInt };
+
+})();
+</script>
+</body>
+</html>
