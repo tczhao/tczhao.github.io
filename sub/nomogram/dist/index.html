@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Nomogram - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F1F2F6;
@@ -1439,6 +1520,16 @@ window.SITE = {
   requireInterval: true,
   reverifyDays: 180,
 
+  /* The one place in this site that is meant to be read quickly, and therefore
+     the one place that has to be restricted hardest. Only the replicated
+     verdict appears. Fourteen of thirty entries qualify, which is the honest
+     yield of this literature and is worth seeing stated as a fraction.
+
+     Derived rather than chosen: the corpus already grades its own evidence, and
+     letting the author pick the cheatsheet by hand would put the judgement back
+     in exactly the place this site removes it from. */
+  cheatsheet: { verdicts: ['replicated'] },
+
   gate: {
     label: "Draw your line first",
     prompt: "Write down how big you think the effect is, and how sure you think the evidence is, before either appears. Being wrong on the record is what calibrates you. Nodding along to a result does nothing.",
@@ -1460,6 +1551,9 @@ window.SITE = {
     sourcePrefix: "After",
     staleNote: "not re-checked since",
     reflectPlaceholder: "The effect you predicted, the effect that was measured, and what you changed.",
+    tabCheatsheet: "Cheatsheet",
+    cheatNote: "What survived being re-run by someone else, and what it is worth in training you would actually do.",
+    cheatWithheld: "rest on one study, are contested, are real but sold past their effect size, or have no trial behind them at all - they are worth reading and are not worth acting on from memory.",
     progressNote: "Entries logged measures reading. The gap between the effect you predicted and the effect that was measured tells you whether you have any feel for how small these effects are. Watch the second one."
   },
 
@@ -1532,6 +1626,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "One MET is 3.5 mL of oxygen per kilogram per minute - roughly the difference a decent block of training can produce. Before reading on, commit to a number: how much do you think one extra MET is worth in all-cause mortality risk, and would you expect the effect to be bigger or smaller than the effect of moving from the bottom fitness third to the top?",
+  cheat: "Retest your capacity instead of assuming it: RR 0.87 per MET (0.84-0.90) is between-person, so a MET you train will not buy the full 13%.",
   idea: "Pooled across 33 prospective cohorts of healthy adults, every 1-MET increment in maximal aerobic capacity was associated with 13% lower all-cause mortality and 15% lower coronary and cardiovascular event risk. This is the replicated backbone of the fitness-mortality literature. It is a smooth gradient, not a threshold you cross.",
   why: "This is the entry to reach for when someone asks whether fitness really matters, because it is the version that survived independent re-running. Thirty-three cohorts, over 100,000 healthy participants, and a tight interval of 0.84 to 0.90. Contrast that with single-cohort hazard ratios that produce more dramatic numbers from more selected populations.\n\nA MET is a usable unit. It is 3.5 mL·kg⁻¹·min⁻¹, so a runner going from a VO2max of 45 to 52 has gained two METs. The pooled estimate says that is worth roughly a quarter off relative all-cause mortality risk. It compounds multiplicatively across the range, which is why the low-versus-high category comparison lands at RR 1.70 rather than something enormous - the gradient is steady, not explosive.\n\nThe caveat that matters for a trained reader: these are observational associations across people, not within-person causal effects of training. Some of the fitness spread is genetic, some is inherited health, some is training. Individual response to a standardised training program varies enormously. Moving yourself up one MET through training is not guaranteed to move your risk by the full 13%, because part of the association is carried by the traits that made you trainable in the first place.",
   failureMode: "You treat fitness as binary. Once you are \"a runner\", you stop tracking capacity and let it drift down over a decade of consistent-but-easy volume, on the assumption that the health box is ticked. The per-MET gradient says the box is not binary and the drift costs you continuously. The opposite failure is treating the association as fully causal and chasing VO2max at the expense of injury risk, sleep and everything else, on the belief that each MET is a guaranteed 13% purchase.",
@@ -1554,6 +1649,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "The 10,000-step target came from a 1960s Japanese pedometer brand name, not from a trial. Before you read the numbers: at what daily step count do you think the mortality benefit curve starts to flatten, and how much of the total benefit do you think is already banked by the time you reach that point?",
+  cheat: "Check your median non-run-day steps against 5,000: the 5,000-7,000 inflection is all-cause only, cancer and cardiovascular mortality kept improving.",
   idea: "Pooling 57 studies across 35 cohorts, walking 7,000 steps a day was associated with 47% lower all-cause mortality than 2,000 steps, and the dose-response curve inflects somewhere around 5,000 to 7,000 steps rather than continuing to 10,000. The benefits extend well past mortality, to dementia, falls and depressive symptoms. Not every outcome flattens - cardiovascular mortality, cancer mortality and type 2 diabetes stayed roughly linear, and cancer incidence showed no association at either end.",
   why: "The shape matters more than the headline. An inverse non-linear association with an inflection between 5,000 and 7,000 steps means the steepest part of the curve is at the bottom. Going from 2,000 to 5,000 steps buys far more per step than going from 8,000 to 11,000. If you already run, you are past the inflection on most days, and the marginal value of your next thousand steps is small compared to the value of a sedentary colleague's next thousand.\n\nThe outcomes that did not flatten need reading carefully, because shape and benefit are different things. Cardiovascular mortality, cancer mortality and type 2 diabetes showed roughly linear shapes across the observed range, so more steps kept buying something for those. Cancer incidence was also modelled without a clear inflection, but its point estimate at 7,000 versus 2,000 steps is HR 0.94 with an interval of 0.87 to 1.01 - a null association from only two studies, not a benefit that keeps accruing. A straight line tells you nothing about whether the line is going anywhere. So \"7,000 is enough\" is true for the all-cause headline, wrong for the handful of outcomes that keep improving, and beside the point for cancer incidence, where the association is not there to begin with.\n\nThe confounding here is heavy and the authors would say so. Step count is measured mostly in cohorts of older adults, and low step counts are a symptom of illness as much as a cause of it. Reverse causation inflates the low end of the curve. The pooled hazard ratio of 0.53 should be read as the association across people, with the steepest part of it partly reflecting who is already unwell.",
   failureMode: "The specific way this goes wrong for a runner: you bank a 60-minute run, hit 12,000 steps by lunchtime, and then sit for nine hours. Step count is a poor proxy for the thing the epidemiology is actually capturing, which is a life with movement distributed through it. The other failure is the reverse - chasing 10,000 as a target on rest days, adding low-value junk volume on legs that need recovery, and buying almost nothing because you are already past the inflection.",
@@ -1652,6 +1748,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "You have almost certainly heard \"1.6 grams per kilo\" quoted as the protein number, stated with two significant figures and no hedging. Before reading on: what do you think the uncertainty around that estimate is, and would you change your intake if the plausible range turned out to be wider than the number itself?",
+  cheat: "Before you add protein, log three days: below 1.03 g/kg/day is worth fixing, but the estimates are 1.62 and 1.3, and the whole prize is 0.30 kg.",
   idea: "Morton et al.'s biphasic regression put the point beyond which extra protein stopped adding fat-free mass at 1.62 g/kg/day, with a 95% confidence interval from 1.03 to 2.20. A separate team re-ran the dose-response question on a larger set of trials and landed on 1.3. Both numbers describe the same bend in the same curve, both sit inside the one interval, and the whole supplementation effect they bound is 0.30 kg of fat-free mass.",
   why: "Start with the size of the underlying effect, because it reframes everything else. Across 49 trials, protein supplementation added 0.30 kg of fat-free mass (95% CI 0.09-0.52) and 2.49 kg of 1RM strength (0.64-4.33) over training alone. Three hundred grams of lean tissue. That is the prize the breakpoint is describing the edge of.\n\nNow the breakpoint, and note what it was actually estimated from. Not the full 49 trials and 1,863 participants - the biphasic regression used 42 study arms and 723 participants. On that subset, 1.62 came with an interval of 1.03 to 2.20, which means the data are compatible with a threshold anywhere from just above the ordinary sedentary recommendation to well beyond what most lifters eat. A range that wide is not a target, it is a region. Quoting 1.62 as though it were a measured constant is a precision claim the regression does not support, and attaching the full review's sample size to it is the same error one level up. Both bounds or neither.\n\nThe replication is the reassuring part and the deflating part at once. Tagawa et al. ran the question independently across 105 articles and 5,402 participants and found the curve bends at 1.3 g/kg/day, with returns dropping roughly three-fold above it: 0.39 kg of lean mass per 0.1 g/kg/day below the inflection, 0.12 kg above. So the phenomenon replicates - there is a bend, and past it you are paying a lot more protein for a lot less tissue. The location of the bend does not replicate to a decimal place. Two teams, two numbers, both inside 1.03 to 2.20.\n\nThe two moderators from Morton are worth more of your attention than the headline. Trained individuals got more out of supplementation, not less: 0.75 kg extra (0.09-1.40). And the effect shrank with age. If you are a masters runner who lifts, both moderators point the same direction - protein matters more to you than to the average trial participant, and the ceiling sits somewhere in a band you cannot pin down from either paper.",
   failureMode: "Two symmetrical errors, both expensive. You take 1.62 as gospel and spend money and gut comfort forcing intake to a decimal place that two independent analyses cannot agree on to within 0.3 g/kg, chasing the top end of a 0.30 kg effect. Or you notice the interval is wide, conclude the whole thing is noise, and drift down toward 1.0 g/kg - which is below both point estimates, at the very bottom bound, and for a runner in a training block with elevated turnover, plausibly under-eating protein while wondering why the lifting is not sticking.",
@@ -1674,6 +1771,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "You have limited time. Before reading: if you had to rank load, weekly sets and training frequency by how much each one changes your strength outcome, what order would you put them in, and would that order be different if the goal were size instead?",
+  cheat: "Choose load for strength, not size: heavy multi-set thrice weekly ranked top, SMD 1.60 versus control, but every prescription grew size comparably.",
   idea: "Across 178 studies for strength and 119 for hypertrophy, the top-ranked prescription for both outcomes was higher-load and multi-set. The two differed only in weekly frequency: three times a week topped strength, twice a week topped hypertrophy. Crucially, every prescription tested beat control for both outcomes, and all of them produced comparable hypertrophy, so the variable choice matters much less than the decision to train at all.",
   why: "The effect sizes tell the real story. The top strength prescription lands at SMD 1.60 against control, with a credible interval of 1.38 to 1.82. The top hypertrophy prescription is 0.66 (0.47-0.85). Those are the gaps between training and not training. The gaps between one sensible prescription and another are a fraction of that, which is why the authors say all prescriptions comparably promoted hypertrophy.\n\nThe common thread is worth naming because it is the one thing that shows up at the top of both lists: higher load, multiple sets. There is no clean load-for-strength, sets-for-size dissociation in this data. What separates the two top-ranked prescriptions is frequency, and even that difference sits inside a set where everything beat control. If you are a runner who lifts primarily to be more robust and to hold form late in a race, the strength adaptation is what you want, and the prescription that ranked first for it was heavy, multi-set and three times a week.\n\nThe network meta-analysis design is why this is worth more than the individual trials it contains. Most resistance training studies compare two arms and are underpowered to detect the modest differences between sensible prescriptions. A network model borrows strength across the whole web of comparisons, and the threshold analysis says the ranking survives plausible perturbation. That is about as good as this literature gets.\n\nOne honest limit on what you can take from it: the paper characterises its population as healthy adults and does not report a training-status or intervention-length distribution you could use to work out how far the magnitudes transport. An SMD of 1.60 against control is a between-condition effect in a pooled trial population, not a forecast for your fifth year of lifting. The ordering of prescriptions is the more portable output.",
   failureMode: "You optimise the variable that ranks rather than the one that moves. A runner with three hours a week of non-running time agonises over set counts and frequency splits while lifting loads they could move for twenty reps and missing a third of their sessions, when the paper's own message is that every prescription beat control and the top ones for both outcomes were heavy. The cost is not just wasted gym time - it is the fatigue those extra light sets put into legs that need to run, bought in exchange for the smallest term in the model.",
@@ -1751,6 +1849,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "A hand dynamometer costs about forty dollars and takes ten seconds to use. Before reading on: how strong an association with death would you expect from something that crude, and would you expect it to hold across countries with completely different income levels and disease profiles?",
+  cheat: "Treat grip as a reserve monitor, not a target: 5 kg lower is associated with 16% higher all-cause mortality, but training it moves the instrument.",
   idea: "Across 139,691 adults in 17 countries, each 5 kg decrement in grip strength was associated with 16% higher all-cause mortality and 17% higher cardiovascular mortality over a median 4 years. It is one of the most robust simple predictors in epidemiology. It is also a marker of systemic reserve rather than a lever you pull by training your hands.",
   why: "The reason a hand squeeze predicts death is that it is not really measuring hands. Grip strength integrates neuromuscular function, nutritional status, inflammatory burden, and the accumulated damage of everything else going on in the body. It is cheap, objective, hard to fake, and correlated with total lean mass and with the nervous system's ability to recruit it. That is why the association survives across 17 countries with wildly different baseline mortality.\n\nThe replication picture is strong. Beyond PURE, Marín-Jiménez et al. (BJSM, 2026) pooled 94 cohort studies and found that adults in the highest handgrip band had lower odds of cardiovascular disease (OR 0.73, 95% CI 0.67-0.80), dementia (0.62, 0.53-0.73), disability (0.57, 0.47-0.70), depression (0.70, 0.63-0.78) and Parkinson's disease (0.53, 0.31-0.91). The breadth of those outcomes is itself informative.\n\nThat breadth is also the warning. Grip strength cannot plausibly cause a lower risk of Parkinson's disease. When one measure predicts a dozen mechanistically unrelated conditions, it is functioning as an index of general physiological reserve. The correct inference is that things which raise your whole-body reserve will move both grip and mortality. The incorrect inference is that squeezing a device will move mortality.\n\nThe short follow-up matters too. A median of 4.0 years leaves plenty of room for reverse causation: people with undiagnosed disease at baseline have both weaker grips and higher near-term mortality. The gradient is real and the causal share of it is smaller than the hazard ratio implies.",
   failureMode: "You buy the dynamometer, train grip specifically with hangs and crushers, watch the number improve, and conclude you have moved the outcome. You have moved the instrument. Meanwhile the actual reserve the measurement was indexing - total lean mass, systemic health, whole-body strength - is unchanged, because you optimised a proxy instead of the thing it proxies. This is the same error as tuning a monitoring dashboard until the alerts stop firing.",
@@ -1773,6 +1872,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "You are 45, you run, and you have decided to start lifting seriously to hold onto muscle as you age. Before reading on: over a typical intervention of a few months, how many kilograms of lean mass do you expect resistance training to add in adults over 50, and does that number change your reason for lifting?",
+  cheat: "Past 50, judge lifting by strength, not mass: 1.1 kg of lean mass against 9.8 to 31.6 kg added on the lifts, so retest your maxes, not DEXA.",
   idea: "Pooled across 49 studies and 1,328 participants aged 50 and over, resistance training added 1.1 kg of lean body mass, with a tight interval of 0.9 to 1.2. Higher-volume programs did better and older participants did worse. If you are lifting to reverse age-related muscle loss by mass, the arithmetic is modest - which is a signal you are lifting for the wrong endpoint.",
   why: "One point one kilograms. Put that against the roughly 1% per year most people lose from midlife and do the arithmetic honestly. On total lean body mass of 55 to 60 kg, 1% is about 0.55 to 0.6 kg a year, so 1.1 kg is roughly two years of drift recovered. Reckoned against skeletal muscle mass alone, 25 to 30 kg, 1% is 0.25 to 0.3 kg a year and 1.1 kg buys four to five years. Two to five years, not a decade. The interval is narrow because 49 studies agree on direction, not because the effect is large.\n\nThe more important comparison is against what the same training does to strength. The companion meta-analysis of 47 studies and 1,079 participants found strength increases of 9.8 to 31.6 kg across leg press, chest press, knee extension and lat pull, with percentage changes of 24 to 33%. Strength moves in double-digit percentages while mass moves 1.1 kg. That gap is the actual finding, and it tells you what resistance training is for in an ageing body: neural drive, force production and function, not tissue accretion.\n\nThe two moderators are consistent with everything else in this literature. Volume helps (β = 0.05, p<0.01), age hurts (β = -0.03, p=0.01). Starting earlier is worth more than training harder later, which is unhelpful advice at any given moment and correct as a lifetime policy.\n\nThe I² of 84% deserves a mention. That is severe heterogeneity, meaning the studies disagree substantially about magnitude even while agreeing on direction. The tight confidence interval reflects the number of studies pooled, not consistency between them.",
   failureMode: "You set a body-composition target, train for it, gain 1.1 kg of lean mass over a hard year, and conclude that lifting does not work for you. So you stop - and give up the 24-33% strength gains that were the actual return, along with the bone loading and the fall resistance that come with them. Judging a strength intervention by a DEXA scan is measuring the wrong output, and the cost of the error is abandoning the intervention entirely.",
@@ -1795,6 +1895,7 @@ window.SITE = {
   replication: "replicated",
   verifiedOn: "2026-08-08",
   gateIntro: "Almost nothing in exercise science earns a high-certainty GRADE rating from Cochrane. Before reading on: name the exercise intervention and outcome pair you think has the strongest evidence base in the entire field, and guess the effect size.",
+  cheat: "Running trains no balance, so add single-leg work to your lifting: exercise cut fall rate 23% and fallers 15% in older adults, high-certainty.",
   idea: "Pooling 59 randomised trials and 12,981 community-dwelling older adults, exercise reduced the rate of falls by 23%, and across 63 studies and 13,518 participants it reduced the number of people falling by 15%. Both are rated high-certainty by Cochrane. In absolute terms that is roughly 195 fewer falls per 1,000 people per year. This is among the best-evidenced exercise findings that exists.",
   why: "Take the certainty rating seriously. High-certainty in GRADE means further research is very unlikely to change the estimate. Most of what gets argued about in training - intensity distribution, set counts, supplement timing - sits at low or moderate certainty on much thinner data. Fifty-nine randomised trials with a tight pooled interval of 0.71 to 0.83 is a different class of evidence entirely. Note that the review's headline exercise-versus-control comparison covers 81 trials and 19,684 participants across all its outcomes, so if you see that larger number attached to the 0.77, it has been borrowed from a different row of the table.\n\nThe reason falls prevention matters more than it sounds is the downstream cascade. A hip fracture in your eighties is not an injury, it is a branch point: hospitalisation, deconditioning, loss of independence, and mortality risk that stays elevated for years afterwards. The intervention with the strongest evidence in exercise science targets the event that most reliably ends an active life.\n\nFor a runner in their forties this reads as somebody else's problem, which is the mistake. The trials recruit people who already have compromised balance and strength, and they recover 23%. The compounding is entirely in the other direction: balance and lower-limb strength built in midlife determine which side of the recruitment criteria you are on in thirty years. Running builds aerobic capacity magnificently and is close to useless for lateral stability and reactive balance.\n\nNote what the two estimates say together. Rate of falls drops more than the number of people falling, 23% versus 15%. Exercise does more to stop repeat fallers falling repeatedly than it does to convert fallers into non-fallers.",
   failureMode: "You bank thirty years of running, arrive at 70 with excellent cardiorespiratory fitness and no balance training whatsoever, and fall on a kerb. Running trains a narrow, sagittal-plane, highly practised movement pattern. It does not train recovering from an unexpected lateral perturbation, and it does not train single-leg stability under load. Aerobic fitness and fall resistance are separate accounts, and only one of them is being funded by your training.",
@@ -1870,6 +1971,7 @@ window.SITE = {
   interval: { lo: -26.332, hi: -7.375, measure: "minutes, pooled mean difference in total sleep time between consumer wrist devices and polysomnography" },
   replication: "replicated",
   gateIntro: "A meta-analysis pools two dozen validations of consumer wrist trackers against polysomnography. Before you look at it: how large do you expect the pooled disagreement on total sleep time to be, and how much do you expect that paper to tell you about how accurately your watch scores REM and deep sleep?",
+  cheat: "Read tracker sleep totals as a monthly trend, about seventeen minutes off pooled, and ignore its REM and deep minutes: staging was never pooled.",
   idea: "The pooled disagreement on total sleep time is about seventeen minutes in magnitude, with a confidence interval that excludes zero. The paper covers four continuous parameters - total sleep time, sleep efficiency, sleep onset latency and wake after sleep onset - and stage accuracy is not one of them. Any claim about REM or deep sleep accuracy attributed to this meta-analysis is a number that is not in it.",
   why: "Seventeen minutes sounds like a rounding error and in one sense it is. Pooled across twenty-four studies and 798 people, the systematic component of the disagreement is small relative to how much your own sleep varies night to night. That is genuinely useful: for cohort-level work, for comparing a group before and after an intervention, or for tracking a trend over months, a bias of this size does not sink the analysis. It is what a mean difference is for.\n\nThe trap is what gets read into it. Sleep staging - the hypnogram, the REM and deep and light minutes your app puts on a coloured chart - is a categorical classification problem, judged by per-stage sensitivity, specificity and Cohen's kappa. It is a different question with different metrics and it was not pooled here. Those figures live in the device-level validation literature, where the picture is much worse: a six-device in-lab validation found wake specificity between about 29% and 52%. Citing a mean-difference meta-analysis as evidence about staging is the sleep-science equivalent of quoting a regression's R-squared to defend a classifier's precision.\n\nThere is a second thing to notice, and it is a lesson about reading papers rather than about sleep. The abstract reports signed mean differences but does not state whether the sign is device minus polysomnography or the reverse. All four signs are internally consistent under either reading. That means you cannot take the direction of the effect from the abstract alone, and anyone who tells you confidently that this paper shows devices overestimate or underestimate sleep is reading in a convention that is not stated there. Take the magnitude, take the interval, and get the direction from the device-level studies that state it - which, in the six-device validation above, is unambiguously overestimation.\n\nBoth things can be true and both matter. The systematic bias is small enough to ignore at the group level. The per-night error is large enough that nothing you read off the watch this morning is actionable. A parameter can be well calibrated on average and useless as an individual measurement, and confusing those two states is the most common mistake made with this class of device.",
   failureMode: "You cite this meta-analysis in a work-adjacent context - a health platform spec, a wellbeing dashboard, an internal argument about which wearable to standardise on - to justify a claim about staging accuracy. Someone checks. The number is not in the paper, the paper explicitly pools four continuous parameters, and now every other figure in your document is suspect. In personal terms the cost is smaller but the same shape: you optimise your evening around getting your deep sleep minutes up, on the basis of an output whose accuracy nobody has told you.",
@@ -1891,6 +1993,7 @@ window.SITE = {
   interval: { lo: -11.9, hi: -3.13, measure: "% change in exercise performance following acute sleep loss" },
   replication: "replicated",
   gateIntro: "You get four hours instead of eight. That can happen two ways - you go to bed at your usual time and the alarm goes at 2am, or you stay up until 3am and get up as normal. Then you have a session or a race the next day. Before you read the pooled figure: what percentage of your physical performance do you expect to lose, does it matter which of those two nights you had, and does it matter whether you go at 7am or 4pm?",
+  cheat: "After an early wake, move hard sessions to the morning: performance fell about 7.6%, 3% to 12%, and another 0.4% per hour awake.",
   idea: "Pooled across 69 studies and 959 participants, acute sleep loss reduced exercise performance by about 7.6%, with a confidence interval running from roughly 3% to 12%. The effect concentrated in afternoon tasks and scaled with time awake, at roughly 0.4% per hour before exercise. Consistent impairment showed up under total deprivation and under late restriction - sleep cut from the end of the night - but not under early restriction, where the night is shortened by a later bedtime.",
   why: "The time-of-day pattern is the most useful thing in this paper and it is the part people skip. If you are sleep deprived and you test at 7am, you are close to the point where you woke up and you have not yet accumulated much time-on-task. By late afternoon you have been awake far longer than you would have been on a normal day, and the homeostatic sleep pressure that has built up since waking is stacked on top of the deficit you started with. The paper puts a number on that: about 0.4% of performance per hour awake before exercise. The deficit does not sit still; it compounds through the day, and the same mechanism explains why late restriction - waking early, then being awake all day - hurt consistently while a later bedtime did not.\n\nThe magnitude is worth sitting with. Eight percent is enormous in racing terms. On a 40-minute 10k that is more than three minutes. That is not a taper-week refinement, it is the difference between a personal best and a bad day, and it comes from one night. Compare it against the effect sizes you see for supplements later in this corpus, where the honest numbers are one to three percent.\n\nThe interval is wide and the heterogeneity statistic tells you why that matters. I2 was 98.1%. Almost all of the variation between the pooled studies is genuine difference between them rather than sampling noise, which means the pooled figure is a summary across a family of different phenomena rather than an estimate of one quantity. Add that 89% of participants were male, that the protocols mixed total deprivation with partial restriction, and that most of it happened in laboratories, and 7.6% is a rough central tendency, not your personal expected loss.\n\nNote what this study does and does not tell you. It is about acute sleep loss - one or a few bad nights - not chronic mild restriction, which is the condition most working runners are actually in. Extrapolating a one-night effect to a habitual seven-hours-instead-of-eight pattern is an extra step the data do not support.",
   failureMode: "You race on four hours of sleep and read the result as a fitness verdict. You conclude your build was wrong, tear up a training plan that was working, and spend a block correcting a problem that was one night of sleep. The reverse costs just as much: you schedule the hardest session of the week for late afternoon after a night on call, then interpret the poor numbers as a signal to add more volume.",
@@ -1933,6 +2036,7 @@ window.SITE = {
   interval: { lo: 1.05, hi: 2.37, measure: "odds ratio for sports or musculoskeletal injury, chronic poor sleepers versus good sleepers" },
   replication: "replicated",
   gateIntro: "You have heard that poor sleep increases injury risk in athletes. Before you see the pooled figure: how much higher do you think the odds of injury are for chronically poor sleepers, and how confident do you think the evidence base is - how many studies, and in what population?",
+  cheat: "Keep the 1.58 injury odds for chronic poor sleepers out of adult planning: 7 studies, athletes 19 or younger, and a 1.05 lower bound.",
   idea: "Seven studies in adolescent athletes pool to an odds ratio of 1.58 for injury among chronic poor sleepers. The lower bound of the confidence interval is 1.05, which is close enough to no effect that a single additional null study could move the conclusion. It is a real signal and a thin one, and the population is teenagers, not adult recreational runners.",
   why: "Start with what would have to be true for this to be a clean finding. You would want objectively measured sleep, prospectively collected injury data with a hard case definition, and adjustment for training exposure. What you get instead is mostly self-reported sleep from questionnaires, injury definitions that vary between studies, and seven studies total. The pooled estimate is doing a lot of work on a small and heterogeneous base.\n\nThe confounding is structural and it points in the direction of the observed result. In adolescent athletes, the ones sleeping badly are disproportionately the ones training hardest, travelling to competition, carrying the heaviest school load, and specialising early in a single sport. Every one of those independently raises injury risk. Sleep is a marker for a lifestyle, and separating the marker from the mechanism needs a design these studies do not have.\n\nCausation can run backwards here too, and it does so more plausibly than usual. Pain wakes people up. An athlete carrying an early-stage bone stress injury or a grumpy tendon sleeps worse because of it, and if the sleep questionnaire is administered anywhere near the injury window you have measured the consequence and called it the cause. The prospective studies mitigate this but do not eliminate it, because injuries in runners rarely announce themselves on a single day.\n\nThen there is the transfer problem, which is yours specifically. These are athletes aged nineteen and under, in mostly team and school sports, with adolescent physiology and adolescent sleep architecture. You are an adult recreational distance runner. The finding may well transfer. Nothing in this paper demonstrates that it does.",
   failureMode: "You treat 1.58 as though it were a well-established multiplier and start making training decisions off your sleep score, which - per the tracker entries in this track - you cannot measure accurately on a single night anyway. Two shaky layers stacked: an odds ratio whose interval nearly includes 1, applied to a measurement whose single-night error exceeds an hour. The output is confident-feeling and worthless. The opposite failure is cheaper but still real: dismissing sleep entirely because the interval is thin, when the point estimate is not small and the mechanism is plausible.",
@@ -2049,6 +2153,7 @@ window.SITE = {
   interval: { lo: 0.38, hi: 1.2, measure: "kg/m2, weighted mean difference in BMI between medial tibial stress syndrome cases and controls" },
   replication: "replicated",
   gateIntro: "You go to a physio with shin pain and get measured: BMI, arch drop, ankle range, hip rotation. Before you read on: how different do you expect those measurements to be, on average, between people who get medial tibial stress syndrome and people who do not?",
+  cheat: "Don't build shin-splint rehab around a screen: cases and controls differ by 0.79 kg/m2 BMI and 1.19 mm navicular drop, too small to act on.",
   idea: "Pooled across 21 studies, the statistically significant risk factors for medial tibial stress syndrome separate cases from controls by 0.79 kg/m2 of BMI, 1.19 mm of navicular drop, 5.94 degrees of ankle plantarflexion and 3.95 degrees of hip external rotation. Every one of those intervals excludes zero. Every one of them is also far too small to tell one runner apart from another, because the case and control distributions sit almost on top of each other.",
   why: "Take BMI first, because it is the one where the objection is purely distributional. A weighted mean difference of 0.79 kg/m2 is measured perfectly well - height and weight are not the problem. The problem is that BMI in a running population has a standard deviation of several units, so a 0.79 gap between group means describes two distributions that are nearly identical in shape and position. This is the difference between a risk factor and a screening test, and it is the whole point of the entry. Two distributions can have different means and overlap almost completely. If you screened runners on BMI you would misclassify almost everyone, in exactly the way a classifier with a c-statistic near 0.5 does.\n\nNavicular drop adds a second problem on top of the first. It is measured with a ruler against a bony landmark on a standing foot, by hand, on a person who is shifting their weight. Hamstra-Wright et al. do not report the reliability of that measurement, so treat this as an inference rather than a finding from the paper - but a pooled group difference of 1.19 mm is the sort of magnitude a hand-held ruler struggles to resolve. Whatever the exact reliability figure turns out to be, a single clinical measurement cannot place you meaningfully on a scale where the entire case-control difference is about a millimetre.\n\nThe negative results deserve more attention than they get. Ankle dorsiflexion range and quadriceps angle were clearly not risk factors, and both have been the target of years of clinical intervention. A field where the null results are this clean and the positive results are this small is telling you something about the underlying model: static anatomical measurements taken at rest are not capturing what loads a tibia during a run.\n\nWhat this does not mean is that the paper is useless. It is a well-executed synthesis and it correctly reports small effects as small. The problem is downstream, where a statistically significant pooled difference becomes clinical guidance to correct navicular drop, and the effect size never travels with the recommendation.",
   failureMode: "You spend a winter on orthotics, arch strengthening and hip external rotation work because a screen flagged you, and the underlying difference those interventions could plausibly move is a millimetre of navicular drop. Meanwhile the variables with real leverage - how much you ran, how fast, on what, after how long off - go unexamined. The specific cost is a false sense of having addressed the cause, which makes you more willing to return to the load that actually caused it.",
@@ -2122,6 +2227,7 @@ window.SITE = {
   interval: { lo: 0.26, hi: 1.11, measure: "kg change in lean body mass with creatine supplementation" },
   replication: "replicated",
   gateIntro: "Creatine is the supplement with the best evidence base in sports nutrition. Before you read on: how much lean mass do you expect it to add in a randomised trial, and does it do anything at all if you are not lifting weights?",
+  cheat: "Take creatine only alongside lifting: 1.10 kg of lean mass with resistance training, 0.03 kg without, and no case for the running itself.",
   idea: "Across 35 randomised trials and 1,192 participants, creatine added 0.68 kg of lean body mass, rising to 1.10 kg when paired with resistance training. Without exercise the estimate was 0.03 kg with an interval spanning zero. It is a real effect, it is about a kilogram, and it requires the training to be there.",
   why: "The stratification is the substance of the paper. The no-exercise estimate of 0.03 kg with an interval from -0.65 to 0.70 is as clean a null as this literature produces. Creatine does not build tissue; it lets you do slightly more work in the sessions that build tissue, by supporting phosphocreatine resynthesis between high-intensity efforts. Take away the sessions and you have removed the mechanism. That is a mechanistically coherent result, which is worth noticing because coherence between mechanism and effect stratification is rare in supplement research.\n\nThe sex difference should be read carefully rather than as a finding. Males 1.46 kg with an interval from 0.47 to 2.46; females 0.29 kg with an interval from -0.43 to 1.01. Those intervals overlap. The female estimate crossing zero is at least as likely to reflect fewer and smaller trials in women as it is a genuine biological difference in response. The honest summary is that the evidence in women is thinner, not that creatine does not work in women.\n\nFor a distance runner the interesting question is whether a kilogram of lean mass is an asset. It is not obviously one. Some of the early gain is intracellular water rather than contractile tissue, and mass is mass when you are carrying it up a hill for two hours. The case for creatine in an endurance athlete rests on the strength work supporting the running, on bone loading, and on injury resilience, not on the running itself. It is a strength-training supplement that happens to be taken by runners who also lift.\n\nWhat makes this entry worth its place in a noise track is the contrast in shape. This is what a supplement with real evidence looks like: 35 randomised trials, over a thousand participants, an effect that is modest and precisely bounded, a clean null in the condition where the mechanism is absent, and honest heterogeneity in the subgroups. Almost nothing else in the supplement aisle looks like this.",
   failureMode: "You take creatine expecting it to improve your running and get a kilogram of extra mass to carry with no performance benefit for the running itself. Or you take it, skip the resistance training, and get the null condition the paper explicitly identifies. The broader failure is calibration: if a kilogram of lean mass across 35 trials is what the best-evidenced supplement in sports nutrition delivers, that is the ceiling you should hold every other supplement claim against.",
@@ -2143,6 +2249,7 @@ window.SITE = {
   interval: { lo: -0.19, hi: -0.012, measure: "Hedges g for endurance running time-trial performance with caffeine, negative favours caffeine" },
   replication: "replicated",
   gateIntro: "Caffeine is the most consistently supported ergogenic aid in endurance sport. Before you read on: how large do you expect its effect to be on a running time trial, and do you expect that to be the same size as its effect on how long you can hold a fixed pace before quitting?",
+  cheat: "If you race, price caffeine off the time-trial g of -0.101, whose upper bound of -0.012 is nearly nothing, not the exhaustion g of 0.392.",
   idea: "Across 21 randomised trials in runners, caffeine produced a medium effect on time to exhaustion, g = 0.392, and a small one on time-trial performance, g = -0.101 with an upper bound of -0.012. The protocol that resembles a race shows a fraction of the effect of the protocol that does not. If you race, the second number is yours.",
   why: "The two protocols measure different things and only one of them is your event. Time to exhaustion holds pace or power fixed and asks how long you last, so the outcome variable is open-ended and the variance is enormous - coefficients of variation for time to exhaustion are routinely several times those of a time trial. It is also a protocol where the endpoint is a decision to stop, which makes it exquisitely sensitive to anything that affects perceived effort or motivation, which is precisely what caffeine does. A time trial fixes the distance and asks how fast, which constrains the outcome, reduces the variance, and is what you actually do on a Sunday morning.\n\nThe time-trial interval is the number to internalise: -0.190 to -0.012. The upper bound is effectively nothing. That does not mean caffeine does not work, it means the effect on the race-like protocol is small enough that this body of evidence can only just distinguish it from zero.\n\nTurning a Hedges g into seconds is where most people go wrong, because the answer depends entirely on which standard deviation you divide by and the paper does not do the conversion for you. Use the between-subject spread of finishing times, which is the conventional denominator for a standardised effect in this literature, and g = 0.1 works out at roughly 1 to 2% of your time - about 24 to 48 seconds on a 40-minute 10k. Use your own event-to-event standard deviation, which for a recreational runner is itself around 1 to 2% of finishing time, and the same g is about 2 to 5 seconds. Both are defensible arithmetic; they answer different questions, and you should say which one you are using. Neither is large. Even the more generous number is roughly a fifth of the 7.6% that a night of acute sleep loss costs per the sleep track - and that comparison is itself loose, because a Hedges g and a percentage change are not on a common scale until you have picked a denominator.\n\nThe sample composition constrains the transfer. 254 participants, of whom 220 were men and 19 were women. Doses ranged from 3 to 9 mg/kg, a threefold spread, and the pooled estimate averages across it. If you are a woman, or if you habitually consume caffeine daily and are therefore partly tolerant, the applicable evidence is thinner than the headline suggests.\n\nThe general lesson generalises beyond caffeine. When a supplement's evidence base looks strong, check which outcome protocol produced the strong result. Time to exhaustion, isolated muscle endurance tests, and repeated-sprint protocols are all more sensitive to motivational and perceptual effects than the competitive event is. A supplement literature dominated by those protocols will systematically overstate what happens on race day.",
   failureMode: "You calibrate your expectations from the time-to-exhaustion literature, take 6 mg/kg before a race expecting a medium-sized effect, and get somewhere between a couple of seconds and half a minute - along with an elevated heart rate you misread as being on pace, a gastrointestinal problem at 30 km, or a disrupted night before if you took it too late for a morning start. The larger cost is opportunity: caffeine gets your attention and your pre-race ritual while the variables with several times the effect size, like your sleep the night before, get none.",
@@ -2185,6 +2292,7 @@ window.SITE = {
   interval: { lo: -533, hi: -73, measure: "kcal/day difference in reported energy intake, injured versus uninjured female distance runners" },
   replication: "replicated",
   gateIntro: "Across prospective cohorts of adult distance runners, someone compares the reported diets of those who went on to get injured against those who did not. Before you read on: which dietary variables do you expect to separate the two groups, and would you expect a screening questionnaire for disordered eating to be one of them?",
+  cheat: "Compare your eating with your training load, not a calorie target: the 303 kcal/day less in injured female runners was self-reported.",
   idea: "Pooled across prospective cohorts, injured female runners reported eating about 303 kcal/day and 20 g/day of fat less than uninjured female runners, both with moderate certainty. Fibre was lower too, by 3 g/day across both sexes. Protein, carbohydrate, calcium, alcohol and disordered eating risk showed nothing. The signal is in total intake, and it is measured by the least reliable instrument in nutrition science.",
   why: "Take the finding seriously first. Low energy availability is a well-described mechanism for bone stress injury, running through suppressed reproductive and metabolic hormone signalling and impaired bone remodelling. A 300 kcal/day deficit in a female distance runner is exactly the magnitude that literature would predict to matter, and the prospective design means the dietary measurement preceded the injury. The direction, the magnitude and the sex specificity all line up with an established mechanism, and moderate GRADE certainty on a nutrition question is better than most of what you will read.\n\nNow take the measurement seriously. Every one of these numbers comes from self-reported dietary intake, whether food diaries or frequency questionnaires. Under-reporting of energy intake against doubly labelled water is one of the most robust findings in nutritional methodology, it is substantial, and it is not random - it correlates with body composition, with sex, and with how much the respondent cares about what the record says. A runner in pain, or a runner already worried about their weight, is not a neutral instrument. A reported 303 kcal/day difference could be a real intake difference, a reporting difference, or both.\n\nThe null on disordered eating risk cuts against the simplest version of the story and deserves more attention than it will get. If the mechanism were straightforwardly restrictive eating causing low energy availability causing injury, you would expect a validated disordered eating screen to detect it. It did not. Either the screens are insensitive in this population, or the energy shortfall in injured runners is arriving through some route other than deliberate restriction - high training volume with inadequate compensation is the obvious candidate.\n\nAnd note the fibre result, mean difference -3 g/day with an interval reported as -5 to -0 and p = 0.04. That -0 is a small negative rounded to one significant figure, not zero, so the interval does exclude no effect and the paper reports it as a real difference at moderate certainty. The reason to be careful with it is not statistical. It is that a 3 g/day gap in fibre is a secondary outcome from nine pooled studies of self-reported diet, and the most economical explanation is total food volume: a runner eating 303 kcal/day less is eating less of everything, fibre included. Expect this one to leave the paper as a headline about fibre being protective, which is a claim the study did not test.",
   failureMode: "You read this as licence to eat more and stop there, without changing what actually drives energy availability, which is the relationship between intake and training load rather than intake alone. Or you read the disordered eating null as reassurance and skip a conversation that a female runner with recurrent bone stress injuries genuinely needs to have. The specific cost of getting this wrong is a bone stress injury, which per the return-to-run entry in the load track has a high recurrence rate and no evidence-based rehabilitation timeline.",
@@ -2357,6 +2465,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -2934,6 +3062,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -2942,6 +3071,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -3439,6 +3569,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -3641,6 +3839,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -3786,6 +3985,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

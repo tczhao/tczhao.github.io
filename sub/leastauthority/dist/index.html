@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Least Authority - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F3F5F2;
@@ -1419,9 +1500,19 @@ window.SITE = {
 
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
+
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
   expiry: true,
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The rules worth having in your head while you are writing the code, rather than after somebody reviews it.',
+    cheatWithheld: 'are attacks and histories rather than rules - they are why the rules exist, and they need their full account to land.',
     labelIdea: 'The principle',
     labelWhy: 'Why it holds',
     labelFailure: 'What an attacker does without it',
@@ -1517,6 +1608,7 @@ window.SITE = {
   track: "principles", level: "classical",
   title: "Fail-safe defaults make the absence of permission the answer",
   source: "Saltzer and Schroeder, The Protection of Information in Computer Systems, 1975",
+  cheat: "Grep the else, except, timeout and null-tenant branches of your auth path; every one that returns allow is today's finding.",
   idea: "Base access decisions on explicit permission rather than explicit exclusion, so that a missing rule produces a denial you notice instead of an allow you do not.",
   why: "The two designs differ in what a mistake looks like. Under deny by default, a gap in the rules breaks a legitimate workflow, and someone files a ticket within the hour. Under allow by default, the same gap opens an unintended path, and nothing at all happens until an attacker finds it. One error mode is self-reporting and the other is silent, and over a system's life you will make many of these errors.\n\nThe subtle version is the error path rather than the rule set. Code that returns allow when the policy service times out, when the tenant id is null, when the tool name is unrecognised, or when an exception is swallowed has a deny-by-default rule set and an allow-by-default failure mode, which is the one that matters during an incident.",
   failureMode: "The tool dispatcher matches the model's requested tool name against a policy map and, on a miss, falls through to a generic handler that executes it anyway. A new tool is registered without a policy entry and is callable by every tenant for three weeks. Tests pass throughout, because the tests only exercise tools that have policy entries.",
@@ -1709,6 +1801,7 @@ window.SITE = {
   track: "principles", level: "practice",
   title: "A security boundary is something you would ship a patch for",
   source: "Microsoft Security Response Center, Security Servicing Criteria for Windows",
+  cheat: "Label each control by whether a bypass earns an emergency fix, before an incident forces the severity argument.",
   idea: "The operational test that separates a boundary from a speed bump is whether a bypass earns an emergency fix, and applying that test out loud settles most architecture arguments in one sentence.",
   why: "Microsoft's servicing criteria work because they tie a security claim to an obligation the organisation must actually honour. A defined security boundary means a bypass gets a security update; a defence-in-depth feature is useful, may still be fixed, but does not carry that promise. Being explicit about which is which stops the ambiguity from being resolved during an incident, at the worst possible moment, by whoever is on the call.\n\nThe test is useful internally because it is cheap and it forces a real answer. Ask whether a bypass of this control wakes someone at 3am, and the room stops arguing about how strong the control is and starts agreeing on what it is for. Most disputes about whether a filter is real security are actually disputes about the obligation nobody wanted to accept, and this question surfaces that in one round.",
   failureMode: "A prompt-injection classifier is described in the design doc as a security control. A researcher demonstrates a bypass. Nobody knows whether this is a P0, and the argument about severity takes longer than the fix would have, while the customer conversation happens without an agreed position. Had it been labelled defence in depth from the start, the same bypass would have been a normal backlog item and everyone would have said so immediately.",
@@ -1795,6 +1888,7 @@ window.SITE = {
   track: "authority", level: "classical",
   title: "Designation and authority must travel in the same message",
   source: "Norm Hardy, The Confused Deputy, ACM SIGOPS Operating Systems Review 22(4), 1988",
+  cheat: "Do not harden a name-taking tool with another blocklist; price the version whose argument is a handle minted upstream.",
   idea: "The fix for the confused deputy is not more validation of the name, it is passing a reference that already carries the permission, so there is no name left for anyone to forge.",
   why: "Every validation-based fix is a denylist of targets the deputy should refuse. It fails the moment someone invents a new spelling, a redirect, a symlink, a DNS rebind, an alias, a synonym in the catalogue. The name and the right are separate objects, so the check is an inference about a string and inferences about strings lose.\n\nHardy's point is that the two should never have been separate. If the caller hands the deputy a reference that is itself the authority to write that file, the deputy no longer has any decision to make: it writes to what it was given, and it can only be given what the caller already held. The caller's inability to reach the billing file is now a property of the message rather than a property of a check. This is why capability people say designation and authority must be unified, and it is the single most transferable idea in this corpus.",
   failureMode: "You harden the URL fetcher with a blocklist for 169.254.169.254 and RFC1918 ranges. Six months later someone adds a redirect follower, or a hostname resolves to a link-local address on second lookup, and the blocklist was never the boundary. Meanwhile a fetcher that only accepts pre-resolved connection handles has no bypass to find.",
@@ -1971,6 +2065,7 @@ window.SITE = {
   track: "authority", level: "practice",
   title: "Your agent's tool list is a row of the access matrix",
   source: "Mark S. Miller, Robust Composition, 2006, applied to tool handles",
+  cheat: "Write two columns per tool - who authorises the call, whose authority it runs under - and circle every row where they differ.",
   idea: "The set of tools you expose to a model is that session's row in the access matrix, and the gap between who authorises each call and whose authority executes it is your confused deputy surface, written down.",
   why: "This is where the whole track lands. A tool definition is a grant. The model chooses which grants to exercise and with what arguments, and the model's choices are influenced by text you do not control. So the row is the security boundary, and everything upstream of it is advisory. Prompt-level instructions to be careful are not part of the matrix.\n\nThe two-column exercise makes the gap visible without any tooling. For each tool, write who authorises this call - the end user, a service principal, a scheduled job, nobody in particular - and whose authority it executes under - the requesting user's token, a tenant service account, a platform superuser. Where the two columns differ, the tool is a deputy and the difference is the borrowed privilege available to anything that can steer the arguments. This is a note, not a command you can run, and it is deliberately note-shaped: probing a production agent is something you schedule with a team, whereas the two columns you can write this afternoon and they will change what you build next.",
   failureMode: "The tool list is reviewed for usefulness and never for authority. The summariser reads under the user's token, the lineage crawler reads under a tenant service account, and the comment writer writes under a platform account with cross-tenant reach. Nobody drew that table, so nobody noticed that a summary of untrusted text can end with a cross-tenant write.",
@@ -2137,6 +2232,7 @@ window.SITE = {
   track: "confinement", level: "classical",
   title: "Declassification is where the real policy lives",
   source: "Sabelfeld and Sands, Dimensions and Principles of Declassification, IEEE Computer Security Foundations Workshop, 2005",
+  cheat: "Grep your redaction and toPublic helpers; the number of call sites is the real size of your confidentiality trusted base.",
   idea: "Every useful system deliberately releases some labelled data, so the policy is not the labels, it is the four questions of what is released, who may release it, where in the system, and when.",
   why: "Non-interference forbids all flow from high to low, and no shipping system satisfies it. Password checking releases one bit about a secret. Aggregate statistics release a function of confidential rows. An agent that summarises a customer's private records for that customer releases the lot, correctly. The moment you admit a declassification primitive, the security property is entirely determined by the constraints on that primitive, and Sabelfeld and Sands' four dimensions are the axes those constraints run along.\n\nMost systems fail on who and where. What gets released is usually documented. The fact that any component holding the label can perform the release, at any point, is usually not, which means an attacker who reaches any of them has reached the declassifier. Concentrating release in a small number of named points is the whole discipline.",
   failureMode: "A redaction helper importable from anywhere in the codebase. Twenty call sites, four of them in retry paths added later, one inside a code path reachable from tenant-authored text. The policy document describes what may be released and is silent on the fact that anything may release it.",
@@ -2201,6 +2297,7 @@ window.SITE = {
   track: "confinement", level: "modern",
   title: "Labels cannot survive a model call, so track them outside it",
   source: "Beurer-Kellner et al., Defeating Prompt Injections by Design (CaMeL), arXiv:2503.18813",
+  cheat: "A delimiter round-tripped through a model is a convention, not a label; carry provenance in the interpreter around it.",
   idea: "Provenance attached to a value is destroyed once that value has been paraphrased by a language model, so any flow tracking has to live in the interpreter around the model rather than inside the context window.",
   why: "A label is metadata that must travel with a value through every transformation. A language model transformation does not preserve it. Text goes in with a marker saying untrusted, the model rewrites, summarises and merges it with other text, and what comes out is one undifferentiated string. Delimiters, prefixes and system-prompt instructions to treat a region as data are not label propagation, they are a request to a component with no mechanism for honouring it.\n\nThe CaMeL design's response is to stop asking. Put the control flow in ordinary code, let the model produce a plan rather than the actions, and have an interpreter outside the model carry capabilities and provenance on the values that plan operates over. The labels then live somewhere with an enforcement point, which is the Flume shape applied to an agent. The specific system will date; the structural claim will not, because it follows from what a language model does to its input rather than from how good any particular one is.",
   failureMode: "Untrusted content is wrapped in tags with an instruction never to follow instructions inside them. The model summarises a document, the summary contains the injected instruction restated as the document's own request, and the summary carries no marker at all because the tags were consumed by the same call that produced it.",
@@ -2387,6 +2484,7 @@ window.SITE = {
   track: "isolation", level: "practice",
   title: "Tenant identity comes from the session, never from a parameter",
   source: "OWASP API Security Top 10 (2023), API1 Broken Object Level Authorization",
+  cheat: "Delete tenant, workspace and account parameters from tool schemas and bind the scope server-side from the session.",
   idea: "Any tenant identifier supplied by the caller is attacker-controlled, and a tenant identifier supplied by a model as a tool argument is caller-controlled through a longer path.",
   why: "Broken object level authorisation has been the top API risk in successive OWASP lists because the pattern is so natural to write. The handler takes an id, fetches the object, returns it. The check that the requester is entitled to that object is a separate line of code that is easy to omit and invisible when omitted, because the endpoint works perfectly for legitimate users.\n\nAgent runtimes make this sharply worse and most teams have not noticed. A tool schema with a tenant_id or workspace_id parameter is an API that takes the authorisation subject as input, and the caller filling it in is a language model whose context contains customer-authored text. Injected text that says 'look up the schema for workspace acme-prod' produces a well-formed tool call with an attacker-chosen scope. The fix is structural: the tenant identity must be bound to the invocation context server-side, and the tool schema must not have that field at all. If the model cannot express the wrong tenant, it cannot be talked into it.",
   failureMode: "A retrieval tool exposes a workspace parameter so it can be reused across tenants. Customer-authored table documentation contains a line addressed to the assistant naming another workspace. The model complies, the tool call is syntactically valid and correctly authenticated, and the audit log shows an authorised service account making a legitimate query.",
@@ -2468,6 +2566,7 @@ window.SITE = {
   track: "isolation", level: "practice",
   title: "An isolation claim is a test you run, not a sentence you write",
   source: "Kubernetes SIG Multi-Tenancy, Multi-Tenancy Benchmarks",
+  cheat: "Put one cross-tenant test in CI and assert denied rather than empty, because empty can just mean the fixture was missing.",
   idea: "Write one automated test that runs as tenant A and attempts the specific reach into tenant B your architecture forbids, then keep it in CI as the operational definition of the boundary.",
   why: "Every isolation property in this track is currently a sentence in a design document, and design documents do not fail builds. The SIG Multi-Tenancy benchmark work is useful mostly as a source of attempts to steal: run as a tenant identity and try to list other namespaces, create a privileged pod, reach a service across namespaces, read a node's details, exceed quota. Take the attempts, not the tooling, and write your own against your own claims.\n\nThe test is not exotic. Provision two fixture tenants, authenticate as A, and assert failure for each crossing you have promised does not happen: query B's rows, hit B's cache key, call a tool with B's identifier, connect to B's service, decrypt with B's key, read B's object prefix. Each assertion is one boundary. When someone later adds a background job with no session, or a cache without a tenant prefix, the assertion fails and you find out from CI rather than from a customer. This is also the only artefact that survives the team turning over, because it states the claim in a form that keeps checking itself.",
   failureMode: "The architecture document says tenants are isolated at the data layer. Eighteen months and three refactors later nobody has verified it, the original authors have left, and the first test of the claim is a customer noticing another company's table names in a search result.",
@@ -2507,6 +2606,7 @@ window.SITE = {
   track: "input", level: "classical",
   title: "Parameterisation works because the parser sees structure before data",
   source: "OWASP Cheat Sheet Series, SQL Injection Prevention",
+  cheat: "Binds cannot cover identifiers, so table names, sort keys and column names need an allowlist of permitted values instead.",
   idea: "A bound parameter cannot change a query's parse tree, which is what makes parameterisation a boundary and escaping only a mitigation.",
   why: "When you prepare a statement, the database parses the SQL text with placeholders in it and produces a plan. Values arrive afterwards, out of band, and are bound into slots in that already-fixed tree. There is no sequence of characters a parameter can contain that alters the tree, because the tree existed before the value did. The ordering is the whole mechanism.\n\nEscaping inverts that order. You transform the value, concatenate it, and the parser decides afterwards. Now correctness depends on your escaper modelling the interpreter's grammar exactly, including its character set handling, its quoting modes and its version. Every historic escape bypass has been a disagreement between those two models. Note also what parameterisation does not cover: identifiers, table names, ORDER BY columns and LIMIT expressions are structure, not data, so they need an allowlist rather than a bind.",
   failureMode: "A team parameterises every value and then builds the sort clause by string concatenation because the driver rejected a placeholder there. A tenant-supplied sort field carries a subquery, and one unparameterised fragment reintroduces the whole bug class the other ninety-nine calls avoided.",
@@ -2656,6 +2756,7 @@ window.SITE = {
   track: "input", level: "classical",
   title: "Canonicalise first, then check, or you check the wrong string",
   source: "MITRE CWE-22, Improper Limitation of a Pathname to a Restricted Directory",
+  cheat: "Resolve the path first, then check containment against the base, because a check before resolution tests the wrong string.",
   idea: "Path traversal survives because validation runs on a representation the filesystem later resolves differently, so the order of the two operations is the entire defence.",
   why: "A path is not a name, it is an expression the operating system evaluates: dot-dot segments, symlinks, mount points, trailing slashes, case folding on some filesystems, alternate encodings of the separator, and on Windows short names and device names. Any check performed before that evaluation is a check on one of many strings that all denote the same file. Resolve first with the platform's real resolver, then compare the result against the base directory with a prefix check that respects segment boundaries, then open the resolved path.\n\nEven that has a race, because a symlink can be swapped between the resolve and the open. Where it matters, hold the directory open and use openat with the no-follow flag, or do the work inside a container whose filesystem does not contain anything worth reaching. And note that the same principle generalises well beyond paths: URLs, hostnames, email addresses and identifiers all have multiple representations, and any check that runs before normalisation is checking a string the consumer will never see.",
   failureMode: "An export feature joins a tenant-supplied filename onto a base directory and rejects anything containing dot-dot. The tenant supplies a URL-encoded separator that the web framework decodes after the check, or a symlink created by an earlier upload, and the resolved path lands outside the base. The service reads a config file and returns it as an export.",
@@ -2811,6 +2912,7 @@ window.SITE = {
   expires: "2027-12-01",
   title: "The lethal trifecta is private data, untrusted content and an outbound channel",
   source: "Simon Willison, The Lethal Trifecta for AI Agents (2025)",
+  cheat: "Tag each agent with private data, untrusted content and outbound channel, then spend on removing a leg, not on hardening the model.",
   idea: "An agent that has access to private data, exposure to attacker-controlled content and any way to send bytes outward can be made to exfiltrate, and the defence is removing a leg rather than hardening the middle.",
   why: "Each leg is individually reasonable. Private data access is why the agent is useful. Untrusted content is unavoidable in a product whose input is customer-authored text. An outbound channel is how the agent reports results. Combined in one context with one identity, they compose into a complete exfiltration primitive, and the model in the middle is the part you cannot make trustworthy.\n\nThe framing earns its place because it turns an unbounded question into a checklist you can hold against an architecture diagram. \"Is this agent robust to injection\" has no answer. \"Which of the three does this agent hold, and can we take one away\" has three candidate answers, and usually at least one is affordable: a read-only agent, an agent that never sees customer-authored text, or an agent whose only output path is a rendered surface your own code controls.",
   failureMode: "A support-summarisation agent reads tenant tickets, holds a metadata API token, and posts its summary back as a ticket comment. All three legs, one identity. An attacker files a ticket, and the agent's next comment on an unrelated ticket contains the tenant's connection inventory in a URL.",
@@ -2947,6 +3049,7 @@ window.SITE = {
   expires: "2027-10-01",
   title: "An MCP server can attack you before you ever call it",
   source: "Trail of Bits, Jumping the line: how MCP servers can attack you before you ever use them (2025)",
+  cheat: "Gate MCP servers at connection with a per-agent allowlist and pinned versions; a server you never call has already spoken.",
   idea: "Tool metadata enters the context at connection time, so installing a server is the trust decision, not invoking its tools.",
   why: "The mental model most teams carry is that connecting a server is inert and calling a tool is the risky act, which is why approval prompts sit on invocation. But the handshake pulls metadata into context immediately, and that metadata is prose the model reads. A server that is never called has already spoken.\n\nOnce you accept that, the control moves earlier in the lifecycle. Connection-time review, a pinned server version, and an allowlist of servers per agent are the mechanisms that actually gate the risk. An invocation-time approval prompt gates nothing that matters here, because by the time the user sees it the hostile text has already shaped what the model decided to ask for.",
   failureMode: "A developer connects five MCP servers to explore which one to use, calls tools from only one, and considers the other four unused. All five have been injecting into every prompt in that session since the handshake.",
@@ -3139,6 +3242,7 @@ window.SITE = {
   track: "defences", level: "modern",
   title: "Policy belongs at the tool boundary, deterministically",
   source: "Díaz, Kern and Olive, An Introduction to Google's Approach to AI Agent Security (Google, 2025)",
+  cheat: "Rewrite each prompt-level rule as a predicate over resolved tool arguments; the ones that will not convert are unenforced.",
   idea: "Security rules must be evaluated by deterministic code inspecting the concrete tool call and its arguments, because that is the only layer whose behaviour you can test.",
   why: "Google's paper argues for a hybrid: reasoning-based defences for the fuzzy cases layered over runtime policy enforcement for the ones that must hold. The division of labour is the point. A prompt expresses intent and degrades probabilistically under adversarial pressure. A policy engine sitting between the agent and the tool sees the resolved call, with the tenant id, the resource path and the write flag already concrete, and returns allow or deny from code you can unit test and diff in review.\n\nThe practical consequence is that every rule you care about has to be expressible over the arguments of a call. If a rule can only be stated as do not do anything harmful, it cannot live at the boundary and it is therefore not enforced, it is merely requested. That reframing is useful in design review: it forces the vague rules to become specific or to be replaced by a narrower tool.",
   failureMode: "The system prompt says never query a table outside the current tenant's namespace. The runtime passes whatever namespace string the model produced straight through to the warehouse client. A description containing a plausible-looking namespace gets one cross-tenant read, and the only artefact is a query log entry nobody diffs.",
@@ -3190,6 +3294,7 @@ window.SITE = {
   track: "defences", level: "practice",
   title: "An egress allowlist breaks the third leg of the trifecta",
   source: "Simon Willison, The Lethal Trifecta for AI Agents (2025), applied at the network layer",
+  cheat: "Default-deny outbound from the tool sandbox, then count your wildcards; one over a CDN or storage host is an open channel.",
   idea: "Deny outbound network from the tool sandbox by default and allowlist per task, because exfiltration needs a destination and a destination is the one thing you can enumerate.",
   why: "The trifecta is private data, exposure to untrusted content and a way to communicate externally. The first two are usually load-bearing for the product. The third is almost never load-bearing in the general case: a task needs the warehouse, the metadata store and maybe one SaaS API, not the internet. Denying by default and allowlisting the handful of hosts a task actually declared removes the leg you can most afford to lose.\n\nThis is also the mitigation with the best durability, which matters for a corpus like this one. It does not depend on a model version, a prompt template or a classifier's training distribution. It keeps working through a model upgrade, and the failure mode when it is too tight is a loud connection error rather than a silent leak.",
   failureMode: "The classic markdown image exfiltration: injected text asks the agent to render an image whose URL embeds the rows it just read. With open egress the render fetches it and the data is in an attacker's access log. With a default-deny policy the fetch fails and you get an alert instead of a breach.",
@@ -3529,6 +3634,7 @@ window.SITE = {
   track: "credentials", level: "modern",
   title: "The context window is a log you do not control",
   source: "OWASP Top 10 for LLM Applications (2025), LLM02 Sensitive Information Disclosure",
+  cheat: "Target zero credential-shaped tool parameters; let the model pass a connection reference and resolve it after it has chosen.",
   idea: "A credential placed in model context is a credential disclosed, because context is copied to the provider, into traces, into summarised memory and potentially into the next response.",
   why: "Everything in context has already left your process. It goes to the inference provider, it is written to whatever trace backend you use for debugging, it is frequently compacted into a memory or summary that outlives the session, and it may be echoed into output. Each of those has a different retention policy and a different access list, and none of them were designed as a secret store.\n\nThere is a second property that makes this worse than an ordinary logging leak. Context has no access control. A model instructed to keep a value secret will surrender it under a sufficiently well-crafted instruction in the untrusted text it is also reading, and that text is customer-authored in most real deployments. The design consequence is that tools must never take a credential as a parameter. The model passes a reference, and the runtime substitutes the credential at the call boundary, outside the loop the model can influence.",
   failureMode: "A tool schema declares an api_key parameter so the model can call a tenant's system. The key is now in the prompt, in the trace the team shares while debugging, and in the eval dataset built from production traces. It also appears verbatim the first time a customer-authored asset description asks the assistant to repeat its instructions.",
@@ -3563,6 +3669,7 @@ window.SITE = {
   track: "credentials", level: "practice",
   title: "When a credential leaks, assume it was used",
   source: "Adkins et al., Building Secure and Reliable Systems (O'Reilly, 2020), crisis management",
+  cheat: "On a leak, revoke before you rotate; preparing a clean replacement first leaves the credential live and the attacker inside.",
   idea: "The order is revoke, then rotate, then hunt for use, and every one of those steps needs to be written down before the day you need it.",
   why: "Teams invert the order because rotation feels productive and revocation causes a visible outage. But the leaked credential is valid until revoked, and credentials exposed publicly are found by automated scanners far faster than by humans. Every minute spent preparing a clean rotation is a minute the attacker still holds access. Containment first, restoration second, investigation third, which is the standard incident structure applied to a credential rather than a service.\n\nThe reason this is a runbook and not a principle is that the hard part is decision latency at 2am. Someone has to know the exact revocation command, what breaks when it runs, and who is authorised to accept that breakage. If those three facts have to be discovered during the incident, the team will stall on them, and stalling is indistinguishable from choosing not to contain.",
   failureMode: "A key is found in a public gist at 2am. Nobody on call knows whether revoking it takes down the ingestion pipeline, so the decision is escalated and waits for morning. The credential stays live for six hours, and the subsequent investigation has to cover all six.",
@@ -3633,6 +3740,7 @@ window.SITE = {
   track: "modelling", level: "classical",
   title: "Attack trees make an adversary's options enumerable",
   source: "Bruce Schneier, Attack Trees, Dr. Dobb's Journal, December 1999",
+  cheat: "Mark each control as branch or leaf on the attack tree; a leaf usually just shifts the cheapest path to a sibling.",
   idea: "Put the attacker's goal at the root, refine it into alternative sub-goals, and you can cost each leaf and see which mitigation removes a branch rather than a leaf.",
   why: "The tree separates goal from method. Root nodes are what the attacker wants, child nodes are OR-alternatives or AND-conjunctions of how, and leaves are concrete acts. Annotating leaves with a value - cost, skill required, whether special equipment is needed, legality - propagates upward, so the cheapest path to the root is computable rather than argued.\n\nThat propagation is what makes the tree a decision tool. A control that raises the cost of one leaf leaves the sibling leaves untouched and the root reachable at the same price, whereas a control at a branch node invalidates everything beneath it. Most security spend is leaf spend defended as branch spend.",
   failureMode: "You add prompt-level guardrails to the summarisation tool because that is where last quarter's demo attack landed. The root goal was exfiltrate another tenant's metadata, and the sibling leaves - the search tool, the export tool, the webhook - are all still there at the original price.",
@@ -3715,6 +3823,7 @@ window.SITE = {
   track: "modelling", level: "practice",
   title: "A useful review comment names the flow",
   source: "Google, Code Review Developer Guide (google/eng-practices)",
+  cheat: "Replace have you considered X with attacker writes here, agent reads here, credential used here, so the thread resolves against code.",
   idea: "Have you considered X puts the work back on the author and dodges accountability, while attacker writes here, agent reads here, credential used here is a claim the author can refute or fix.",
   why: "A question transfers the burden of proof without transferring any information. The author now has to reconstruct what you were worried about, and the cheapest way to close the thread is a reassuring sentence that neither of you can check. A named flow is falsifiable: either the attacker can write to that field or they cannot, and the disagreement resolves against the code.\n\nIt also puts your reputation behind the finding, which is the point. Reviewers who only ask questions accumulate no track record, so their comments carry no weight when they need to block something. Reviewers who make specific claims are occasionally wrong in public and are listened to when they are right.",
   failureMode: "The review comment reads 'have you thought about prompt injection here?'. The author replies that the system prompt instructs the model to ignore instructions in data. Both parties feel the thread is resolved, the LGTM lands, and no one has established whether the description field is tenant-writable.",
@@ -3967,6 +4076,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4544,6 +4673,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4552,6 +4682,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -5049,6 +5180,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -5251,6 +5450,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5396,6 +5596,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

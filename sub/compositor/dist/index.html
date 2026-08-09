@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Compositor - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F7F4ED;
@@ -1420,6 +1501,13 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   gate: {
     label: 'Bring a paragraph',
     prompt: 'Paste a paragraph you wrote, then apply today\'s move to it before you read the worked example.',
@@ -1441,6 +1529,9 @@ window.SITE = {
   extraRequired: ['fallback', 'gatePrompt', 'worked'],
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The edits that survive being reduced to one line: what to do to a sentence, not what to admire about it.',
+    cheatWithheld: 'need a draft in front of you to mean anything - they are drills rather than rules, and a rule is what a row can hold.',
     labelIdea: 'The move',
     labelWhy: 'Why it works on a reader',
     labelFailure: 'What it looks like when it is missing',
@@ -1496,6 +1587,7 @@ window.SITE = {
   source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
   gatePrompt: "Take the longest sentence in your paragraph. Write down its grammatical subject and its main verb as a bare two-word pair. If that pair is not the actor and the action you meant, rewrite the sentence until it is.",
   fallback: "Consideration of a phased cutover was given by the platform team after the discovery of a dependency between the ingestion workers and the legacy scheduler. The expectation is that completion of the migration will occur before the end of Q3, assuming the availability of review capacity from the data team.",
+  cheat: "Write a hard sentence's subject and main verb as a bare two-word pair - if that pair is not the actor and the action, rewrite.",
   idea: "Put the main character of the sentence in the grammatical subject and the main action in the main verb.",
   why: "Readers assign agency to whatever occupies the subject slot, whether or not you meant them to, and they hold that subject in working memory unattached until the verb tells them what it did. When the subject names the actor and the verb names the action, the reader resolves the clause at the earliest possible point and every remaining phrase has an obvious place to attach.\n\nThis is the move the rest of this track is made of. Nominalization, empty subjects, light verbs and agentless passives are all the same failure seen from different angles: the actor is somewhere other than the subject, or the action is somewhere other than the verb. Fix the alignment and most of them disappear without being addressed individually.",
   failureMode: "\"Consideration of a phased cutover was given by the platform team.\" The subject is an abstraction, the verb is \"was given\", and the two things a reader wants - who, and what they did - are parked in a prepositional phrase and a noun. Six words of the sentence exist only to hold the structure together.",
@@ -1800,6 +1892,7 @@ window.SITE = {
   source: "Geoffrey K. Pullum, \"Fear and Loathing of the English Passive\" (Language and Communication, 2014)",
   gatePrompt: "Find every sentence in your paragraph you would have called passive. Apply the two-part test to each: a form of \"be\" or \"get\" plus a past participle, with the subject as the thing acted on. Cross out the ones that fail.",
   fallback: "Nit on the design doc: there is too much passive voice throughout. \"There are three services affected\" should be active. \"The system is dependent on the scheduler\" is passive too, and so is \"the migration is complete\". Can you do a pass and make these all active before it goes to the wider group?",
+  cheat: "Run the two-part test before flagging a passive: be or get plus a past participle, subject as the thing acted on - otherwise name the real fault.",
   idea: "Verify a passive before you flag one: it needs an auxiliary plus a past participle, with the subject corresponding to the object of the active version.",
   why: "Pullum's paper documents that the advice literature, Strunk and White included, routinely misidentifies its own examples, and that the label has drifted to mean roughly \"prose I find flat\". That drift matters to you specifically because you review other people's writing. A reviewer whose diagnoses do not hold up loses the authority of the correct advice sitting next to the wrong one.\n\nThe three usual false positives are copula plus adjective (\"the migration is complete\"), verb-derived adjectives (\"is dependent on\"), and existential clauses (\"there are three services affected\"). Each one has a real fault available to name: no character in the subject, a verb hiding in an adjective, a placeholder where the actor should be. Those names are more useful than \"passive\" and they are also true.",
   failureMode: "A review comment flagging \"the migration is complete\" as passive. It is a copula and an adjective, there is no participle and no demoted agent, and the author now has to choose between a wrong instruction and a disagreement with their reviewer.",
@@ -2167,6 +2260,7 @@ window.SITE = {
   source: "George Gopen, The Sense of Structure",
   gatePrompt: "Delete every \"however\", \"therefore\", \"moreover\" and \"in addition\" from your paragraph. Read what is left and mark each join as still clear or now broken.",
   fallback: "The rollout was paused on Thursday after the canary showed elevated error rates. However, cost per run has been trending down since April, which was the original justification for the change. Therefore, the remaining three regions will be picked up next sprint. Moreover, the dashboard still needs an owner.",
+  cheat: "Strip every however and therefore first - the joins that break are topic problems, and putting the words back will not fix them.",
   idea: "Fix the sequence of topics first, because a connective asserts a relationship rather than creating one.",
   why: "Connectives are labels. \"However\" tells the reader that the coming sentence contradicts the last one, and the reader will look for the contradiction. If the two sentences are about different subjects, the search fails, and the reader is left holding a promised relationship they cannot locate. That is worse than no connective, which at least leaves them to make their own sense of the join.\n\nThe underlying point is that coherence lives in the topic sequence. When subjects follow one another sensibly, most joins need no signposting and the few connectives you do use are believed. When subjects jump, adding connectives converts a paragraph that is merely disjointed into one that is disjointed and misleading.",
   failureMode: "Three connectives asserting three relationships that are not there. Nothing in the fallback contradicts anything, so \"however\" misfires; the falling cost does not cause the regions to be picked up, so \"therefore\" is false; and the dashboard's owner is not a further instance of anything.",
@@ -2224,6 +2318,7 @@ window.SITE = {
   source: "George Gopen, The Sense of Structure",
   gatePrompt: "Read only the final sentence of each paragraph in something you wrote this week, in order. Write down what that sequence claims. Compare it with what you meant to claim.",
   fallback: "Cutting the poll interval from ten seconds to one dropped detection time for stuck runs from a median of eleven seconds to under two. We have run it in staging for a fortnight with no measurable increase in API server load. It is worth noting that we have not tested above two thousand concurrent runs, and the staging cluster is about a third the size of production.",
+  cheat: "Keep the caveat but move it to the middle of the paragraph - a limitation in the last sentence becomes the finding.",
   idea: "End the paragraph on what you want carried forward, because the final sentence is what the reader takes away.",
   why: "The emphasis that attaches to syntactic closure at the end of a sentence attaches again, more strongly, at the end of a paragraph. The reader is closing a larger unit, and what sits at that boundary is what survives into the next paragraph and into their summary of the document.\n\nThis is why trailing caveats are so expensive. Honest writers put the limitation last because it feels like integrity to finish with the qualification, and the structural effect is to make the limitation the finding. Keep the caveat, but put it in the middle where the reader will read it as a bound on the claim rather than as the news.",
   failureMode: "A real result reported first and surrendered last. The fallback's finding is a five-fold improvement in detection time, and the sentence the reader carries away is that it has not been tested at scale on a small staging cluster. Everyone who skims that paragraph remembers the untested part.",
@@ -2496,6 +2591,7 @@ window.SITE = {
   source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
   gatePrompt: "Count the negations in your paragraph, including unless, without, except, prevent, avoid, preclude and fail. Rewrite every sentence that carries more than one so that it carries at most one, and write both counts down.",
   fallback: "Do not disable the canary route unless the rollout has not completed. We are unable to avoid blocking writes to the shard while the reindex is running, so no deploy should proceed without first confirming that no backfill is in flight. Failure to check this has not been uncommon.",
+  cheat: "Hold runbook steps to one negation per sentence, counting hidden ones like unless, without, except, prevent, avoid and fail.",
   idea: "State what is true or what to do, and reserve negation for the cases where the positive form does not exist.",
   why: "A negative is an instruction to build the positive proposition and then invert it. That is one extra operation held in working memory. Two negatives in the same clause force the reader to hold an inversion while parsing the rest of the sentence, and under load they routinely drop one and take away the opposite of what you wrote. In a runbook, that is an outage.\n\nThe count is higher than it looks, because English carries negation inside ordinary words. Prevent, avoid, preclude, fail, doubt, unless, without and except are all negatives without using \"not\". \"No deploy should proceed without confirming that no backfill is in flight\" contains three, and the reader has to resolve all of them before they know whether to press the button.",
   failureMode: "Runbook and alert text that needs decoding under pressure: \"Do not disable the canary route unless the rollout has not completed.\" Someone at three in the morning has to work out that they should leave the route enabled while the rollout is still running, and they have a fifty per cent chance of getting it backwards.",
@@ -2515,6 +2611,7 @@ window.SITE = {
   source: "Joseph M. Williams, Style: Lessons in Clarity and Grace",
   gatePrompt: "Take your shortest paragraph. Between each pair of adjacent sentences, write the inference a reader must make to get from one to the next. Mark every inference you would not bet a new hire on making.",
   fallback: "We are moving to a sharded control plane with tenants pinned to shards. Rebalancing stays manual until the placement service lands. Cost neutral, failure domain shrinks, recommend we proceed this quarter.",
+  cheat: "Judge concision by the inferences a reader must reconstruct, not by length - nine sentences can be tighter than three.",
   idea: "Cut the words that do no work, not the words that carry the argument, and judge the result by what the reader has to reconstruct rather than by length.",
   why: "Concision targets propositional emptiness, not word count. Compression past a threshold does not remove work, it moves it: the links you cut still have to be built, and now the reader builds them from their own assumptions rather than your evidence. You have not saved anything, you have outsourced it and lost control of the answer.\n\nWhat gets cut first is exactly what should not. Transitions and warrants feel redundant to the writer because the writer can already see the connection. \"Cost neutral, failure domain shrinks, recommend we proceed\" is three claims with the reasoning between them deleted, and the reader who does not already know why pinning makes cost neutral has no way in. Nine sentences that each add a proposition are more concise, in the only sense that matters, than three that force three reconstructions.",
   failureMode: "Telegraphic summaries that read as decisive and land as unreadable: \"Cost neutral, failure domain shrinks, recommend we proceed this quarter.\" Every noun is a compressed argument. The people who can decode it are the people who were in the design review, which means the summary works only for the audience that did not need it.",
@@ -2540,6 +2637,7 @@ window.SITE = {
   source: "Francis Christensen, A Generative Rhetoric of the Sentence",
   gatePrompt: "Find the longest sentence in your paragraph. Mark the word where the main clause finishes, then count the words before that mark. If the count is above eight, rewrite the sentence so the main clause completes first and every qualification follows it.",
   fallback: "Because the shard rebalancer holds a global lock while it recomputes ownership, and because that recomputation walks every tenant in the cluster rather than only the ones affected by the move, writes to unrelated tenants stall for the duration. Given the size of the largest region and the current tenant count, which has roughly tripled since the rebalancer was written, that duration is now between forty and ninety seconds.",
+  cheat: "Close the main clause inside eight words, then hang every qualification off the back where it costs the reader almost nothing.",
   idea: "Assert the main thing in a short base clause, then extend the sentence with free modifiers that add to what you have already said.",
   why: "An incomplete main clause is an open obligation. Until the subject meets its verb and the predication closes, the reader is holding unattached material with nowhere to put it, and every extra word before closure raises the cost of the next one. That is why a front-loaded sentence gets harder as it gets longer, and why a cumulative one does not.\n\nOnce the base clause lands, the proposition is stored. Everything after it attaches to something already understood, so each addition is cheap: the reader is refining a commitment rather than deferring one. This is how a fifty-word sentence can read faster than a twenty-five word one.",
   failureMode: "The sentence spends its first two lines qualifying a claim it has not made yet. \"Given the volume of writes during backfill and the fact that compaction has never been tuned for the current shard count, latency degrades.\" Twenty-two words of setup for a three-word point. The reader has to hold all the setup, discover what it was setup for, then re-read it to attach it.",
@@ -2749,6 +2847,7 @@ window.SITE = {
   source: "Verlyn Klinkenborg, Several Short Sentences About Writing",
   gatePrompt: "Count the words in every sentence of your paragraph and write the numbers out in a row. If no number is under eight, rewrite your single most important sentence until one of them is.",
   fallback: "The design doc proposes moving the workflow history store off the shared Postgres instance and onto a dedicated cluster with its own retention policy. This would remove the noisy-neighbour behaviour we have seen during large backfills and would let us tune vacuum settings for a write-heavy workload. The cost is roughly eleven thousand dollars a year, which is materially less than the engineering time we currently spend on incident response for this one component.",
+  cheat: "Uniform sentence length spends emphasis on nothing - put your key claim in the paragraph's shortest sentence, under eight words.",
   idea: "Treat sentence length as an instrument: run long while you develop, then drop to a short sentence at the point you most want remembered.",
   why: "Readers build a running expectation of sentence length from the sentences they have just read. A sentence that breaks the pattern gets attention for free, and the sharpest break available is a short sentence after several long ones. Nothing in the wording has to do the work.\n\nThere is a second effect. A short sentence closes its syntax immediately, so the whole proposition lands as one chunk with no held material. That combination, cheap to process and unexpected, is why the shortest sentence in a paragraph is read as its most emphatic, whether or not you intended it. Which means uniform length is not neutral: it spends the emphasis on nothing.",
   failureMode: "Paragraphs where every sentence runs 25 to 35 words, competent and unreadable, the standard output of a careful engineer writing a design doc at 5pm. Nothing is wrong with any individual sentence. There is also no signal anywhere about which of the six claims is the one you should carry into the meeting.",
@@ -3059,6 +3158,7 @@ window.SITE = {
   source: "Richard E. Young, Alton L. Becker and Kenneth L. Pike, Rhetoric: Discovery and Change",
   gatePrompt: "Take a doc aimed at someone with a stake in the current arrangement. Read only the first sentence as they would, and write their one-line reply. If the reply is a defence, rewrite the opening to start from something they already believe.",
   fallback: "The connector framework should be owned by the platform team rather than by integrations. Integrations has shipped fourteen connectors in two years, but the framework itself has had no maintainer since the original author left, and three of the last five production incidents traced back to it. We propose the transfer takes effect at the start of next quarter.",
+  cheat: "With a reader invested in what you are displacing, open with their position and the conditions it held under, then the claim.",
   idea: "With a reader who is invested in the position you are arguing against, establish shared ground and their view before stating your conclusion.",
   why: "Answer-first works because it gives the reader a structure to hang facts on. It stops working when the answer itself is the thing under threat, because a reader who feels attacked in sentence one reads the rest as prosecution material and spends their attention building a rebuttal rather than a model. Everything you write after that point is processed adversarially.\n\nThe Rogerian move is to spend the opening demonstrating that you understand their position and the conditions under which it is correct. That is not softening. It removes the reason to defend, so the evidence gets read as evidence. You still land the claim; you land it after the ground that makes it inevitable rather than before.",
   failureMode: "A conclusion that reads as a verdict on the reader. \"The connector framework should be owned by the platform team rather than by integrations.\" The integrations lead has stopped reading and started drafting, and your incident data never gets evaluated on its merits.",
@@ -3078,6 +3178,7 @@ window.SITE = {
   source: "Stephen Toulmin, The Uses of Argument",
   gatePrompt: "Take a paragraph where you draw a conclusion from data. Write the sentence that has to be true for the data to license the conclusion. Check whether that sentence appears anywhere in the doc.",
   fallback: "p99 latency on the search endpoint rose from 180ms to 420ms in the week after the index change shipped. Error rates were flat over the same period and no tenant has raised a ticket. We should roll the index change back before the release freeze on Friday.",
+  cheat: "Write the sentence that licenses your data to support your claim - that assumption is what reviewers are actually disputing.",
   idea: "Name the assumption that licenses the move from your evidence to your claim, because that assumption is what reviewers are really disputing.",
   why: "An argument has data and a claim, and between them a warrant: the general principle that makes this data count as support for this claim. Writers state data and claim because those are the parts they researched. The warrant stays implicit because it feels obvious, and it feels obvious because you have been inside the problem for a fortnight.\n\nWhen a reviewer pushes back on your numbers and the conversation goes in circles, the usual cause is that they accept the numbers and reject the warrant. Two people arguing about whether 420ms is real when the actual disagreement is whether 420ms matters will not converge, because neither has named the thing they disagree about.",
   failureMode: "Data, then \"we should\", with nothing between them. \"p99 rose from 180ms to 420ms. We should roll back.\" The unstated warrant is that search p99 under 200ms outranks whatever the index change bought, and that is precisely what the person who shipped the index will contest.",
@@ -3274,6 +3375,7 @@ window.SITE = {
   source: "Francis-Noël Thomas and Mark Turner, Clear and Simple as the Truth",
   gatePrompt: "Take a document you wrote recently. Write one sentence at the top naming the reader's situation when they open it: what they are trying to do, and what happens if they get it wrong. Then decide whether the document's current style matches that situation.",
   fallback: "Restoring the queue after a backlog event is straightforward. One drains the pending partitions, confirms the consumers have reconnected, and the system settles back into a healthy state within a few minutes. The operator will find that patience is generally rewarded here, since the reconciler prefers to converge on its own rather than be hurried.",
+  cheat: "A runbook reader is executing, not reading - give them preconditions, ordered steps, exact commands, observable results and a failure branch.",
   idea: "Choose the stand from the reader's situation, and use classic style only where the reader is reading rather than doing.",
   why: "Thomas and Turner treat a style as a set of answers to questions about truth, presentation, the scene, the cast and the thought. Classic answers them one way: truth is knowable, the scene is one competent person showing another something, the occasion is disinterested. Practical style answers differently, because its reader has a job to finish and a boss waiting.\n\nA runbook reader is not being shown anything. They are executing under time pressure, possibly at 3am, and they need preconditions, ordered steps, expected output and a rollback. Classic style's smoothness actively hurts here: \"one drains the pending partitions\" hides the command, and \"patience is generally rewarded\" hides the timeout. Elegance and executability are different goals.",
   failureMode: "A runbook that reads beautifully and cannot be followed. The giveaway is the impersonal \"one\" and the absence of anything checkable: no command, no threshold, no branch for the case where the consumers do not reconnect. It describes the happy path as a landscape rather than a procedure.",
@@ -3331,6 +3433,7 @@ window.SITE = {
   source: "Steven Pinker, The Sense of Style",
   gatePrompt: "Find a paragraph where you introduced a new concept. Mark the sentence where the definition appears and the sentence where the first concrete instance appears. If the definition comes first, swap them and read it again.",
   fallback: "A rerouter is a component that intercepts task queue assignments and rewrites their destination according to a policy resolved at dispatch time, where the policy is drawn from a precedence chain of tenant-level, workflow-level and global rules. Precedence is evaluated most-specific-first, with ties broken by declaration order. For example, a tenant pinned to the legacy queue keeps running there even after the global default moves.",
+  cheat: "Lead with one concrete instance and put the definition after it - if the definition did not shrink, the example is too weak.",
   idea: "Lead with one concrete instance the reader can hold, then generalise from it.",
   why: "Comprehension is not the transfer of a definition, it is the construction of a model. Readers build abstractions by generalising from instances, so a definition arriving with nothing to attach to has to be held in working memory unresolved while they wait for something to test it against. That waiting is the effort they feel, and it is why a technically perfect definition can be exhausting to read.\n\nAn instance first gives the reader a scaffold. The definition then arrives as a compression of something they already have rather than a promissory note, and it takes almost no effort because they are checking it, not building from it.",
   failureMode: "The paragraph that spends its first forty words on qualifications before the reader knows what is being qualified. \"A rerouter is a component that intercepts task queue assignments and rewrites their destination according to a policy resolved at dispatch time\" has four abstractions stacked before the first thing you could point at, and the example that would have unlocked it is parked in sentence three.",
@@ -3470,6 +3573,7 @@ window.SITE = {
   source: "John McPhee, Draft No. 4",
   gatePrompt: "Paste something you are drafting. Before reading on, go through the edits you have already made to it and mark each one S (structural: moved, merged, cut, resequenced) or L (line: word choice, clause order, rhythm). Write the two counts.",
   fallback: "The retention policy for workflow history is the second problem, and it is the more expensive of the two. As noted above, we hold every execution record indefinitely, which is why the cluster now carries eleven months of state that nothing will ever read. Retention, then, is where the cost lives. We return to retention in the sizing section below.",
+  cheat: "Settle structure before touching a sentence - forty minutes of polishing is what turns a section you should cut into one you defend.",
   idea: "Settle what the document is made of before you touch how any of it is written.",
   why: "A sentence has no fixed quality. It has a job, and the job is set by the structure around it: what the reader already knows when they arrive, what the sentence must hand to the next one. Change the section order and the same sentence is now doing different work, usually badly. Polishing before the structure is fixed means polishing against a brief that has not been written.\n\nThe second mechanism is in your head, not the reader's. Effort creates commitment. A section you spent forty minutes tightening is a section you will argue to keep, and you will not experience that as sunk cost, you will experience it as the section being good.",
   failureMode: "A draft where every sentence is clean and the document still does not work. Three sections make the same point three well-written times, nobody can say which is the real one, and the review comes back asking for the thing that was supposed to be in section two. The tell in your own behaviour is defending a paragraph on the grounds that it reads well.",
@@ -3660,6 +3764,7 @@ window.SITE = {
   source: "George Gopen, Expectations: Teaching Writing from the Reader's Perspective",
   gatePrompt: "Find a review comment you left in the past fortnight. Rewrite it so that it names the fault in terms that would also apply to a different document, then put the two versions side by side.",
   fallback: "This is confusing, maybe reword? Also this paragraph feels long. I would probably say something like 'the connection pool exhausted during the reindex and we did not catch it for forty minutes'. Rest of the section looks fine to me.",
+  cheat: "Do not hand back a rewritten sentence - name the fault as a detector the writer can run on the next draft themselves.",
   idea: "Name the fault in reusable terms rather than pointing at where it hurts.",
   why: "A symptom comment transfers one repair. A named fault transfers a detector, which the writer can run on every paragraph they write afterwards. The difference compounds across a team: one is a fix, the other is a capability.\n\nHanding over a rewritten sentence is the worst version, because it looks maximally helpful and teaches least - the writer accepts it, learns that you will supply the good sentence, and brings you the next draft in the same condition. A named fault is also arguable. The writer can say the subject is consistent and you have misread, and that argument is the evidence they engaged with the diagnosis rather than applying it.",
   failureMode: "'This is confusing, maybe reword?' followed by your rewritten version of the sentence. The writer takes your sentence, the paragraph improves, and nothing was learned by anyone. Compare: 'this paragraph has four different grammatical subjects, so the reader never settles on whose story it is' - which they can check themselves, disagree with, and apply next Tuesday.",
@@ -3799,6 +3904,7 @@ window.SITE = {
   source: "Michael Alley, The Craft of Scientific Writing",
   gatePrompt: "Paste a paragraph you wrote. Circle every percentage, multiple and \"up by\" phrase, and write the raw base next to it. Rewrite one of those sentences so the base sits inside the sentence rather than in your head.",
   fallback: "Retry volume was up over 300 percent in the hour after the rollout and the failure rate more than doubled, so we rolled back at 14:20. Error budget burn for the day came in at roughly 40 percent higher than a normal Tuesday. The change is clearly not safe to reship without further work on the connector timeout path.",
+  cheat: "Put the base count in the same sentence as the ratio - a bare percentage gets discounted as spin or filled in from imagination.",
   idea: "Put the base count in the same sentence as the ratio, or drop the ratio and give the counts.",
   why: "A percentage is a compression that throws away the one number the reader needs to judge whether to care. Three retries becoming twelve and thirty thousand becoming a hundred and twenty thousand are both \"up 300 percent\", and they call for entirely different responses. Readers know this, so a bare ratio triggers one of two failure responses: discount it as spin, or fill in a base from imagination, which is usually far larger than the real one.\n\nPutting the base in the sentence also disciplines you. Many ratios stop being worth writing once you have to say out loud that the numerator moved from four to sixteen.",
   failureMode: "An incident summary built entirely from ratios: \"error rates jumped 40 percent, retries tripled, budget burn was up a third.\" Nothing in it survives the question \"out of how many?\" The severe version is a ratio of a ratio, such as a 50 percent increase in a rate that was already a percentage, which no reader can unpack without asking you.",
@@ -3856,6 +3962,7 @@ window.SITE = {
   source: "Sherman Kent, \"Words of Estimative Probability\"",
   gatePrompt: "Paste a paragraph containing at least one hedge. Beside each of \"likely\", \"possible\", \"unlikely\", \"probable\" and friends, write the percentage you meant. Then ask one colleague what they read it as and write their number next to yours.",
   fallback: "It is likely that the dual-write window has to stay open for a second sprint. There is a real possibility that the backfill saturates the read replica during business hours, and it is conceivable though unlikely that we find schema drift on the older tenants. On balance we think the risk is manageable.",
+  cheat: "Attach a number to every probability word or delete it - readers read probable as anywhere from about 60 to 90 percent.",
   idea: "Attach a number or an agreed numeric band to every probability word, or delete the word.",
   why: "Kent's point, which has been reproduced many times since, is that estimative words have no shared scale. Readers given the same sentence assign \"probable\" anywhere from about 60 to 90 percent, and \"a real possibility\" spans nearly the whole range. The writer feels precise because they had a specific figure in mind; the reader receives a word and supplies their own, usually the one that suits their prior.\n\nThe damage is invisible at the time and shows up later. Everyone agreed on the sentence, so nobody detected the disagreement, and after the outcome each side can honestly claim the words meant what they now need them to mean.",
   failureMode: "A risk section built from a ladder of adverbs: \"likely\", \"a real possibility\", \"conceivable though unlikely\", with no anchors. Two readers walk out of the review agreeing on the text and holding estimates that differ by a factor of five. The other tell is a hedge stack, such as \"it is possible that we may potentially need\", which is three uncertainty markers doing the work of none.",
@@ -3976,6 +4083,7 @@ window.SITE = {
   source: "Bryan Garner, Garner's Modern English Usage",
   gatePrompt: "Paste a paragraph you wrote, and beside it paste one correction you made to someone else's writing this month. For each rule you applied, write one line naming the evidence for it and one line naming the reader it protects. Cross out every rule where both lines came out blank.",
   fallback: "Editorial pass on the migration doc before it goes to the customer. Do not start sentences with \"But\" or \"And\", do not end a sentence with a preposition, and change every restrictive \"which\" to \"that\" throughout. Also \"data\" takes a plural verb, so please fix the four places where it does not. These are basic rules and we should be holding the bar on anything that leaves the team.",
+  cheat: "Before enforcing a style rule, name its evidence and the reader it protects - if both lines are blank, drop the note.",
   idea: "Before you enforce a rule, name the evidence behind it, the reader it protects, and whether writers you admire actually observe it.",
   why: "Usage advice arrives in two kinds and they feel identical from the inside. One kind tracks something real about how readers process English: an ambiguity that costs a re-read, a distinction that carries meaning, a form so widely observed by careful writers that its absence registers as error. The other kind is inherited assertion, often traceable to one nineteenth-century schoolmaster reasoning from Latin, and it survives because nobody has ever been asked for the evidence.\n\nGarner's three questions separate them, because a real rule answers all three and a superstition answers none. What evidence supports it: corpus data, editorial practice, a demonstrable ambiguity. Who is harmed: a specific reader misreading a specific sentence. Do careful writers observe it: check ten pages of prose you respect. A rule that fails all three still costs you something. It spends editing attention that should be going to characters, actions and sentence order, and it spends credibility with the writer you are correcting, who can usually tell the difference even if they cannot name it.",
   failureMode: "Review comments that stack real problems and folklore at the same volume: \"the second paragraph buries the recommendation, and do not open a sentence with 'But'.\" The writer now has to guess which of your notes is load-bearing, and the safest guess is that none of them are. Worse is the correction that damages a sentence to satisfy a rule nobody can defend, such as fronting a preposition into \"the failure mode about which we warned\", so the clause stalls at exactly the point it should be carrying weight.",
@@ -4071,6 +4179,7 @@ window.SITE = {
   source: "Geoffrey K. Pullum, \"50 Years of Stupid Grammar Advice\"",
   gatePrompt: "Paste a paragraph you wrote. Mark every relative clause, then label each one: does it identify which thing you mean, or add information about a thing already identified? Fix the commas to match, and ignore the choice of word entirely until they do.",
   fallback: "The scheduler that we rolled out in March is now carrying all tenant traffic. The backfill job that saturated the read replica has been moved to the overnight window. The audit hook that adds a quarter second to every workflow start is the last item outstanding, and the runbook that covers it still needs a rewrite before we hand it to support.",
+  cheat: "The commas carry the restrictive distinction, not the word - a which-to-that pass that strips them invents components that do not exist.",
   idea: "The commas carry the restrictive distinction; the choice between \"which\" and \"that\" is a house convention you either adopt deliberately or drop.",
   why: "Restrictive \"which\" has been in continuous use by good writers for centuries and remains ordinary in British editing. The preference for \"that\" in restrictive clauses began as a reform proposal and spread through American editorial practice and Strunk and White. Pullum's observation is that its own advocates break it constantly, E. B. White included, which is the signature of a convention rather than a rule.\n\nWhat actually carries meaning is the punctuation. \"The connector that we deprecated\" and \"the connector, which we deprecated,\" tell a reader different things: the first says there are several connectors and this is the one, the second says there is one and here is a fact about it. Get the commas wrong and the reader miscounts your nouns and quietly builds the wrong model of your system. Get the word wrong and a copy editor changes it. Those are not the same size of error, and treating them as one spends your attention on the smaller one.",
   failureMode: "A mechanical which-to-that pass that strips the commas along with the word, so every non-restrictive clause turns restrictive. \"The audit hook that adds a quarter second to every start\" now implies there are several audit hooks and this is the slow one. Nobody catches it in review, because every sentence is perfectly grammatical, and the reader walks away believing in components that do not exist.",
@@ -4282,6 +4391,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4859,6 +4988,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4867,6 +4997,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -5364,6 +5495,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -5566,6 +5765,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5711,6 +5911,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

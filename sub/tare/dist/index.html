@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Tare - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #EFEEE6;
@@ -1437,6 +1518,15 @@ window.SITE = {
   requireInterval: false,
   reverifyDays: 180,
 
+  /* Statute rather than replication, which is the opposite of Nomogram and for
+     the same reason. This corpus has exactly one replicated finding and ten
+     that rest on a single study, so a replication filter here would produce a
+     one-row page that said nothing. What is actually settled in this material
+     is the legislation: a cap is a cap because it is written down, and every
+     statute entry carries the date it was true and a link to the primary
+     source. The one replicated finding rides along because it earned it. */
+  cheatsheet: { verdicts: ['statute', 'replicated'] },
+
   /* The arithmetic gate reads these. Each entry declares its answer as a sum
      over them, and the entry stays shut until you have written your own number
      to be scored against. Fields are asked for one at a time, at the moment an
@@ -1475,6 +1565,9 @@ window.SITE = {
     sourcePrefix: 'After',
     staleNote: 'not re-checked since',
     reflectPlaceholder: 'The number you got, and whether it changed what you will do.',
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The numbers that are settled because somebody legislated them, each true as at the date beside it, plus the one finding here that has actually been replicated.',
+    cheatWithheld: 'rest on a single study, are real but sold past their effect size, or are contested - worth reading, and not worth carrying in your head as fact.',
     progressNote: 'Entries logged measures reading. The gap between your number and the real one measures whether any of it reached your arithmetic. Watch the second one.'
   },
 
@@ -1577,6 +1670,7 @@ window.SITE = {
   sourceUrl: "https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/withdrawing-and-using-your-super/when-you-can-access-your-super",
   verifiedOn: "2026-08-08",
   gateIntro: "You reach preservation age. Before reading on: write down what you believe you can withdraw the following morning, and under what condition.",
+  cheat: "Preservation age is 60 for everyone born after 30 June 1964, and a separate condition of release still gates access.",
   idea: "Preservation age and a condition of release are two separate requirements. Reaching sixty satisfies the first and does nothing about the second.",
   why: "The two get collapsed into one date in almost every conversation about retiring early, and the collapse is what makes a plan fail at the exact moment it is supposed to pay out.\n\nPreservation age is now flat at sixty for anyone born after June 1964, so the phased schedule people remember no longer applies. But the money is still preserved until something happens: retirement as the legislation defines it, ceasing an employment arrangement after sixty, turning sixty-five, or a transition-to-retirement stream with its own limits.\n\nThe practical consequence is that the bridge between stopping work and unrestricted access is built from money outside super, and its length is set by which condition you expect to satisfy.",
   failureMode: "You plan to stop work at sixty and live on super. You have satisfied preservation age but not a condition of release, so the balance is unavailable and the bridge you needed outside super was never built.",
@@ -1600,6 +1694,7 @@ window.SITE = {
   verifiedOn: "2026-08-08",
   gateIntro: "Two different caps govern superannuation: one on what goes in each year, one on what can move into a tax-free pension. Before reading on: write down which one binds first for you, and at roughly what balance.",
   compute: { question: "How much of your target balance lands outside the transfer balance cap?", expr: "targetBalance - 2100000", unit: "AUD" },
+  cheat: "For 2026-27 the concessional cap is $32,500; the general transfer balance cap of $2.1 million limits what reaches tax-free pension.",
   idea: "Annual contributions caps limit the rate of accumulation. The transfer balance cap limits how much of the result can ever be moved into a tax-free retirement pension. They bind at different times and neither implies the other.",
   why: "Almost all attention goes to the annual caps, because they are the number you interact with every payslip. The transfer balance cap is the one that decides what the exercise was for.\n\nAt $2.1 million general cap, an accumulation balance well past that is entirely possible and entirely legal. What is not possible is moving all of it into the tax-free pension phase. The excess stays in accumulation, taxed at 15% on earnings rather than nil.\n\nThe personal cap is proportional to unused cap space rather than a flat number, so the timing of when you first start a retirement phase income stream affects the cap you personally get for life.",
   failureMode: "You optimise hard on the annual caps for twenty years, land well above the transfer balance cap, and discover the surplus was accumulated into an environment that taxes it at 15% forever rather than the nil you were planning around.",
@@ -1634,6 +1729,7 @@ window.SITE = {
   verifiedOn: "2026-08-08",
   gateIntro: "You earn above the Division 293 threshold, so concessional contributions are taxed at 30% inside super rather than 15%. Before reading on: what is the tax saving on the next dollar you salary sacrifice?",
   compute: { question: "On the next dollar you salary sacrifice, how many percentage points do you save?", expr: "marginalRate - 30", unit: "percentage points" },
+  cheat: "At the top marginal rate the Division 293 comparison is 30% inside super against 47% outside, a wedge of seventeen percentage points.",
   idea: "Once Division 293 applies, the contributions tax on concessional super doubles from 15% to 30%. The comparison that matters is still 30% against 47%, not 15% against 30%.",
   why: "Division 293 is widely read as the point where salary sacrificing stops being worth it. That reading compares the new rate against the old one, which is the wrong pair. The rate you avoid by putting a dollar into super is your marginal rate outside it.\n\nAbove $190,000 that is 45% plus the 2% Medicare levy, so 47%. Against a 30% contributions rate the wedge is seventeen percentage points on every dollar, and it persists for as long as the money stays in the concessional environment.\n\nThe wedge narrows, it does not close. Deciding it has closed is a decision to hand over seventeen points.",
   failureMode: "You read that Division 293 doubled your contributions tax, conclude super has stopped working for you, and stop salary sacrificing. You have swapped a 30% rate for a 47% one on the strength of a comparison against your own past rather than against your alternative.",
@@ -1657,6 +1753,7 @@ window.SITE = {
   verifiedOn: "2026-08-08",
   gateIntro: "You have five years of unused concessional cap and you are about to use all of it in one year, on an income well above the Division 293 threshold. Before reading on: what is the largest Division 293 bill that year can produce?",
   compute: { question: "What is the Division 293 bill on this year's concessional contributions?", expr: "concessional * 15 / 100", unit: "AUD" },
+  cheat: "Carried-forward contributions count for Division 293, so a catch-up year is not bounded by 15% of the $32,500 standard cap.",
   idea: "Division 293 is 15% of the lesser of your taxable super contributions and your excess over $250,000. When carry-forward lifts your concessional cap, every contribution inside the higher cap counts.",
   why: "It is tempting to bound the worst case at 15% of the standard concessional cap, because that is the most you can normally contribute concessionally in a year. On that arithmetic the maximum liability is small and fixed, and the entry writes itself.\n\nCarry-forward breaks the bound. Five years of unused cap can lift a single year's concessional contributions far above the standard cap, and the ATO counts all of it. The liability scales with what you actually contributed, not with what you could have contributed in a normal year.\n\nThe strategy still works. What does not work is planning against a ceiling that is not there.",
   failureMode: "You model a catch-up year against a bounded worst case, get a comfortable number, and contribute the lot. The assessment arrives several times larger, in a year you have already spent the cash flow that would have covered it.",
@@ -1679,6 +1776,7 @@ window.SITE = {
   sourceUrl: "https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/growing-your-super/division-293-tax",
   verifiedOn: "2026-08-08",
   gateIntro: "Two numbers govern how much extra tax high earners pay on super: the $250,000 threshold and the concessional cap. Before reading on: which of them moves with wages, and what does that do to the affected population over a decade?",
+  cheat: "The $250,000 Division 293 threshold has no indexation mechanism since 2017-18; the concessional cap is AWOTE-indexed, $32,500 for 2026-27.",
   idea: "The Division 293 threshold has no indexation mechanism. The concessional cap it interacts with is indexed to average weekly ordinary time earnings. The affected population therefore grows every year by construction, without anyone legislating it.",
   why: "A threshold fixed in nominal terms is a tax increase on a schedule, and it does not appear in any budget as one. Wages rise, the threshold does not, and each year more people cross it.\n\nThe interaction is what makes it sharp here. The cap rises with AWOTE, so the contributions that can be caught grow at the same time as the population being caught. Both edges move toward each other.\n\nThis is worth knowing not because you can avoid it but because it changes what a long-horizon plan should assume. Modelling on today's threshold assumes a policy that is quietly reversing itself.",
   failureMode: "You build a twenty-year contribution plan on the assumption that Division 293 applies to people meaningfully richer than you. Real wage growth moves you inside it without any announcement, and the plan's tax assumption was wrong from about year six.",
@@ -1950,6 +2048,7 @@ window.SITE = {
   asAt: "2026-07-01",
   sourceUrl: "https://www.revenue.nsw.gov.au/taxes-duties-levies-royalties/transfer-duty/rates",
   gateIntro: "You are buying a $1.2 million investment property in Sydney. Before you read the schedule, write down what you think the transfer duty will be, in dollars. Then write down how many years of net rental income you think it represents. Most people are wrong on the first by tens of thousands and wrong on the second by years.",
+  cheat: "On the 2026/27 NSW schedule, $48,187 duty on $1.2 million (4.02%) is cash at settlement, recovered only via the cost base.",
   idea: "On the 2026/27 NSW schedule, transfer duty on a $1.2 million purchase is $48,187, or 4.02% of the price. The schedule is progressive, so the percentage rises with price: 4.56% at $2 million and 5.46% at $5 million once premium property duty applies to residential purchases above $3,870,000. None of it is deductible against your income - it goes into the cost base and you recover it, in nominal terms, only when you sell.",
   why: "The reason this number deserves its own entry is that it is a cost you pay in year zero, in cash, out of savings that were otherwise earning a return. At 4.02% of the price, the property has to appreciate by more than 4% before you are back where you started, and that is before conveyancing, inspections and the eventual agent commission. Convert it into your own units rather than borrowing anyone's average yield: divide $48,187 by the annual net rent you actually expect on that specific property, and you have the number of years of rent your entry ticket consumes.\n\nBe careful about the bracket structure, because it is the specific thing people get wrong. The rate schedule is marginal, not a flat rate applied to the whole value. The $387,001 to $1,290,000 bracket charges $11,602 plus $4.50 per $100 over $387,000. Only the slice above the threshold attracts the higher rate. The same is true of premium property duty at $3,870,000: the 7% applies to the excess, not to the whole price. Every bracket boundary in this schedule is continuous, which is a useful check - if your calculation jumps discontinuously at a threshold, you have applied a rate to the whole value.\n\nThe thresholds are indexed to CPI annually, which is why quoting a premium duty threshold from memory or from an article written two years ago is a reliable way to be wrong. The 2026/27 premium threshold is $3,870,000. It was a different number last year and will be a different number next year.\n\nThe treatment matters as much as the amount. Duty is a capital cost, not a deduction. It joins your cost base and reduces your eventual capital gain. That makes its real value to you dependent on the capital gains regime in force when you sell, and that regime is changing from 1 July 2027 - which turns a settled question into an open one.",
   failureMode: "You budget for the deposit and forget that duty is due at settlement in cash on top of it. On a $1.2 million purchase at 80% LVR you need $240,000 for the deposit and another $48,187 for duty, plus conveyancing and inspections. Getting this wrong does not just embarrass you at settlement, it pushes people into a higher LVR or lenders mortgage insurance to close the gap, which quietly makes the position more leveraged and more expensive than the plan they modelled.",
@@ -1972,6 +2071,7 @@ window.SITE = {
   asAt: "2026-08-08",
   sourceUrl: "https://budget.gov.au/content/04-tax-reform.htm",
   gateIntro: "You earn a senior engineer's salary and you are looking at an established apartment that will run at a $12,000 annual loss. Under the arrangements you grew up reading about, that loss comes off your taxable income at your marginal rate. Before reading on: from 1 July 2027, if you buy that established dwelling now, what happens to the $12,000?",
+  cheat: "From 1 July 2027 established-rental losses carry forward rather than offset wages, unless held before 12 May 2026; not law as at 8 August 2026.",
   idea: "The 2026-27 Budget limits negative gearing to new builds from 1 July 2027. For an affected established dwelling, rental losses can still be carried forward to future years but can no longer be deducted against other income such as wages. Properties held before Budget night on 12 May 2026 are unaffected, as are new builds acquired after it.",
   why: "The mechanical change is narrower than the headlines suggest and the practical change is larger. Nothing is destroyed. The losses still exist, they are still yours, and the Budget says they carry forward. What the Budget does not say is what pool they can be set against. The natural reading, and the way quarantining normally works elsewhere in the tax code, is that they offset residential rental income and gains from the property. Treat that as an inference rather than a stated rule until the final Act says so, because the exposure draft was still open when this was written.\n\nThe timing consequence is the part worth modelling and it holds under any reading. Under the old arrangement, a $12,000 loss at a 47% marginal rate returned about $5,640 in cash in the year it arose. Under the new one, the same loss is banked until you have something to absorb it against. That deferral is worth strictly less, and how much less depends on how long you wait and what inflation does in the interim. If you hold for a decade, you receive the same nominal credit in much cheaper dollars.\n\nThe grandfathering line is drawn at properties held before Budget night. \"Held\" is not the same word as \"acquired\", and the difference is load-bearing for anyone who exchanged near 12 May 2026: for CGT purposes acquisition is at contract date, while a property is arguably held from settlement. The Budget does not resolve it and the draft legislation had not been passed. What is clear enough to act on is that the line exists and it creates a genuine two-tier market, in which the same apartment carries a different after-tax cost depending on which side of Budget night its owner sits.\n\nThe new-build carve-out is the policy's stated intent, focusing tax support on new supply. Whether it achieves that is an empirical question nobody can answer yet. What you can act on is the differential: from 1 July 2027 a new build and an established dwelling with identical rents and identical prices have materially different after-tax returns for a high-income buyer.",
   failureMode: "You buy an established dwelling in 2026 or early 2027 on a spreadsheet that books the annual loss against your salary in the year it arises, because that is how every article you have read for twenty years described it. The error is not the whole deduction - the credit survives and carries forward. The error is the timing, and its size is the present-value difference between a refund of roughly $5,640 in year one and the same nominal credit received years later, possibly not until sale. On a marginal property that difference is frequently what separates a deal that works from one that does not, and it is entirely invisible in a model that never discounts.",
@@ -1994,6 +2094,7 @@ window.SITE = {
   asAt: "2026-08-08",
   sourceUrl: "https://budget.gov.au/content/04-tax-reform.htm",
   gateIntro: "You hold an asset for fifteen years. It doubles in nominal terms. Inflation over that period was 2.5% a year. Before reading on: under a 50% discount, and under a regime that indexes your cost base for inflation instead, which one taxes you less? Then answer a harder one - if the asset had tripled instead of doubled, would your answer change? The comparison depends on three variables, and most commentary quotes two.",
+  cheat: "From 1 July 2027 indexation plus a minimum 30% tax replaces the 50% discount; high-growth assets do not benefit. Not law as at 8 August 2026.",
   idea: "From 1 July 2027 the flat 50% capital gains discount is replaced by a discount based on inflation, with a minimum 30% tax on gains. Indexation taxes only the real gain rather than a fixed half of the nominal gain, so the change is not uniformly a tax rise. Which regime treats you better depends on your holding period, on inflation, and on how much the asset actually grew - and on one design detail the Budget does not specify.",
   why: "The two regimes have completely different shapes, and that is the thing to understand before anyone tells you whether the change is good or bad for you. A 50% discount is indifferent to holding period and to inflation: hold for thirteen months or thirty years, you are taxed on half the nominal gain either way. Indexation is the opposite. It scales your cost base up with prices, so the longer you hold and the higher inflation runs, the more of your nominal gain is exempted as illusory.\n\nThe comparison is exact and you can run it yourself. Indexation produces a lower taxable amount than the 50% discount precisely when (1+π)^n is greater than 0.5 × (S/C) + 0.5, where π is inflation, n is your holding period and S/C is the gross nominal multiple on the asset. That third term is the one every commentary drops, and it is often the term that decides. An asset that doubles needs the inflation factor to clear 1.5, which at 2.5% takes about seventeen years. An asset that triples needs it to clear 2.0, which at 3% inflation takes about twenty-four years. A high-growth asset does not benefit from indexation at any plausible holding period, regardless of what inflation does.\n\nThe minimum 30% tax is layered on top, and the Budget says only \"a minimum 30 per cent tax on gains\" without saying which gain. That ambiguity is not cosmetic. If the floor applies to the nominal gain, it caps how much benefit a long hold in a high-inflation period can extract from indexation. If it applies to the indexed real gain, it caps nothing of the sort and binds only on taxpayers whose marginal rate sits below 30%, a group that includes many retirees and low-income earners holding a single investment property. Those are materially different measures. Any calculation you encounter that resolves this quietly is guessing, and as at 8 August 2026 the exposure draft had not settled it.\n\nTwo further details change the planning. The reforms apply only to gains arising after 1 July 2027, so gains accrued before that date are not retrospectively caught. And new build investors may elect the existing 50% discount instead which, combined with the negative gearing carve-out for new builds, means the tax code is now pushing hard in one direction. Entity scope was also unsettled, so anything you read about trusts, companies or super funds should be checked against the final legislation rather than against commentary.",
   failureMode: "You conclude this is simply a tax rise and bring a sale forward into 2026-27, or you conclude indexation is generous and hold on. Both are coin flips until you have put your own gross multiple, holding period and inflation assumption into the inequality, and the coin is further weighted by a design detail - the base of the 30% floor - that was not settled when you decided. The cost is a large, irreversible transaction driven by a regime you did not model and, on the published information, could not fully specify.",
@@ -2045,6 +2146,7 @@ window.SITE = {
   evidence: "Trading records for 10,000 randomly selected accounts at a nationwide US discount brokerage, January 1987 to December 1993. Entire year: proportion of gains realised 0.148 against proportion of losses realised 0.098, a difference of 0.050 with a t-statistic of 35, from 13,883 realised gains, 79,658 paper gains, 11,930 realised losses and 110,348 paper losses. In December the ordering reverses: PGR 0.108 against PLR 0.128, t-statistic 4.3. Measured account by account, average PGR 0.57 and PLR 0.36. Restricting to sales with no new purchase within three weeks, PGR 0.449 against PLR 0.281, so the effect is not rebalancing. Winners sold outperformed losers held by 1.03 percentage points in excess return over the following 84 trading days, 3.41 over 252 and 3.58 over 504.",
   replication: "replicated",
   gateIntro: "You hold two stocks. One is up 30%, one is down 30%, and you need to raise cash. Before reading on: which do you sell, and what do you predict happens to the two of them over the following year? Be honest about the first answer before you look at the second.",
+  cheat: "Gains are realised at 0.148 against 0.098 for losses; winners sold beat losers held by 3.41 points over 252 trading days, a one-off divergence.",
   idea: "Odean found investors realise gains at about 1.5 times the rate they realise losses, and the pattern survives controls for rebalancing. It is not merely costly in tax: the winners that get sold go on to beat the losers that get kept by 3.41 percentage points over the following year. The single exception is December, when the tax incentive briefly flips the behaviour.",
   why: "The size of the asymmetry is what makes this finding hard to dismiss. A proportion of gains realised of 0.148 against a proportion of losses realised of 0.098 is not a subtle tilt - it is a t-statistic of 35, computed across more than 215,000 position observations. Whatever is driving it is not noise, and it is not a small minority of accounts. Measured account by account rather than trade by trade, the average PGR is 0.57 and the average PLR is 0.36.\n\nThe December reversal is the detail that turns a correlation into something close to a natural experiment. If selling winners were driven by rational portfolio management, December should look like every other month. It does not. In December, when realising losses delivers a tax benefit, the ordering flips: PGR falls to 0.108 and PLR rises to 0.128. Investors demonstrably can sell losers when they are given a concrete reason to. The other eleven months they mostly do not.\n\nThe obvious defence is that selling winners is just rebalancing, and Odean tests it directly rather than arguing about it. Controlling for rebalancing and for share price, the effect is still observed, and when he restricts the sample to sales with no new purchase within three weeks - which removes rebalancing almost by construction - the asymmetry gets stronger, PGR 0.449 against PLR 0.281. Whatever this is, it is not portfolio maintenance.\n\nThen the returns, which remove the last respectable defence. The usual justification for holding losers is mean reversion. Odean finds the opposite: the winners investors sold beat the losers they held by 3.41 percentage points over the subsequent 252 trading days. Read the horizon carefully, because it is the part most retellings mangle. The differential is 1.03 points at 84 trading days, 3.41 at 252 and 3.58 at 504. It opens up over the first year and then essentially stops. Odean himself sets this against Jegadeesh and Titman's momentum at horizons up to eighteen months and DeBondt and Thaler's reversals at three to five years. The winners keep winning for about a year; beyond that this data says nothing. The mechanism usually offered is prospect theory, with gains and losses evaluated against a purchase-price reference point, but that explanation is plausible rather than established by this data. What the data establishes is the behaviour and its cost.",
   failureMode: "You need cash, and you choose which position to sell by looking at your purchase price. The one that is up feels like a gain to lock in; the one that is down feels like something you should not crystallise. On Odean's numbers you are disposing of the asset that beats the one you keep by 3.4 points over the next year, and paying capital gains tax for the privilege. Do not annualise that 3.4 - it is a one-off divergence on the pair that has largely stopped growing by the second year, adding only 0.17 points between year one and year two. It is still a real cost, repeated every time you raise cash the same way, and it stays invisible because you never see the portfolio you would have had.",
@@ -2217,6 +2319,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -2794,6 +2916,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -2802,6 +2925,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -3299,6 +3423,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -3501,6 +3693,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -3646,6 +3839,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

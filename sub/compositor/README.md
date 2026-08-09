@@ -87,6 +87,20 @@ There is also a **Take it further** button that composes a prompt for Claude car
 whatever you wrote, including the answer you committed before reading, so the conversation starts from your real situation rather
 than the abstraction.
 
+## The cheatsheet
+
+The one view that is not a study aid. Everything else here is built to slow you
+down; this tab is built to be read at speed, so the row leads with what to do and
+demotes the claim to the line underneath it.
+
+Nothing in this corpus carries a replication verdict, so there is nothing to
+derive a filter from and the row is opt-in: `cheatsheet: true`, and an entry
+appears if it was written a `cheat` line. That is a selection rather than a
+filter, and the page says so - it states the 118 entries it leaves off rather
+than implying 18 is the whole corpus.
+
+An entry earns a row when it is a rule you can apply to a sentence without a draft in front of you. Most of this corpus is drills, and a drill needs your own writing to mean anything, so most entries do not earn one.
+
 ## When to abandon it
 
 On day one, take a 200-word paragraph from a teammate's design doc and write a

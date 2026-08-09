@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Cascade - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F1F2F4;
@@ -1419,6 +1500,13 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   gate: {
     label: 'Call it before you read it',
     prompt: 'What fired, what amplified it, and what made recovery slow? Commit an answer before the write-up opens.',
@@ -1435,6 +1523,9 @@ window.SITE = {
   extraRequired: ['gateIntro'],
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The moves worth having in your head at three in the morning, when there is no time to read the entry behind them.',
+    cheatWithheld: 'describe mechanisms rather than moves - they are what you read beforehand, not what you reach for mid-incident.',
     labelIdea: 'The mechanism',
     labelWhy: 'Why it propagates',
     labelFailure: 'What made it worse',
@@ -1483,6 +1574,7 @@ window.SITE = {
   title: "Backoff without jitter re-synchronises the clients it was meant to spread",
   source: "Marc Brooker, Exponential Backoff And Jitter, AWS Architecture Blog (2015)",
   gateIntro: "A few hundred clients share one dependency. The dependency has a brief capacity dip and effectively every client fails inside the same second. Every client is running the vendor SDK on default settings, with a bounded attempt count that no client exceeds. Over the following minutes the dependency does not see a smooth ramp of returning load. It sees a short tall arrival spike, then quiet, then another spike roughly twice as far out as the last, each one large enough to push it back over its limit. Time to drain the backlog is many times longer than the original dip.",
+  cheat: "Backoff spreads nothing on its own - add full jitter, a delay uniform between zero and the current cap, at every shared retry site.",
   idea: "It is the randomisation and not the doubling that spreads retry load, because clients that failed together stay in phase through every doubling of a pure exponential delay.",
   why: "Exponential backoff reduces the rate at which one client retries. It does nothing to the correlation between clients. If a thousand callers fail at t=0 and all wait 1s, then 2s, then 4s, they arrive together at t=1, t=3, t=7. The peak the dependency has to survive is unchanged, it just happens less often, and each peak is capable of re-triggering the failure that created the correlation in the first place. The system converges on a stable oscillation instead of recovering.\n\nBrooker's simulation of contending clients is the useful part: adding full jitter, where the delay is uniform between zero and the current cap, cut both total work done and time to completion substantially against pure exponential backoff. The counterintuitive result is that randomising downward, sometimes retrying sooner than the backoff would allow, reduces total load, because it converts a spike into a rate.",
   failureMode: "A cache tier restarts. Every application pod fails its first read, backs off identically, and hammers the cold cache in synchronised waves. Each wave times out, so each wave doubles, so the interval grows but the amplitude does not, and the tier never gets a quiet window long enough to warm. Someone eventually fixes it by scaling application pods down, which is the only lever that actually reduces peak concurrency.",
@@ -1721,6 +1813,7 @@ window.SITE = {
   title: "Temporal activity retries multiply with workflow retries and with the HTTP client underneath",
   source: "Temporal documentation, Retry Policies, Activity Timeouts and ScheduleToClose",
   gateIntro: "A workflow worker calls an internal HTTP API as part of a tenant onboarding path. The API has a bad ten minutes and recovers. More than an hour after the API team declares the incident closed, they are still seeing sustained inbound request volume from that worker at a steady rate that never decays. Workflow start count is flat and unremarkable. No workflow has failed. The affected executions all show as Running, with no terminal error recorded anywhere, and nobody on the workflow side has an alert.",
+  cheat: "Temporal MaximumAttempts defaults to zero, meaning unlimited; StartToClose bounds a single attempt, so ScheduleToClose is what bounds the sequence.",
   idea: "A default-unlimited activity retry policy sitting above a Go SDK client that already retries turns one logical call into a sustained request stream, and StartToClose against ScheduleToClose is where you actually bound it.",
   why: "Temporal's default activity retry policy has an initial interval of one second, a backoff coefficient of two, a maximum interval capped at a multiple of the initial, and a maximum attempts of zero, which means unlimited. Combined with the interval cap, the steady state is not exponential decay at all: it is a fixed retry rate that continues for as long as the activity keeps failing. Add the HTTP client inside the activity doing its own attempts and you have the multiplicative stack, with the outer layer having no bound.\n\nThe two timeouts do different jobs and this is the part people get wrong. StartToClose bounds a single attempt. ScheduleToClose bounds the entire sequence including every retry and every wait between them. Setting only StartToClose gives you a bounded attempt inside an unbounded loop, which is exactly the shape above. If you want the workflow to give up, ScheduleToClose or MaximumAttempts is the field, and non-retryable error types are how you stop retrying the failures that will never succeed.",
   failureMode: "During the Argo to Temporal cutover this is easy to introduce, because the Argo workflow it replaces had retryStrategy limit set to a small number and the equivalent Temporal policy left at default is unlimited. The behaviour change is silent, does not show up in a diff review, and only manifests when the downstream is unhealthy.",
@@ -1761,6 +1854,7 @@ window.SITE = {
   title: "Little's law tells you the pool size your latency budget already implies",
   source: "Mor Harchol-Balter, Performance Modeling and Design of Computer Systems: Queueing Theory in Action, Cambridge University Press, 2013",
   gateIntro: "A Go service in front of Postgres plateaus at a throughput number nobody chose. Adding pods does not move it. CPU on the pods sits under a third and the database reports low CPU throughout. As offered load rises past the plateau, p99 climbs smoothly while completed requests per second stays flat. The plateau has been at the same number for months, across three unrelated deploys.",
+  cheat: "Divide pool concurrency by mean residence time to get the throughput ceiling; under two times peak arrivals it has no burst headroom.",
   idea: "Concurrency equals arrival rate times residence time, so a pool size and a latency target together fix the maximum throughput, and whichever of the three you did not choose has been chosen for you by accident.",
   why: "Little's law says the mean number of items in a system equals the mean arrival rate times the mean time each spends there. It is distribution-free: no assumption about the arrival process, the service time distribution, or the scheduling discipline, only that the system is stable over the interval you measure. That is what makes it usable at 2am. A pool of 50 connections with a mean residence time of 100 milliseconds absorbs 500 requests per second and not one more, regardless of what the capacity plan says.\n\nThe operational consequence is that the three numbers are jointly determined and are usually set by three different people who have never spoken. The latency target lives in an SLO document. The pool size lives in a Helm values file. The arrival rate is whatever the tenants do. Worse, residence time includes queue time, so as you approach the ceiling the residence term grows and the arrival rate the pool can absorb actually falls. The ceiling is not a wall you hit, it is a wall that moves towards you.",
   failureMode: "A Temporal worker with MaxConcurrentActivityExecutionSize of 100 and an activity that averages two seconds absorbs 50 activity executions per second. A tenant schedules a backfill producing several hundred per second. The backlog grows and nobody notices, because worker CPU sits at 30 percent: the workers are blocked on a downstream call, not on the CPU. The metric that would have caught it is schedule-to-start latency, and nobody had a panel for it.",
@@ -1795,6 +1889,7 @@ window.SITE = {
   title: "The connection pool is the queue, and a small pool fails better than a large one",
   source: "Brett Wooldridge, About Pool Sizing, HikariCP wiki",
   gateIntro: "A team raises a service's database connection pool after seeing acquisition timeouts. The timeouts stop within minutes. Over the next hour median query latency roughly doubles and p99 goes up by more, while database CPU is unchanged. Two hours later readiness probes on the service begin failing intermittently and pods start cycling.",
+  cheat: "Before raising a pool, multiply size by replicas: past roughly two connections per database core the queue just moves inside the database.",
   idea: "A pool sized larger than the downstream can serve does not add capacity, it relocates the queue to somewhere you cannot see it or shed from it.",
   why: "The Oracle Real-World Performance work that Wooldridge cites shows throughput on a fixed-core database rising when connection counts are reduced. Past the point where the cores are busy, extra concurrent sessions buy context switching, lock contention and cache thrash, not work. HikariCP's guidance is a small pool sized against the downstream's actual parallelism, not against the application's peak concurrency. A database with eight cores does not do more work with two hundred connections than with twenty; it does the same work with more contention and longer per-query latency.\n\nThe operational argument is stronger than the throughput one. A small pool keeps the queue explicit and local. Acquisition timeout is a knob you own, it fires inside your process, it produces a typed error you can map to a 503, and it lets you refuse by tenant before the work starts. Once the concurrency is inside the database, your only shedding primitive is killing sessions, and you have lost the ability to distinguish a request that queued from a request that ran slowly.",
   failureMode: "Pool raised from 20 to 200 across 15 replicas puts 3000 potential sessions against a database with 16 cores. Acquisition timeouts vanish, which is read as a fix. What actually happened is that the fast local failure was replaced by a slow remote one: everything is now slower, including the health check query, so Kubernetes removes pods and concentrates the same load on fewer replicas.",
@@ -2039,6 +2134,7 @@ window.SITE = {
   title: "The load that triggers the failure and the load that sustains it are different numbers",
   source: "Bronson, Aghayev, Charapko and Zhu, Metastable Failures in Distributed Systems, HotOS 2021",
   gateIntro: "A service that has carried the same request rate for months goes hard down during a brief network fault. The fault lasts under a minute and is fully repaired, and every graph of the fault itself is clean afterwards. Thirty minutes later the error rate is still pinned at the top, client-offered load is exactly where it was yesterday, and the trigger has not recurred. Doubling the fleet moves the error rate not at all.",
+  cheat: "Clearing the trigger is necessary and insufficient; the exit is cutting offered load below the level that sustains the loop.",
   idea: "A metastable failure is sustained by work the system creates for itself, so the load that keeps it down is lower than the load that put it there.",
   why: "Bronson and colleagues separate three states. Stable: the system serves the offered load with headroom. Vulnerable: it still serves the offered load, but a large enough trigger will tip it. Metastable failure: it is not serving, and the internal work it generates is by itself enough to keep it not serving. A trigger moves you from the second state to the third. A sustaining effect keeps you there, and the sustaining effect is work amplification, where each unit of offered load produces more than one unit of internal work.\n\nThe part people get wrong on the bridge is that the sustaining effect is independent of the trigger. Once amplification exceeds one, the system holds itself down at an offered load it served comfortably an hour earlier. Fixing the trigger is correct, necessary and insufficient, and every minute spent waiting for the fix to show up in the graphs is a minute the loop keeps running.",
   failureMode: "The incident call spends its whole length confirming the trigger is gone. The network change is reverted, the bad deploy is rolled back, the noisy tenant is throttled, and nothing moves, so someone reverts the revert on the theory that the diagnosis was wrong. The actual exit, taking offered load below the level that sustains the loop, is never attempted because the offered load looks entirely normal on the dashboard.",
@@ -2209,6 +2305,7 @@ window.SITE = {
   title: "Recovery attempts that fail identically at the same point are the tell",
   source: "Bronson, Aghayev, Charapko and Zhu, Metastable Failures in Distributed Systems, HotOS 2021",
   gateIntro: "Three restart attempts, each with more capacity than the last: the original fleet, then half again, then triple. Each attempt serves traffic for somewhere between forty and ninety seconds, then returns to total failure of the same endpoint with the same error, at roughly the same point in the warm-up. The fourth attempt runs on the same fleet size as the third, with one upstream feature flag turned off, and holds indefinitely.",
+  cheat: "When recovery attempts fail at the same point as capacity varies, stop adding and go subtractive: shed load, disable the trigger, stage the return.",
   idea: "A recovery that fails at the same point regardless of how much capacity you add is a feedback loop, not a shortage, and the next action must be subtractive.",
   why: "A resource shortage fails at a point that moves when you change the resource. Add fifty percent more workers and a capacity-limited system survives fifty percent longer or clears fifty percent more backlog before it tips. The failure point is a function of the resource, so it responds to the resource.\n\nA feedback loop fails at the point where its own dynamics close, and that point is set by the amplification factor rather than by the absolute capacity. More capacity means more requests admitted, which means more amplified work, so the loop closes at the same relative position. Three attempts landing in the same place, with capacity varying between them, is a stronger signal than any single metric on the dashboard, and it is available early. It says stop adding and start removing: shed load, disable the feature, close the queue, block the retry path, return dependents in stages.",
   failureMode: "Without this rule the escalation path is monotonic in one direction. Each failed attempt justifies a larger attempt, the cluster grows through the night, cost accrues, and the loop is unaffected because it never was a capacity problem. The worst version is when a scale-up eventually appears to work for reasons unrelated to the diagnosis, which teaches the team exactly the wrong lesson for next time.",
@@ -2249,6 +2346,7 @@ window.SITE = {
   title: "Configuration changes are the most common documented trigger of large outages",
   source: "Zuoning Yin, Xiao Ma, Jing Zheng, Yuanyuan Zhou, Lakshmi N. Bairavasundaram and Shankar Pasupathy, An Empirical Study on Configuration Errors in Commercial and Open Source Systems, SOSP 2011",
   gateIntro: "A storage vendor's customer support database and the bug trackers of four widely deployed open source servers were mined for every case where the eventual fix was a settings change rather than a code change. Several hundred cases survived the filter. In most of them the affected system had come up and run normally for some period before anyone noticed anything wrong. A meaningful share produced no symptom at all until some later, apparently unrelated event.",
+  cheat: "Spend the review on cross-field config constraints, not syntax: the values that break you are legal ones inconsistent with something else.",
   idea: "The misconfigurations that cause outages are overwhelmingly legal values in the wrong place, not malformed ones, which is why syntax validation catches almost none of them and why config needs the same staged rollout and review as code.",
   why: "Yin and colleagues classified real, customer-reported configuration errors from a commercial storage vendor and from CentOS, MySQL, Apache and OpenLDAP. The headline result is that only a minority of the errors were illegal parameters - values a parser could reject. The majority were syntactically valid entries that were inconsistent with something else: another parameter, the environment, the hardware, the version. A type checker sees a well-formed integer. The system sees a thread pool sized for a machine that no longer exists.\n\nThe second result is the one that hurts on call. A substantial fraction of these errors were latent: the wrong value sat in production without symptom until a later event exercised the path. Failover, a restart, a traffic shift, a leap second. That decouples the change from the failure, so the deploy timeline is no longer a list of suspects. Configuration is at or near the top of every published tally of outage causes, and the reason is structural rather than cultural: config carries the same power as code with none of the review, testing, staging or version discipline that code gets by default.",
   failureMode: "Someone raises the Temporal worker's maxConcurrentActivityTaskPollers in a values file. It is an integer, it is in range, the chart renders, the pods start, the probes pass. Three weeks later a large tenant backfill arrives, the pollers all wake at once and the task queue's downstream connection pool saturates. The change that caused it is twenty deploys back and nobody looks there.",
@@ -2436,6 +2534,7 @@ window.SITE = {
   title: "Bake time has to exceed your time to detect or the pipeline has already moved on",
   source: "Clare Liguori, Automating safe, hands-off deployments, Amazon Builders' Library",
   gateIntro: "A change enters an automated pipeline at 09:00. It clears the one-box stage, then the first region, then the second, then the rest, and it is running in every production cell by 09:40. At 10:15 the alarm that would have caught it fires. Nobody skipped a manual step and nobody overrode a gate. Each stage's health check was genuinely green at the moment the pipeline read it.",
+  cheat: "Set bake time from detection latency - scrape interval, evaluation window, datapoints-to-alarm, ingestion delay - and attach an auto-rollback.",
   idea: "An automated pipeline that promotes a stage faster than the failure becomes visible in metrics guarantees the bad change reaches production, so bake time is a function of detection latency and not of how long the team is willing to wait.",
   why: "Liguori's description of the Amazon pipeline makes bake time a first-class artefact rather than a delay. The point of soaking a stage is to accumulate enough requests, enough time and enough alarm evaluation periods that a regression has a chance to become statistically visible before promotion. That budget has real components you can measure: the metric's scrape interval, the alarm's evaluation window and datapoints-to-alarm, the aggregation delay in your metrics store, and the incubation period of the class of failure you are trying to catch. Add them and you have a lower bound. Anything shorter is theatre with a progress bar.\n\nThere is a second half that gets dropped more often than the first. Bake time only protects you if something is watching during the bake and can act on what it sees. Amazon's pipelines attach rollback monitors to the alarms that matter, so the deployment auto-reverts on a regression rather than waiting for a human to be paged, look at a dashboard and decide. Without that, a long bake time just means the failure has more time to accumulate before a person notices. The pairing is what works: a soak long enough to observe, plus an automated reversal fast enough to matter.",
   failureMode: "Your Argo CD sync progresses on pod readiness, which is a liveness statement about the process and says nothing about correctness. Readiness goes green in ninety seconds. Your Grafana alert on workflow failure rate needs five minutes of data and three evaluation periods. The pipeline is done before the alert can exist.",
@@ -2527,6 +2626,7 @@ window.SITE = {
   title: "Backward compatible means the new reader handles old data, and that is the direction people invert",
   source: "Martin Kleppmann, Designing Data-Intensive Applications, chapter 4",
   gateIntro: "A release goes out at 09:40 across a fleet on a rolling update. At 10:15 a fraction of requests start failing on one service. The team calls it at 10:22 and rolls back. The error rate does not fall, it climbs, and it keeps climbing after the rollback completes. Client traffic is flat throughout. Hosts running the previous image fail on a subset of rows that hosts running the new image read without complaint.",
+  cheat: "For every format change, answer from the diff whether the previous image can read what the new one writes; that answer is your rollback path.",
   idea: "Backward compatibility is a property of the new reader, forward compatibility is a property of the old one, and a rolling deploy needs both at the same time.",
   why: "Kleppmann's definitions are precise and the industry uses them loosely. Backward compatible means newer code can read data written by older code. Forward compatible means older code can read data written by newer code. Backward compatibility is the easy one, because the author of the new code knows exactly what the old format looked like. Forward compatibility is the hard one, because the old code has to tolerate a shape nobody had invented when it was written.\n\nA rolling deployment runs both versions against the same store for the whole rollout window, so data flows in both directions the entire time. The moment the new version persists something the old version cannot interpret, the rollback path is gone, and it is gone silently. Rolling back removes the code, not the rows. That is why this class of incident starts at the rollback rather than at the deploy, and why the graph gets worse exactly when the mitigation lands.",
   failureMode: "A column is widened from int32 to int64. An enum gains a variant. A JSON field that was a string becomes an object. A Temporal workflow input struct gains a field the previous worker build treats as required. The new pods write it, the old half of the rolling update fails on parse, and the team rolls back into a store that now contains records only the version they just removed could read.",
@@ -2653,6 +2753,7 @@ window.SITE = {
   title: "One message that cannot be processed stops the partition behind it",
   source: "Gregor Hohpe and Bobby Woolf, Enterprise Integration Patterns, Dead Letter Channel (2003)",
   gateIntro: "Consumer lag on one partition of a topic starts climbing at 03:00 and rises in a straight line all night. The other eleven partitions sit at zero. The consumer group is healthy, every member is alive and rebalancing normally, CPU is low. The consumer's reported per-message processing rate for the stuck partition reads as several hundred a second. No alert fires, because the service's own success rate is 100 percent and its error rate is zero.",
+  cheat: "Alert on maximum per-partition lag rather than the sum, and give each consumer a bounded attempt count and a dead letter path.",
   idea: "Ordered consumption plus unbounded retry on a message that can never succeed means the queue never drains, and the fix is a bounded attempt count plus a channel for messages that cannot be processed.",
   why: "Hohpe and Woolf separate two cases that get conflated. An invalid message is one the receiver cannot interpret at all, and it goes to an Invalid Message Channel because it is a sender problem, not a delivery problem. A dead letter is a message the messaging system could not deliver. The engineering point common to both is that there must exist a terminal disposition other than success. A consumer whose only two outcomes are 'processed' and 'try again' has no way to make progress past a message that will fail deterministically for the rest of time.\n\nThe amplifier is ordering. On an unordered work queue a poison message burns a worker and the rest of the queue drains around it, which is a capacity problem. On an ordered partition it is a head-of-line block, so a single malformed record stops every message behind it for that key or partition, indefinitely, while every health signal reads normal. Worse, the retry loop often looks like throughput: the consumer really is processing hundreds of messages a second, all of them the same one.",
   failureMode: "A tenant emits one record with an unexpected null or an oversized field. Their partition stops draining at 03:00. Nothing pages, because lag alerting is set on the aggregate across partitions and eleven of twelve are at zero. The tenant discovers it at 09:00 when their data is six hours stale.",
@@ -2905,6 +3006,7 @@ window.SITE = {
   title: "A lease is only as safe as your bound on clock skew and process pauses",
   source: "Martin Kleppmann, How to do distributed locking (2016)",
   gateIntro: "A scheduler guarantees that at most one worker runs a given tenant's sync at a time, using a lock with a timeout. In production two workers occasionally write conflicting output for the same tenant inside the same second. Both workers' logs show them holding the lock, neither logs an error, and the lock service shows exactly one holder at every point in its own history. The problem is rare, it correlates with nothing in the input, and it is more common on the busiest nodes.",
+  cheat: "A longer lease TTL only makes the race rarer; mutual exclusion needs a fencing token the resource itself rejects when stale.",
   idea: "A lease provides mutual exclusion only if the resource itself rejects writes from an expired holder, because the holder cannot tell a pause from an instant.",
   why: "Lease correctness rests on the holder noticing expiry before it acts. Between the check and the write there can be a garbage collection pause, hypervisor steal, a page fault storm, CPU throttling in a cgroup, or a clock jump. The lock service expires the lease on its own clock and hands it to somebody else. The paused process resumes and completes a write it correctly believed was protected when it checked. No component behaved incorrectly and no log line is wrong.\n\nThe fix is not a longer timeout, because a longer timeout only makes the window rarer, and rarer means you will meet it during an incident when pauses are longest. The fix is a monotonically increasing token issued with the lease and checked by the resource on every write, where the resource rejects any token lower than the highest it has already accepted. That converts the safety property from a timing assumption into an ordering one. If the resource cannot check a token, you do not have a lock, you have a probability.",
   failureMode: "CPU limits make pauses routine. A throttled pod stalls for hundreds of milliseconds at a time in normal operation, and a heap collection under memory pressure goes much further. So the estate that most needs fencing is exactly the one where the lease TTLs were chosen assuming processes run continuously. Look at leader election in custom operators, the Argo controller, and anything whose shape is check the lock, then write to object storage or ClickHouse, where the destination accepts every write it is offered.",
@@ -2990,6 +3092,7 @@ window.SITE = {
   title: "Time-based partitions stop being created before you notice they are missing",
   source: "PostgreSQL documentation, declarative partitioning and partition maintenance",
   gateIntro: "At 00:00 UTC on a Saturday every insert into the largest table in the analytics database began to fail. Query load was normal, the host had spare disk, CPU and connections, and no schema change had been deployed for eleven weeks. The writing service had not been modified in months. Reads against the same table continued to work perfectly, and the engineer who originally built the table left the company in the spring.",
+  cheat: "Alert on partition runway in days and fire at 30, because the insert error rate is not an early warning, it is the outage.",
   idea: "Time-based partitioning schedules a failure for a calendar date rather than triggering it with load, so the alert has to be on remaining runway rather than on errors.",
   why: "With declarative partitioning and no default partition, a row whose key falls outside every existing partition is rejected outright. Partitions are created ahead of time by a maintenance job. If that job dies, nothing breaks: the pre-created runway absorbs it. The system keeps working perfectly until the last partition's upper bound is reached, and then every insert fails at once, at midnight, on a boundary.\n\nThe gap between cause and symptom is the whole problem. The maintenance job failed weeks or months before the outage, far enough back that nobody connects the two, and the person who would have connected them may have left. The same shape covers anything pre-provisioned in advance: certificates, IP space in a CIDR block, licence files, pre-generated identifier ranges. For all of them the monitorable quantity is runway in days, and the error rate is not an early warning, it is the outage.",
   failureMode: "In ClickHouse the mirror image bites instead. Partitions are created implicitly, so you never run out, and the hazard runs the other way: an over-granular PARTITION BY produces many small parts, merges cannot keep up, and inserts are eventually rejected for too many parts. One estate can hold both shapes at once, and neither is triggered by traffic. One is a wall on a date, the other is a slope that intersects the limit on a date.",
@@ -3030,6 +3133,7 @@ window.SITE = {
   title: "Static stability means the data plane keeps working when the control plane does not",
   source: "Becky Weiss and Mike Furr, Static stability using Availability Zones, Amazon Builders' Library",
   gateIntro: "An availability zone loses power at 02:10. Two zones are untouched and the fleet was sized to survive exactly this. Client-visible error rates go to about a third and stay there for fifty minutes. The scaling policy fired on time and the requests to add capacity were accepted, but the fleet size does not move. The two healthy zones are running well under their CPU limits the whole time.",
+  cheat: "Check whether minReplicas alone carries peak with one zone gone; if survival needs a scale-out during the event, do not count on it.",
   idea: "A statically stable system continues doing what it was already doing when its control plane is unavailable, because continuing requires no control plane calls at all.",
   why: "A control plane is the thing that creates, configures and moves resources. A data plane is the thing that serves requests using resources that already exist. The control plane is always the more complex of the two: more code paths, more state, more coordination, more dependencies, and therefore a lower availability ceiling. It is also, structurally, the component most loaded during a failure, because every affected system is simultaneously asking it to make a change.\n\nSo any recovery design that routes through the control plane is asking the least available component to work hardest at the worst moment. Static stability inverts it. Pre-provision the capacity you will need after the failure, keep it warm, and let the failure mode be a reduction in headroom rather than a request to create something. The AZ version is the canonical one: run enough capacity in three zones that two carry the load, rather than running two zones' worth and launching instances when a zone dies.",
   failureMode: "Autoscaling as a disaster recovery plan. The zone fails, the scaling policy fires, the launch API is now serving every other customer's identical request, capacity in the surviving zones is contended, and the instances arrive twenty minutes after they were needed. The same shape appears with pod scheduling: a node pool loses a zone, the replacement pods are Pending because the scheduler needs a control plane that is itself degraded, and the service that would have survived on warm capacity does not.",
@@ -3132,6 +3236,7 @@ window.SITE = {
   title: "Kubernetes DNS lookups fail for five seconds because of a conntrack race",
   source: "Martynas Pumputis, Racy conntrack and DNS lookup timeouts, Weaveworks (2017)",
   gateIntro: "A Go service in a Kubernetes cluster calls an internal peer a few thousand times a minute. The p50 is 4ms. Roughly one call in several hundred takes 5.0 seconds, almost exactly, and then succeeds. The peer's own latency histogram shows nothing above 20ms in the same window. The pattern does not correlate with load, node, namespace or time of day, and it survives a restart of both sides.",
+  cheat: "A hard spike at exactly five seconds with a clean callee histogram is a resolver timeout; raising the client timeout to ten seconds makes it worse.",
   idea: "A latency distribution with a hard spike at exactly five seconds and no matching spike on the callee is a resolver timeout, not a slow dependency.",
   why: "The C resolver sends the A and AAAA queries in parallel from the same source socket. Both UDP packets traverse the kernel's connection tracking layer at nearly the same moment, and the insert of the conntrack entry is not atomic with respect to the lookup. Under DNAT to a service IP, two packets racing to create the same tuple can result in one of them being dropped, so one of the two replies never comes back. The resolver waits out its timeout, which defaults to five seconds, then retries and succeeds.\n\nThe Kubernetes amplifier is ndots. The default resolv.conf has a search path of several suffixes and ndots set to 5, so a name like an external API hostname is tried against every search domain before the absolute form. Each attempt is another pair of racing packets, which multiplies the number of chances to lose the race by roughly the length of the search path. The tells are the exact five second figure, the absence of any corresponding latency on the callee, and the fact that it scales with query volume rather than with request complexity.",
   failureMode: "You spend a week hunting for a slow dependency that is not slow. Or worse, you raise client timeouts to ten seconds to stop the errors, which converts a rare five second stall into a queue of held connections and turns a resolver artefact into a saturation event on your own side.",
@@ -3308,6 +3413,7 @@ window.SITE = {
   title: "A cold cache means you need more capacity to restart than to run",
   source: "Matt Brinkley and Jas Chhabra, Caching challenges and strategies, Amazon Builders' Library",
   gateIntro: "A read-heavy service is restarted as part of a routine rolling deploy on a Tuesday afternoon. Client-visible request rates are flat throughout and no client behaviour changed. Within seconds of the first pods coming back, the datastore behind the service sees a query rate several times higher than its normal daily peak, its connection pool saturates, and the service starts returning timeouts. The deploy completes on schedule. The datastore stays pinned and the service does not settle on its own.",
+  cheat: "Before any full restart, multiply backend query rate by one over the miss rate and compare with the backend's measured saturation point.",
   idea: "A service fronted by a cache is provisioned for its warm hit rate, so the moment the cache is empty its dependency is asked for a multiple of the load it has ever served.",
   why: "The modal hit rate is the hidden capacity multiplier. At a 95 percent hit rate the backend has been sized, tuned and load tested for one twentieth of the request stream. Empty the cache and the backend sees the whole stream at once, which is a load it has never handled and was never intended to handle. Brinkley and Chhabra call this out directly: caching makes the system bimodal, and the cold mode has a completely different capacity requirement to the warm one.\n\nThe consequence for recovery is that a restart is not a neutral action. It converts a service from its cheap mode to its expensive mode instantaneously. Recovery therefore needs either load shedding while the cache fills, staged capacity return so only a fraction of traffic is cold at any time, or a warming pass before traffic is admitted. Doing none of these means the restart is the incident.",
   failureMode: "A ClickHouse-backed lineage endpoint runs happily on a warm mark cache. A node pool rotation cycles every replica inside ten minutes, all caches empty simultaneously, and ClickHouse takes a full scan workload it has never seen. Queries queue, the endpoint times out, and the retries make the cold load worse than the original cold load.",
@@ -3427,6 +3533,7 @@ window.SITE = {
   title: "Rolling back the code does not roll back the state the code already created",
   source: "Temporal documentation, Workflow determinism, Versioning and Patching",
   gateIntro: "A worker deployment goes out at 10:00. At 10:40 it is rolled back for an unrelated reason and the previous image is running everywhere within two minutes. Client traffic is normal throughout. From 10:42 the worker logs fill with errors, but only on a subset of executions: anything started before 10:00 completes normally, and anything started after the rollback completes normally. The affected executions are not failing, they are stuck, and they stay stuck through two further worker restarts.",
+  cheat: "Reverting a worker image wedges in-flight Temporal executions the new code touched, so the runbook step is patch or version gate, not revert.",
   idea: "A rollback restores the code and leaves behind every piece of durable state the newer code already created, which is why in-flight workflows break on revert.",
   why: "A Temporal workflow's correctness rests on deterministic replay: the worker re-executes the workflow function against the recorded event history and the commands it produces must match what is already in the history. Code shipped at 10:00 that adds an activity, reorders two calls or changes a timer writes those commands into the histories of every execution it touches. Roll the worker back and the old code replays those same histories, produces different commands, and the SDK raises a non-determinism error. The execution does not fail cleanly, it stops making progress, and restarting the worker does nothing because the history is durable.\n\nThe correct handling is a version gate rather than a revert. Patching or worker versioning keeps both code paths present so that old executions continue to take the branch they already committed to while new executions take the new one. The general principle is broader than Temporal: any system with durable in-flight state - a migration that has written new-format rows, a queue holding messages in a new schema, a saga midway through - has a rollback that is only a partial rollback, and the residue is where the incident lives.",
   failureMode: "During the Argo to Temporal cutover someone reverts a worker image to stop a bug. Every tenant workflow started in the intervening forty minutes wedges on non-determinism, and because they are stuck rather than failed no alert fires on error rate. You find them hours later by noticing that a tenant's crawl never finished.",
@@ -3535,6 +3642,7 @@ window.SITE = {
   title: "A low-precision alert is a base rate problem wearing a pager",
   source: "Rob Ewaschuk, My Philosophy on Alerting, appendix to Site Reliability Engineering",
   gateIntro: "A service has thorough alerting: forty rules, most of them firing a few times a week. During a real degradation the correct alert fires within ninety seconds. Nobody acts on it for twenty five minutes.",
+  cheat: "Count fires against actions per rule over ninety days; anything below roughly one in four wants deleting or rewriting.",
   idea: "An alert that is usually wrong trains the responder to be slow, and the training is rational.",
   why: "This is conditional probability with a human attached. If a rule fires thirty times a month and two of those are real, the responder's posterior on any given page is about seven percent, so the correct individual response is to finish what they are doing and look in a minute. Every one of those decisions is locally reasonable and the aggregate is a team that cannot respond quickly to anything.\n\nThe damage is not confined to the noisy rule. Precision is learned at the level of the pager, not the rule, so one high-volume low-precision alert degrades response time for every other alert that shares the channel. That is why deleting alerts is usually a bigger availability win than adding them, and why it feels wrong to everyone."
 ,
@@ -3625,6 +3733,7 @@ window.SITE = {
   title: "A signal that stops when the situation worsens teaches the wrong lesson",
   source: "BEA, Final Report on the accident to Airbus A330-203 flight AF 447, 2012",
   gateIntro: "Air France 447, 1 June 2009, over the Atlantic. Airspeed indications became briefly unreliable and the autopilot disengaged, handing an aircraft in cruise to the crew. During the descent that followed, a warning that was correctly indicating the aircraft's condition ceased whenever the crew moved the controls toward the recovery action, and resumed when they moved them back.",
+  cheat: "Work out what your first-look panel renders when the service is fully down; blank or zero reads as healthy, so add a no-data alert.",
   idea: "An indicator whose validity logic silences it in the extreme case can invert the feedback a responder is learning from.",
   why: "The stall warning on the A330 is suppressed when measured airspeed falls below a validity threshold, on the reasonable ground that the sensors cannot be trusted at very low airspeed. At the extreme angle of attack the aircraft reached, that condition was met, so the warning stopped. Pushing the nose down restored valid airspeed and the warning resumed. Every correct input was followed by the alarm returning, and every incorrect input by silence.\n\nThe transferable point is not about aviation. Any signal with a validity gate can go quiet in exactly the regime where it matters most, and a responder cannot distinguish quiet-because-fine from quiet-because-unmeasurable. A metric that disappears when a service is fully down looks identical to a metric that is healthy, and dashboards render both as an absence."
 ,
@@ -3924,6 +4033,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4501,6 +4630,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4509,6 +4639,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -5006,6 +5137,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -5208,6 +5407,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5353,6 +5553,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

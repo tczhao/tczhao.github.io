@@ -46,6 +46,15 @@ window.SITE = {
   requireInterval: false,
   reverifyDays: 180,
 
+  /* Statute rather than replication, which is the opposite of Nomogram and for
+     the same reason. This corpus has exactly one replicated finding and ten
+     that rest on a single study, so a replication filter here would produce a
+     one-row page that said nothing. What is actually settled in this material
+     is the legislation: a cap is a cap because it is written down, and every
+     statute entry carries the date it was true and a link to the primary
+     source. The one replicated finding rides along because it earned it. */
+  cheatsheet: { verdicts: ['statute', 'replicated'] },
+
   /* The arithmetic gate reads these. Each entry declares its answer as a sum
      over them, and the entry stays shut until you have written your own number
      to be scored against. Fields are asked for one at a time, at the moment an
@@ -84,6 +93,9 @@ window.SITE = {
     sourcePrefix: 'After',
     staleNote: 'not re-checked since',
     reflectPlaceholder: 'The number you got, and whether it changed what you will do.',
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The numbers that are settled because somebody legislated them, each true as at the date beside it, plus the one finding here that has actually been replicated.',
+    cheatWithheld: 'rest on a single study, are real but sold past their effect size, or are contested - worth reading, and not worth carrying in your head as fact.',
     progressNote: 'Entries logged measures reading. The gap between your number and the real one measures whether any of it reached your arithmetic. Watch the second one.'
   },
 

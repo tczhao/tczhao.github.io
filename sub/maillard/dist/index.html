@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Maillard - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #FAF6EE;
@@ -1417,7 +1498,17 @@ window.SITE = {
 
   review: 'none',
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'What to actually do at the stove, and the temperature, timing or ratio that makes it work.',
+    cheatWithheld: 'explain what is happening rather than what to do - worth reading once, and not the kind of thing you check mid-cook.',
     labelIdea: 'What is actually happening',
     labelWhy: 'The chemistry',
     labelFailure: 'What goes wrong, and why',
@@ -1503,6 +1594,7 @@ window.SITE = {
   track: "protein", level: "weeknight",
   title: "Collagen shrinks at 60C and only dissolves above 70C",
   source: "Harold McGee, On Food and Cooking",
+  cheat: "Collagen has a dead zone: hold a cut under 60C or push past 70C for hours, since 63C shrinks every fibre and converts none.",
   idea: "Collagen makes meat tougher before it makes it tender, and the two effects are separated by both temperature and hours.",
   why: "Collagen is a triple helix of three protein chains wound together and stabilised by cross-links. Around 60C to 65C the helix loses its structure and the whole fibre contracts to something like a third of its length. That is the shrinking, and it is fast. It happens in minutes and it makes a tough cut tougher while wringing water out of it.\n\nConverting the collapsed collagen into gelatin is hydrolysis: water has to break the peptide bonds along the chain. That is slow, it needs temperatures above about 70C to run at a useful rate, and it speeds up sharply as you climb. So a cut full of collagen has a bad middle zone. You have to either stay under it or push well past it and wait.",
   failureMode: "You cook chuck like a steak, to 63C, because that is the right number for muscle. You have shrunk every collagen fibre in it and converted none of them. The result is drier and chewier than the same cut at 55C and far worse than at 85C.",
@@ -1575,6 +1667,7 @@ window.SITE = {
   track: "protein", level: "weeknight",
   title: "Salting 45 minutes ahead leaves meat wetter than salting at the pan",
   source: "J. Kenji Lopez-Alt, The Food Lab",
+  cheat: "Salt a steak at the pan or a full 45 minutes ahead; salting at 15 minutes is the worst point on the curve plus a wet surface.",
   idea: "Salt pulls water out of meat first and puts more of it back after about forty minutes, so early salting ends up net positive.",
   why: "The first phase is osmosis. Salt on the surface dissolves into the meat's own moisture and the concentration gradient pulls more water out, so within ten or fifteen minutes there are visible beads on the surface and the meat has genuinely lost weight.\n\nThe second phase is what makes it worth doing. That concentrated brine dissolves myofibrillar proteins, chloride ions bind to the filaments and increase their net negative charge, and the filament lattice swells apart and takes water with it. The surface liquid is drawn back in and held more tightly than it was before. The crossover is around forty minutes for a steak-sized piece. Salt at the pan and you get the seasoning without the swelling. Salt at fifteen minutes and you get the worst point on the curve, plus a wet surface that will not brown.",
   failureMode: "You salt twenty minutes out because you are almost ready, then hit a wet surface with a hot pan. The water has to boil off before the surface can pass 100C, so you steam the first two minutes away and get a grey crust instead of a brown one.",
@@ -1821,6 +1914,7 @@ window.SITE = {
   track: "browning", level: "weeknight",
   title: "Browning waits for the surface to dry",
   source: "Nathan Myhrvold, Modernist Cuisine",
+  cheat: "Pat the surface bone dry before it hits the pan; while free water is evaporating the surface is pinned just under 100C and will not brown.",
   idea: "While free water is evaporating from the surface, that surface is pinned near 100C and browning is negligible, so the crust starts only once the outer millimetre is dry.",
   why: "Evaporation is a temperature clamp. As long as there is liquid water at the surface, the energy the pan delivers goes into latent heat rather than into raising the temperature, and the surface sits just under 100C. Maillard at 100C is slow enough that on the timescale of a sear it is effectively off. Visible browning begins when the outer millimetre or so has dried enough that the surface temperature can finally climb.\n\nThis is a heat budget problem, not a chemistry problem. Vaporising 1g of water costs about 2260 joules. A wet steak carries several grams of surface liquid, so the pan has to spend ten kilojoules or more before the temperature can move at all, and every second it spends doing that, the meat underneath is cooking towards grey.",
   failureMode: "Steak straight out of a marinade goes into a hot pan and comes out slate grey with a wide overcooked band and no crust. Same pan, same heat, same steak: the entire difference was 5g of liquid on the outside.",
@@ -1869,6 +1963,7 @@ window.SITE = {
   track: "browning", level: "weeknight",
   title: "Searing is for flavour, and the reverse sear proves it",
   source: "J. Kenji Lopez-Alt, The Food Lab",
+  cheat: "Sear after the oven, not before: the final sear then takes 45 to 60 seconds a side, same crust with a much thinner grey band.",
   idea: "Because searing does nothing for moisture, the only real question is when to spend the heat, and spending it last gives a thinner grey band for the same crust.",
   why: "Once the sealing story is gone, searing is purely a flavour transaction and you can put it wherever it costs least. Searing first means the meat then spends its whole oven time with an already-hot exterior, so the temperature gradient from surface to centre stays steep for the entire cook. That steep gradient is exactly what the grey band is: the volume of meat that passed through medium-well on the way to getting the centre where you wanted it.\n\nGoing the other way, a long gentle rise to about 5C below target gives a shallow gradient and a nearly uniform interior. It also dries the surface for you, which is precisely the water activity condition Maillard wants, so the final sear takes 45 to 60 seconds a side rather than three minutes and barely penetrates. Same crust, much less of the meat cooked twice.",
   failureMode: "A 4cm steak seared first and finished in the oven comes out with 8mm of grey under each face and a small pink centre. On average it is cooked correctly. Nobody eats the average.",
@@ -2067,6 +2162,7 @@ window.SITE = {
   track: "emulsion", level: "weeknight",
   title: "Mayonnaise thickens because droplets crowd, not because oil is absorbed",
   source: "Herve This, Molecular Gastronomy",
+  cheat: "Thin a stiff mayonnaise with water or lemon juice; adding more oil raises the volume fraction, stiffens it further and then breaks it.",
   idea: "Mayonnaise stiffens as you add oil because the droplets run out of room to move past each other.",
   why: "Identical hard spheres poured into a container jam at about 64 percent by volume. Oil droplets are neither identical nor hard, so a real mayonnaise with a spread of droplet sizes packs the small ones into the gaps and gets past 70, sometimes 80 percent oil. At that point every droplet is touching several neighbours and pressing against them. Flow requires droplets to deform, which costs energy, so the mixture stops behaving as a liquid and acquires a yield stress. It sits on the spoon.\n\nThis is worth internalising because it inverts the intuition. Adding oil to a sauce normally thins it. Adding oil to a mayonnaise thickens it, and the thickening has nothing to do with the oil itself and everything to do with how densely you have packed the droplets in the water. Mayonnaise is roughly 75 percent oil and behaves like a soft solid. Cream is roughly 35 percent fat and pours.",
   failureMode: "The sauce is too thick and you add more oil to loosen it, which is exactly backwards. It gets stiffer, then breaks. A teaspoon of water or lemon juice would have thinned it, because thinning means lowering the oil volume fraction.",
@@ -2079,6 +2175,7 @@ window.SITE = {
   track: "emulsion", level: "weeknight",
   title: "Adding oil slowly matters only at the start",
   source: "Shirley Corriher, CookWise",
+  cheat: "Drip the oil only for the first 30g of a mayonnaise; after that a thin steady stream is fine and the rest is superstition.",
   idea: "The drop-by-drop rule applies to the first 30g of oil and is wasted effort after that.",
   why: "At the beginning there is barely any continuous phase. One yolk plus a splash of acid is maybe 20ml of water-based liquid, and each arriving drop of oil has to be sheared into droplets and coated with emulsifier before the next drop lands. Pour fast into that and the oil pools, coalesces with itself, and you have oil floating on yolk rather than an emulsion. There is nothing to disperse into.\n\nOnce you are 30g in, the situation reverses. Now there is an established emulsion with a large population of stabilised droplets and free emulsifier in solution, and incoming oil is immediately surrounded by an existing continuous phase that carries it into the shear field of the whisk. You can pour in a thin steady stream. The rule is real, it just has a much shorter expiry than the recipes imply.",
   failureMode: "Someone spends fifteen minutes dripping oil into a food processor for a whole cup, decides mayonnaise is a nuisance, and buys it from then on. The technique was correct for the first minute and superstition for the other fourteen.",
@@ -2349,6 +2446,7 @@ window.SITE = {
   track: "starch", level: "weeknight",
   title: "Bread stales faster in the fridge than on the bench",
   source: "Shirley Corriher, BakeWise",
+  cheat: "Plain bread: bench for two days, freezer beyond that, fridge never, because 4C sits near the peak of starch recrystallisation.",
   idea: "Refrigerating bread ages it several times faster than leaving it on the bench, because 4C is close to the temperature at which starch recrystallises fastest.",
   why: "This is the direct consequence of the retrogradation rate curve. A loaf held at 4C passes through roughly as much staling in one day as a loaf on the bench does in several. The folk intuition that cold preserves food is correct for microbial spoilage and wrong for this particular physical process, and bread on a two day timescale is limited by staling, not by mould.\n\nThe freezer is the right answer because it skips the fast zone. Below about minus 7C the chains have no mobility and the loaf is effectively frozen in time, so a properly wrapped loaf sliced before freezing and toasted from frozen is closer to fresh than a two day old refrigerated one. The rule is bench for two days, freezer beyond that, fridge never - unless the bread is enriched or filled enough that spoilage genuinely beats staling.",
   failureMode: "Buying good sourdough on Saturday, putting it in the fridge to make it last, and finding it dry and crumbly on Monday while the identical loaf a neighbour left in a paper bag is still fine. The fridge did that.",
@@ -2493,6 +2591,7 @@ window.SITE = {
   track: "starch", level: "project",
   title: "Custard coagulates between 79C and 85C, and starch raises the ceiling",
   source: "Shirley Corriher, BakeWise",
+  cheat: "Boil pastry cream properly for a minute or two to kill yolk amylase; pull it at 85C like a creme anglaise and it is soup by morning.",
   idea: "A stirred egg custard thickens and then curdles inside a band a few degrees wide, and adding even a small amount of starch widens that band enough to let you boil the mixture.",
   why: "Egg proteins unfold with heat and then bond to each other into a loose three-dimensional mesh that traps liquid. In a dilute custard the yolk proteins start doing this around 79C to 80C and the mesh is what makes it coat a spoon. A few degrees further and the bonds keep forming and tightening, the mesh contracts, and it squeezes out the water it was holding. That is curdling: not burning, but the same reaction going too far. Sugar and dilution both push the whole window a few degrees higher by getting between the proteins.\n\nStarch changes the game because gelatinised starch physically interferes with protein cross-linking and because the swollen granules keep the proteins apart. With 30g or so of cornflour per litre you can take the mixture to a full boil without graining. You have to, in fact: raw egg yolk contains alpha-amylase, which will digest the starch and turn your pastry cream to soup in the fridge overnight, and only a proper boil for a minute or two destroys it.",
   failureMode: "Perfect pastry cream that is watery the next morning. Nobody did anything wrong at the mixing stage. The custard was pulled at 85C like a creme anglaise, the amylase survived, and it spent the night eating the starch.",
@@ -2631,6 +2730,7 @@ window.SITE = {
   track: "flavour", level: "weeknight",
   title: "Salt improves food mainly by removing bitterness, not by adding saltiness",
   source: "Paul Breslin and Gary Beauchamp, Salt enhances flavour by suppressing bitterness, Nature 387 (1997)",
+  cheat: "Salt is a bitterness eraser first, so it rescues dishes that read bitter; 0.3g in 100ml usually cuts bitter without reading salty.",
   idea: "Sodium suppresses bitter perception more strongly than it enhances anything else, so salting a bitter food works by subtraction.",
   why: "Breslin and Beauchamp showed this cleanly. In a mixture of urea and sucrose, adding sodium raised the perceived sweetness. But the increase came from sodium knocking down the bitterness of the urea, which had been masking the sweet, not from sodium acting on the sweet channel. Remove the bitter component and the sweetness enhancement largely disappears. Other sodium salts behaved the same way regardless of their anion, so the effect follows the sodium ion itself.\n\nThe practical reading is that salt is a bitterness eraser first and a taste in its own right second. That covers most of what salt does for coffee, tonic water, bitter greens, radicchio, grapefruit, dark chocolate and over-extracted stock. It also sets an upper bound: if a dish is not bitter, salt has much less work to do, and adding more of it will just make the dish salty.",
   failureMode: "A stock reduced too far turns harsh and you add salt until it tastes salty and still harsh. The bitterness came from concentrated bitter compounds that a small amount of salt would have masked and a large amount cannot.",
@@ -2715,6 +2815,7 @@ window.SITE = {
   track: "flavour", level: "weeknight",
   title: "Acid works by contrast, and perceived sourness tracks titratable acidity rather than pH",
   source: "Samin Nosrat, Salt Fat Acid Heat",
+  cheat: "When a rich dish reads heavy, add 5ml of vinegar per 200ml before more salt; the missing element is contrast, not sodium.",
   idea: "Adding acid lifts a dish because contrast sharpens everything around it, and how sour it tastes depends on total acid available, not on the pH reading.",
   why: "Sour is transduced by protons entering the taste cell, largely through the OTOP1 channel. But weak organic acids such as acetic, citric, lactic and malic are mostly undissociated in solution, and the undissociated form crosses the cell membrane and releases its proton inside. That is why acetic acid tastes far more sour than a strong mineral acid at the same pH: pH measures only the free protons in the liquid, while your tongue also gets at the large undissociated reserve. Perceived sourness therefore correlates with titratable acidity, and pH alone will mislead you.\n\nThe culinary effect is contrast rather than sourness for its own sake. A squeeze of lemon into a rich braise does not make it lemony. It introduces a channel that was absent, and against that contrast the fat reads cleaner, the salt reads sharper and the aroma reads brighter. This is the same reason acid rescues a dish that is over-rich, which is a problem no amount of salt fixes.",
   failureMode: "You keep adding salt to a fatty braise that reads heavy and dull, and every addition makes it heavier. Five millilitres of red wine vinegar would have solved it, because the missing element was contrast, not sodium.",
@@ -2769,6 +2870,7 @@ window.SITE = {
   track: "acid", level: "weeknight",
   title: "Salt diffuses roughly a centimetre a day into muscle",
   source: "Harold McGee, On Food and Cooking",
+  cheat: "Time a dry brine from thickness, not weight: salt moves about a centimetre a day, so a 6cm shoulder needs three days a face.",
   idea: "Curing time is set by the thickness of the piece, not by its weight.",
   why: "Two different transport processes run at once and they run at wildly different speeds. Osmosis pulls water out of the cells almost immediately, because the concentration gradient across the cell membrane is steep and the distance is microns. Diffusion carries sodium and chloride ions inward through a crowded protein gel, and that is slow: at fridge temperature the seasoned front advances on the order of a centimetre per day.\n\nSo the useful number is the distance from the surface to the centre, halved if you are salting both sides. A 2cm pork chop is seasoned through in about a day. A 6cm pork shoulder needs three days from each face, and no amount of extra salt speeds it up - more salt steepens the gradient a little but does not change the order of magnitude. Weight tells you how much salt to use. Thickness tells you how long to wait.",
   failureMode: "You dry-brine a 5cm pork loin for two hours because a recipe said two hours, and you get a salty crust over bland interior. The salt is all sitting in the outer 2mm, which is also why it tastes harsher than the same total amount evenly distributed would.",
@@ -2829,6 +2931,7 @@ window.SITE = {
   track: "acid", level: "project",
   title: "pH 4.6 is the safety line",
   source: "Harold McGee, On Food and Cooking; FSANZ Food Standards Code",
+  cheat: "Botulinum cannot grow below pH 4.6, so treat 4.6 as the cliff edge and 4.2 as where you stand; garlic in oil goes in the fridge, briefly.",
   idea: "Clostridium botulinum cannot grow below pH 4.6, which is the whole basis of shelf-stable acid preserving.",
   why: "Botulinum spores survive boiling. What stops them producing toxin is an environment they cannot grow in, and acidity is the cheapest one available at home. Below pH 4.6 growth stops, which is why jams, most pickles, chutneys and tomato products with added acid are safe on a shelf, and why low-acid vegetables in oil or water are not, no matter how clean the jar looked.\n\nTwo things make the number harder than it sounds. First, it is the pH of the equilibrated food, not the brine - a cucumber packed in pH 3 vinegar can hold a near-neutral interior for days while the acid diffuses in. Second, home practice targets 4.2 or lower rather than 4.6, because your measurement has error, your ingredient acidity varies and buffering by proteins and starch shifts the endpoint. Treat 4.6 as the cliff edge and 4.2 as where you stand.",
   failureMode: "Garlic or chilli in oil at room temperature. Both are low-acid, the oil is anaerobic, and there is no hurdle in the jar at all. This is a recurring source of real botulism cases, and the fix is either refrigeration with a short life or acidification first.",
@@ -3099,6 +3202,7 @@ window.SITE = {
   track: "heat", level: "weeknight",
   title: "Alcohol does not all cook off",
   source: "Augustin, Augustin, Cutrufelli, Hagen and Teitzel, Alcohol retention in food preparation, Journal of the American Dietetic Association, 1992",
+  cheat: "Alcohol does not all cook off: about 40 percent survives 15 minutes of simmering and about 25 percent survives an hour.",
   idea: "Ethanol and water form an azeotrope and leave the pot together rather than the alcohol boiling out first, so a dish simmered for an hour still holds about a quarter of the alcohol added.",
   why: "The folk belief comes from ethanol's boiling point of 78C, which suggests it should vanish before the water even boils. Mixtures do not work that way. Ethanol and water form a positive azeotrope, so the vapour leaving a dilute solution is richer in ethanol than the liquid but nowhere near pure, and the remaining liquid keeps a falling but non-zero alcohol concentration for as long as there is liquid at all. You are distilling slowly, not evaporating selectively.\n\nThe measured retention figures are blunt. In the 1992 study behind the USDA retention tables, alcohol added to a boiling liquid and removed from the heat retained about 85 percent. Flamed, about 75 percent. Simmered or baked for 15 minutes, about 40 percent. At 30 minutes, about 35 percent. At an hour, about 25 percent. At two and a half hours, still about 5 percent. Nothing in normal cooking gets to zero.",
   failureMode: "Telling someone who does not drink, or is pregnant, or is on metronidazole, that the wine has cooked out of the sauce after twenty minutes. It has not. Roughly 35 to 40 percent is still there. The flavour reasoning is also wrong in the other direction: cooks who splash in wine and boil hard for two minutes think they have removed harshness when they have removed almost nothing.",
@@ -3159,6 +3263,7 @@ window.SITE = {
   track: "heat", level: "weeknight",
   title: "Distance is the grill's real control, not the dial",
   source: "Nathan Myhrvold, Modernist Cuisine",
+  cheat: "Grill by moving the shelf, not the dial: on most domestic grills the setting changes duty cycle, while distance changes intensity steeply.",
   idea: "Radiant intensity falls off steeply with distance from the element, so moving the shelf is a far bigger lever than changing the setting.",
   why: "A compact radiant source obeys an inverse square law: double the distance, quarter the intensity. A grill element is not a point source, it is an extended one, so close in the falloff is gentler than the square and only approaches it once you are far enough away that the element subtends a small angle. The honest version is that intensity drops steeply and non-linearly with distance, somewhere between linear and inverse square depending on how wide your element is and how close you are. Either way the effect of moving a shelf rung dwarfs anything the dial does.\n\nThe dial is weak for a second reason. Most domestic grills are on or off, and the setting changes duty cycle rather than element temperature. Since radiant emission scales with the fourth power of absolute temperature, the element's actual temperature is the thing that matters and you have almost no access to it. Distance you have complete access to, in 2cm increments, for free.",
   failureMode: "Turning the grill to medium to stop the top burning, which just means the element spends half its time off. The surface still burns during the on phase, and the interior gets less total energy, so you end up with a burnt and cold piece of food instead of a burnt and hot one.",
@@ -3333,6 +3438,7 @@ window.SITE = {
   track: "sichuan", level: "project",
   title: "Chilli oil is an extraction with a temperature range",
   source: "Fuchsia Dunlop, The Food of Sichuan",
+  cheat: "Pour oil onto chilli flakes at 130C to 150C; above about 180C they pyrolyse and you get ashy notes instead of fragrance.",
   idea: "Capsaicin, pigment and aroma compounds move into oil at different rates and have different heat tolerances, so roughly 130C to 150C is the window that gets aroma and colour without scorching.",
   why: "Three separate extractions are happening. Capsaicin is strongly lipophilic and comes out readily at almost any temperature above warm, so heat is not what controls the burn - the amount of chilli is. The carotenoid pigments need real heat to leave the plant tissue and are why cold-infused chilli oil looks pale. The aroma compounds are the fragile part: volatile esters and aldehydes that carry the fruity, toasted character, and they are both driven off and destroyed at high temperature.\n\nSo the window is narrow at the top. Below about 110C you get heat and very little colour or fragrance. Between 130C and 150C the pigment comes out and the aroma survives. Above about 180C the sugars and proteins in the flake pyrolyse rather than toast, and you get acrid, ashy notes and a duller brown-red. This is also the argument for the multi-pour method some cooks use: a small first pour hotter for toasted character, the bulk poured in the middle of the window for colour and fragrance.",
   failureMode: "Heating oil until it shimmers and smokes, then pouring it over the flakes. Smoke point on a neutral oil is around 200C or above, so the flakes scorch on contact, the oil goes brown rather than red, and the finished oil smells of ash. It will still be hot, which is why people conclude it worked.",
@@ -3417,6 +3523,7 @@ window.SITE = {
   track: "sichuan", level: "weeknight",
   title: "Sichuan pepper loses its numbing with age",
   source: "Fuchsia Dunlop, The Food of Sichuan",
+  cheat: "Never double the dose of an old Sichuan pepper jar: sanshool degrades in months while the aroma survives, so buy 50g at a time.",
   idea: "Sanshools are chemically unstable and degrade over months, so an old jar delivers citrus aroma with little tingle, and the fix is to buy small quantities and toast lightly just before grinding.",
   why: "Hydroxy-alpha-sanshool is a polyunsaturated fatty acid amide with a conjugated double-bond chain, which is exactly the structure that oxidises and isomerises readily. Light, air and warmth all accelerate it, and the isomers it converts to are far less active on the touch fibres. The aroma is a separate fraction, mostly terpenes like limonene and linalool in the husk, and it survives better and evaporates on a different schedule. That mismatch is why an old jar still smells convincingly of Sichuan pepper and does almost nothing to your lips.\n\nToasting is a compromise, not a repair. A brief dry-pan toast at low heat drives off moisture and makes the husks brittle enough to grind, and it volatilises aroma compounds so they are perceptible. It cannot regenerate degraded sanshool, and pushing the toast too far destroys what is left. Buy in 50g lots, keep the jar dark and closed, grind to order, and discard on a timescale of months rather than years.",
   failureMode: "Doubling the dose of a two-year-old jar to get the tingle back. You get twice the woody, husky bitterness and no more numbing, because the compound you wanted is gone and the one you are adding more of is not it.",
@@ -3585,6 +3692,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4162,6 +4289,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4170,6 +4298,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -4667,6 +4796,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -4869,6 +5066,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5014,6 +5212,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

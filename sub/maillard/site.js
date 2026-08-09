@@ -26,7 +26,17 @@ window.SITE = {
 
   review: 'none',
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'What to actually do at the stove, and the temperature, timing or ratio that makes it work.',
+    cheatWithheld: 'explain what is happening rather than what to do - worth reading once, and not the kind of thing you check mid-cook.',
     labelIdea: 'What is actually happening',
     labelWhy: 'The chemistry',
     labelFailure: 'What goes wrong, and why',

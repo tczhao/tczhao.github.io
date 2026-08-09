@@ -62,6 +62,22 @@ which has a failure rate and a SAFEMAX but no confidence interval. Where an
 interval *is* given, both bounds are mandatory - a one-sided quote manufactures
 precision, and that is the failure this gate exists to prevent.
 
+## The cheatsheet
+
+`cheatsheet: { verdicts: ['statute', 'replicated'] }` adds a tab holding the nine
+entries here that are actually settled. That filter is the opposite of Nomogram's,
+which takes only `replicated`, and it is the opposite for a reason: this corpus
+has exactly one replicated finding and ten resting on a single study, so a
+replication filter would produce a one-row page that told you nothing.
+
+What is genuinely settled in this material is the legislation. A cap is a cap
+because somebody wrote it down, and every statute entry carries the date it was
+true and a link to the primary source. Those dates ride along onto the row, so a
+figure never appears without the year it belongs to - which matters more here than
+anywhere else, because statute moves every July.
+
+The one replicated finding rides along because it earned it.
+
 ## Citation rot
 
 Expiry retires a claim the author already knew would go stale. `reverifyDays`

@@ -135,6 +135,24 @@ function validateConfig(cfg) {
     errs.push(`site.js: unknown review model "${cfg.review}"`);
   }
   if (cfg.gate && !cfg.gate.label) errs.push('site.js: a gate needs a label');
+  /* A verdict-filtered cheatsheet reads a field that only the evidence gate
+     puts there, so without the gate it builds clean and renders an empty page.
+     An opt-in cheatsheet reads no such field and is legal anywhere. */
+  if (cfg.cheatsheet && cfg.cheatsheet.verdicts) {
+    const v = cfg.cheatsheet.verdicts;
+    if (!cfg.evidenceGate) {
+      errs.push('site.js: cheatsheet.verdicts needs evidenceGate - it filters on the replication verdict');
+    }
+    if (!Array.isArray(v) || !v.length) {
+      errs.push('site.js: cheatsheet.verdicts must be a non-empty array');
+    } else {
+      for (const x of v) {
+        if (!REPLICATION.includes(x)) {
+          errs.push(`site.js: cheatsheet.verdicts has unknown verdict "${x}"`);
+        }
+      }
+    }
+  }
   errs.push(...validatePalette(cfg.palette).map(e => 'site.js: ' + e));
   return errs;
 }
@@ -143,6 +161,7 @@ function validate(cfg, entries) {
   const errs = [];
   const seen = new Set();
   const perTrack = {};
+  let cheatRows = 0;
   const trackIds = (cfg.tracks || []).map(t => t.id);
   const levelIds = Object.keys(cfg.levels || {});
   const needsRecall = cfg.review !== 'none';
@@ -217,6 +236,30 @@ function validate(cfg, entries) {
       errs.push(`${where}: carries evidence fields but the site has no evidenceGate`);
     }
 
+    /* Under a verdict filter the corpus decides who appears, so a qualifying
+       entry with no line is a hole in the page and a line on a verdict that
+       never renders is dead content. Both are silent without this. Under the
+       opt-in model the line is itself the selection, so only its shape is
+       checked. */
+    if (cfg.cheatsheet) {
+      const verdicts = cfg.cheatsheet.verdicts;
+      const qualifies = verdicts ? verdicts.includes(l.replication) : true;
+      if (l.cheat === undefined) {
+        if (verdicts && qualifies) {
+          errs.push(`${where}: "${l.replication}" is on the cheatsheet and needs a cheat line`);
+        }
+      } else if (!qualifies) {
+        errs.push(`${where}: has a cheat line but "${l.replication}" never reaches the cheatsheet`);
+      } else if (String(l.cheat).trim() === '') {
+        errs.push(`${where}: cheat is empty`);
+      } else if (/\n/.test(String(l.cheat))) {
+        errs.push(`${where}: cheat must be one line - the cheatsheet renders it as a single row`);
+      }
+      if (l.cheat !== undefined) cheatRows++;
+    } else if (l.cheat !== undefined) {
+      errs.push(`${where}: carries a cheat line but the site has no cheatsheet`);
+    }
+
     if (l.compute !== undefined) {
       const fieldIds = ((cfg.profile || {}).fields || []).map(f => f.id);
       if (!fieldIds.length) {
@@ -246,6 +289,12 @@ function validate(cfg, entries) {
 
   for (const t of trackIds) {
     if (!perTrack[t]) errs.push(`track "${t}" has no entries`);
+  }
+
+  // A declared cheatsheet with nothing on it is a blank tab, which reads as a
+  // broken page rather than as a corpus with nothing worth compressing.
+  if (cfg.cheatsheet && !cheatRows) {
+    errs.push('the cheatsheet is on but no entry carries a cheat line');
   }
 
   return { errs, perTrack };

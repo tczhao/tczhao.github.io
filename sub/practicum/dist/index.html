@@ -686,6 +686,64 @@ button { font: inherit; color: inherit; }
   color: var(--ink-faint);
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from the shelf above. The shelf leads with the claim because you
+   are choosing what to read; here you have already read it, so the row leads
+   with what to do and demotes the claim to the line that justifies it. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__source {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
 .pip {
   display: inline-block;
   width: 6px;
@@ -890,6 +948,9 @@ button { font: inherit; color: inherit; }
       <button class="nav__item" data-view="library">
         <span class="nav__key">Library</span>
       </button>
+      <button class="nav__item" data-view="cheatsheet">
+        <span class="nav__key">Cheatsheet</span>
+      </button>
       <button class="nav__item" data-view="journal">
         <span class="nav__key">Journal</span>
       </button>
@@ -924,6 +985,7 @@ button { font: inherit; color: inherit; }
     <section class="view" id="view-today" aria-label="Today"></section>
     <section class="view" id="view-review" aria-label="Review" hidden></section>
     <section class="view" id="view-library" aria-label="Library" hidden></section>
+    <section class="view" id="view-cheatsheet" aria-label="Cheatsheet" hidden></section>
     <section class="view" id="view-journal" aria-label="Journal" hidden></section>
     <section class="view" id="view-progress" aria-label="Progress" hidden></section>
   </main>
@@ -971,6 +1033,7 @@ button { font: inherit; color: inherit; }
   track: "leverage", level: "team",
   title: "Task-relevant maturity",
   source: "Andy Grove, High Output Management",
+  cheat: "Rate maturity task by task: if three tasks on one person score the same, you are probably rating the person.",
   idea: "How much you should delegate depends not on how senior someone is, but on how experienced they are at this specific task. Maturity is per-task, not per-person.",
   why: "A staff engineer running their first incident review has low task-relevant maturity, and needs structure they would find insulting in their own domain. A mid-level engineer who has shipped this kind of migration four times needs to be left alone.\n\nGrove's mapping is direct: low maturity wants structured, task-oriented direction. Medium wants two-way conversation and support. High wants goals, then monitoring. The mistake is picking one style and applying it to a whole person, when the right style changes as you move across their work.",
   failureMode: "You decide someone is senior, so you give them everything with no scaffolding, and they quietly drown on the one part they have never done. Or you decide someone is junior and keep specifying their work long after they have outgrown it, and they leave.",
@@ -1067,6 +1130,7 @@ button { font: inherit; color: inherit; }
   track: "leverage", level: "both",
   title: "Pair every indicator with its counterweight",
   source: "Andy Grove, High Output Management",
+  cheat: "Next to your team's headline number, write the one that gets worse when it is gamed, and start tracking that too.",
   idea: "Any single metric will be optimised at the expense of something it does not measure. Grove's answer is to always pair it with an indicator that catches the damage.",
   why: "Measure tickets closed and quality quietly drops. Measure velocity and estimates inflate. This is not dishonesty, it is what attention does: the metric tells people where to look, and they stop looking elsewhere.\n\nPairing makes the trade visible instead of hidden. Tickets closed against reopen rate. Deploy frequency against change failure rate. Interview throughput against first-year attrition. Neither number alone is trustworthy; together they bound the behaviour.",
   failureMode: "A team hits its number for two quarters and the system underneath rots. Because the counter-indicator was never tracked, the rot is only discovered when it becomes an incident, and by then the causal link back to the metric is deniable.",
@@ -1185,6 +1249,7 @@ button { font: inherit; color: inherit; }
   track: "people", level: "both",
   title: "Feedback names behaviour, not character",
   source: "Center for Creative Leadership, Situation-Behavior-Impact",
+  cheat: "Strip every adjective about the person from your feedback; if nothing survives, you have an impression, not feedback.",
   idea: "Describe the situation, the specific observable behaviour, and its impact. Skip the inference about what kind of person they are.",
   why: "'You were dismissive in that review' is an interpretation, and it is arguable - so the conversation becomes a debate about whether they are a dismissive person, which nobody wins. 'In the review yesterday, when Priya raised the migration risk, you moved to the next agenda item without responding, and she has not raised a risk since' is not arguable. It is a description with a consequence attached.\n\nBehaviour is also the only thing someone can actually change. Character feedback gives them nothing to do differently on Monday.",
   failureMode: "Feedback that consists of adjectives. The recipient hears a verdict on who they are, defends their identity rather than examining the behaviour, and leaves with no idea what to do differently. The manager concludes they are not coachable.",
@@ -1233,6 +1298,7 @@ button { font: inherit; color: inherit; }
   track: "people", level: "both",
   title: "Mentorship is advice, sponsorship is risk",
   source: "Lara Hogan, Resilient Management",
+  cheat: "List each report with the last opportunity you put their name forward for; the blanks and old dates are the finding.",
   idea: "Mentoring costs you an hour and your opinion. Sponsoring costs you political capital - you put someone's name forward and stake your credibility on them. Careers move on the second one.",
   why: "Advice is abundant and does not open doors. Opportunity does, and opportunity is allocated in rooms the person is not in. Sponsorship is the act of using your presence in that room on their behalf: naming them for the visible project, the conference talk, the promotion case.\n\nBecause it costs something real, sponsorship distributes unevenly and tends to flow to people who resemble the sponsor. That makes it one of the highest-leverage places to be deliberate rather than instinctive.",
   failureMode: "A manager who mentors generously and sponsors only the person who reminds them of themselves. Everyone gets coffee and encouragement; one person gets the launch. Over three years the difference in trajectory is enormous and nobody can point to a single unfair decision.",
@@ -1527,6 +1593,7 @@ button { font: inherit; color: inherit; }
   track: "trust", level: "both",
   title: "Silence is not agreement",
   source: "Edgar Schein, Humble Inquiry",
+  cheat: "Replace does anyone have concerns with what is the biggest risk here, then wait ten seconds without filling the gap.",
   idea: "The absence of objection tells you nothing about whether people agree. It usually means the cost of objecting looked higher than the cost of staying quiet.",
   why: "Objecting in a group is expensive: you risk looking slow, contradicting a senior person, or extending a meeting everyone wants to end. Agreement is free. So silence is the default output of any group, and reading it as consent means systematically mistaking your own proposals for consensus.\n\nSchein's remedy is genuine inquiry rather than rhetorical questions. 'Any concerns?' invites silence. 'What is the weakest part of this?' presupposes there is one, which makes answering safe.",
   failureMode: "A decision made in a meeting where nobody objected, which then fails to happen. Three people had reservations and none of them were asked in a way that made raising it easy. The manager experiences this as an execution failure.",
@@ -1543,6 +1610,7 @@ button { font: inherit; color: inherit; }
   track: "trust", level: "both",
   title: "Make bringing bad news the winning move",
   source: "Ron Westrum, on generative culture",
+  cheat: "Credit an early warning publicly by name, and make sure raising it did not make them the owner of fixing it.",
   idea: "In a healthy team, the person who surfaces a problem early gets visible credit. If bad news costs the bearer anything at all, you will get it late.",
   why: "Every person deciding whether to escalate is doing a private cost calculation. If raising a risk means becoming the owner of it, being questioned about why it was not caught earlier, or being seen as negative, the rational choice is to wait and hope. Many risks do resolve themselves, which makes the strategy locally sensible.\n\nThe fix is to make the calculation come out the other way, deliberately and visibly. Not gratitude in private - credit in the same forum where the news landed, so everyone updates their estimate of what it costs.",
   failureMode: "Risks that surface exactly when they become undeniable, which is always too late to be cheap. Leadership concludes the team has poor foresight. The team has excellent foresight and a correct read on the incentives.",
@@ -1597,6 +1665,7 @@ button { font: inherit; color: inherit; }
   track: "decisions", level: "cross",
   title: "Name the decider before the discussion, not after",
   source: "Bain, the RAPID framework",
+  cheat: "Before a decision meeting, send one line naming who decides, by when, and who is only giving input.",
   idea: "Most stuck decisions are not stuck on information. They are stuck because nobody established who decides, so the group is waiting for a consensus that has no mechanism to arrive.",
   why: "Separating the roles is what unsticks it: who provides input, who must be consulted, who decides, who executes. The critical one is a single named decider. Groups do not decide; people do, sometimes after listening to a group.\n\nDoing this before the discussion also changes its quality. If everyone knows they are giving input rather than negotiating a veto, they argue about the substance instead of positioning for leverage.",
   failureMode: "A decision that resurfaces in four consecutive meetings. Each time the discussion is good and nothing concludes, because no one in the room believes they have the authority and nobody wants to say so. Eventually it gets decided by whoever is most stubborn, or by the deadline.",
@@ -1645,6 +1714,7 @@ button { font: inherit; color: inherit; }
   track: "decisions", level: "both",
   title: "Imagine it has already failed",
   source: "Gary Klein, Performing a Project Premortem",
+  cheat: "Run the premortem as it is six months on and this failed, with everyone writing causes silently before anyone reads out.",
   idea: "Instead of asking what might go wrong, tell the team it is a year later and the project failed badly. Then ask why. The change in tense unlocks concerns that a risk register never gets.",
   why: "Klein's mechanism is prospective hindsight: assuming an outcome has occurred makes people generate reasons far more fluently than asking them to speculate about possibilities. The research he draws on finds a substantial increase in the number of causes identified.\n\nIt also removes the social cost. Asking 'what are the risks?' makes the speaker sound negative about a plan colleagues are invested in. Asking 'why did it fail?' makes it a puzzle everyone is solving together, so the person with the real concern can voice it safely.",
   failureMode: "A risk register full of generic entries - dependency delay, scope creep, resourcing - written to satisfy a template. The actual killer was known by two people who never found a comfortable moment to say it.",
@@ -1827,6 +1897,7 @@ button { font: inherit; color: inherit; }
   track: "communication", level: "both",
   title: "Say what you want the reader to do",
   source: "Standard staff-work practice",
+  cheat: "Put one line at the top: what you want, from whom, by when - and no action needed counts as a real ask.",
   idea: "Most messages that fail to get a response fail because they never stated what response was wanted. Information without an ask reads as optional.",
   why: "Readers triage by required action. A message with no discernible ask goes to the bottom of the queue, not out of rudeness but because nothing breaks if it is ignored. Adding one explicit line - approve this, tell me if you disagree by Thursday, no action needed - moves it into a category the reader can process.\n\n'No action needed' is a real and underused ask. It tells the reader they can stop reading with a clear conscience, which makes them more likely to read the next thing you send.",
   failureMode: "A thoughtful message about a risk, sent to three senior people, none of whom respond. The sender reads this as indifference. All three read it as an FYI, because nothing in it asked for anything.",
@@ -1843,6 +1914,7 @@ button { font: inherit; color: inherit; }
   track: "communication", level: "cross",
   title: "You are undercommunicating by roughly a factor of ten",
   source: "John Kotter, Leading Change",
+  cheat: "Say your priority in a different form than last time, then ask someone to tell you back what it means for their work.",
   idea: "Kotter's finding is that leaders undercommunicate their direction by orders of magnitude. By the time you are bored of saying it, most of your audience has heard it once, distractedly.",
   why: "The asymmetry is that you have thought about the message for weeks and it arrives in someone else's inbox between two incidents. Your fifth repetition is their first real encounter with it. The feeling of repeating yourself is not evidence of saturation - it is the normal sensation of adequate communication.\n\nRepetition also has to vary in form. The same words in the same channel get pattern-matched and skipped. The same message in a document, a team meeting, a one-on-one and a decision you visibly make on its basis lands four different ways.",
   failureMode: "A direction announced once at an all-hands, clearly and well. Three months later half the organisation cannot state it and the other half state a distorted version. Leadership concludes the strategy was not understood, when it was simply not repeated.",
@@ -2041,6 +2113,7 @@ button { font: inherit; color: inherit; }
   track: "systems", level: "cross",
   title: "Cognitive load is the real limit on a team",
   source: "Matthew Skelton and Manuel Pais, Team Topologies",
+  cheat: "An overloaded team is over-scoped, not under-staffed - hiring does not shrink what each person must know for on-call.",
   idea: "A team can only hold so much in its head. Ownership should be bounded by the team's cognitive capacity, not by headcount or by what happens to be adjacent in the codebase.",
   why: "Skelton and Pais separate three loads: intrinsic - the fundamental difficulty of the domain, extraneous - accidental complexity from tooling and process, and germane - the useful thinking about the actual problem. Only the third produces value, and the first two crowd it out.\n\nThe practical consequence is that a team owning eight loosely-related services is not under-resourced, it is over-scoped. Adding a person does not reduce the number of things everyone must understand to be on call. The fix is reducing what the team must hold, usually by giving something away or by lowering extraneous load with better platform.",
   failureMode: "A team with too many systems that responds to being overloaded by hiring. The new person takes six months to be useful, the surface area is unchanged, and on-call is still brutal because everyone still has to know everything.",
@@ -2169,6 +2242,7 @@ button { font: inherit; color: inherit; }
   track: "systems", level: "cross",
   title: "Adjusting numbers is the weakest way to change a system",
   source: "Donella Meadows, Leverage Points",
+  cheat: "Before raising a target, ask what information the people involved lack and get it in front of them within a week.",
   idea: "Meadows ranks intervention points by power. Tuning parameters is near the bottom. Changing information flows, rules, goals, and the paradigm behind them is progressively more powerful and progressively harder.",
   why: "Most management attention goes to the weakest levers, because they are the visible and available ones: adjust the headcount, change the target, tweak the process step. These rarely move behaviour, because the structure generating the behaviour is untouched.\n\nThe strongest accessible lever for most managers is information flow - who finds out what, when. Making a previously invisible consequence visible to the person causing it changes behaviour without needing any authority over goals or rules.",
   failureMode: "A team whose quality problem is addressed by raising the coverage target. The number is met, quality is unchanged, because the actual issue was that nobody found out about production failures unless a customer complained. The available lever was pulled; the effective one was not.",
@@ -2271,6 +2345,7 @@ button { font: inherit; color: inherit; }
   track: "strategy", level: "cross",
   title: "Do not say no, say what it displaces",
   source: "Greg McKeown, Essentialism",
+  cheat: "Answer the next request with what it would displace and by how long, ask whether they want that trade, and say nothing else.",
   idea: "A flat refusal invites a fight about your judgement. Naming what would have to move instead turns it into a shared prioritisation problem, which is the requester's decision to make.",
   why: "'We cannot do that' is a claim about capacity that the requester has no way to verify and every incentive to dispute. 'We can do that if we move the migration to next quarter - do you want that trade?' hands them the actual decision with its actual cost attached.\n\nMost of the time they decline, having not previously understood the price. Occasionally they accept, and they are right to, because they have context you do not. Either way you have replaced a status contest with an informed choice.",
   failureMode: "A manager who protects the team by refusing requests and acquires a reputation for being difficult. Requests start routing around them to individual engineers, who cannot say no, and the work arrives anyway without any prioritisation.",
@@ -2319,6 +2394,7 @@ button { font: inherit; color: inherit; }
   track: "strategy", level: "both",
   title: "A measure that becomes a target stops measuring",
   source: "Charles Goodhart, in Marilyn Strathern's formulation",
+  cheat: "Ask how your team could hit its target without improving anything; if a route exists, drop or loosen the target - a better metric will not help.",
   idea: "Once people are judged on a number, they optimise the number rather than the thing it was a proxy for. The correlation that made it useful is exactly what breaks.",
   why: "Any metric is a proxy, and proxies work because they correlate with what you care about under normal behaviour. Making it a target changes the behaviour, which severs the correlation. This is not cheating - it is the predictable result of directing attention.\n\nThe practical defence is to keep the measure and drop the target, or to hold the target loosely and pair it with a counterweight. What does not work is finding a better metric, because the mechanism applies to that one too.",
   failureMode: "A code review turnaround target that is met by rubber-stamping. The number is excellent, review quality has collapsed, and because the metric is green nobody investigates. The original problem - slow reviews - has been replaced by a worse one that is invisible.",
@@ -2485,6 +2561,7 @@ button { font: inherit; color: inherit; }
   track: "influence", level: "cross",
   title: "The meeting is where you confirm, not where you convince",
   source: "Standard staff-work practice",
+  cheat: "Ask the two likeliest objectors separately what worries them, fold it into the proposal, and credit them in the meeting.",
   idea: "Nobody changes their mind about something significant while eight people watch. Do the persuasion individually beforehand, and use the meeting to record a decision.",
   why: "Public reversal is costly, so in a group setting people defend their existing position regardless of the argument. One-on-one, with no audience, the same person can say 'I had not thought about that' at no cost.\n\nPre-wiring also surfaces objections while they are still cheap to address. An objection raised privately can be incorporated into your proposal; the same objection raised in the meeting becomes a public disagreement that has to be won or lost.",
   failureMode: "A proposal taken to a decision forum cold. Two people raise concerns that could have been resolved in fifteen minutes each. Because they were raised publicly, positions harden, the decision is deferred, and the next attempt starts from a worse place.",
@@ -2565,6 +2642,7 @@ button { font: inherit; color: inherit; }
   track: "influence", level: "cross",
   title: "Know what happens if you do not agree",
   source: "Roger Fisher and William Ury, Getting to Yes",
+  cheat: "Write down what you will do if the ask is refused; if that is just wait, spend an hour improving it before the conversation.",
   idea: "Your best alternative to a negotiated agreement determines your actual leverage. Improving it before the conversation changes the outcome more than anything you say during it.",
   why: "Leverage is not confidence or argument quality - it is the attractiveness of your fallback. If you have no alternative to this team building your dependency, you will accept whatever timeline they offer, regardless of how well you make the case.\n\nWhich means the useful preparation is often outside the negotiation: finding a second option, scoping a workaround, establishing what you would do unilaterally. Doing that work changes what you can credibly accept, and the other side can usually tell.",
   failureMode: "A team that negotiates hard for a dependency with no fallback whatsoever, is offered a date two quarters out, and accepts. Two weeks of scoping a workaround beforehand would have produced an entirely different conversation.",
@@ -2651,6 +2729,7 @@ button { font: inherit; color: inherit; }
   track: "performance", level: "team",
   title: "Check for a mismatch before concluding underperformance",
   source: "Andy Grove, High Output Management",
+  cheat: "Ask which part of the work they find hardest and which least interesting before assuming a skill gap - the remedies differ.",
   idea: "Grove's diagnostic: is the person unable to do the job, or unmotivated to do it? The two have completely different remedies, and a third possibility is that the job is wrong for them.",
   why: "Ability problems respond to training, structure and time. Motivation problems do not - more training makes them worse. And a surprisingly large share of apparent underperformance is a capable, motivated person in a role that does not fit: the wrong domain, the wrong level of ambiguity, the wrong kind of work.\n\nDistinguishing them requires asking rather than inferring. Someone struggling with ability usually knows and is anxious. Someone unmotivated usually has a reason, and it is often something you can address. Someone mismatched frequently performs well the moment the shape of the work changes.",
   failureMode: "A performance improvement plan built entirely around skill development for someone who is bored and has decided to leave. Everyone goes through the motions for eight weeks, nothing improves, and both parties knew the answer at week one.",
@@ -2811,6 +2890,7 @@ button { font: inherit; color: inherit; }
   track: "performance", level: "team",
   title: "The hour after matters as much as the conversation",
   source: "Standard management practice",
+  cheat: "Send a three-line written summary the same day, then have a normal, unrelated interaction within forty-eight hours.",
   idea: "People do not absorb much during a difficult conversation. What you do in the following days - following up in writing, staying normal with them, checking in - determines what they take from it.",
   why: "Under stress recall is poor and selective, so the person will leave with a partial and probably harsher version than you delivered. A short written summary of what you said, sent the same day, corrects that and gives them something to reread once the adrenaline has gone.\n\nThe second part is behavioural. If you become distant afterwards, they will conclude the relationship has changed regardless of what you said about it. Treating them exactly as before is the evidence that the feedback was about the work.",
   failureMode: "A well-delivered piece of hard feedback followed by two weeks of the manager being slightly awkward and avoiding them. The person concludes they are on their way out. Nothing in the original conversation said that.",
@@ -2881,6 +2961,7 @@ button { font: inherit; color: inherit; }
   track: "hiring", level: "both",
   title: "Score independently before anyone speaks",
   source: "Daniel Kahneman, Olivier Sibony and Cass Sunstein, Noise",
+  cheat: "Collect a written score and one line of reasoning from every interviewer before anyone talks in the debrief.",
   idea: "In a debrief, the first confident opinion anchors everyone else. Collecting written independent assessments before discussion preserves the information you convened the group to get.",
   why: "The value of multiple interviewers is multiple independent observations. Discussion-first destroys the independence: people update toward the first strong view, especially if it comes from someone senior, and the group converges on an opinion held by one person while feeling like consensus.\n\nWriting first costs three minutes and preserves the disagreement, which is the useful part. Two interviewers who scored differently on the same dimension have found something worth examining.",
   failureMode: "A debrief where the hiring manager speaks first, decisively. Everyone else moderates their reservations, the hire proceeds, and two people later admit they had concerns. The process gathered five opinions and used one.",
@@ -2913,6 +2994,7 @@ button { font: inherit; color: inherit; }
   track: "hiring", level: "both",
   title: "One candidate from an underrepresented group has almost no chance",
   source: "Johnson, Hekman and Chan, Harvard Business Review",
+  cheat: "If your finalist pool has exactly one of anything, hold the decision and extend sourcing rather than deciding from that slate.",
   idea: "Research on finalist pools found that when only one candidate differs from the norm, their odds of selection are close to zero. Two changes the outcome substantially.",
   why: "A single different candidate is read as an exception against a pattern, and the pattern is what feels like the safe choice. With two, difference stops being the distinguishing feature and the comparison moves to actual merits.\n\nThis makes slate composition a decision point rather than a passive outcome. It is also actionable at exactly the moment when most processes have stopped paying attention - the point where you have a finalist list and are about to compare.",
   failureMode: "A conscientious process that sources widely and ends with one candidate from an underrepresented group among four finalists. They are not selected, everyone's reasoning is defensible, and the outcome was largely determined before the comparison began.",
@@ -3031,6 +3113,7 @@ button { font: inherit; color: inherit; }
   track: "change", level: "both",
   title: "Stop the bleeding before you find the wound",
   source: "Google SRE practice",
+  cheat: "Have someone ask out loud whether you are mitigating or diagnosing; if customers are affected, mitigate first and investigate after.",
   idea: "During an incident, restoring service takes precedence over understanding the cause. Curiosity is the most common reason outages last longer than they need to.",
   why: "Engineers are trained to understand problems, and that instinct is actively harmful mid-incident. The rollback, the failover, the feature flag - these end customer impact without requiring you to know why, and they preserve the evidence for later.\n\nThe discipline is to separate the two phases explicitly and say which one you are in. Diagnosis after mitigation is calmer, better, and costs nothing. Diagnosis during impact costs minutes per minute.",
   failureMode: "A forty-minute outage where the first thirty were spent understanding an interesting failure mode that a two-minute rollback would have ended. The investigation was excellent and could have happened afterwards.",
@@ -3063,6 +3146,7 @@ button { font: inherit; color: inherit; }
   track: "change", level: "both",
   title: "Your system is already running in a degraded state",
   source: "Richard Cook, How Complex Systems Fail",
+  cheat: "List every condition the incident needed - at least four - rank by cost to remove, and fix the cheapest two, not the one you called root cause.",
   idea: "Cook's observation is that complex systems always contain latent faults, and run anyway. Failure requires multiple faults to align, so there is never a single root cause.",
   why: "This changes what you look for. If failure needs several contributing conditions, then removing any one of them prevents that specific accident - which means the highest-value question is not 'what caused this' but 'which of these conditions is cheapest to eliminate'.\n\nIt also explains why systems that have been reliable for a year are not therefore safe. They have been running with the same latent faults the whole time and simply have not had the alignment yet. Absence of incidents is weak evidence of safety.",
   failureMode: "A postmortem that identifies one root cause, fixes it, and closes. Three of the four contributing conditions remain, so the same class of failure recurs through a slightly different path and is logged as an unrelated incident.",
@@ -3277,6 +3361,7 @@ button { font: inherit; color: inherit; }
   track: "self", level: "both",
   title: "Burnout is mostly about control and fairness, not hours",
   source: "Christina Maslach, on the six areas of worklife",
+  cheat: "Ask which of the six drivers is worst right now before cutting workload; rest does not touch control, fairness or values conflict.",
   idea: "Maslach's research identifies workload as only one of six drivers. The others - control, reward, community, fairness and values conflict - are frequently the actual cause, and no amount of rest fixes them.",
   why: "This is why holidays do not work. Someone burning out from a values conflict or from persistent unfairness returns rested and the condition is unchanged, because the cause was never workload. The three symptoms - exhaustion, cynicism and a sense of ineffectiveness - all persist.\n\nThe diagnostic value is in the specificity. 'Are you working too much?' misses five of six causes. 'Which of these six is worst for you right now?' produces an answer you can act on, and often the action is small.",
   failureMode: "A manager who responds to a burning-out engineer by reducing their workload. The engineer's actual problem was that their work kept getting cancelled by decisions they had no input into. Less of it makes the sense of futility worse.",
@@ -3389,6 +3474,7 @@ button { font: inherit; color: inherit; }
   track: "self", level: "both",
   title: "Keep a record of your own judgement",
   source: "Peter Drucker, Managing Oneself",
+  cheat: "For your next significant call, write one line predicting what will happen and when you will know, and put a reminder at that date.",
   idea: "Write down what you expect to happen when you make a significant call, then check later. Drucker's feedback analysis is the only reliable way to find out what your judgement is actually good at.",
   why: "Memory rewrites predictions to match outcomes, so unrecorded experience produces confidence rather than calibration. You will remember having anticipated things you did not and forget the calls you got wrong, which means decades of experience can leave your accuracy unchanged.\n\nThe record is what breaks that. Over a year it shows you a pattern - that you consistently underestimate coordination cost, or read people well and timelines badly - and those patterns are specific enough to act on.",
   failureMode: "Fifteen years of management experience with no better calibration than year three. Every decision felt informed by experience. Nothing was ever checked, so the same systematic errors recurred with more confidence each time.",
@@ -4012,6 +4098,42 @@ button { font: inherit; color: inherit; }
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read before a one-to-one you are already late
+     for. Nothing in this corpus grades its own evidence, so there is no verdict
+     to filter on and the row is opt-in: an entry appears if it was written a
+     cheat line. That is a selection rather than a filter, and the note says so
+     - a page of twenty-odd lines that implied it was the whole corpus would be
+     the exact management-writing failure the entries themselves warn about. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    var rows = LESSONS.filter(function (l) { return !!l.cheat; });
+
+    var h = '<div class="section__head"><h2 class="section__title">Cheatsheet</h2>' +
+      '<p class="section__note">The entries that survive being compressed to one line. ' +
+      '<b>' + rows.length + '</b> of ' + LESSONS.length + ' entries. The other ' +
+      (LESSONS.length - rows.length) + ' are not weaker, they are less compressible - ' +
+      'their value is in the reasoning, and a one-line version would be a slogan.</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var inTrack = rows.filter(function (l) { return l.track === t.id; });
+      if (!inTrack.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      inTrack.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '">';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta"><span class="cheat__source">' + esc(l.source) + '</span></span>';
+        h += '</button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderJournal() {
     var notes = Object.keys(state.log)
       .filter(function (id) { return BY_ID[id] && (state.log[id].note || '').trim(); })
@@ -4104,12 +4226,13 @@ button { font: inherit; color: inherit; }
 
   function render() {
     renderChrome();
-    ['today', 'review', 'library', 'journal', 'progress'].forEach(function (v) {
+    ['today', 'review', 'library', 'cheatsheet', 'journal', 'progress'].forEach(function (v) {
       el('view-' + v).hidden = v !== view;
     });
     if (view === 'today') renderToday();
     else if (view === 'review') renderReview();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'journal') renderJournal();
     else renderProgress();
   }
@@ -4169,6 +4292,11 @@ button { font: inherit; color: inherit; }
     if (act === 'lib-close') { libOpen = null; renderLibrary(); return; }
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

@@ -68,6 +68,7 @@ function validate(lessons) {
   const errs = [];
   const seen = new Set();
   const perTrack = {};
+  let cheatRows = 0;
 
   if (!lessons.length) errs.push('corpus is empty');
 
@@ -89,12 +90,27 @@ function validate(lessons) {
     // Sequence order and library links depend on ids being URL-clean slugs.
     if (l.id && !/^[a-z0-9-]+$/.test(l.id)) errs.push(`${where}: id is not a clean slug`);
 
+    /* The cheat line is optional - it is itself the selection of what reaches
+       the cheatsheet - so only its shape is checked. A line that runs to a
+       second paragraph is a line that was written as prose and will render as
+       one unreadable row. */
+    if (l.cheat !== undefined) {
+      if (String(l.cheat).trim() === '') errs.push(`${where}: cheat is empty`);
+      else if (/\n/.test(String(l.cheat))) {
+        errs.push(`${where}: cheat must be one line - the cheatsheet renders it as a single row`);
+      }
+      cheatRows++;
+    }
+
     perTrack[l.track] = (perTrack[l.track] || 0) + 1;
   }
 
   for (const t of TRACKS) {
     if (!perTrack[t]) errs.push(`track "${t}" has no lessons`);
   }
+
+  // A cheatsheet tab with nothing on it reads as a broken page.
+  if (!cheatRows) errs.push('no entry carries a cheat line - the cheatsheet would be blank');
 
   return { errs, perTrack };
 }

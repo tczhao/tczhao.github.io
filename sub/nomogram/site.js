@@ -48,6 +48,16 @@ window.SITE = {
   requireInterval: true,
   reverifyDays: 180,
 
+  /* The one place in this site that is meant to be read quickly, and therefore
+     the one place that has to be restricted hardest. Only the replicated
+     verdict appears. Fourteen of thirty entries qualify, which is the honest
+     yield of this literature and is worth seeing stated as a fraction.
+
+     Derived rather than chosen: the corpus already grades its own evidence, and
+     letting the author pick the cheatsheet by hand would put the judgement back
+     in exactly the place this site removes it from. */
+  cheatsheet: { verdicts: ['replicated'] },
+
   gate: {
     label: "Draw your line first",
     prompt: "Write down how big you think the effect is, and how sure you think the evidence is, before either appears. Being wrong on the record is what calibrates you. Nodding along to a result does nothing.",
@@ -69,6 +79,9 @@ window.SITE = {
     sourcePrefix: "After",
     staleNote: "not re-checked since",
     reflectPlaceholder: "The effect you predicted, the effect that was measured, and what you changed.",
+    tabCheatsheet: "Cheatsheet",
+    cheatNote: "What survived being re-run by someone else, and what it is worth in training you would actually do.",
+    cheatWithheld: "rest on one study, are contested, are real but sold past their effect size, or have no trial behind them at all - they are worth reading and are not worth acting on from memory.",
     progressNote: "Entries logged measures reading. The gap between the effect you predicted and the effect that was measured tells you whether you have any feel for how small these effects are. Watch the second one."
   },
 

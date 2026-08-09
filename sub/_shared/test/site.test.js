@@ -128,6 +128,65 @@ if (config.gate && (config.extraRequired || []).includes('gateIntro')) {
   });
 }
 
+if (config.cheatsheet) {
+  const VERDICTS = config.cheatsheet.verdicts || null;
+  const qualifies = l => (VERDICTS ? VERDICTS.includes(l.replication) : !!l.cheat);
+  const rule = VERDICTS ? 'the ' + VERDICTS.join('/') + ' slice' : 'the entries that carry a line';
+
+  check('the cheatsheet is exactly ' + rule, () => {
+    /* The filter is the entire editorial claim of this view. A single contested
+     * or single-study finding leaking onto a page designed to be read at speed
+     * and acted on is the one failure that matters here, so it is asserted in
+     * both directions rather than by counting rows. */
+    const env = boot(ROOT, T0);
+    env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+    const html = env.els['view-cheatsheet'].innerHTML;
+
+    const hole = templateHole(html);
+    assert.ok(!hole, 'the cheatsheet has a template hole near: ' + hole);
+
+    const solid = env.window.LESSONS.filter(qualifies);
+    assert.ok(solid.length > 0, 'the cheatsheet is on but nothing in the corpus qualifies');
+
+    for (const l of solid) {
+      assert.ok(html.includes('data-id="' + l.id + '"'), 'qualifies but missing from the cheatsheet: ' + l.id);
+    }
+    for (const l of env.window.LESSONS.filter(l => !qualifies(l))) {
+      assert.ok(!html.includes('data-id="' + l.id + '"'),
+        l.id + ' does not qualify and must not reach the cheatsheet');
+    }
+
+    const rows = (html.match(/class="cheat__row"/g) || []).length;
+    assert.strictEqual(rows, solid.length, 'one row per qualifying entry, no more');
+  });
+
+  check('every cheat line is one plain line of the right shape', () => {
+    /* The build enforces this too. It is repeated here because these lines are
+     * the only prose in the corpus written to be acted on without reading the
+     * entry behind it, and a line that runs long or carries markup is a line
+     * that was written as a paragraph. */
+    for (const l of loadEntries().entries.filter(l => l.cheat !== undefined)) {
+      assert.ok(!/\n/.test(l.cheat), l.id + ': cheat spans more than one line');
+      assert.ok(!/—/.test(l.cheat), l.id + ': cheat has an em dash');
+      assert.ok(!/\*\*|^#/.test(l.cheat), l.id + ': cheat carries markdown');
+      assert.ok(l.cheat.length >= 40 && l.cheat.length <= 190,
+        l.id + ': cheat is ' + l.cheat.length + ' chars, outside 40-190');
+    }
+  });
+
+  check('the cheatsheet states how much of the corpus it leaves out', () => {
+    /* A cheatsheet that shows fourteen findings without saying sixteen were
+     * withheld reads as the whole corpus, which would invert the point of a
+     * site built to make you feel how thin the evidence is. */
+    const env = boot(ROOT, T0);
+    env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+    const html = env.els['view-cheatsheet'].innerHTML;
+    const withheld = env.window.LESSONS.filter(l => !qualifies(l) && !env.api.lapsed(l)).length;
+    assert.ok(html.includes(' ' + withheld + ' '),
+      'the number of entries left off the cheatsheet is not stated on it');
+  });
+}
+
 check('the built file is self-contained and under the artifact ceiling', () => {
   const dist = path.join(ROOT, 'dist', 'index.html');
   assert.ok(fs.existsSync(dist), 'not built yet - run npm run build');

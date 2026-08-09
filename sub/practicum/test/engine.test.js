@@ -343,4 +343,57 @@ check('restoring a backup replaces state and rejects rubbish', () => {
   assert.ok(fresh.state().log[id], 'bad payload must not wipe existing state');
 });
 
+check('the cheatsheet is exactly the entries that carry a line', () => {
+  /* The selection is the entire editorial claim of this view, and it lives in
+   * the content rather than in a filter, so nothing else can catch a row that
+   * appears without a line or a line that never reaches a row. */
+  const env = boot(T0);
+  env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+  const html = env.els['view-cheatsheet'].innerHTML;
+
+  const withLine = env.window.LESSONS.filter(l => !!l.cheat);
+  assert.ok(withLine.length > 0, 'no entry carries a cheat line');
+
+  for (const l of withLine) {
+    assert.ok(html.includes('data-id="' + l.id + '"'), 'has a cheat line but no row: ' + l.id);
+  }
+  for (const l of env.window.LESSONS.filter(l => !l.cheat)) {
+    assert.ok(!html.includes('data-id="' + l.id + '"'), 'row without a cheat line: ' + l.id);
+  }
+
+  const rows = (html.match(/class="cheat__row"/g) || []).length;
+  assert.strictEqual(rows, withLine.length, 'one row per line, no more');
+});
+
+check('the cheatsheet says how much of the corpus it leaves out', () => {
+  /* Twenty-odd lines presented as the whole corpus would be the exact
+   * management-writing failure these entries warn about. */
+  const env = boot(T0);
+  env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+  const html = env.els['view-cheatsheet'].innerHTML;
+  const withheld = env.window.LESSONS.filter(l => !l.cheat).length;
+  assert.ok(html.includes(' ' + withheld + ' '), 'the withheld count is not stated on the page');
+});
+
+check('every cheat line is one plain line of the right shape', () => {
+  const env = boot(T0);
+  for (const l of env.window.LESSONS.filter(l => l.cheat !== undefined)) {
+    assert.ok(!/\n/.test(l.cheat), l.id + ': cheat spans more than one line');
+    assert.ok(!/—/.test(l.cheat), l.id + ': cheat has an em dash');
+    assert.ok(l.cheat.length >= 40 && l.cheat.length <= 190,
+      l.id + ': cheat is ' + l.cheat.length + ' chars, outside 40-190');
+  }
+});
+
+check('following a cheatsheet row opens the entry behind it', () => {
+  const env = boot(T0);
+  const first = env.window.LESSONS.find(l => !!l.cheat);
+  env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+  env.fire('click', target({ act: 'cheat-open', id: first.id }));
+  assert.ok(!env.els['view-library'].hidden, 'the library should be showing');
+  assert.ok(env.els['view-cheatsheet'].hidden, 'the cheatsheet should be hidden');
+  assert.ok(env.els['view-library'].innerHTML.includes(first.title),
+    'the opened entry is not the one the row pointed at');
+});
+
 console.log('\n' + passed + ' checks passed\n');

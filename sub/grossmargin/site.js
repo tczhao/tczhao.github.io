@@ -28,7 +28,17 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The decisions whose consequence turns up on a statement somebody else writes, compressed to the form you need before making one.',
+    cheatWithheld: 'are ways of reading a number rather than calls you make - they teach a lens, and a lens does not fit in a row.',
     labelIdea: 'The idea',
     labelWhy: 'How the number actually works',
     labelFailure: 'What engineers get wrong about it',

@@ -23,6 +23,7 @@
   title: "A low-precision alert is a base rate problem wearing a pager",
   source: "Rob Ewaschuk, My Philosophy on Alerting, appendix to Site Reliability Engineering",
   gateIntro: "A service has thorough alerting: forty rules, most of them firing a few times a week. During a real degradation the correct alert fires within ninety seconds. Nobody acts on it for twenty five minutes.",
+  cheat: "Count fires against actions per rule over ninety days; anything below roughly one in four wants deleting or rewriting.",
   idea: "An alert that is usually wrong trains the responder to be slow, and the training is rational.",
   why: "This is conditional probability with a human attached. If a rule fires thirty times a month and two of those are real, the responder's posterior on any given page is about seven percent, so the correct individual response is to finish what they are doing and look in a minute. Every one of those decisions is locally reasonable and the aggregate is a team that cannot respond quickly to anything.\n\nThe damage is not confined to the noisy rule. Precision is learned at the level of the pager, not the rule, so one high-volume low-precision alert degrades response time for every other alert that shares the channel. That is why deleting alerts is usually a bigger availability win than adding them, and why it feels wrong to everyone."
 ,
@@ -113,6 +114,7 @@
   title: "A signal that stops when the situation worsens teaches the wrong lesson",
   source: "BEA, Final Report on the accident to Airbus A330-203 flight AF 447, 2012",
   gateIntro: "Air France 447, 1 June 2009, over the Atlantic. Airspeed indications became briefly unreliable and the autopilot disengaged, handing an aircraft in cruise to the crew. During the descent that followed, a warning that was correctly indicating the aircraft's condition ceased whenever the crew moved the controls toward the recovery action, and resumed when they moved them back.",
+  cheat: "Work out what your first-look panel renders when the service is fully down; blank or zero reads as healthy, so add a no-data alert.",
   idea: "An indicator whose validity logic silences it in the extreme case can invert the feedback a responder is learning from.",
   why: "The stall warning on the A330 is suppressed when measured airspeed falls below a validity threshold, on the reasonable ground that the sensors cannot be trusted at very low airspeed. At the extreme angle of attack the aircraft reached, that condition was met, so the warning stopped. Pushing the nose down restored valid airspeed and the warning resumed. Every correct input was followed by the alarm returning, and every incorrect input by silence.\n\nThe transferable point is not about aviation. Any signal with a validity gate can go quiet in exactly the regime where it matters most, and a responder cannot distinguish quiet-because-fine from quiet-because-unmeasurable. A metric that disappears when a service is fully down looks identical to a metric that is healthy, and dashboards render both as an absence."
 ,

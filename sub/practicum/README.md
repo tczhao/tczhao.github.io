@@ -55,6 +55,22 @@ browser that blocks storage gets an explicit warning rather than silently losing
 notes. Export and import are in **Progress** - worth using, because a year of journal
 entries lives in one browser.
 
+**The cheatsheet.** The one view that is not a study aid. Everything else here is
+built to slow you down; that tab is built to be read before a one-to-one you are
+already late for, so the row leads with what to do and demotes the claim to the
+line underneath.
+
+Nothing in this corpus grades its own evidence, so there is no verdict to filter
+on and the row is opt-in: an entry appears if it carries a `cheat` field. That is
+a selection rather than a filter, and the page states the count it leaves out
+rather than implying it is the whole corpus.
+
+The selection bar is deliberately high, because management writing compresses into
+platitude faster than any other material here. An entry earns a row when the useful
+part is a rule, an ordering or a specific move, and it is denied one when the value
+lives in the reasoning and a one-liner would be a fortune cookie. Most entries do
+not earn a row.
+
 ## Layout
 
 ```

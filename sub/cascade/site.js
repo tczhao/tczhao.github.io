@@ -28,6 +28,13 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   gate: {
     label: 'Call it before you read it',
     prompt: 'What fired, what amplified it, and what made recovery slow? Commit an answer before the write-up opens.',
@@ -44,6 +51,9 @@ window.SITE = {
   extraRequired: ['gateIntro'],
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The moves worth having in your head at three in the morning, when there is no time to read the entry behind them.',
+    cheatWithheld: 'describe mechanisms rather than moves - they are what you read beforehand, not what you reach for mid-incident.',
     labelIdea: 'The mechanism',
     labelWhy: 'Why it propagates',
     labelFailure: 'What made it worse',

@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Gross Margin - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F9F7F0;
@@ -1419,7 +1500,17 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The decisions whose consequence turns up on a statement somebody else writes, compressed to the form you need before making one.',
+    cheatWithheld: 'are ways of reading a number rather than calls you make - they teach a lens, and a lens does not fit in a row.',
     labelIdea: 'The idea',
     labelWhy: 'How the number actually works',
     labelFailure: 'What engineers get wrong about it',
@@ -1498,6 +1589,7 @@ window.SITE = {
   track: "pnl", level: "read",
   title: "Your cloud bill lands in cost of revenue, not operating expense",
   source: "Snowflake Form 10-K, cost of revenue discussion in Item 7 MD and A, and the cost of revenue captions in the consolidated statements of operations",
+  cheat: "Ask FP and A which cloud accounts they map to cost of revenue before quoting a margin; CI and staging usually are not.",
   idea: "The portion of your cloud bill that serves production traffic sits in cost of revenue and therefore hits gross margin directly, while the rest of it sits in operating expense and does not.",
   why: "Cost of revenue holds the cost of delivering the service that was sold: third party cloud infrastructure, hosting and data centre costs, personnel who run and support the deployed service, amortisation of capitalised internal-use software, and third party licences embedded in the product. Snowflake splits cost of revenue into product and professional services and other, and discusses the third party cloud infrastructure component in MD and A, which is the clearest public statement of where a cloud bill goes.\n\nThe trap is that not all of your cloud bill qualifies. CI runners, development and staging environments, internal analytics and engineering tooling are consumed by building the product, not delivering it, and are normally booked to R and D or G and A. So somebody in finance has already drawn a line through your cloud accounts, and you probably have not seen where.",
   failureMode: "You quote total cloud spend as cost of revenue and compute a gross margin several points below the real one, because the CI account and three sandbox accounts are in your number and not in finance's. You then argue for a cost programme sized against a denominator nobody else recognises, and the argument dies on reconciliation rather than on merit.",
@@ -1546,6 +1638,7 @@ window.SITE = {
   track: "pnl", level: "model",
   title: "Contribution margin per tenant is not gross margin per tenant",
   source: "Berman and Knight, Financial Intelligence, Part Five; Storment and Fuller, Cloud FinOps, the unit economics chapter",
+  cheat: "Quote contribution margin, not blended allocated margin, when sales asks about a discount on a dedicated-instance deal.",
   idea: "Gross margin per tenant divides shared cost across tenants by some allocation rule, while contribution margin counts only the cost that actually disappears when the tenant does.",
   why: "Allocated cost is an accounting convention. If your control plane, your observability stack and your baseline node pool exist whether you have ninety tenants or ninety-one, then dividing their cost by tenant count produces a per-tenant number that is correct for reporting and wrong for every marginal decision. Contribution margin asks the only question a pricing meeting cares about: revenue from this tenant minus the cost that would go away if they left.\n\nThe gap between the two numbers is a direct readout of your architecture. In a fully shared multi-tenant plane, marginal cost per tenant is close to zero and contribution margin approaches the price. In a dedicated-namespace or dedicated-cluster model, the baseline nodes, the per-tenant control plane components and the per-tenant observability floor are all genuinely incremental, and contribution margin collapses towards gross margin. That gap is the number nobody else in the company can compute, because finance does not know the deployment topology and engineering does not read the P and L.",
   failureMode: "Sales asks whether they can discount thirty percent to win a dedicated-instance deal. You quote the blended per-tenant gross margin, which is healthy because it is dominated by shared-plane tenants, and the deal is approved. The tenant lands on a dedicated cluster whose incremental cost was never in that average, and the deal contributes nothing.",
@@ -1776,6 +1869,7 @@ window.SITE = {
   track: "cogs", level: "read",
   title: "FOCUS gives every cloud bill one schema and one set of column names",
   source: "FinOps Foundation, FOCUS specification version 1.0",
+  cheat: "Build every unit cost trend on EffectiveCost; on BilledCost a commitment purchase looks like a usage spike.",
   idea: "FOCUS is an open specification that defines a common schema, column names and allowed values for billing data, which is what makes cross-provider cost analysis a query rather than a project.",
   why: "Before FOCUS, every provider exported its own billing file with its own column names, its own words for the same concept and its own treatment of commitments and credits. Any cross-provider report meant writing and maintaining a bespoke normaliser per provider, which is why most organisations never had one. FOCUS defines required columns with defined semantics, including BilledCost and EffectiveCost, ListCost and ContractedCost, ChargeCategory, ServiceCategory, resource and SKU identifiers, quantities and units, and charge period timestamps.\n\nThe pair worth internalising is BilledCost against EffectiveCost. BilledCost is what appeared on the invoice for that charge period. EffectiveCost amortises commitment purchases across the period they cover, so a three year prepayment stops appearing as one enormous month. Report a unit cost trend on BilledCost and it will jump on the month you bought a commitment; report it on EffectiveCost and it reflects the economics. Which column you picked is the first question anyone competent will ask about your chart.",
   failureMode: "A per-tenant cost chart shows a step change in March. Two weeks of investigation follow. The cause was a Savings Plan purchase landing as a single billed charge in March while the underlying usage was flat, and the chart was built on BilledCost.",
@@ -1872,6 +1966,7 @@ window.SITE = {
   track: "cogs", level: "model",
   title: "Committed use discounts are a duration bet, not a discount",
   source: "AWS Savings Plans and Reserved Instances documentation; Google Cloud committed use discounts documentation; Storment and Fuller, Cloud FinOps, rate optimization chapter",
+  cheat: "Break-even utilisation on a commitment is 1 minus the discount; count how many of the last twelve months fall below it.",
   idea: "A commitment exchanges a rate discount for an obligation to pay for a fixed term regardless of usage, so price it as an instrument with a break-even and a downside rather than as free money.",
   why: "There is a clean identity here. If the commitment gives you a discount of d against on-demand, and you commit to quantity Qc but only consume Qu, the commitment beats on-demand exactly when Qu divided by Qc exceeds 1 minus d. That is your break-even utilisation, and it is computable the moment the provider tells you the discount for the term and payment option you are considering. Read the discount off the provider's own pricing page for your term rather than assuming a number.\n\nWhat you are buying with that discount is term risk. Demand can fall, a tenant can churn, a rearchitecture can move you off the instance family or the service entirely, and a provider migration or a region change can strand the commitment. Longer terms carry larger discounts precisely because they carry more of this risk. The right analysis is not \"can we afford the commitment\" but \"what is the probability-weighted cost of the scenarios where we do not use it\", and the engineering roadmap is the best evidence anyone has about those scenarios. That evidence lives with you, not with finance, which is why you should be in the meeting.",
   failureMode: "Finance buys a three year commitment on a compute family in month one of a two year plan to move that workload to a managed service. The migration lands, the commitment keeps billing, and the saved engineering cost is offset by stranded capacity for eighteen months. Nobody was wrong individually; the roadmap and the purchase never met.",
@@ -2118,6 +2213,7 @@ window.SITE = {
   track: "architecture", level: "model",
   title: "Allocated capacity is not used capacity and the gap is the bill",
   source: "Verma et al., Large-scale cluster management at Google with Borg, EuroSys 2015, resource reclamation; Tirmazi et al., Borg: the Next Generation, EuroSys 2020, eight production cells over May 2019",
+  cheat: "You are billed for requests, not usage, and limits do not affect placement - so lower requests, not limits.",
   idea: "You pay for what your workloads request, they consume considerably less, and the systematic size of that gap is a published result rather than a guess.",
   why: "The Borg paper documents this directly. Google found the gap between what jobs request and what they actually use large enough to build a whole mechanism around it: Borg estimates near-term usage, calls that a reservation, and reclaims the difference between reservation and limit for lower priority work. The follow-up paper repeats the analysis across eight production cells for a month of 2019. Read the resource reclamation sections for the measured gap rather than trusting anyone's rule of thumb, including mine.\n\nOn Kubernetes you have the same gap and none of the reclamation. The scheduler places pods against requests, the cloud provider bills you for nodes sized to hold those requests, and the difference between requests and actual usage is money spent on nothing. Limits do not help, because limits do not affect placement. The number you need is the ratio of cluster-wide CPU and memory requests to cluster-wide usage at the same instant, and every cluster has it in the metrics already.",
   failureMode: "Requests are copied from whichever service the author had open last, then doubled after one incident. Nobody ever lowers them, because lowering a request has a visible downside and an invisible upside. Two years in, cluster utilisation sits under twenty per cent, and the team responds by negotiating a committed-use discount on capacity it does not need.",
@@ -2182,6 +2278,7 @@ window.SITE = {
   track: "architecture", level: "model",
   title: "Cross-AZ traffic is created by your topology, not by your users",
   source: "AWS EC2 data transfer pricing for traffic between Availability Zones; Kubernetes documentation on topology aware routing",
+  cheat: "With default routing across three zones, roughly two thirds of internal hops cross a boundary billed twice; use topology aware routing.",
   idea: "How much of your internal chatter crosses a billed zone boundary is decided by service placement and routing policy, not by user behaviour.",
   why: "The default Kubernetes service routes to any ready endpoint anywhere in the cluster. With pods spread evenly across three zones, roughly two thirds of every internal hop leaves the zone it started in. AWS bills data transfer between availability zones in the same region per gigabyte, and it is charged on both the send and the receive side, so each crossing is billed twice. Multiply that by the number of hops in a request path and the number of requests, and a chatty microservice architecture generates a meaningful bill out of traffic that never touches the internet.\n\nThe controls are unglamorous and documented. Topology aware routing keeps traffic within a zone when endpoint distribution allows it. Zonal replica placement for caches and read replicas keeps the hot read path local. Consolidating chatty services into one process removes the hop entirely. None of this is a trade against availability if you keep the failover path across zones intact and only prefer local when local is healthy.",
   failureMode: "Nobody owns the inter-AZ line because it appears under data transfer rather than under any team's service. It grows with request volume, so it looks like a healthy sign of growth. Meanwhile the actual driver is a service mesh that added two extra hops per request, each of which now crosses a zone boundary two times out of three.",
@@ -2332,6 +2429,7 @@ window.SITE = {
   track: "metrics", level: "read",
   title: "Gross retention and net retention answer different questions",
   source: "KeyBanc Capital Markets, Private SaaS Company Survey, gross and net dollar retention sections, respondent count stated in the report",
+  cheat: "Ask finance for gross dollar retention too; net retention above one hundred per cent is compatible with severe leakage.",
   idea: "Gross dollar retention caps at one hundred per cent and measures leakage, while net dollar retention adds expansion on top and can hide leakage completely.",
   why: "Gross retention counts only downgrades and churn against the starting base. It cannot exceed one hundred per cent by construction, so it is a pure measure of how much of last year's revenue survives without help. Net retention adds expansion from the surviving customers, so a strong expansion motion can carry a badly leaking base past one hundred per cent and look healthy.\n\nThe pair is diagnostic because the two failures need different fixes. Low gross retention with high net retention means you are refilling a leaking bucket with upsell to your largest accounts, which works until the largest accounts saturate. High gross retention with flat net retention means the product is sticky and the pricing model has no expansion vector, which is a packaging problem, not a reliability problem. Only the pair distinguishes them.",
   failureMode: "A platform team is told net retention is above one hundred per cent, so churn is not a priority this half. Two quarters later the expansion in the top ten accounts flattens because they have bought everything on the price list, and the underlying gross retention, which was never reported to engineering, becomes the entire growth story. The reliability work that would have fixed it was deprioritised on a number that never contained it.",
@@ -2396,6 +2494,7 @@ window.SITE = {
   track: "metrics", level: "model",
   title: "CAC payback belongs on gross profit, not revenue",
   source: "OpenView Partners, SaaS Benchmarks Report, CAC payback methodology, respondent count stated in the report",
+  cheat: "CAC payback is sales and marketing spend over net new ARR, times gross margin, times twelve; on revenue the customer looks free to serve.",
   idea: "Compute months to recover acquisition cost using gross profit in the denominator, because paying back on revenue silently assumes the customer costs nothing to serve.",
   why: "The formula is sales and marketing spend in a period divided by the net new ARR that spend produced, multiplied by the gross margin, expressed in months. The gross margin term is the part that connects the metric to your architecture. If your service runs at a high margin the customer repays acquisition faster in cash terms; if per-tenant isolation drags the margin down, every customer takes longer to repay regardless of how well sales performed.\n\nThat is the arithmetic that puts an architecture decision into a funding conversation. Dedicated infrastructure per tenant changes gross margin, gross margin scales payback months linearly, and payback months is one of the two or three numbers a board uses to decide whether growth spend is worth funding. You can state the effect of an isolation model on payback in months, which is a sentence a CFO can act on, rather than in cost per pod, which is a sentence they cannot.",
   failureMode: "A team wins an argument for hard tenant isolation on security grounds without pricing it, taking product gross margin down by a meaningful number of points. Payback lengthens across every deal, sales efficiency looks worse on the same sales performance, and the following planning cycle cuts headcount from the growth motion. The cost landed nowhere near the team that created it.",
@@ -2706,6 +2805,7 @@ window.SITE = {
   track: "pricing", level: "decide",
   title: "Under consumption pricing an efficiency win can reduce revenue",
   source: "Snowflake Form 10-K, Item 1A risk factors - search the risk factors for the discussion of product performance and efficiency improvements affecting customer consumption",
+  cheat: "Before shipping an efficiency win on a metered resource, decide with revenue whether to reprice the unit or pass it through.",
   idea: "When you meter on the resource you are optimising, shipping the optimisation transfers the saving to the customer's bill unless you deliberately change the price per unit.",
   why: "This is disclosed. Snowflake's risk factors include the point that improvements which make the platform more efficient can reduce the credits customers consume and therefore reduce revenue. Go and find the paragraph yourself - a public company telling its shareholders that making the product faster can lower revenue is a stronger artefact for a roadmap conversation than any framework.\n\nTwo effects with different time constants. Immediately, the same workload consumes fewer metered units, so revenue for that workload falls in proportion. Over a longer horizon, a cheaper unit price for the customer can induce more workload, and if demand is elastic enough the volume recovers the revenue. You cannot assume the second one. The decision to make before the work starts is which side of the meter the saving lands on: keep it as margin by holding the customer's bill flat and repricing the unit, or pass it through as a bill reduction and buy elasticity. Both are defensible. Discovering it in the quarterly revenue review is not.",
   failureMode: "The platform team ships a forty per cent compute reduction, presents it as a cost win, and in the same quarter finance sees consumption revenue soften on the affected workloads. The team gets asked why they shipped it. The answer - that nobody asked which side of the meter the saving would land on - is a process failure, not an engineering one.",
@@ -2850,6 +2950,7 @@ window.SITE = {
   track: "pricing", level: "decide",
   title: "Choose the value metric for your service and price a margin floor into it",
   source: "Ramanujam and Tacke, Monetizing Innovation, on monetisation model and price setting; your own allocated cost per unit",
+  cheat: "Set a dated floor price of fully allocated cost per unit divided by one minus target margin; at seventy-five per cent that is four times cost.",
   idea: "Pick the unit, compute fully allocated cost per unit, and publish the price below which no discount may go, with a date on it.",
   why: "The arithmetic is one line. Floor price per unit equals fully allocated cost per unit divided by one minus target gross margin. At a seventy-five per cent target, the floor is four times your cost per unit. That is a number a deal desk can use without understanding your architecture, which is the entire point: you are converting an architectural fact into a commercial constraint that survives contact with a quarter-end negotiation.\n\nTwo things make it real rather than decorative. First, fully allocated means everything: compute, storage, egress, third-party model or vendor spend, and an allocation of support and on-call, because a floor computed on infrastructure alone is below water by whatever support costs. Second, it has a date and a review cadence. The floor should fall as you get more efficient, and a floor from eighteen months ago that nobody has recomputed is either leaving margin on the table or protecting a cost you no longer have.",
   failureMode: "A floor computed from the EC2 and storage lines only, with the third-party model bill and the support allocation left out. Every deal signed at the floor is quietly gross margin negative, and the discovery happens in a gross margin bridge six months later, attributed to mix.",
@@ -2872,6 +2973,7 @@ window.SITE = {
   track: "filings", level: "read",
   title: "A 10-K has four parts and you need three items",
   source: "SEC Form 10-K general instructions; Snowflake Form 10-K, Items 1, 1A, 7 and 8",
+  cheat: "Read Item 1 once per company, then only Items 1A, 7 and 8 each year, in that order.",
   idea: "Learn the fixed item numbering of a 10-K once and you can go straight to the three items that carry the economics in any filer's document.",
   why: "The structure is not the company's choice. Form 10-K and Regulation S-K fix the parts and the item numbers, so Item 1A means risk factors in every filing ever made. Part I is the business and its risks. Part II is the money: Item 7 is MD and A, Item 8 is the audited financial statements and notes. Parts III and IV are governance and exhibits, and Part III is usually incorporated by reference from the proxy rather than printed.\n\nThat fixed numbering is what makes the skill transferable. Item 1 you read once per company to learn what it sells. Items 1A, 7 and 8 you read every year, in that order, and the order matters: 1A tells you what management is worried about, 7 tells you why each line moved, 8 gives you the numbers to check both against.",
   failureMode: "Reading front to back, burning fifty minutes in Item 1 boilerplate about the total addressable market, and arriving at the financial statements with no attention left. Or worse, reading somebody's summary of the filing written by a party with a position.",
@@ -2984,6 +3086,7 @@ window.SITE = {
   track: "filings", level: "read",
   title: "Stock-based compensation is allocated across cost of revenue and every opex line",
   source: "Datadog Form 10-K, stock-based compensation note showing allocation by financial statement line",
+  cheat: "Ask finance whether any headcount reclassification into cost of revenue is planned before you commit to a margin target.",
   idea: "Equity expense follows the employee, so the portion belonging to people classified in cost of revenue sits inside the gross margin you are measured on.",
   why: "ASC 718 requires share-based compensation to be classified in the same line as the cash compensation of the employees who earned it. Support engineers, cloud operations, managed service delivery and technical account management usually sit in cost of revenue, so their equity does too. The SBC footnote gives you the allocation table by financial statement line.\n\nThe consequence is uncomfortable. Gross margin carries a non-cash charge that scales with delivery headcount and with the share price. Move a team from research and development into an on-call delivery function and reported gross margin falls without a single dollar of cloud spend changing. Run a project that cuts cloud cost by two points and lose it to a reorg and a share price rally.",
   failureMode: "Committing to a gross margin improvement from an infrastructure project, delivering the infrastructure saving, and watching the margin go the wrong way because headcount was reclassified into cost of revenue mid-year. You then have to explain a number you did not control.",
@@ -3214,6 +3317,7 @@ window.SITE = {
   track: "capital", level: "model",
   title: "Build against buy against partner is computed, not argued",
   source: "Mauboussin and Callahan, Capital Allocation, Counterpoint Global Insights, mergers and acquisitions section; Wang and Casado, The Cost of Cloud, a Trillion Dollar Paradox, Andreessen Horowitz; your fully loaded engineering cost",
+  cheat: "Add a maintenance row to every build estimate; over a three-year horizon it often exceeds the one-time engineering cost.",
   idea: "Put build, buy and partner in one table with total cost of ownership over the same horizon and the same discount rate, and let the arithmetic pick.",
   why: "The three options are almost never compared on the same terms. Build gets quoted as an initial engineering estimate with no ongoing maintenance line. Buy gets quoted as year-one licence with no contractual escalator and no integration cost. Partner gets quoted as a revenue share with no exit cost. Force them into one table with identical rows and the comparison becomes possible: initial engineering in engineer-years times the loaded rate, annual maintenance in engineer-years, incremental cloud spend, vendor fees with the escalator from the actual contract, one-time integration and migration, and exit cost if you have to reverse the decision.\n\nWang and Casado's argument is the interesting shape here rather than any single figure they quote. Buying is right early because it converts fixed cost into variable and preserves optionality, and building becomes right at scale because the variable cost keeps growing while the fixed cost does not. That means the answer is a crossover point, not a preference, and the crossover moves as your volume moves. Their piece cites the Dropbox infrastructure optimisation disclosed in Dropbox's own S-1 as the worked case, which is where to go for a real disclosed number rather than a plausible one.",
   failureMode: "The build estimate excludes the maintenance annuity. A team quotes six engineer-months to build, ships it, and then carries one engineer indefinitely on upkeep, on-call and dependency upgrades. Over a three-year horizon the omitted row is larger than the row that was included, and it is the row that made build look cheaper.",
@@ -3326,6 +3430,7 @@ window.SITE = {
   track: "capital", level: "decide",
   title: "An efficiency project competes for capital with a feature project",
   source: "Berman and Knight, Financial Intelligence, Part Six on return on investment and Part Two on the income statement; your hurdle rate and your allocated cloud cost",
+  cheat: "Convert a saving into revenue equivalent by dividing by gross margin: at seventy-five per cent a dollar saved is about one dollar thirty-three.",
   idea: "Margin work and revenue work draw on the same pool of engineer-quarters, so cost savings must be presented in units that compare directly to revenue.",
   why: "The conversion is a single division and most engineers never make it. A dollar of cost of revenue removed adds a full dollar of gross profit. A dollar of new revenue adds only the gross margin fraction of a dollar. So a recurring saving is equivalent to new revenue of the saving divided by the gross margin. At seventy-five per cent gross margin, a dollar saved is worth about one dollar thirty-three of new revenue. Compute your own company's product gross margin from the filing or from finance and use that, not an assumed figure.\n\nThe second half is that a recurring saving is an annuity, not a one-off. A monthly cloud saving that persists is a stream, and the honest way to size it is to discount the stream at the hurdle rate over a defensible horizon rather than quoting an annualised run rate. State the horizon and state the assumption that the saving persists, because that assumption is where a reviewer will push, particularly if the saving depends on usage that is growing.",
   failureMode: "The efficiency project is presented as a percentage reduction in the cloud bill. Nobody in the room converts that to revenue equivalent, so it is mentally filed as housekeeping and loses to a feature with a smaller expected contribution but a customer name attached. The margin work is deferred, the bill compounds, and next year the same project has a larger saving and still no dollar framing.",
@@ -3524,6 +3629,7 @@ window.SITE = {
   track: "valuation", level: "read",
   title: "A board reviews a standing pack and your work appears in three lines of it",
   source: "Bessemer Venture Partners State of the Cloud on the metrics investors track quarterly; National Venture Capital Association model documents on board composition and information rights",
+  cheat: "Your work reaches the board only as gross margin, cost of revenue or headcount, so claim a dated movement in one of those.",
   idea: "The board sees a small standing set of metrics every quarter, and everything your team does reaches them compressed into gross margin, the cloud cost line inside it, and headcount.",
   why: "Board packs are standardised because directors compare across quarters and across portfolio companies. The recurring set is narrow: net new and total recurring revenue, net and gross retention, gross margin, cash burn and runway, an efficiency measure combining growth and margin, headcount and hiring plan, pipeline. Investors' information rights, which come from the model financing documents, are what make this cadence contractual rather than cultural.\n\nThat compression is the constraint on how your work travels. A platform re-architecture does not appear as a slide. It appears as a movement in gross margin, or in the cost of revenue line beneath it, or in headcount, one or two quarters later, attributed to nobody in particular unless somebody attributes it. Knowing this tells you what framing survives three levels of summarisation, and that framing is a number with a unit and a date, not a description of the work.",
   failureMode: "A year of density and scheduling work that moves cost of revenue meaningfully, presented internally as a reliability and platform-maturity story. It never reaches the pack as your team's result, so when the funding question comes it is argued on headcount cost rather than on margin delivered.",
@@ -3556,6 +3662,7 @@ window.SITE = {
   track: "valuation", level: "read",
   title: "Optionality is real and usually overclaimed",
   source: "Aswath Damodaran, real options material, NYU Stern",
+  cheat: "Score an optionality claim on underlying asset, exclusivity, exercise date and carrying cost; below three of four, drop the word.",
   idea: "Option value requires an underlying asset you can value, exclusivity over the right to exercise, and a genuine decision point at which waiting resolves something, and most strategic optionality claims have none of the three.",
   why: "The reason an option has value above its intrinsic value is that you can wait, learn, and only commit if the news is good, while nobody else can take the opportunity while you wait. Remove exclusivity and the argument collapses: if a competitor can build the same thing while you hold your option, the upside you are pricing is not yours to capture. Damodaran is explicit that barriers to entry are what make a real option a real option rather than a description of an opportunity everyone has.\n\nThe second requirement is a decision that actually gets made. An option has an exercise date and an exercise cost. If nobody can say what the exercise decision is, who makes it, when, and what triggers it, then there is no option, only a phrase. And waiting is not free: while you hold the option you are paying for the platform work that keeps it alive, and that carrying cost belongs in the case.",
   failureMode: "A platform investment justified because it \"gives us optionality on agent workloads\". No underlying cash flow is named, no barrier stops any competitor doing the same, no exercise decision or date exists, and the carrying cost is two engineers indefinitely. The word is doing the work a number should be doing.",
@@ -3658,6 +3765,7 @@ window.SITE = {
   track: "compliance", level: "read",
   title: "Type 1 is a photograph and Type 2 is a film with a stated period",
   source: "AICPA, SSAE No. 18, AT-C Section 205 (examination engagements); AICPA SOC 2 reporting guidance",
+  cheat: "A Type 2 needs an observation period plus a reporting lag that money cannot compress, so start before sales promises a date.",
   idea: "A Type 1 opines on control design at a single date, a Type 2 opines on operating effectiveness across a stated period, and the period is why a Type 2 cannot be conjured for a deal that is closing this quarter.",
   why: "Type 1 asks whether the controls were suitably designed as of a date. Type 2 asks whether they operated effectively throughout a period, which the report states explicitly on its cover. The auditor samples events from inside that window: change tickets, access reviews, incident records, onboarding and offboarding. If the control did not exist for the first two months of the window, there is nothing to sample and the report says so.\n\nThat makes the observation period a lead-time constraint in the same category as a hardware order. You cannot compress it with money. The only lever is starting earlier, and the only way to know when to start is to know which deals will demand a Type 2 and when.",
   failureMode: "A large prospect asks for a Type 2 in November. The team has a Type 1 from March and assumes the auditor can upgrade it. Instead the observation period has to run forward from whenever the controls actually started operating, and the report lands well after the prospect's procurement deadline. The deal slips a quarter or closes with a contractual commitment to deliver a report by a date the team cannot control.",
@@ -3866,6 +3974,7 @@ window.SITE = {
   track: "compliance", level: "read",
   title: "Vulnerability management and penetration testing are recurring costs with named controls",
   source: "ISO/IEC 27001:2022 Annex A 8.8, management of technical vulnerabilities; AICPA Trust Services Criteria CC7 series on system operations",
+  cheat: "Write the remediation SLA you actually meet; the auditor samples against your own number, turning a capacity gap into an exception.",
   idea: "Vulnerability management is a named control in both frameworks, which makes the scanning spend and the remediation queue compliance obligations with deadlines rather than discretionary hygiene.",
   why: "Annex A 8.8 requires information about technical vulnerabilities to be obtained, exposure evaluated and appropriate measures taken. The Trust Services Criteria CC7 series covers detection of vulnerabilities and anomalies, evaluation of security events, and response. Neither prescribes a tool or an SLA, but both expect you to have defined your own and then to be able to show that you met it.\n\nThat last part is where the cost lands. Once you write 'critical vulnerabilities remediated within N days' into a policy, the auditor samples against N, and every overdue item is a potential exception. So the policy SLA is a commitment on engineering capacity, and setting it aggressively to look good is a way of buying yourself audit findings. Meanwhile the annual penetration test is a hard cash line and the remediation of its findings is a hard capacity line, both of which recur.",
   failureMode: "The policy says critical findings are remediated in fifteen days because that number looked defensible when it was written. Two years on, the scanner reports hundreds of criticals a month across container base images, the queue is permanently overdue, and the auditor samples ten items of which six breached the stated SLA. The finding is not that the software is insecure; it is that the organisation does not follow its own policy.",
@@ -4070,6 +4179,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4647,6 +4776,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4655,6 +4785,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -5152,6 +5283,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -5354,6 +5553,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5499,6 +5699,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

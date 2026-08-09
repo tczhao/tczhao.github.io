@@ -1284,6 +1284,87 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
+/* --- Cheatsheet ----------------------------------------------------------
+   Inverted from every other list in the engine. The shelf leads with the
+   claim because you are choosing what to read; here you have already read it,
+   so the row leads with what to do and demotes the claim to the line that
+   justifies it. The solid rule down the left is the same one the evidence
+   block uses for a replicated verdict, because that is the only verdict on
+   this page and the colour should mean the same thing in both places. */
+.cheat { margin-bottom: calc(var(--u) * 5); }
+.cheat__track {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: var(--u);
+  border-bottom: 1px solid var(--rule);
+}
+.cheat__row {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.75);
+  width: 100%;
+  padding: calc(var(--u) * 2) calc(var(--u) * 2);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--solid);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.cheat__row:hover { background: var(--accent-soft); }
+.cheat__do {
+  font-family: var(--face-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: var(--measure);
+}
+.cheat__claim {
+  font-family: var(--face-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+.cheat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 0.5);
+}
+.cheat__interval {
+  font-family: var(--face-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--solid);
+}
+.cheat__source,
+.cheat__stale {
+  font-family: var(--face-ui);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+}
+
+/* A row carries the same colour its verdict earns in the evidence block, so
+   the meaning of the rule is one thing across the whole site. Sites with no
+   verdicts keep the default solid rule set above. */
+.cheat__row[data-rep="statute"] { border-left-color: var(--accent); }
+.cheat__row[data-rep="statute"] .cheat__interval,
+.cheat__row[data-rep="statute"] .rep-chip { color: var(--accent); }
+.cheat__row[data-rep="replicated"] .rep-chip { color: var(--solid); }
+
+/* Same convention as the evidence block: staleness marks the check, not the
+   claim, so the row keeps the verdict colour and changes only the rule. */
+.cheat__row[data-stale="1"] { border-left-style: dashed; }
+.cheat__row[data-stale="1"] .cheat__stale { color: var(--action); }
+
 /* Base Rate - theme tokens, generated from the palette in site.js */
 :root {
   --paper: #F3F6F6;
@@ -1417,9 +1498,19 @@ window.SITE = {
 
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
+
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
   forecastBook: true,
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The checks worth running before you believe a number, in the form you need while you are looking at one.',
+    cheatWithheld: 'are not weaker, they are less compressible - the value is in the working, and a one-line version would be a slogan.',
     labelIdea: 'The idea',
     labelWhy: 'Why it holds',
     labelFailure: 'How it goes wrong in practice',
@@ -1549,6 +1640,7 @@ window.SITE = {
   track: "validity", level: "core",
   title: "Cohen's kappa exists because raw agreement counts the agreements chance would have given you anyway",
   source: "Jacob Cohen, A Coefficient of Agreement for Nominal Scales, Educational and Psychological Measurement, 1960",
+  cheat: "Quote kappa with the matrix and both marginals: reviewers who each pass 95 percent hit 0.905 agreement by habit alone.",
   idea: "Kappa is observed agreement minus expected agreement, divided by one minus expected agreement, so the agreement the marginals alone would have produced scores zero.",
   why: "Expected agreement is what two raters would hit by matching their own habits with no communication at all. For each category, multiply the two raters' marginal rates for that category and sum across categories. Two reviewers who each pass 95 percent of traces have expected agreement of 0.95 times 0.95 plus 0.05 times 0.05, which is 0.905. If they actually agree on 90 percent of traces, kappa is (0.90 minus 0.905) divided by 0.095, which is about negative 0.05. Ninety percent agreement, worse than chance.\n\nThe denominator is the part people skip. One minus expected agreement is the headroom available above chance, so kappa asks what fraction of the achievable improvement the raters actually achieved. When the headroom is small, ordinary variation in the numerator swings kappa hard, which is why kappa always has to be read next to its marginals.",
   failureMode: "Two engineers review 200 traces, agree on 184, and the eval design doc records 92 percent inter-rater agreement as proof the rubric is clear. Both flagged 6 percent of traces as failures. Expected agreement is 0.8872, so kappa is 0.29. The rubric is not clear, it is just being applied to a stream where almost everything passes.",
@@ -1679,6 +1771,7 @@ window.SITE = {
   track: "validity", level: "applied",
   title: "The more a quantitative indicator drives decisions, the faster it corrupts what it monitors",
   source: "Donald T. Campbell, Assessing the Impact of Planned Social Change, Evaluation and Program Planning, 1979",
+  cheat: "Goodhart says stop trusting the number; Campbell says the work drifts, so make unmeasured territory somebody's explicit job.",
   idea: "Campbell's law is the stronger claim: the indicator does not merely stop working, the process it monitors deforms itself to feed the indicator.",
   why: "Campbell's formulation is that the more any quantitative social indicator is used for social decision making, the more subject it will be to corruption pressures and the more apt it will be to distort and corrupt the processes it is intended to monitor. Two mechanisms, and the second is the dangerous one. The first is straightforward manipulation of the number. The second is honest reallocation of real effort towards whatever the indicator can see, which looks exactly like diligent work and produces no guilt in anyone.\n\nThis is why Campbell bites harder than Goodhart in an engineering organisation. Goodhart says the correlation breaks. Campbell says the underlying system reshapes itself around the measurement, so the thing you originally cared about is not merely mismeasured, it is now genuinely worse, and the people who made it worse were following the priorities you gave them.",
   failureMode: "Eval pass rate becomes the release gate. Nobody cheats, nobody games anything. What happens is that every hard case the eval does not contain stops getting engineering attention, because attention follows the score. Twelve months on, the eval sits at 96 percent and the support queue is full of failure modes the eval has never sampled and nobody was rewarded for fixing.",
@@ -1718,6 +1811,7 @@ window.SITE = {
   track: "uncertainty", level: "core",
   title: "The Wald interval fails precisely at small n and extreme p",
   source: "Lawrence D. Brown, T. Tony Cai and Anirban DasGupta, Interval Estimation for a Binomial Proportion, Statistical Science, 2001",
+  cheat: "Use Wilson, not Wald, for proportions: 1 failure in 30 traces means the rate could be one in six, not zero.",
   idea: "The textbook interval for a proportion, p-hat plus or minus 1.96 times the square root of p-hat times one minus p-hat over n, has coverage that oscillates chaotically and can sit far below 95 percent even at large n.",
   why: "The Wald interval estimates its own standard error from the same p-hat it is centred on. When p-hat lands near zero or one, that estimated standard error shrinks towards zero, so the interval narrows exactly when the estimate is least trustworthy. At p-hat of zero or one it collapses to a point, which claims perfect certainty from the least informative possible data.\n\nBrown, Cai and DasGupta computed exact coverage rather than trusting the asymptotics, and found it is not a smooth approach to 95 percent from below. It jumps around as n and p move, because the underlying binomial is discrete, and the dips do not disappear with sample size. Their recommendation is the Wilson score interval, which inverts the test using the null standard error instead: it centres at p-hat plus z squared over 2n, all divided by one plus z squared over n, so it is pulled towards one half and never leaves the zero-to-one range.",
   failureMode: "You judge 30 agent traces and 1 fails. Wald gives a failure rate of 0.033 plus or minus 0.064, so the lower bound is negative and you round it to zero and tell the review the failure rate could be zero. Wilson gives roughly 0.006 to 0.167, which is the honest statement: the failure rate could be one in six.",
@@ -1947,6 +2041,7 @@ window.SITE = {
   track: "uncertainty", level: "applied",
   title: "Twenty five ways to misread a p-value, an interval or a power calculation",
   source: "Sander Greenland, Stephen J. Senn, Kenneth J. Rothman, John B. Carlin, Charles Poole, Steven N. Goodman and Douglas G. Altman, Statistical Tests, P Values, Confidence Intervals, and Power: A Guide to Misinterpretations, European Journal of Epidemiology, 2016",
+  cheat: "Non-significant is not no effect: read the interval's upper bound, because minus 1 to plus 9 points hides the year's biggest win.",
   idea: "Greenland and colleagues enumerate and correct twenty five specific misinterpretations, and two of them cause most of the damage in engineering review meetings.",
   why: "The first damaging one: a non-significant result means there is no effect. It does not. It means the data are compatible with no effect, and they are also compatible with every other value inside the interval, including large ones. The correct response to a non-significant result is to read the upper bound of the interval and ask whether an effect that size would matter. If it would, you have not ruled it out, you have failed to measure it.\n\nThe second: two studies disagree because one was significant and the other was not. Two results can be highly compatible while landing on opposite sides of a threshold, since a p of 0.04 and a p of 0.06 are almost the same evidence. The difference between significant and non-significant is not itself significant. The paper's broader framing is that a p-value measures compatibility between the data and a model that includes the test hypothesis plus every other assumption in the analysis, so a small p-value can indict any of those assumptions, not just the hypothesis you were interested in.",
   failureMode: "The eval comparison comes back at p equals 0.11 and the decision is recorded in Jira as no difference between the variants. The interval ran from minus 1 to plus 9 points. Nine points would have been the largest quality win of the year, and the ticket now says it does not exist.",
@@ -2017,6 +2112,7 @@ window.SITE = {
   track: "baserates", level: "core",
   title: "A 99 percent accurate detector for a one in a thousand event is wrong most times it fires",
   source: "David M. Eddy, Probabilistic Reasoning in Clinical Medicine: Problems and Opportunities, in Judgment Under Uncertainty, 1982",
+  cheat: "A 99 percent detector at one in a thousand prevalence is right nine percent of the times it fires, so buy specificity not sensitivity.",
   idea: "At low prevalence the positive predictive value of a detector is dominated by false positives no matter how good the detector is.",
   why: "The formula is worth holding in plain text. Positive predictive value equals prevalence times sensitivity, divided by that same quantity plus one minus prevalence times the false positive rate. The numerator scales with prevalence. The second term in the denominator scales with one minus prevalence, which at low prevalence is essentially one. So the denominator barely notices the detector and is set almost entirely by how much healthy traffic there is.\n\nRun it. Prevalence one in a thousand, sensitivity ninety-nine percent, specificity ninety-nine percent. Out of ten thousand cases, ten are real and about ten of those fire. Nine thousand nine hundred and ninety are not real and about a hundred of those fire anyway. Ten true out of a hundred and ten firings is nine percent. Eddy's medical version is worse still: he found that most physicians given a mammography problem with a one percent base rate answered around seventy-five percent when the correct answer was under eight percent, and that the published literature itself contained the same error.",
   failureMode: "You ship an agent-output safety classifier benchmarked at ninety-nine percent on a balanced eval set. In production, harmful outputs are one in two thousand. The classifier now generates roughly twenty false blocks for every real catch, support opens tickets about legitimate queries being refused, and the fix that gets proposed is to lower the threshold, which is the wrong lever.",
@@ -2050,6 +2146,7 @@ window.SITE = {
   track: "baserates", level: "applied",
   title: "Posterior odds equal prior odds times the likelihood ratio",
   source: "David L. Sackett, Sharon E. Straus, W. Scott Richardson, William Rosenberg and R. Brian Haynes, Evidence-Based Medicine: How to Practice and Teach EBM, second edition, 2000",
+  cheat: "Update by multiplying prior odds by the likelihood ratio: a signal at two is not confirmation, above ten usually shifts a decision.",
   idea: "Working in odds turns Bayesian updating into a single multiplication you can do without a calculator.",
   why: "In odds form Bayes has no denominator to normalise. Posterior odds equal prior odds times the likelihood ratio. The likelihood ratio for a positive result is sensitivity divided by one minus specificity: how much more often this result appears when the thing is true than when it is not. For a negative result it is one minus sensitivity divided by specificity. Convert back at the end with probability equals odds divided by one plus odds.\n\nSackett and colleagues pushed this format because clinicians need it at the bedside, and the same argument applies at three in the morning on call. A prevalence of one in a thousand is prior odds of about one to a thousand. A detector with ninety-nine percent sensitivity and ninety-nine percent specificity has a likelihood ratio of ninety-nine to one. Multiply and you get about one to ten, which is roughly nine percent, matching the long-hand answer with one multiplication. Their rough guide is that a likelihood ratio above ten or below one tenth usually shifts a decision, and one between about a third and three rarely shifts anything.",
   failureMode: "A second signal fires and the room treats it as confirmation, but the signal has a likelihood ratio near two. Two is not confirmation. Starting from prior odds of one in five hundred, a likelihood ratio of two lands you at one in two hundred and fifty, and you have just diverted three engineers on a quarter of one percent.",
@@ -2333,6 +2430,7 @@ window.SITE = {
   track: "causal", level: "applied",
   title: "Some controls help, some do nothing and some destroy the estimate",
   source: "Carlos Cinelli, Andrew Forney and Judea Pearl, A Crash Course in Good and Bad Controls, Sociological Methods and Research, 2022",
+  cheat: "Pre-treatment does not make a control safe: a pre-treatment collider creates M-bias, so classify covariates by graph position.",
   idea: "For each canonical graph shape there is a settled answer about whether adjusting for a variable removes bias, adds bias or only changes precision, and the paper enumerates them.",
   why: "Cinelli, Forney and Pearl walk through a numbered series of small graphs and give the verdict for each. Good controls block a backdoor path and are required. Neutral controls change nothing about bias but do move the standard error, and the direction depends on which side they sit: a cause of the outcome only improves precision, while a cause of the treatment only makes the estimate noisier. Bad controls are mediators, descendants of the treatment, colliders, and the M-bias case where a variable that is a pure pre-treatment collider opens a path that was closed.\n\nThe M-bias case is the one worth memorising, because it breaks the last rule of thumb people fall back on. Adjust only for pre-treatment variables sounds safe and is not: a pre-treatment variable can be a collider between two unmeasured causes, and conditioning on it opens a path from treatment to outcome that did not exist before. Timing does not classify a control. Only position in the graph does.",
   failureMode: "A reviewer asks why a variable is not in the model and the analyst adds it because it is cheap to add and looks responsible. Nobody asks which shape it occupies. Over three review rounds the model accumulates eleven controls, at least one mediator among them, and the coefficient has drifted with no record of which addition moved it.",
@@ -2446,6 +2544,7 @@ window.SITE = {
   track: "causal", level: "applied",
   title: "Specify the randomised trial you would have run, then emulate it",
   source: "Miguel A. Hernan and James M. Robins, Using Big Data to Emulate a Target Trial When a Randomized Trial Is Not Available, American Journal of Epidemiology, 2016",
+  cheat: "Start follow up at assignment, not at adoption date, or non-adopters fill with early churners and the lift is partly a definition.",
   idea: "Write the protocol first - eligibility, treatment strategies, assignment, start of follow up, outcome, causal contrast, analysis plan - and the ill-defined interventions and immortal time show up before you touch the data.",
   why: "Hernan and Robins argue that most failures of observational analysis are not statistical but specification failures, and that they become visible the moment you are forced to write the protocol of the randomised trial you cannot run. The seven components are ordinary: who is eligible, which strategies are being compared, how assignment happens, when follow up starts, what the outcome is, which contrast you want, how you will analyse it. The discipline is that all seven have to be answered before the query is written.\n\nThe component that catches most errors is when follow up starts. In observational data the tempting choice is the moment a unit adopted the treatment, and that choice guarantees immortal time bias: to be classified as an adopter, a unit had to survive long enough to adopt. Survival gets attributed to the treatment. In a real trial, assignment and start of follow up coincide by construction, which is why writing the protocol makes the problem obvious and why staring at the data does not.",
   failureMode: "Tenants who enabled the agent feature retained better than those who did not, measured from enable date. A tenant that churned in month two never had the chance to enable it in month four, so the non-adopter group is stuffed with early churners by construction. The retention lift is partly a definition, and the size of that part is unknown without redoing the design.",
@@ -2501,6 +2600,7 @@ window.SITE = {
   track: "design", level: "applied",
   title: "Never run a significance test on baseline covariates",
   source: "Stephen Senn, Testing for Baseline Balance in Clinical Trials, Statistics in Medicine, 1994",
+  cheat: "Do not p-test baseline covariates after randomising; pick the adjustment set on prognostic grounds and commit it before the run.",
   idea: "In a randomised trial the null hypothesis a baseline balance test examines is true by construction, so the test carries no information.",
   why: "Senn's point is that the arms were drawn from the same distribution because you drew them that way. The test is therefore calibrated to reject at its nominal rate and every rejection is a false positive. A small p-value on a baseline covariate tells you a coin came up heads, not that the trial is compromised.\n\nThe decision that actually matters is whether to adjust for a covariate, and that should be made on prognostic grounds before the data exist. If tenant size predicts the outcome, adjust for it whether or not it looks balanced. If it does not predict the outcome, adjusting because a chance imbalance appeared makes the model choice a function of the realised data, which inflates the error rate and buys nothing.",
   failureMode: "The Table 1 with p-values habit. Twenty baseline covariates, one lands at p equals 0.03, and someone asks to rerun the randomisation. You have now conditioned the entire analysis on a coin flip, and the rerun is not a fresh randomisation, it is a search.",
@@ -2615,6 +2715,7 @@ window.SITE = {
   track: "design", level: "applied",
   title: "The E-value is a sensitivity analysis you can compute from a risk ratio alone",
   source: "Tyler J. VanderWeele and Peng Ding, Sensitivity Analysis in Observational Research: Introducing the E-Value, Annals of Internal Medicine, 2017",
+  cheat: "E-value every observational claim at the confidence limit: a risk ratio of 1.2 needs only about 1.69 on both treatment and outcome.",
   idea: "The E-value is the minimum association an unmeasured confounder would need with both treatment and outcome to explain away your observed effect.",
   why: "For an observed risk ratio RR of at least 1, the E-value is RR plus the square root of RR times RR minus 1. It is the smallest value such that an unmeasured confounder associated with both the treatment and the outcome by at least that much, on the risk ratio scale and conditional on the measured covariates, could account for the whole observed association. If RR is below 1, take its reciprocal first and apply the same formula.\n\nCompute it twice: once for the point estimate and once for the confidence limit closest to the null, which is the number that should drive the decision. A risk ratio of 1.2 has an E-value of about 1.69. A risk ratio of 2 has an E-value of about 3.41. It requires no additional data and no assumption about the confounder's direction or distribution, which is exactly why it is cheap enough to make routine on every observational claim you publish internally.",
   failureMode: "A readout claims a twenty per cent relative lift in weekly active usage among tenants who enabled the agent. That is an E-value of about 1.69, which a mild unmeasured factor clears easily: engaged tenants both switch on new features and use the product more. Nobody computed it, so the twenty per cent went onto a QBR slide unqualified.",
@@ -2751,6 +2852,7 @@ window.SITE = {
   track: "experiments", level: "applied",
   title: "Sample ratio mismatch invalidates the result before you read it",
   source: "Aleksander Fabijan, Jayant Gupchup, Somit Gupta, Jeff Omhover, Wen Qin, Lukas Vermeer and Pavel Dmitriev, Diagnosing Sample Ratio Mismatch in Online Controlled Experiments, KDD, 2019",
+  cheat: "Check the split before you read the lift: 50,600 against 49,400 is chi-squared 14.4, and the alarm threshold is 0.0005.",
   idea: "If the observed split between arms does not match the designed split, stop analysing and start debugging.",
   why: "The test is one line. For a designed 50/50 split, chi-squared is the sum over arms of (observed minus expected) squared divided by expected, with one degree of freedom. With 50,000 expected per arm and an observed 50,600 versus 49,400, that is 600 squared over 50,000, doubled, which is 14.4, and the p-value is about 0.00015. Fabijan and colleagues use a threshold of 0.0005 rather than 0.05, because the check runs on every experiment and you want alarms you will actually investigate.\n\nWhy it matters more than any other single check: the mechanisms that lose users are almost never random with respect to the outcome. Redirect bugs lose slow connections. Bot filters applied after assignment strip different populations from each arm. Telemetry that fails under load drops the users having the worst experience. So the missing users are disproportionately the ones whose behaviour would have moved the metric, and the surviving comparison is between two populations that are no longer exchangeable. Randomisation has been undone downstream, and no amount of variance reduction repairs it.",
   failureMode: "An experiment reports a strong win on engagement. The split is 50.4 percent to 49.6 percent, which looks like nothing until you compute it on two million users and get a p-value near zero. The treatment arm was redirecting through an extra hop that timed out for users on poor networks, and those users were exactly the low-engagement tail. The win is the missing tail.",
@@ -2978,6 +3080,7 @@ window.SITE = {
   track: "experiments", level: "core",
   title: "Most experiments show nothing, and that is the finding",
   source: "Ron Kohavi, Thomas Crook and Roger Longbotham, Online Experimentation at Microsoft, Third Workshop on Data Mining Case Studies, 2009",
+  cheat: "About one third of well designed ideas improve their target metric, so eight wins in ten is a warning rather than good news.",
   idea: "Only about a third of well designed ideas improve the metric they were built to improve, so a programme that rarely reports a null is reporting false positives.",
   why: "The Microsoft case studies paper puts it plainly: roughly one third of ideas improved the metrics they targeted, one third made no difference, and one third made things worse. These were ideas that survived design review and got built, proposed by people who knew the product. The number is not an indictment of anyone's judgement; it is what the base rate for product intuition actually looks like when you measure it instead of assuming it.\n\nThat base rate is the yardstick for your own programme. If nine of your last ten experiments were declared wins, the likely explanations are not that your team is three times better than Bing's. They are that success metrics are being chosen after the readout, that nulls are quietly not written up, that the analysis stops at the first favourable slice, or that the changes are so large and obvious that a controlled experiment was never the constraint. A healthy programme produces a lot of nulls, and the nulls are the return on the investment: they are the quarters you did not spend building on a false premise.",
   failureMode: "Every launch retro in the last year concludes that the feature performed well. No document anywhere records a change that did nothing. The organisation has learned that reporting a null is career-negative, so the experiment programme now functions as a ratification step and the base rate of one in three is being paid in engineering time nobody is counting.",
@@ -3001,6 +3104,7 @@ window.SITE = {
   track: "evals", level: "core",
   title: "An LLM judge is a measurement instrument and needs validating against human labels",
   source: "Shreya Shankar, J. D. Zamfirescu-Pereira, Bjorn Hartmann, Aditya G. Parameswaran and Ian Arawjo, Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences, UIST 2024",
+  cheat: "Report the judge's recall on the failing class: when eight per cent of outputs are bad, saying good every time scores ninety-two.",
   idea: "A judge prompt is an unvalidated instrument until you have measured its agreement with human grades on the same items.",
   why: "A judge emits a number whether or not that number tracks anything. The only evidence connecting the score to the quality you care about is a set of items graded both ways, by the judge and by a person, and compared item by item. That is what the EvalGen work builds: candidate criteria are generated, a human grades a sample, and criteria are kept or discarded on how well they align with those grades. Alignment is measured per criterion, not for \"the judge\" as a single thing, because a rubric with five clauses is five instruments stapled together and they do not all work equally well.\n\nRead the agreement against the base rate or you will fool yourself. If eight per cent of your outputs are bad, a judge that says \"good\" to everything scores ninety-two per cent agreement. The number you need is the confusion matrix split by class: of the outputs you called failures, what fraction did the judge catch, and of the ones it flagged, what fraction were real.",
   failureMode: "A groundedness judge reports a mean of 4.2 out of 5 across production traffic. Nobody has ever hand-graded fifty of those outputs. The rubric wording pushes everything to 4 or 5, so the metric has a range of one point, and a prompt change that a human reviewer would call a clear regression moves the mean from 4.2 to 4.3.",
@@ -3131,6 +3235,7 @@ window.SITE = {
   track: "evals", level: "applied",
   title: "Judges prefer whichever answer came first",
   source: "Peiyi Wang, Lei Li, Liang Chen, Zefan Cai, Dawei Zhu and colleagues, Large Language Models Are Not Fair Evaluators, arXiv 2305.17926, 2023",
+  cheat: "Run every pair in both orders and count flips as ties: a 54 to 46 win became 47 to 53 once the slots were swapped.",
   idea: "Swapping the presentation order of two candidate answers flips a judge's verdict often enough to decide an A/B by itself.",
   why: "The paper shows that a judge asked to compare two responses is sensitive to which one appears first, to the point where reversing the order reverses the winner on a substantial fraction of pairs. This is a property of the instrument, so it does not average out: if your template always puts the incumbent in slot A and the challenger in slot B, every comparison carries the same bias in the same direction and the aggregate inherits it.\n\nThe mitigation is cheap and doubles your judge cost. Evaluate every pair in both orders. Pairs where the verdict is consistent are your signal; pairs that flip are ties, or evidence the judge cannot tell them apart on this criterion. The flip rate is a free diagnostic on top: a high rate means either the systems are genuinely close or the criterion is not discriminating, and you should find out which before running the experiment again.",
   failureMode: "A prompt A/B where the candidate always sits in slot B because that is how the template was written. The candidate wins 54 to 46 and gets shipped. Rerun with the slots swapped and it wins 47 to 53. What you measured was the layout of the prompt.",
@@ -3333,6 +3438,7 @@ window.SITE = {
   track: "failures", level: "core",
   title: "You do not have to run many analyses to be p-hacking",
   source: "Andrew Gelman and Eric Loken, The Statistical Crisis in Science, American Scientist, 2014",
+  cheat: "One test picked after seeing the data still costs the family: list the splits you would have tried and divide 0.05 by that count.",
   idea: "A single analysis chosen in response to the data carries the same inflation as running every analysis you would have chosen under other data.",
   why: "Gelman and Loken call this the garden of forking paths. The multiple comparisons correction is usually taught as a penalty for tests you actually performed, which lets an honest analyst off the hook: I only ran one regression, so no correction is needed. But the reference distribution for a p-value is over hypothetical repetitions of the whole procedure, and the procedure includes the analyst. If the data had come out differently you would have split by a different segment, or used a different cutoff, or reported the interaction instead of the main effect. Those unrun branches are part of the sampling distribution whether or not you visited them.\n\nThis is the version that bites careful people. It needs no fishing expedition and no intent. It only needs that the specific comparison you reported was contingent on features of the data you had already seen. The defence is not more discipline in the moment; it is preregistration of the analysis, or splitting the data so that the choice is made on one half and the estimate on the other.",
   failureMode: "You look at agent task success by tenant and notice the enterprise segment looks better, so you test enterprise versus everyone else and get p equals 0.02. You ran one test. But if the pattern had been in trial accounts, or in a region, or in one workflow type, you would have tested that instead. The honest correction is for the family of segment splits you would have considered, and that family has maybe fifteen members.",
@@ -3430,6 +3536,7 @@ window.SITE = {
   track: "failures", level: "applied",
   title: "Extreme measurements move back towards average without anyone doing anything",
   source: "Adrian G. Barnett, Jolieke C. van der Pols and Annette J. Dobson, Regression to the Mean: What It Is and How to Deal With It, International Journal of Epidemiology, 2005",
+  cheat: "Judge a fix on the worst week against unselected weeks: at correlation 0.6, ten points below the mean rebounds four by itself.",
   idea: "Selecting the worst-performing week, tenant or model and then intervening guarantees an apparent improvement, because extreme values contain measurement noise that does not repeat.",
   why: "Barnett and colleagues give the arithmetic. If two measurements of the same unit correlate at r, and you select a unit whose first measurement sits d away from the mean, the expected second measurement sits r times d away from the mean. Any r below 1 pulls it in. The noisier the metric, the lower r, and the larger the free improvement you get for doing nothing.\n\nThe trap is that selection on the extreme is exactly how operational work starts. You do not investigate an average week; you investigate the bad one. So every intervention in operations is applied to a selected extreme, and every one of them shows improvement afterwards. Barnett's remedies are the ones you would expect: a randomised control group measured over the same period, or a prespecified comparison against the trend of the unselected population, or using a separate baseline measurement from the one used for selection.",
   failureMode: "P99 agent latency spikes in one week, you spend the sprint on a caching change, and next week P99 is down thirty percent. The caching change may have done nothing. Every other week that was not selected also drifted towards the mean, and you never looked at them, so you have no counterfactual and the caching work now has a fabricated track record.",
@@ -3535,6 +3642,7 @@ window.SITE = {
   track: "forecasting", level: "core",
   title: "Brier decomposes into reliability, resolution and uncertainty",
   source: "Allan H. Murphy, A New Vector Partition of the Probability Score, Journal of Applied Meteorology, 1973",
+  cheat: "Calibration alone proves nothing, since always saying the base rate is perfectly calibrated; check resolution beats 10 percent of uncertainty.",
   idea: "Brier equals reliability minus resolution plus uncertainty, so calibration is only one of three things going on and it is the one that is cheapest to fake.",
   why: "Bin your forecasts by the probability you gave. Reliability is the weighted mean squared gap between the probability you said in a bin and the fraction of events that actually happened in that bin; it is calibration error and lower is better. Resolution is the weighted mean squared gap between each bin's observed frequency and the overall base rate; it measures how far you are willing to move away from the base rate and be right about it, so higher is better. Uncertainty is the base rate times one minus the base rate, the variance of the event itself, and it is a property of the questions, not of you.\n\nThe consequence is the point of the entry. A forecaster who says the base rate to every question has reliability zero, which is perfect, and resolution zero, so his Brier is exactly the uncertainty term. He is flawlessly calibrated and carries no information. Skill is the resolution term. Calibration is the licence to be believed; resolution is what you are actually paid for. When someone shows you a calibration plot as evidence their model is good, the plot cannot answer the question, because the useless forecaster produces the best plot in the room.",
   failureMode: "A risk review presents an incident-likelihood model, well calibrated, and everyone nods. Then you notice every prediction it emits sits between 0.06 and 0.11 and the historical incident rate is 0.08. The model has learned the base rate and nothing else. Its Brier beats a coin flip and its resolution is close to zero, so it has never once told anyone which week to worry about.",
@@ -3671,6 +3779,7 @@ window.SITE = {
   track: "forecasting", level: "applied",
   title: "Your ninety eight percent intervals contain the answer about sixty percent of the time",
   source: "Marc Alpert and Howard Raiffa, A Progress Report on the Training of Probability Assessors, in Judgment Under Uncertainty, 1982",
+  cheat: "Write 90 percent intervals on ten quantities before looking them up: calibrated is nine hits and most people manage five or six.",
   idea: "Asked for intervals wide enough to be wrong 2 percent of the time, people produce intervals that are wrong around 40 percent of the time, and feedback shrinks that gap without closing it.",
   why: "Alpert and Raiffa asked subjects for 98 percent intervals on quantities they could not look up and tracked the surprise index, the fraction of true values falling outside the stated interval. It should have been 2 percent. It came out near 40. This is not a small miscalibration, it is an order of magnitude, and it is the most robust finding in the elicitation literature: interval overconfidence is large, consistent across populations, and survives being told about it.\n\nThe mechanism is anchoring. People produce a point estimate first and then widen it a little in each direction, and the widening is anchored on the point estimate rather than generated from any consideration of what could make the answer extreme. The repair that Alpert and Raiffa found actually worked was feedback: after subjects saw their own surprise index, the next round improved substantially, though it stayed far short of the nominal 2 percent. That makes this the cheapest calibration exercise available to you, because unlike most of the material here it needs no data infrastructure at all, only that you write the intervals down before you look.",
   failureMode: "A capacity plan states that the new agent workload will land between 8,000 and 12,000 runs per day, quoted as a 95 percent range. The real distribution of comparable launches spans a factor of five. Provisioning is sized against the top of a range that had no chance of being a 95 percent range, and the incident when it arrives is described as unprecedented demand rather than a known elicitation bias.",
@@ -3878,6 +3987,26 @@ window.SITE = {
   var HAS_EXPIRY = SITE.expiry === true;
   var HAS_FORECAST = SITE.forecastBook === true;
   var HAS_EVIDENCE = SITE.evidenceGate === true;
+  /* Two ways to earn a cheatsheet row, because the sites disagree about what
+     "worth acting on from memory" can even mean.
+
+     Where the corpus carries a replication verdict, the filter is derived:
+     `cheatsheet: { verdicts: ['replicated'] }` and the corpus decides. Nobody
+     is exercising judgement, which is the point - Nomogram refuses to let the
+     author grade their own evidence, and the cheatsheet must not be the hole
+     in that.
+
+     Where it does not, there is nothing to derive from, so the row is opt-in:
+     `cheatsheet: true`, and an entry appears if the author wrote it a line.
+     That is editorial and the page says so rather than dressing a selection up
+     as a filter. */
+  var CHEAT = SITE.cheatsheet || null;
+  var CHEAT_VERDICTS = CHEAT && CHEAT.verdicts ? CHEAT.verdicts : null;
+  var HAS_CHEAT = !!CHEAT && (!CHEAT_VERDICTS || HAS_EVIDENCE);
+
+  function onCheatsheet(l) {
+    return CHEAT_VERDICTS ? CHEAT_VERDICTS.indexOf(l.replication) !== -1 : !!l.cheat;
+  }
 
   /* Expiry retires a claim the author already knew would rot. This retires the
      author's confidence in a claim they thought was settled, which is where
@@ -4455,6 +4584,7 @@ window.SITE = {
      Views
      ========================================================================== */
   var VIEWS = ['today', HAS_REVIEW ? 'review' : 'attempts', 'library'];
+  if (HAS_CHEAT) VIEWS.push('cheatsheet');
   if (HAS_FORECAST) VIEWS.push('forecast');
   VIEWS.push('journal', 'progress');
 
@@ -4463,6 +4593,7 @@ window.SITE = {
     review: COPY.tabReview || 'Review',
     attempts: COPY.tabAttempts || 'Attempts',
     library: COPY.tabLibrary || 'Library',
+    cheatsheet: COPY.tabCheatsheet || 'Cheatsheet',
     forecast: COPY.tabForecast || 'Forecasts',
     journal: COPY.tabJournal || 'Journal',
     progress: COPY.tabProgress || 'Progress'
@@ -4960,6 +5091,74 @@ window.SITE = {
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read at speed, which is why it is restricted
+     to the verdict that survived being re-run. A cheatsheet of contested and
+     single-study findings would be a list of things to be confidently wrong
+     about, and the corpus is mostly those - so the count of what was left off
+     is stated rather than quietly dropped. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    /* live() rather than LESSONS. A lapsed entry stays in the library marked,
+       because knowing what went stale is useful, but a cheatsheet row is the
+       purest form of the quiet reinforcement that expiry exists to stop. */
+    var pool = live();
+    var solid = pool.filter(onCheatsheet);
+
+    var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
+    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
+      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    /* The withheld count is generated and the reason is the site's to write,
+       because the reasons differ: a verdict-filtered site withheld what did not
+       replicate, an opt-in site withheld what does not compress. Stating the
+       count either way stops a short page reading as the whole corpus. */
+    if (COPY.cheatWithheld) {
+      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
+    }
+    h += '</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var rows = solid.filter(function (l) { return l.track === t.id; });
+      if (!rows.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      rows.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '"' +
+          (l.replication ? ' data-rep="' + esc(l.replication) + '"' : '') +
+          (stale(l) ? ' data-stale="1"' : '') + '>';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta">';
+        /* A page carrying more than one verdict has to say which is which, or a
+           legislated fact and a replicated finding read as the same kind of
+           thing. One verdict needs no chip: the section note already said it. */
+        if (CHEAT_VERDICTS && CHEAT_VERDICTS.length > 1) {
+          h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
+        }
+        if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
+          /* Both bounds or neither. Half an interval is the single most common
+             way a number gets laundered into sounding settled, and a cheatsheet
+             is exactly where that happens. */
+          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
+            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+        }
+        h += '<span class="cheat__source">' + esc(l.source) + '</span>';
+        // Statute is true as at a date and not before or necessarily after it.
+        if (l.replication === 'statute' && l.asAt) {
+          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+        }
+        if (stale(l)) {
+          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+        }
+        h += '</span></button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderForecast() {
     var host = el('view-forecast');
     var all = forecastList();
@@ -5162,6 +5361,7 @@ window.SITE = {
     else if (view === 'review') renderReview();
     else if (view === 'attempts') renderAttempts();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'forecast') renderForecast();
     else if (view === 'journal') renderJournal();
     else renderProgress();
@@ -5307,6 +5507,11 @@ window.SITE = {
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

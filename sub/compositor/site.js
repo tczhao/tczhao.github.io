@@ -29,6 +29,13 @@ window.SITE = {
   review: 'leitner',
   intervals: [1, 3, 7, 16, 35],
 
+  /* No replication verdict anywhere in this corpus, so there is nothing to
+     derive a cheatsheet from and the row is opt-in: an entry appears if it was
+     written a cheat line. That is a selection rather than a filter, and the
+     page states the count it leaves off rather than implying it is the whole
+     corpus. */
+  cheatsheet: true,
+
   gate: {
     label: 'Bring a paragraph',
     prompt: 'Paste a paragraph you wrote, then apply today\'s move to it before you read the worked example.',
@@ -50,6 +57,9 @@ window.SITE = {
   extraRequired: ['fallback', 'gatePrompt', 'worked'],
 
   copy: {
+    tabCheatsheet: 'Cheatsheet',
+    cheatNote: 'The edits that survive being reduced to one line: what to do to a sentence, not what to admire about it.',
+    cheatWithheld: 'need a draft in front of you to mean anything - they are drills rather than rules, and a rule is what a row can hold.',
     labelIdea: 'The move',
     labelWhy: 'Why it works on a reader',
     labelFailure: 'What it looks like when it is missing',

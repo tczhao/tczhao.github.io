@@ -574,6 +574,42 @@
     host.innerHTML = h;
   }
 
+  /* The one view that is not a study aid. Everything else here is built to slow
+     you down; this is built to be read before a one-to-one you are already late
+     for. Nothing in this corpus grades its own evidence, so there is no verdict
+     to filter on and the row is opt-in: an entry appears if it was written a
+     cheat line. That is a selection rather than a filter, and the note says so
+     - a page of twenty-odd lines that implied it was the whole corpus would be
+     the exact management-writing failure the entries themselves warn about. */
+  function renderCheatsheet() {
+    var host = el('view-cheatsheet');
+    var rows = LESSONS.filter(function (l) { return !!l.cheat; });
+
+    var h = '<div class="section__head"><h2 class="section__title">Cheatsheet</h2>' +
+      '<p class="section__note">The entries that survive being compressed to one line. ' +
+      '<b>' + rows.length + '</b> of ' + LESSONS.length + ' entries. The other ' +
+      (LESSONS.length - rows.length) + ' are not weaker, they are less compressible - ' +
+      'their value is in the reasoning, and a one-line version would be a slogan.</p></div>';
+
+    TRACKS.forEach(function (t) {
+      var inTrack = rows.filter(function (l) { return l.track === t.id; });
+      if (!inTrack.length) return;
+
+      h += '<section class="cheat">';
+      h += '<h3 class="cheat__track">' + esc(t.name) + '</h3>';
+      inTrack.forEach(function (l) {
+        h += '<button class="cheat__row" data-act="cheat-open" data-id="' + esc(l.id) + '">';
+        h += '<span class="cheat__do">' + esc(l.cheat) + '</span>';
+        h += '<span class="cheat__claim">' + esc(l.title) + '</span>';
+        h += '<span class="cheat__meta"><span class="cheat__source">' + esc(l.source) + '</span></span>';
+        h += '</button>';
+      });
+      h += '</section>';
+    });
+
+    host.innerHTML = h;
+  }
+
   function renderJournal() {
     var notes = Object.keys(state.log)
       .filter(function (id) { return BY_ID[id] && (state.log[id].note || '').trim(); })
@@ -666,12 +702,13 @@
 
   function render() {
     renderChrome();
-    ['today', 'review', 'library', 'journal', 'progress'].forEach(function (v) {
+    ['today', 'review', 'library', 'cheatsheet', 'journal', 'progress'].forEach(function (v) {
       el('view-' + v).hidden = v !== view;
     });
     if (view === 'today') renderToday();
     else if (view === 'review') renderReview();
     else if (view === 'library') renderLibrary();
+    else if (view === 'cheatsheet') renderCheatsheet();
     else if (view === 'journal') renderJournal();
     else renderProgress();
   }
@@ -731,6 +768,11 @@
     if (act === 'lib-close') { libOpen = null; renderLibrary(); return; }
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
+
+    /* A cheatsheet row is a summary of an entry, so following one hands you the
+       entry itself rather than a second, longer summary. go() clears libOpen on
+       any move away from the library, so it is set after the switch. */
+    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);

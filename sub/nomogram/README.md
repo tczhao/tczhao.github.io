@@ -55,6 +55,33 @@ epochs but at a specificity of roughly 29 to 52%, which means they call almost
 everything sleep - so they overestimate total sleep time in exactly the people
 who need the measurement.
 
+## The cheatsheet
+
+`cheatsheet: { verdicts: ['replicated'] }` adds a tab that is the exact opposite
+of the rest of the site. Everything else here is built to slow you down; that
+page is built to be read at speed, which is why it is restricted to the one
+verdict that survived being re-run by somebody else. Fourteen of thirty entries
+qualify.
+
+The filter is derived rather than chosen. The corpus already grades its own
+evidence, so the cheatsheet reads that grade instead of asking the author which
+entries they rate - which would put the judgement straight back into the one
+place this site takes it out of. Sites whose corpus carries no verdict use the
+opt-in form, `cheatsheet: true`, where an entry appears if it was written a
+`cheat` line; that is a selection and those pages say so.
+
+Each row leads with what to do and demotes the claim to the line underneath it,
+which is the inverse of the library. By the time you are on the cheatsheet you
+have read the entry - what you have forgotten is the consequence, not the
+finding. Both bounds of the interval travel with the row, because a cheatsheet
+is precisely where a number gets laundered into sounding settled.
+
+The other sixteen entries are not hidden, they are counted. A page showing
+fourteen findings without saying sixteen were withheld would read as the whole
+corpus, and this site exists to make the thinness visible. `build.js` refuses a
+`cheat` line on any verdict other than `replicated`, and refuses a `replicated`
+entry that has no `cheat` line.
+
 ## Citation rot
 
 `reverifyDays` is 180. An entry whose `verifiedOn` is older than that renders

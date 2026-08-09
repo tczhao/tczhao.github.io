@@ -7,7 +7,7 @@
 const path = require('path');
 const assert = require('assert');
 const { boot, target, makeEnv, check, report, templateHole, DAY, ENGINE } = require('./harness');
-const { validate } = require('../lib/build');
+const { validate, validateConfig } = require('../lib/build');
 const fs = require('fs');
 
 const FULL = path.join(__dirname, 'fixtures', 'full');
@@ -506,6 +506,78 @@ check('craft and statute are exempt from the interval rule', () => {
     errsFor({ replication: 'statute', interval: undefined, asAt: '2026-07-01', sourceUrl: 'https://example.invalid/x' }),
     []
   );
+});
+
+/* --- Cheatsheet ----------------------------------------------------------
+ * The one view meant to be read at speed rather than studied, so its whole
+ * value is the narrowness of what reaches it. These guard the filter. */
+
+check('a verdict-filtered cheatsheet without the evidence gate that feeds it is refused', () => {
+  // The filter reads the replication verdict, and nothing carries one without
+  // the gate. Left unguarded this builds clean and renders an empty page, which
+  // is the failure mode the rest of this file exists to prevent. An opt-in
+  // cheatsheet reads no such field and is legal on any site.
+  const base = { key: 'x.v1', slug: 'x', name: 'X', tagline: 'x', tracks: [{ id: 'alpha', name: 'Alpha' }] };
+  const verdicts = { verdicts: ['replicated'] };
+  assert.ok(validateConfig({ ...base, cheatsheet: verdicts }).some(e => /cheatsheet/.test(e)),
+    'a verdict filter without evidenceGate must not build');
+  assert.ok(validateConfig({ ...base, cheatsheet: verdicts, evidenceGate: true }).every(e => !/cheatsheet/.test(e)),
+    'the pair together is the supported configuration');
+  assert.ok(validateConfig({ ...base, cheatsheet: true }).every(e => !/cheatsheet/.test(e)),
+    'an opt-in cheatsheet needs no evidence gate');
+  assert.ok(validateConfig({ ...base, evidenceGate: true, cheatsheet: { verdicts: ['probably-true'] } })
+    .some(e => /cheatsheet/.test(e)), 'a verdict outside the vocabulary must not build');
+  assert.ok(validateConfig({ ...base, evidenceGate: true, cheatsheet: { verdicts: [] } })
+    .some(e => /cheatsheet/.test(e)), 'an empty verdict list would render an empty page');
+});
+
+check('an opt-in cheatsheet takes a line on any entry and demands none', () => {
+  /* Where a corpus grades its own evidence the filter is derived and the
+   * author gets no say. Where it does not, there is nothing to derive from,
+   * so the line itself is the selection and no entry is obliged to carry one. */
+  const cfg = { key: 'x.v1', slug: 'x', name: 'X', tagline: 'x', review: 'none',
+    tracks: [{ id: 'alpha', name: 'Alpha' }], cheatsheet: true };
+  const entry = over => Object.assign({
+    id: 'e1', track: 'alpha', title: 'T', source: 'S',
+    idea: 'i', why: 'w', failureMode: 'f', experiment: 'x', reflection: 'r', deepDive: 'd'
+  }, over);
+
+  assert.deepStrictEqual(validate(cfg, [entry({ cheat: 'A line worth acting on.' })]).errs, []);
+  assert.ok(validate(cfg, [entry({})]).errs.some(e => /cheat/.test(e)),
+    'a cheatsheet with no lines anywhere is a blank tab and must not build');
+  assert.deepStrictEqual(
+    validate(cfg, [entry({ cheat: 'A line.' }), entry({ id: 'e2' })]).errs, [],
+    'one line is enough - the rest of the corpus is not obliged to carry one'
+  );
+});
+
+check('the cheatsheet demands a line on every qualifying entry and only those', () => {
+  const on = { ...evidenceCfg(), cheatsheet: { verdicts: ['replicated'] } };
+  const errs = over => validate(on, [evidenceEntry(over)]).errs;
+
+  assert.ok(errs({}).some(e => /cheat/.test(e)),
+    'a replicated entry with no cheat line leaves a hole in the page');
+  assert.deepStrictEqual(errs({ cheat: 'Train it, the effect is real and small.' }), []);
+  assert.ok(errs({ cheat: '' }).some(e => /cheat/.test(e)), 'an empty cheat line must fail');
+  assert.ok(errs({ cheat: 'Two\nlines.' }).some(e => /one line/.test(e)),
+    'the cheatsheet renders one row, so a cheat line is one line');
+
+  // Content that can never render is as much a defect as content that is
+  // missing, and it is the harder of the two to notice.
+  assert.ok(
+    errs({ replication: 'craft', interval: undefined, cheat: 'Do the thing.' }).some(e => /cheat/.test(e)),
+    'a cheat line on a verdict that never reaches the cheatsheet must fail'
+  );
+  assert.ok(validate(evidenceCfg(), [evidenceEntry({ cheat: 'x' })]).errs.some(e => /cheat/.test(e)),
+    'a cheat line on a site with no cheatsheet must fail');
+});
+
+check('a site that does not ask for a cheatsheet does not get one', () => {
+  // Thirteen other sites share this engine and none of them declare the flag.
+  const env = boot(EVIDENCE, T0);
+  assert.ok(!env.els['view-cheatsheet'], 'the cheatsheet view mounted without being declared');
+  assert.ok(!((env.els['nav'] || {})._html || '').includes('cheatsheet'),
+    'a cheatsheet tab appeared in a site that never asked for one');
 });
 
 check('a statutory entry must carry an as-at date and a primary source', () => {
