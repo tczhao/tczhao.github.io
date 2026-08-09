@@ -5563,7 +5563,13 @@ window.SITE = {
     if (VIEWS.indexOf(v) === -1) return;
     view = v;
     if (v === 'review') { reviewQueue = dueList(); reviewIdx = 0; revealed = false; }
-    if (v !== 'library') libOpen = null;
+    /* Unconditionally, including when v is already the library. Clearing only on
+       the way out left the open entry in place, so pressing Library while
+       reading one re-rendered that entry and the tab looked dead - the one way
+       back to the list was the entry's own close button. Going to a view means
+       the top of it. Anything that wants an entry open sets libOpen after the
+       call, which is what cheat-open does. */
+    libOpen = null;
     render();
     el('field').scrollIntoView({ block: 'start', behavior: 'auto' });
   }
@@ -5701,8 +5707,8 @@ window.SITE = {
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
 
     /* A cheatsheet row is a summary of an entry, so following one hands you the
-       entry itself rather than a second, longer summary. go() clears libOpen on
-       any move away from the library, so it is set after the switch. */
+       entry itself rather than a second, longer summary. go() clears libOpen, so
+       it is set after the switch rather than before. */
     if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
 
     if (act === 'export') {

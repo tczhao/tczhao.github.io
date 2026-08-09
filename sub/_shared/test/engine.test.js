@@ -580,6 +580,37 @@ check('a site that does not ask for a cheatsheet does not get one', () => {
     'a cheatsheet tab appeared in a site that never asked for one');
 });
 
+check('pressing Library while reading an entry goes back to the list', () => {
+  /* The library is two screens behind one tab: a list, and an entry opened from
+   * it. Clearing the open entry only when navigating away meant pressing Library
+   * from inside an entry re-rendered that entry, so the tab appeared to do
+   * nothing and the only way back was the entry's own close button. */
+  const env = boot(FULL, T0);
+  const id = env.window.LESSONS[2].id;
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  const list = env.els['view-library'].innerHTML;
+  assert.ok(list.includes('shelf__row'), 'the library should open on the list');
+
+  env.fire('click', target({ act: 'lib-open', id }));
+  assert.ok(!env.els['view-library'].innerHTML.includes('shelf__row'), 'the entry should have replaced the list');
+
+  env.fire('click', target({ view: 'library' }, true));
+  assert.ok(env.els['view-library'].innerHTML.includes('shelf__row'),
+    'pressing Library from inside an entry must return to the list');
+});
+
+check('following a cheatsheet row still opens the entry, not the list', () => {
+  /* cheat-open routes through go('library'), which now clears the open entry,
+   * so it depends on setting libOpen after that call rather than before. */
+  const env = boot(EVIDENCE, T0);
+  const first = env.window.LESSONS[0];
+  env.fire('click', target({ act: 'cheat-open', id: first.id }));
+  const html = env.els['view-library'].innerHTML;
+  assert.ok(!html.includes('shelf__row'), 'a cheatsheet row must open the entry, not the list');
+  assert.ok(html.includes(first.title), 'and it must be the entry the row pointed at');
+});
+
 check('a statutory entry must carry an as-at date and a primary source', () => {
   const base = { replication: 'statute', interval: undefined, asAt: '2026-07-01', sourceUrl: 'https://example.invalid/x' };
   assert.ok(errsFor({ ...base, asAt: undefined }).some(e => /asAt/.test(e)), 'statute needs an as-at date');

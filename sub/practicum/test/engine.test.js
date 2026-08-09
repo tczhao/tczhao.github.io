@@ -343,6 +343,25 @@ check('restoring a backup replaces state and rejects rubbish', () => {
   assert.ok(fresh.state().log[id], 'bad payload must not wipe existing state');
 });
 
+check('pressing Library while reading an entry goes back to the list', () => {
+  /* The library is two screens behind one tab: a list, and an entry opened from
+   * it. Clearing the open entry only when navigating away meant pressing Library
+   * from inside an entry re-rendered that entry, so the tab appeared to do
+   * nothing and the only way back was the entry's own close button. */
+  const env = boot(T0);
+  const id = env.window.LESSONS[2].id;
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  assert.ok(env.els['view-library'].innerHTML.includes('shelf__row'), 'the library should open on the list');
+
+  env.fire('click', target({ act: 'lib-open', id }));
+  assert.ok(!env.els['view-library'].innerHTML.includes('shelf__row'), 'the entry should have replaced the list');
+
+  env.fire('click', target({ view: 'library' }, true));
+  assert.ok(env.els['view-library'].innerHTML.includes('shelf__row'),
+    'pressing Library from inside an entry must return to the list');
+});
+
 check('the cheatsheet is exactly the entries that carry a line', () => {
   /* The selection is the entire editorial claim of this view, and it lives in
    * the content rather than in a filter, so nothing else can catch a row that
