@@ -189,11 +189,15 @@
     font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
     color: var(--text-secondary); margin-bottom: 14px;
   }
+  /* background-clip:text crops to the line box, so a tight line-height shears
+     the descenders off "Garage" and "Tiguan". The extra leading and padding is
+     what gives the g and q room. */
   .hero-text h1 {
-    font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1.02;
+    font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1.16;
     background: linear-gradient(135deg, #f0f4ff 0%, #8b95b0 100%);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 14px;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
   }
   [data-theme="light"] .hero-text h1 { background: linear-gradient(135deg, #1a1f36 0%, #475569 100%); -webkit-background-clip: text; background-clip: text; }
   .hero-text .spec {
