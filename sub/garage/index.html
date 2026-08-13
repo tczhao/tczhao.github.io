@@ -79,25 +79,9 @@
   .topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 20px;
   }
-
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .back-link:hover { border-color: var(--border-hover); background: var(--bg-card-hover); color: var(--text-primary); }
 
   .theme-toggle {
     width: 52px; height: 28px;
@@ -408,7 +392,6 @@
 
 <div class="container">
   <div class="topbar">
-    <a class="back-link" href="../">&larr; Substrate</a>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
       <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
     </button>

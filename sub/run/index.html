@@ -94,23 +94,6 @@
   [data-theme="light"] .header h1 { background: linear-gradient(135deg, #1a1f36 0%, #475569 100%); -webkit-background-clip: text; background-clip: text; }
   .header p { font-size: 15px; color: var(--text-secondary); }
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 18px;
-    padding: 8px 18px;
-    border-radius: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .back-link:hover { border-color: var(--border-hover); background: var(--bg-card-hover); color: var(--text-primary); }
-
   .upload-zone {
     max-width: 620px; margin: 0 auto 40px; padding: 48px 32px;
     border: 2px dashed var(--border-hover); border-radius: var(--radius);
@@ -275,7 +258,6 @@
     <span class="header-icon">&#127939;</span>
     <h1>Run Dashboard</h1>
     <p id="headerSub">Drop a CSV file to get started</p>
-    <a class="back-link" href="../">&larr; Substrate</a>
   </div>
 
   <div class="upload-zone" id="uploadZone">
