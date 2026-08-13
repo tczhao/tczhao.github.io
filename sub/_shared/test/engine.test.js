@@ -600,6 +600,98 @@ check('pressing Library while reading an entry goes back to the list', () => {
     'pressing Library from inside an entry must return to the list');
 });
 
+/* --- The library pager --------------------------------------------------- */
+
+/* Which entry each half of the pager points at. Read off the markup rather
+ * than off an exported function, because the bug this guards against is the
+ * pager offering a different entry from the one the shelf would have. */
+function pager(html) {
+  const at = dir => {
+    const m = new RegExp('pager__btn--' + dir + '"[^>]*data-id="([^"]+)"').exec(html);
+    return m ? m[1] : null;
+  };
+  return { prev: at('prev'), next: at('next') };
+}
+
+check('reading an entry offers the one either side of it', () => {
+  const env = boot(FULL, T0);
+  const seq = env.api.seq();
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: seq[1] }));
+
+  assert.deepStrictEqual(pager(env.els['view-library'].innerHTML),
+    { prev: seq[0], next: seq[2] }, 'the pager must follow library order');
+});
+
+check('stepping to the next entry stays in the reader', () => {
+  const env = boot(FULL, T0);
+  const seq = env.api.seq();
+  const byId = {};
+  env.window.LESSONS.forEach(l => { byId[l.id] = l; });
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: seq[0] }));
+  env.fire('click', target({ act: 'lib-open', id: pager(env.els['view-library'].innerHTML).next }));
+
+  const html = env.els['view-library'].innerHTML;
+  assert.ok(!html.includes('shelf__row'), 'stepping must not drop back to the list');
+  assert.ok(html.includes(byId[seq[1]].title), 'expected the next entry to be open');
+});
+
+check('the ends of the library are stops, not wraps', () => {
+  /* Wrapping would make the pager a loop with no edge, and the library is a
+   * finite ordered corpus - reaching the end of it is information.
+   *
+   * The ends come off the shelf rather than off SEQ: a lapsed entry leaves the
+   * sequence but stays on the shelf, so the last row is not the last id in
+   * SEQ. Reading the shelf is also what makes this a real check that the two
+   * agree, rather than a check that the pager matches its own idea of order. */
+  const env = boot(FULL, T0);
+  env.fire('click', target({ act: 'go', view: 'library' }));
+
+  const shelf = [...env.els['view-library'].innerHTML
+    .matchAll(/class="shelf__row"[^>]*data-id="([^"]+)"/g)].map(m => m[1]);
+  assert.ok(shelf.length > 2, 'expected a shelf to read the ends off');
+
+  env.fire('click', target({ act: 'lib-open', id: shelf[0] }));
+  assert.strictEqual(pager(env.els['view-library'].innerHTML).prev, null, 'the first entry has nothing before it');
+
+  env.fire('click', target({ act: 'lib-open', id: shelf[shelf.length - 1] }));
+  assert.strictEqual(pager(env.els['view-library'].innerHTML).next, null, 'the last entry has nothing after it');
+});
+
+check('the pager follows the filtered shelf, not the raw sequence', () => {
+  /* The shelf you stepped off is the list you expect to be walking. Stepping
+   * out of a filtered shelf onto an entry it never showed is the whole failure
+   * this shares libraryRows() with renderLibrary() to avoid. */
+  const env = boot(FULL, T0);
+  const byId = {};
+  env.window.LESSONS.forEach(l => { byId[l.id] = l; });
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-track', track: 'beta' }));
+  env.fire('click', target({ act: 'lib-open', id: 'beta-one' }));
+
+  const next = pager(env.els['view-library'].innerHTML).next;
+  assert.ok(next, 'a filtered shelf still has a next entry');
+  assert.strictEqual(byId[next].track, 'beta', 'the pager left the track the shelf was filtered to');
+});
+
+check('an entry opened from outside the filter still has neighbours', () => {
+  /* A cheatsheet row opens an entry directly and leaves whatever filter was
+   * set behind it, so the open entry can be absent from its own shelf. Without
+   * a fallback the pager renders empty and the reader is stranded. */
+  const env = boot(FULL, T0);
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-track', track: 'beta' }));
+  env.fire('click', target({ act: 'lib-open', id: 'gamma-two' }));
+
+  const p = pager(env.els['view-library'].innerHTML);
+  assert.ok(p.prev && p.next, 'expected the unfiltered order to supply neighbours, got ' + JSON.stringify(p));
+});
+
 check('following a cheatsheet row still opens the entry, not the list', () => {
   /* cheat-open routes through go('library'), which now clears the open entry,
    * so it depends on setting libOpen after that call rather than before. */

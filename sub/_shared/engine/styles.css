@@ -521,6 +521,71 @@ button { font: inherit; color: inherit; }
   color: var(--accent-ink);
 }
 
+/* --- Library pager -------------------------------------------------------
+   Two equal columns so the next entry keeps the right-hand side whether or not
+   there is a previous one to balance it. auto-fit rather than a breakpoint:
+   the titles are clipped to one line, and below roughly 14rem a column shows
+   too few characters of a title to be worth reading, so it stacks instead. */
+.pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 4);
+}
+
+.pager__btn {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.5);
+  min-width: 0;
+  padding: calc(var(--u) * 1.5) calc(var(--u) * 2);
+  background: none;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.pager__btn:hover { border-color: var(--ink-muted); background: var(--accent-soft); }
+.pager__btn--next { align-items: flex-end; text-align: right; }
+
+.pager__dir {
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* One line, clipped. A long title wrapping to three lines turns a navigation
+   control into the largest thing on the screen after the entry itself. */
+.pager__title {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--face-text);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Holds the column so a missing neighbour does not slide the other button
+   across, and says which end you reached rather than leaving a gap. */
+.pager__end {
+  display: flex;
+  align-items: center;
+  padding: calc(var(--u) * 1.5) calc(var(--u) * 2);
+  font-family: var(--face-ui);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.pager__end:last-child { justify-content: flex-end; }
+
 /* --- Deep dive ----------------------------------------------------------- */
 .deepdive {
   display: flex;

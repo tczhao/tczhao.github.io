@@ -798,6 +798,26 @@
     return h;
   }
 
+  /* Both halves carry the destination title. "Next" alone tells you a next
+     exists; the title tells you whether it is the one you wanted, which is the
+     question that sent you back to the list in the first place. */
+  function pagerHTML(id) {
+    var nb = libNeighbours(id);
+    if (!nb.prev && !nb.next) return '';
+
+    function side(dir, l, end) {
+      if (!l) return '<span class="pager__end">' + esc(end) + '</span>';
+      return '<button class="pager__btn pager__btn--' + dir + '" data-act="lib-open" data-id="' + esc(l.id) + '">' +
+        '<span class="pager__dir">' + (dir === 'prev' ? 'Previous' : 'Next') + '</span>' +
+        '<span class="pager__title">' + esc(l.title) + '</span></button>';
+    }
+
+    return '<nav class="pager" aria-label="Nearby entries">' +
+      side('prev', nb.prev, 'First entry') +
+      side('next', nb.next, 'Last entry') +
+      '</nav>';
+  }
+
   /* --- Entry (shared by Today and Library reader) ------------------------ */
   function entryHTML(l, opts) {
     opts = opts || {};
@@ -902,6 +922,12 @@
     h += '</div>';
     h += '<pre class="deepdive__text" id="prompt-text" hidden></pre>';
     h += '</div>';
+
+    /* Only in the library. Today is deliberately one entry, and a button that
+       walks to the next one would undo the mechanic the whole page is built
+       around. Reading ahead is already free, so here it just costs fewer
+       clicks than going back out to the list and picking again. */
+    if (!opts.canComplete) h += pagerHTML(l.id);
 
     h += '<div class="actions">';
     if (opts.canComplete) {
@@ -1055,6 +1081,57 @@
     host.innerHTML = h;
   }
 
+  /* Display order for the whole corpus: the sequence, then anything the
+     sequence left out. A lapsed entry leaves SEQ but stays in the library
+     marked, so it lands at the end rather than disappearing. */
+  function libraryOrder() {
+    var ordered = SEQ.map(function (id) { return BY_ID[id]; });
+    LESSONS.forEach(function (l) { if (ordered.indexOf(l) === -1) ordered.push(l); });
+    return ordered.filter(Boolean);
+  }
+
+  /* Shared by the shelf and by the reader's pager, because they have to agree
+     on what comes next. Two copies of this filter is how you get a Next button
+     that walks off the list you were reading. */
+  function libraryRows() {
+    var q = libFilter.q.trim().toLowerCase();
+    return libraryOrder().filter(function (l) {
+      if (libFilter.lapsed && !lapsed(l)) return false;
+      if (libFilter.track && l.track !== libFilter.track) return false;
+      if (libFilter.level && l.level !== libFilter.level) return false;
+      if (q) {
+        var hay = (l.title + ' ' + l.idea + ' ' + l.source + ' ' + trackName(l.track)).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function idIndex(rows, id) {
+    for (var i = 0; i < rows.length; i++) { if (rows[i].id === id) return i; }
+    return -1;
+  }
+
+  /* What the pager offers either side of the entry being read. Ends are stops
+     rather than wraps: the corpus is finite and ordered, so running out of it
+     is worth being told. */
+  function libNeighbours(id) {
+    var rows = libraryRows();
+    var i = idIndex(rows, id);
+    /* An entry can be open while sitting outside the current filter - a
+       cheatsheet row opens one directly and the filter it left behind is still
+       set. Falling back to the unfiltered order keeps the pager working
+       instead of stranding the reader on an entry with no way onward. */
+    if (i === -1) {
+      rows = libraryOrder();
+      i = idIndex(rows, id);
+    }
+    return {
+      prev: i > 0 ? rows[i - 1] : null,
+      next: i !== -1 && i < rows.length - 1 ? rows[i + 1] : null
+    };
+  }
+
   function renderLibrary() {
     var host = el('view-library');
 
@@ -1090,21 +1167,7 @@
     });
     h += '</div>';
 
-    var q = libFilter.q.trim().toLowerCase();
-    var ordered = SEQ.map(function (id) { return BY_ID[id]; });
-    LESSONS.forEach(function (l) { if (ordered.indexOf(l) === -1) ordered.push(l); });
-
-    var rows = ordered.filter(function (l) {
-      if (!l) return false;
-      if (libFilter.lapsed && !lapsed(l)) return false;
-      if (libFilter.track && l.track !== libFilter.track) return false;
-      if (libFilter.level && l.level !== libFilter.level) return false;
-      if (q) {
-        var hay = (l.title + ' ' + l.idea + ' ' + l.source + ' ' + trackName(l.track)).toLowerCase();
-        if (hay.indexOf(q) === -1) return false;
-      }
-      return true;
-    });
+    var rows = libraryRows();
 
     if (!rows.length) {
       h += '<p class="empty">Nothing matches that.</p>';

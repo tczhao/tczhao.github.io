@@ -1,0 +1,11 @@
+{
+  "name": "andon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Andon - saying the unwelcome thing, in the room, in time. One move a day, gated behind the sentence you would actually say.",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}
