@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Bowser</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-card-hover: #1f2847;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8b95b0;
+    --text-muted: #5a6480;
+    --accent-blue: #3b82f6;
+    --accent-amber: #f59e0b;
+    --accent-olive: #9aa63d;
+    --accent-emerald: #10b981;
+    --accent-rose: #f43f5e;
+    --inner: rgba(255,255,255,0.02);
+    --win-bg: rgba(16,185,129,0.10);
+    --win-line: rgba(16,185,129,0.38);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f4f6fb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fc;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.14);
+    --text-primary: #1a1f36;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
+    --accent-olive: #5c6612;
+    --accent-emerald: #059669;
+    --accent-rose: #e11d48;
+    --inner: rgba(0,0,0,0.02);
+    --win-bg: rgba(5,150,105,0.08);
+    --win-line: rgba(5,150,105,0.32);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; padding: 40px 24px 60px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text-primary); }
+
+  .theme-toggle {
+    width: 52px; height: 28px; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    cursor: pointer; padding: 0; transition: all 0.3s ease;
+    display: flex; align-items: center; flex: none;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .theme-toggle .toggle-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: transform 0.3s ease; transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
+
+  .hero { margin-bottom: 26px; }
+  .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+  .hero p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+  h2 {
+    font-size: 12px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;
+  }
+  .section { margin-bottom: 26px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button {
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    background: var(--bg-card); color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 15px; cursor: pointer; transition: all 0.2s ease;
+  }
+  .chips button:hover { color: var(--text-primary); border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .chips button.on { color: var(--accent-olive); border-color: var(--accent-olive); background: var(--bg-card-hover); }
+
+  .km { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+
+  input[type="text"] {
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    width: 100%; min-width: 0;
+  }
+  input[type="text"]:focus { outline: none; border-color: var(--accent-olive); }
+  input.km-input { width: 110px; text-align: right; }
+  input.bad { border-color: var(--accent-rose); }
+
+  .table { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .trow {
+    display: grid;
+    grid-template-columns: 74px 1fr 1fr 1fr 104px;
+    gap: 10px; align-items: center;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .trow:first-child { border-top: none; }
+  .trow.head {
+    background: var(--inner);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.7px;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .trow.head .num { text-align: right; }
+  .trow.win { background: var(--win-bg); box-shadow: inset 3px 0 0 var(--accent-emerald); }
+
+  .grade { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+  .grade .corr { display: block; font-size: 10px; font-weight: 400; color: var(--text-muted); letter-spacing: 0; }
+  .cost {
+    font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;
+    text-align: right; color: var(--text-primary);
+  }
+  .trow.win .cost { color: var(--accent-emerald); }
+
+  .verdict {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 26px;
+  }
+  .verdict .lead { font-size: 15px; line-height: 1.6; margin-bottom: 4px; }
+  .verdict .lead b { color: var(--accent-emerald); }
+  .verdict .sub { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+  .gaps { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+  .gap {
+    display: flex; align-items: baseline; gap: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    padding: 9px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--inner);
+  }
+  .gap .g { font-weight: 600; min-width: 52px; color: var(--text-primary); }
+  .gap .why { flex: 1; color: var(--text-muted); }
+  .gap .d { font-weight: 600; color: var(--accent-rose); white-space: nowrap; }
+  .gap.close .d { color: var(--accent-amber); }
+
+  .flag {
+    margin-top: 14px; padding: 11px 14px;
+    border: 1px solid var(--border); border-left: 3px solid var(--accent-amber);
+    border-radius: var(--radius-sm); background: var(--inner);
+    font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
+  }
+
+  .notes { color: var(--text-muted); font-size: 12.5px; line-height: 1.85; }
+  .notes b { color: var(--text-secondary); font-weight: 600; }
+  .notes code {
+    font-family: 'JetBrains Mono', monospace; background: var(--inner);
+    border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--text-secondary);
+  }
+  .footer { margin-top: 36px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 660px) {
+    .container { padding: 28px 14px 40px; }
+    .hero h1 { font-size: 27px; }
+    .trow { grid-template-columns: 58px 1fr 1fr 74px; row-gap: 8px; padding: 12px; }
+    .trow .docket-cell { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="topbar">
+    <a class="back-link" href="../">&larr; Substrate</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="toggle-thumb" id="toggleIcon">&#127769;</span>
+    </button>
+  </div>
+
+  <div class="hero">
+    <h1>Bowser</h1>
+    <p>Which grade is actually cheapest per kilometre, once you account for what is in the fuel rather than what is on the board.</p>
+  </div>
+
+  <div class="section">
+    <h2>Vehicle</h2>
+    <div class="chips" id="vehicles"></div>
+  </div>
+
+  <div class="section">
+    <h2>Prices at the pump</h2>
+    <div class="table" id="table"></div>
+  </div>
+
+  <div class="section">
+    <div class="km">
+      <label for="kmYear">Kilometres per year</label>
+      <input type="text" id="kmYear" class="km-input" inputmode="numeric" autocomplete="off" value="15000">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Verdict</h2>
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+  <div class="section">
+    <h2>Why the board price lies</h2>
+    <p class="notes" id="notes"></p>
+  </div>
+
+  <div class="footer">
+    Runs entirely in the browser. Nothing is uploaded.
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------------------------------------------------------------------------
+   Energy content, MJ/L, from the Australian NGER Determination.
+
+   This is the only reason the tool exists. A litre is a unit of volume, the
+   bowser sells volume, and the engine buys energy. Where those two disagree
+   the board price is not the price.
+
+   E10 is a 10% ethanol blend, so its energy content is the volume-weighted
+   mean of its parts, not a property you look up: 0.9(34.2) + 0.1(23.4) =
+   33.12 MJ/L, about 3.2% below straight petrol.
+
+   95 and 98 are deliberately given the SAME figure as 91. Their energy per
+   litre really is about equal; the benefit of premium, where a car has one,
+   comes from knock resistance letting the ECU advance timing, which is a
+   property of the engine and not of the fuel. Baking a blanket economy gain
+   into those rows is the servo's claim, not a measurement, so any gain here
+   has to arrive as an L/100km the owner actually measured.
+   --------------------------------------------------------------------------- */
+var MJ_PETROL = 34.2, MJ_ETHANOL = 23.4, MJ_DIESEL = 38.6;
+
+var GRADES = [
+  { key: 'e10',    label: 'E10',    mj: 0.9 * MJ_PETROL + 0.1 * MJ_ETHANOL, ref: MJ_PETROL, premium: false },
+  { key: 'u91',    label: '91',     mj: MJ_PETROL,                          ref: MJ_PETROL, premium: false },
+  { key: 'p95',    label: '95',     mj: MJ_PETROL,                          ref: MJ_PETROL, premium: true  },
+  { key: 'p98',    label: '98',     mj: MJ_PETROL,                          ref: MJ_PETROL, premium: true  },
+  { key: 'diesel', label: 'Diesel', mj: MJ_DIESEL,                          ref: MJ_DIESEL, premium: false }
+];
+
+function gradeByKey(key) {
+  for (var i = 0; i < GRADES.length; i++) if (GRADES[i].key === key) return GRADES[i];
+  return null;
+}
+
+/* Diesel is not a grade you can choose, it is a car you already own, so the
+   eligible set is a property of the vehicle. Consumption figures are ADR
+   combined-cycle book values and are meant to be typed over with measured
+   ones; real-world figures run higher and that is the point of the field. */
+var VEHICLES = [
+  { key: 'tiguan',   name: 'Tiguan TDI', cons: 7.0,  grades: ['diesel'] },
+  { key: 'forester', name: 'Forester',   cons: 9.3,  grades: ['e10', 'u91', 'p95', 'p98'] },
+  { key: 'hiace',    name: 'HiAce',      cons: 11.3, grades: ['e10', 'u91', 'p95', 'p98'] },
+  { key: 'mx5',      name: 'MX-5',       cons: 7.0,  grades: ['p95', 'p98'] },
+  { key: 'b200',     name: 'B200',       cons: 7.9,  grades: ['p95', 'p98'] },
+  { key: 'custom',   name: 'Custom',     cons: 8.2,  grades: ['e10', 'u91', 'p95', 'p98', 'diesel'] }
+];
+
+var REFERENCE = 'u91';
+
+/* --- pure arithmetic ----------------------------------------------------- */
+
+/* How much more fuel the engine must burn to get the same energy out of a
+   litre of this grade. 1.0 for anything at the reference energy content. */
+function energyMultiplier(grade) {
+  return grade.ref / grade.mj;
+}
+
+/* Consumption to score a grade on, in L/100km.
+
+   `touched` records whether the owner typed this row's figure themselves or
+   inherited it from the vehicle preset. It decides whether the energy
+   correction applies: a figure copied from the 91 row has not paid the E10
+   penalty yet and must, while a figure measured on E10 already contains it and
+   correcting again would charge it twice. The number alone cannot tell those
+   two cases apart, which is why the flag is carried rather than inferred. */
+function adjustedConsumption(grade, entered, touched) {
+  return touched ? entered : entered * energyMultiplier(grade);
+}
+
+/* Board price less any docket, in dollars per litre. */
+function effectivePrice(row) {
+  return (row.price - row.docket) / 100;
+}
+
+function costPer100km(grade, row) {
+  return effectivePrice(row) * adjustedConsumption(grade, row.cons, row.touched);
+}
+
+/* The board price this grade would need for its cost per 100 km to match
+   `targetCost`. Returned in cents per litre with the docket added back, so it
+   is directly comparable to what is painted on the sign. */
+function breakEvenBoardPrice(grade, row, targetCost) {
+  var cons = adjustedConsumption(grade, row.cons, row.touched);
+  return (targetCost / cons) * 100 + row.docket;
+}
+
+function rank(keys, rows) {
+  return keys.map(function (key) {
+    var grade = gradeByKey(key), row = rows[key];
+    return {
+      key: key,
+      grade: grade,
+      row: row,
+      cons: adjustedConsumption(grade, row.cons, row.touched),
+      cost: costPer100km(grade, row)
+    };
+  }).sort(function (a, b) { return a.cost - b.cost; });
+}
+
+function annualDelta(costA, costB, kmPerYear) {
+  return Math.abs(costA - costB) / 100 * kmPerYear;
+}
+
+/* Whether a premium row is claiming an economy gain that nothing here
+   supports. A row still at its preset figure cannot be evidence of anything,
+   so only a figure the owner typed counts as a measurement. */
+function unevidencedPremiumClaim(scored, referenceRow) {
+  return scored.filter(function (s) {
+    return s.grade.premium && !s.row.touched && s.row.cons < referenceRow.cons;
+  });
+}
+
+window.__bowser = {
+  GRADES: GRADES,
+  VEHICLES: VEHICLES,
+  gradeByKey: gradeByKey,
+  energyMultiplier: energyMultiplier,
+  adjustedConsumption: adjustedConsumption,
+  effectivePrice: effectivePrice,
+  costPer100km: costPer100km,
+  breakEvenBoardPrice: breakEvenBoardPrice,
+  rank: rank,
+  annualDelta: annualDelta,
+  unevidencedPremiumClaim: unevidencedPremiumClaim
+};
+
+/* Everything above is arithmetic and is exercised by bowser.test.js in node,
+   where there is no DOM to speak of. */
+if (typeof document === 'undefined') return;
+
+/* --- state -------------------------------------------------------------- */
+var DEFAULT_PRICE = { e10: 179.9, u91: 184.9, p95: 194.9, p98: 204.9, diesel: 189.9 };
+
+var state = { vehicle: 'forester', kmPerYear: 15000, rows: {} };
+
+function vehicleByKey(key) {
+  for (var i = 0; i < VEHICLES.length; i++) if (VEHICLES[i].key === key) return VEHICLES[i];
+  return VEHICLES[0];
+}
+
+function selectVehicle(key) {
+  var v = vehicleByKey(key);
+  state.vehicle = v.key;
+  state.rows = {};
+  v.grades.forEach(function (g) {
+    state.rows[g] = { price: DEFAULT_PRICE[g], docket: 0, cons: v.cons, touched: false };
+  });
+}
+
+/* --- rendering ---------------------------------------------------------- */
+function money(n) { return '$' + n.toFixed(2); }
+
+function numInput(value, cls, onInput) {
+  var el = document.createElement('input');
+  el.type = 'text';
+  el.className = cls;
+  el.inputMode = 'decimal';
+  el.autocomplete = 'off';
+  el.value = String(value);
+  el.addEventListener('input', function () {
+    var n = parseFloat(el.value);
+    var ok = isFinite(n) && n >= 0;
+    el.classList.toggle('bad', el.value !== '' && !ok);
+    if (ok) onInput(n);
+  });
+  return el;
+}
+
+function headRow() {
+  var head = document.createElement('div');
+  head.className = 'trow head';
+  ['Grade', 'Board c/L', 'Docket c/L', 'L/100km', '$/100km'].forEach(function (label, i) {
+    var cell = document.createElement('div');
+    cell.textContent = label;
+    if (i === 4) cell.className = 'num';
+    if (i === 2) cell.className = 'docket-cell';
+    head.append(cell);
+  });
+  return head;
+}
+
+function gradeRow(scored, isWinner) {
+  var row = state.rows[scored.key];
+  var el = document.createElement('div');
+  el.className = 'trow' + (isWinner ? ' win' : '');
+
+  var name = document.createElement('div');
+  name.className = 'grade';
+  name.textContent = scored.grade.label;
+  var mult = energyMultiplier(scored.grade);
+  if (!row.touched && mult !== 1) {
+    var corr = document.createElement('span');
+    corr.className = 'corr';
+    corr.textContent = '×' + mult.toFixed(3);
+    name.append(corr);
+  }
+
+  var price = numInput(row.price, '', function (n) { row.price = n; render(); });
+  var docketWrap = document.createElement('div');
+  docketWrap.className = 'docket-cell';
+  docketWrap.append(numInput(row.docket, '', function (n) { row.docket = n; render(); }));
+  var cons = numInput(row.cons, '', function (n) {
+    row.cons = n;
+    row.touched = true;
+    render();
+  });
+
+  var cost = document.createElement('div');
+  cost.className = 'cost';
+  cost.textContent = money(scored.cost);
+
+  el.append(name, price, docketWrap, cons, cost);
+  return el;
+}
+
+function renderVerdict(scored) {
+  var box = document.getElementById('verdict');
+  box.innerHTML = '';
+
+  var winner = scored[0];
+
+  var lead = document.createElement('div');
+  lead.className = 'lead';
+  if (scored.length === 1) {
+    lead.innerHTML = '<b>' + winner.grade.label + '</b> at ' + money(winner.cost) + ' per 100 km.';
+    var only = document.createElement('div');
+    only.className = 'sub';
+    only.textContent = 'This vehicle takes one grade, so there is no choice to make at the bowser. '
+      + 'The figure is here to compare against other fills, or against another car.';
+    box.append(lead, only);
+    return;
+  }
+
+  var runnerUp = scored[1];
+  lead.innerHTML = '<b>' + winner.grade.label + '</b> wins at ' + money(winner.cost)
+    + ' per 100 km, ' + money(runnerUp.cost - winner.cost) + ' ahead of ' + runnerUp.grade.label + '.';
+
+  var sub = document.createElement('div');
+  sub.className = 'sub';
+  var worst = scored[scored.length - 1];
+  sub.textContent = 'Over ' + state.kmPerYear.toLocaleString() + ' km a year that is '
+    + money(annualDelta(winner.cost, runnerUp.cost, state.kmPerYear)) + ' against '
+    + runnerUp.grade.label + ', and '
+    + money(annualDelta(winner.cost, worst.cost, state.kmPerYear)) + ' against ' + worst.grade.label + '.';
+
+  box.append(lead, sub);
+
+  var gaps = document.createElement('div');
+  gaps.className = 'gaps';
+  scored.slice(1).forEach(function (s) {
+    var need = breakEvenBoardPrice(s.grade, s.row, winner.cost);
+    var drop = s.row.price - need;
+
+    var el = document.createElement('div');
+    el.className = 'gap' + (drop < 3 ? ' close' : '');
+
+    var g = document.createElement('span');
+    g.className = 'g';
+    g.textContent = s.grade.label;
+    var why = document.createElement('span');
+    why.className = 'why';
+    why.textContent = 'needs ' + need.toFixed(1) + ' on the board to match ' + winner.grade.label;
+    var d = document.createElement('span');
+    d.className = 'd';
+    d.textContent = '−' + drop.toFixed(1) + ' c/L';
+
+    el.append(g, why, d);
+    gaps.append(el);
+  });
+  box.append(gaps);
+
+  var claims = unevidencedPremiumClaim(scored, state.rows[REFERENCE] || winner.row);
+  if (claims.length) {
+    var flag = document.createElement('div');
+    flag.className = 'flag';
+    flag.textContent = claims.map(function (c) { return c.grade.label; }).join(' and ')
+      + ' is scoring better economy than 91 on a preset figure rather than a measured one. '
+      + 'Premium holds no more energy per litre; if your car genuinely returns less on it, '
+      + 'put your own number in that row.';
+    box.append(flag);
+  }
+}
+
+function renderNotes(scored) {
+  var e10 = null, ref = null;
+  scored.forEach(function (s) {
+    if (s.key === 'e10') e10 = s;
+    if (s.key === REFERENCE) ref = s;
+  });
+
+  var bits = [];
+  bits.push('A litre is volume. The engine buys energy, and the two only agree when the fuel does. '
+    + 'Straight petrol carries <b>' + MJ_PETROL + ' MJ/L</b> and ethanol <b>' + MJ_ETHANOL
+    + ' MJ/L</b>, so E10 at one part in ten works out to <b>'
+    + (0.9 * MJ_PETROL + 0.1 * MJ_ETHANOL).toFixed(2) + ' MJ/L</b>.');
+
+  if (e10 && ref) {
+    var pct = (energyMultiplier(e10.grade) - 1) * 100;
+    bits.push('That is <b>' + pct.toFixed(1) + '%</b> less energy in the tank, so E10 has to be '
+      + '<b>' + pct.toFixed(1) + '%</b> cheaper than 91 to break even — about <b>'
+      + (ref.row.price * pct / 100).toFixed(0) + ' c/L</b> at the price you have entered. '
+      + 'Pumps usually discount two to four.');
+  }
+
+  bits.push('95 and 98 are given the same energy content as 91 on purpose. Premium resists knock, '
+    + 'which lets the ECU advance timing on an engine that was knock-limited to begin with. '
+    + 'On an engine that was not, there is nothing to recover.');
+
+  bits.push('Preset <code>L/100km</code> figures are ADR combined-cycle book values. '
+    + 'Type your own over them; the row stops being energy-corrected once you do, '
+    + 'because a measured figure already carries the penalty.');
+
+  document.getElementById('notes').innerHTML = bits.join('<br><br>');
+}
+
+function render() {
+  var v = vehicleByKey(state.vehicle);
+  var scored = rank(v.grades, state.rows);
+
+  var table = document.getElementById('table');
+  table.innerHTML = '';
+  table.append(headRow());
+  scored.forEach(function (s, i) { table.append(gradeRow(s, i === 0 && scored.length > 1)); });
+
+  renderVerdict(scored);
+  renderNotes(scored);
+  save();
+}
+
+function renderVehicles() {
+  var wrap = document.getElementById('vehicles');
+  wrap.innerHTML = '';
+  VEHICLES.forEach(function (v) {
+    var b = document.createElement('button');
+    b.textContent = v.name;
+    if (v.key === state.vehicle) b.className = 'on';
+    b.addEventListener('click', function () {
+      selectVehicle(v.key);
+      renderVehicles();
+      render();
+    });
+    wrap.append(b);
+  });
+}
+
+/* --- persistence -------------------------------------------------------- */
+var STORE = 'bowser-state';
+
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+}
+
+function load() {
+  try {
+    var raw = localStorage.getItem(STORE);
+    if (!raw) return false;
+    var saved = JSON.parse(raw);
+    var v = vehicleByKey(saved.vehicle);
+    if (saved.vehicle !== v.key) return false;
+
+    /* Rebuild from the vehicle's eligible grades rather than trusting the
+       stored keys, so an edit to VEHICLES here does not leave a stale row
+       being scored against a grade the car cannot take. */
+    selectVehicle(v.key);
+    v.grades.forEach(function (g) {
+      var r = saved.rows && saved.rows[g];
+      if (r && isFinite(r.price) && isFinite(r.docket) && isFinite(r.cons)) {
+        state.rows[g] = { price: r.price, docket: r.docket, cons: r.cons, touched: !!r.touched };
+      }
+    });
+    if (isFinite(saved.kmPerYear) && saved.kmPerYear > 0) state.kmPerYear = saved.kmPerYear;
+    return true;
+  } catch (e) { return false; }
+}
+
+/* --- wiring ------------------------------------------------------------- */
+document.getElementById('kmYear').addEventListener('input', function () {
+  var n = parseFloat(this.value);
+  var ok = isFinite(n) && n > 0;
+  this.classList.toggle('bad', this.value !== '' && !ok);
+  if (ok) { state.kmPerYear = n; render(); }
+});
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') !== 'light' ? 'light' : 'dark';
+  if (next === 'light') html.setAttribute('data-theme', 'light');
+  else html.removeAttribute('data-theme');
+  try { localStorage.setItem('bowser-theme', next); } catch (e) {}
+  document.getElementById('toggleIcon').innerHTML = next === 'light' ? '&#9728;' : '&#127769;';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+(function init() {
+  try {
+    var saved = localStorage.getItem('bowser-theme') || localStorage.getItem('flight-dash-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if ((saved || (prefersDark ? 'dark' : 'light')) === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('toggleIcon').innerHTML = '&#9728;';
+    }
+  } catch (e) {}
+
+  if (!load()) selectVehicle(state.vehicle);
+  document.getElementById('kmYear').value = String(state.kmPerYear);
+  renderVehicles();
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>

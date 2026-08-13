@@ -15,6 +15,7 @@
     --fg: #171717;
     --fg-mid: #383839;
     --rule: #e3e3e3;
+    --panel: #f1f1f0;
     --max-w: 1400px;
     --pad: 4vw;
     --gutter: 29px;
@@ -68,7 +69,7 @@
   .nav {
     display: flex;
     align-items: baseline;
-    gap: clamp(26px, 4.8vw, 70px);
+    gap: clamp(22px, 4.2vw, 62px);
     list-style: none;
   }
 
@@ -86,11 +87,32 @@
   .nav-item:hover { border-bottom-color: var(--rule); }
   .nav-item[aria-pressed="true"] { border-bottom-color: var(--fg); }
 
+  .views {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .view-item {
+    font: inherit;
+    font-size: clamp(0.72rem, 0.9vw, 0.84rem);
+    color: var(--fg-mid);
+    opacity: 0.45;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  .view-item:hover { opacity: 0.8; }
+  .view-item[aria-pressed="true"] { color: var(--fg); opacity: 1; }
+  .views .sep { color: var(--rule); font-size: 0.8rem; }
+
   .grid {
-    padding-top: clamp(44px, 6vw, 88px);
     columns: 4;
     column-gap: var(--gutter);
   }
+  .grid[data-view="text"]  { padding-top: clamp(44px, 6vw, 88px); }
+  .grid[data-view="image"] { padding-top: clamp(36px, 4vw, 60px); }
   @media (max-width: 1199px) { .grid { columns: 3; } }
   @media (max-width: 899px)  { .grid { columns: 2; } }
   @media (max-width: 599px)  { .grid { columns: 1; } }
@@ -100,14 +122,35 @@
     break-inside: avoid;
     text-decoration: none;
     color: inherit;
-    margin-bottom: clamp(36px, 3.6vw, 56px);
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--rule);
   }
   .work:focus-visible {
     outline: 1px solid var(--fg);
     outline-offset: 8px;
   }
+  [data-view="text"] .work {
+    margin-bottom: clamp(36px, 3.6vw, 56px);
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+  [data-view="image"] .work {
+    margin-bottom: clamp(34px, 3.2vw, 52px);
+  }
+
+  .tile {
+    aspect-ratio: var(--ratio, 3 / 2);
+    background: var(--panel);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1);
+    transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .work:hover .tile img { transform: scale(1.05); }
 
   .work-kind {
     display: block;
@@ -117,13 +160,14 @@
     line-height: 1;
     text-transform: uppercase;
     color: var(--fg-mid);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
+  [data-view="text"] .work-kind { margin-bottom: 15px; }
 
   .work-name {
-    font-size: 1.875rem;
+    font-size: 1.625rem;
     line-height: 1.15;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-decoration-color: transparent;
@@ -131,14 +175,15 @@
     transition: text-decoration-color 0.25s ease;
   }
   .work:hover .work-name { text-decoration-color: var(--fg); }
+  [data-view="text"] .work-name { font-size: 1.875rem; margin-bottom: 8px; }
 
   .work-line {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-style: italic;
     line-height: 1.6;
     color: var(--fg-mid);
-    margin-bottom: 14px;
   }
+  [data-view="text"] .work-line { font-size: 0.78rem; margin-bottom: 14px; }
 
   .work-note {
     font-size: 0.78rem;
@@ -183,7 +228,7 @@
   </nav>
 </header>
 
-<main class="grid wrap" id="grid"></main>
+<main class="grid wrap" id="grid" data-view="text"></main>
 
 <footer class="tail wrap">
   <div id="copyright"></div>
@@ -191,6 +236,8 @@
 </footer>
 
 <script>
+const VIEW_KEY = 'substrate-view';
+
 const FILTERS = [
   { id: 'all',       label: 'Overview' },
   { id: 'practice',  label: 'Practice' },
@@ -198,112 +245,127 @@ const FILTERS = [
   { id: 'tool',      label: 'Tools' }
 ];
 
+const VIEWS = [
+  { id: 'text',  label: 'Text' },
+  { id: 'image', label: 'Image' }
+];
+
+// line: italic tagline, shown in both views.
+// cap:  tile caption for the items that carry no tagline of their own.
+// note: long description, shown in the text view only.
 const WORKS = [
   {
-    href: 'sub/nomogram/dist/', kind: 'practice',
+    href: 'sub/nomogram/dist/', kind: 'practice', img: 'nomogram', ratio: '4 / 3',
     name: 'Nomogram', label: 'Alignment chart',
     line: 'what training does, and how well that is known',
     note: 'Six tracks on physical capacity, from cardiorespiratory fitness to what actually predicts a running injury. Every entry carries its sample size, its effect size and both bounds of a real confidence interval.'
   },
   {
-    href: 'sub/tare/dist/', kind: 'practice',
+    href: 'sub/tare/dist/', kind: 'practice', img: 'tare', ratio: '1 / 1',
     name: 'Tare', label: 'Docket',
     line: 'what survives fees, tax, inflation and you',
     note: 'Australian personal finance, where the entry stays shut until you have worked out its number against your own figures. Every claim carries its source and an honest verdict on how well established it is.'
   },
   {
-    href: 'sub/practicum/dist/', kind: 'practice',
+    href: 'sub/practicum/dist/', kind: 'practice', img: 'practicum', ratio: '3 / 2',
     name: 'Practicum', label: 'Logbook',
     line: 'management practice, one day at a time',
     note: '152 entries from the management canon, tagged by level from running one team to leading across an org. Each day brings an experiment to run at work.'
   },
   {
-    href: 'sub/cascade/dist/', kind: 'practice',
+    href: 'sub/cascade/dist/', kind: 'practice', img: 'cascade', ratio: '1 / 1',
     name: 'Cascade', label: 'Case book',
     line: 'what failed, what amplified it, what made recovery slow',
     note: '130 production failure mechanisms across 9 tracks. You commit a call before the write-up opens, which trains recognition speed rather than derivation.'
   },
   {
-    href: 'sub/leastauthority/dist/', kind: 'practice',
+    href: 'sub/leastauthority/dist/', kind: 'practice', img: 'leastauthority', ratio: '5 / 4',
     name: 'Least Authority', label: 'Field notes',
     line: 'systems that act on untrusted input',
     note: '140 principles across 9 tracks, from the 1970s canon through to agent tool permissioning. Entries expire rather than being reinforced into folklore.'
   },
   {
-    href: 'sub/baserate/dist/', kind: 'practice',
+    href: 'sub/baserate/dist/', kind: 'practice', img: 'baserate', ratio: '3 / 2',
     name: 'Base Rate', label: 'Notebook',
     line: 'whether a number means anything',
     note: '135 entries on measurement and inference across 9 tracks, with a forecast book that scores you. A Brier score that has not moved is the one signal you cannot argue with.'
   },
   {
-    href: 'sub/grossmargin/dist/', kind: 'practice',
+    href: 'sub/grossmargin/dist/', kind: 'practice', img: 'grossmargin', ratio: '1 / 1',
     name: 'Gross Margin', label: 'Ledger',
     line: 'the architecture decisions a CFO later reports',
     note: '150 entries on the unit economics of B2B infrastructure SaaS, from the cloud bill your architecture sets to the board metrics that decide headcount.'
   },
   {
-    href: 'sub/compositor/dist/', kind: 'practice',
+    href: 'sub/compositor/dist/', kind: 'practice', img: 'compositor', ratio: '4 / 3',
     name: 'Compositor', label: 'Workbook',
     line: 'sentence craft, drilled on your own drafts',
     note: '136 prose moves across 9 tracks, each applied to a paragraph you actually wrote that day. The charter, the deprecation plan, the incident write-up.'
   },
   {
-    href: 'sub/maillard/dist/', kind: 'practice',
+    href: 'sub/maillard/dist/', kind: 'practice', img: 'maillard', ratio: '1 / 1',
     name: 'Maillard', label: 'Kitchen notes',
     line: 'the chemistry under the cooking',
     note: '160 mechanisms across 8 tracks, plus a log of what actually happened in the pan. The one here that is deliberately not about work.'
   },
   {
-    href: 'sub/contactpatch/dist/', kind: 'practice',
+    href: 'sub/contactpatch/dist/', kind: 'practice', img: 'contactpatch', ratio: '4 / 3',
     name: 'Contact Patch', label: 'Setup sheet',
     line: 'what four hands of rubber can actually do',
     note: 'Vehicle dynamics on one side, crash epidemiology on the other, and they disagree: the physics is settled and the evidence that knowing it makes you safer is not. 30 entries so far, of a planned nine tracks.'
   },
   {
-    href: 'sub/andon/dist/', kind: 'practice',
+    href: 'sub/andon/dist/', kind: 'practice', img: 'andon', ratio: '4 / 3',
     name: 'Andon', label: 'Pull log',
     line: 'saying the unwelcome thing, in the room, in time',
     note: '135 entries on voicing disagreement, from noticing you disagree through to what it costs you a year later. Each one stays shut until you have written the sentence you would actually say, and every claim carries a verdict on how well established it is.'
   },
   {
-    href: 'sub/flight/', kind: 'dashboard',
+    href: 'sub/flight/', kind: 'dashboard', img: 'flight', ratio: '3 / 2',
     name: 'Flight', label: 'Dashboard',
+    cap: 'routes, airlines, aircraft, hours in the air',
     note: 'Routes on a world map, airlines, aircraft models, hours in the air, spending and country coverage.'
   },
   {
-    href: 'sub/run/', kind: 'dashboard',
+    href: 'sub/run/', kind: 'dashboard', img: 'run', ratio: '4 / 3',
     name: 'Run', label: 'Dashboard',
+    cap: 'distance, cadence of the week, shoes worn through',
     note: 'Daily distance, day-of-week patterns, cumulative km, shoe leaderboard and a monthly heatmap.'
   },
   {
-    href: 'sub/travel/', kind: 'dashboard',
+    href: 'sub/travel/', kind: 'dashboard', img: 'travel', ratio: '3 / 2',
     name: 'Travel', label: 'Dashboard',
+    cap: 'where the money went, by trip and by category',
     note: 'Trip-level expenses by category and location, daily spend timeline and photo counts in AUD.'
   },
   {
-    href: 'sub/competition/', kind: 'dashboard',
+    href: 'sub/competition/', kind: 'dashboard', img: 'competition', ratio: '4 / 3',
     name: 'Competition', label: 'Dashboard',
+    cap: 'race results, personal bests, pace over years',
     note: 'Race results across distances, personal bests per category, pace progression and a full race history.'
   },
   {
-    href: 'sub/garage/', kind: 'dashboard',
+    href: 'sub/garage/', kind: 'dashboard', img: 'garage', ratio: '3 / 4',
     name: 'Garage', label: 'Service book',
     line: 'every part that has failed and what it cost',
     note: '140 service records across five cars - Tiguan, Forester, HiAce, MX-5, B200 - with running spend by system and by year, the biggest single jobs, and photos of the parts that came out.'
   },
   {
-    href: 'sub/diff/', kind: 'tool',
+    href: 'sub/diff/', kind: 'tool', img: 'diff', ratio: '3 / 4',
     name: 'Diff', label: 'Utility',
+    cap: 'line diff by the Myers algorithm, the one git uses',
     note: 'Line diff by the Myers algorithm, the one git uses, with word-level highlighting inside changed lines. Side-by-side or unified, and options to ignore whitespace and case.'
   },
   {
-    href: 'sub/dice/', kind: 'tool',
+    href: 'sub/dice/', kind: 'tool', img: 'dice', ratio: '4 / 3',
     name: 'Dice', label: 'Utility',
+    cap: 'standard notation, rolled without modulo bias',
     note: 'Standard notation - 3d6, 1d20+5, 4d6kh3, d% - rolled from the platform cryptographic random source with the modulo bias removed. Keeps a session tally and a history.'
   },
   {
-    href: 'sub/scorepad/', kind: 'tool',
+    href: 'sub/scorepad/', kind: 'tool', img: 'scorepad', ratio: '4 / 3',
     name: 'Scorepad', label: 'Utility',
+    cap: 'round-by-round scoring that survives a refresh',
     note: 'Round-by-round board game scoring for up to eight players. Quick plus and minus buttons or an editable grid, ties ranked properly, and the game survives a refresh.'
   }
 ];
@@ -315,11 +377,27 @@ const SOCIALS = [
   { label: 'Kaggle',   url: 'https://www.kaggle.com/tobycat' }
 ];
 
-function renderWork(work) {
+const grid = document.getElementById('grid');
+let currentFilter = 'all';
+let currentView = 'text';
+
+function renderWork(work, index) {
   const card = document.createElement('a');
   card.className = 'work';
   card.href = work.href;
-  card.dataset.kind = work.kind;
+
+  if (currentView === 'image') {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.style.setProperty('--ratio', work.ratio);
+    const img = document.createElement('img');
+    img.src = 'img/tiles/' + work.img + '.jpg';
+    img.alt = '';
+    img.decoding = 'async';
+    if (index >= 4) img.loading = 'lazy';
+    tile.append(img);
+    card.append(tile);
+  }
 
   const kind = document.createElement('span');
   kind.className = 'work-kind';
@@ -331,33 +409,81 @@ function renderWork(work) {
 
   card.append(kind, name);
 
-  if (work.line) {
+  const caption = currentView === 'image' ? (work.line || work.cap) : work.line;
+  if (caption) {
     const line = document.createElement('p');
     line.className = 'work-line';
-    line.textContent = work.line;
+    line.textContent = caption;
     card.append(line);
   }
 
-  const note = document.createElement('p');
-  note.className = 'work-note';
-  note.textContent = work.note;
-  card.append(note);
+  if (currentView === 'text') {
+    const note = document.createElement('p');
+    note.className = 'work-note';
+    note.textContent = work.note;
+    card.append(note);
+  }
 
   return card;
 }
 
-function renderNav(target, onPick) {
+function render() {
+  grid.dataset.view = currentView;
+  const shown = WORKS.filter(work => currentFilter === 'all' || work.kind === currentFilter);
+  grid.replaceChildren(...shown.map(renderWork));
+}
+
+function renderNav(target) {
   FILTERS.forEach(filter => {
     const li = document.createElement('li');
     const button = document.createElement('button');
     button.className = 'nav-item';
     button.type = 'button';
     button.textContent = filter.label;
-    button.setAttribute('aria-pressed', String(filter.id === 'all'));
-    button.addEventListener('click', () => onPick(filter.id, button));
+    button.setAttribute('aria-pressed', String(filter.id === currentFilter));
+    button.addEventListener('click', () => {
+      currentFilter = filter.id;
+      target.querySelectorAll('.nav-item').forEach(item => {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      render();
+    });
     li.append(button);
     target.append(li);
   });
+
+  const li = document.createElement('li');
+  const group = document.createElement('div');
+  group.className = 'views';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', 'View');
+
+  VIEWS.forEach((view, i) => {
+    if (i) {
+      const sep = document.createElement('span');
+      sep.className = 'sep';
+      sep.textContent = '/';
+      sep.setAttribute('aria-hidden', 'true');
+      group.append(sep);
+    }
+    const button = document.createElement('button');
+    button.className = 'view-item';
+    button.type = 'button';
+    button.textContent = view.label;
+    button.setAttribute('aria-pressed', String(view.id === currentView));
+    button.addEventListener('click', () => {
+      currentView = view.id;
+      group.querySelectorAll('.view-item').forEach(item => {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      try { localStorage.setItem(VIEW_KEY, view.id); } catch (_) {}
+      render();
+    });
+    group.append(button);
+  });
+
+  li.append(group);
+  target.append(li);
 }
 
 function renderTail(copyrightTarget, linksTarget) {
@@ -375,20 +501,14 @@ function renderTail(copyrightTarget, linksTarget) {
   });
 }
 
-const grid = document.getElementById('grid');
-grid.append(...WORKS.map(renderWork));
+try {
+  const saved = localStorage.getItem(VIEW_KEY);
+  if (saved === 'text' || saved === 'image') currentView = saved;
+} catch (_) {}
 
-function applyFilter(kind, button) {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.setAttribute('aria-pressed', String(item === button));
-  });
-  grid.querySelectorAll('.work').forEach(card => {
-    card.style.display = (kind === 'all' || card.dataset.kind === kind) ? '' : 'none';
-  });
-}
-
-renderNav(document.getElementById('nav'), applyFilter);
+renderNav(document.getElementById('nav'));
 renderTail(document.getElementById('copyright'), document.getElementById('tailLinks'));
+render();
 </script>
 </body>
 </html>
