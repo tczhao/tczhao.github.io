@@ -3,31 +3,392 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Tianchu</title>
+<title>Tianchu Zhao</title>
+<meta name="description" content="Standalone things that live at their own URL.">
 <link rel="icon" href="/favicon.ico">
-<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abel&family=Source+Code+Pro:ital,wght@0,300;0,400;1,300&display=swap">
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #171717;
+    --fg-mid: #383839;
+    --rule: #e3e3e3;
+    --max-w: 1400px;
+    --pad: 4vw;
+    --gutter: 29px;
+  }
+
+  @media (max-width: 767px) {
+    :root { --pad: 6vw; }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2 {
+    font-family: 'Abel', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 2.5vw;
+  }
+
+  .wordmark {
+    font-family: 'Abel', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: clamp(1.5rem, 2.2vw, 2.05rem);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(26px, 4.8vw, 70px);
+    list-style: none;
+  }
+
+  .nav-item {
+    font: inherit;
+    font-size: clamp(0.8rem, 1vw, 0.94rem);
+    color: var(--fg);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    padding: 0 0 3px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+  .nav-item:hover { border-bottom-color: var(--rule); }
+  .nav-item[aria-pressed="true"] { border-bottom-color: var(--fg); }
+
+  .grid {
+    padding-top: clamp(44px, 6vw, 88px);
+    columns: 4;
+    column-gap: var(--gutter);
+  }
+  @media (max-width: 1199px) { .grid { columns: 3; } }
+  @media (max-width: 899px)  { .grid { columns: 2; } }
+  @media (max-width: 599px)  { .grid { columns: 1; } }
+
+  .work {
+    display: block;
+    break-inside: avoid;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: clamp(36px, 3.6vw, 56px);
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .work:focus-visible {
+    outline: 1px solid var(--fg);
+    outline-offset: 8px;
+  }
+
+  .work-kind {
+    display: block;
+    font-size: 0.655rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--fg-mid);
+    margin-bottom: 15px;
+  }
+
+  .work-name {
+    font-size: 1.875rem;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 5px;
+    transition: text-decoration-color 0.25s ease;
+  }
+  .work:hover .work-name { text-decoration-color: var(--fg); }
+
+  .work-line {
+    font-size: 0.78rem;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--fg-mid);
+    margin-bottom: 14px;
+  }
+
+  .work-note {
+    font-size: 0.78rem;
+    line-height: 1.75;
+    color: var(--fg-mid);
+    transition: color 0.25s ease;
+  }
+  .work:hover .work-note { color: var(--fg); }
+
+  .tail {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    border-top: 1px solid var(--rule);
+    padding: 26px 0 44px;
+    font-size: 0.72rem;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+    color: var(--fg-mid);
+  }
+  .tail-links { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+  .tail-links li:not(:last-child)::after { content: ' /'; color: var(--rule); }
+  .tail a { color: var(--fg-mid); text-decoration: none; }
+  .tail a:hover { color: var(--fg); }
+
+  @media (max-width: 599px) {
+    .masthead { flex-direction: column; align-items: flex-start; gap: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
 </head>
 <body>
 
-<main>
-  <section class="hero">
-    <h1>
-      Operate Runtime<br>
-      <span class="with">with</span> <span class="accent">Tianchu</span>
-    </h1>
-    <img class="avatar" src="img/avatar.png" alt="Tianchu Avatar">
-  </section>
+<header class="masthead wrap">
+  <a class="wordmark" href="/">Tianchu Zhao</a>
+  <nav>
+    <ul class="nav" id="nav"></ul>
+  </nav>
+</header>
 
-  <section class="trusted">
-    <h2>Trusted by</h2>
-    <ul class="logo-grid" id="logo-grid"></ul>
-  </section>
-</main>
+<main class="grid wrap" id="grid"></main>
 
-<footer>
-  <ul class="socials" id="socials"></ul>
+<footer class="tail wrap">
+  <div id="copyright"></div>
+  <ul class="tail-links" id="tailLinks"></ul>
 </footer>
 
-<script src="app.js"></script>
+<script>
+const FILTERS = [
+  { id: 'all',       label: 'Overview' },
+  { id: 'practice',  label: 'Practice' },
+  { id: 'dashboard', label: 'Dashboards' },
+  { id: 'tool',      label: 'Tools' }
+];
+
+const WORKS = [
+  {
+    href: 'sub/nomogram/dist/', kind: 'practice',
+    name: 'Nomogram', label: 'Alignment chart',
+    line: 'what training does, and how well that is known',
+    note: 'Six tracks on physical capacity, from cardiorespiratory fitness to what actually predicts a running injury. Every entry carries its sample size, its effect size and both bounds of a real confidence interval.'
+  },
+  {
+    href: 'sub/tare/dist/', kind: 'practice',
+    name: 'Tare', label: 'Docket',
+    line: 'what survives fees, tax, inflation and you',
+    note: 'Australian personal finance, where the entry stays shut until you have worked out its number against your own figures. Every claim carries its source and an honest verdict on how well established it is.'
+  },
+  {
+    href: 'sub/practicum/dist/', kind: 'practice',
+    name: 'Practicum', label: 'Logbook',
+    line: 'management practice, one day at a time',
+    note: '152 entries from the management canon, tagged by level from running one team to leading across an org. Each day brings an experiment to run at work.'
+  },
+  {
+    href: 'sub/cascade/dist/', kind: 'practice',
+    name: 'Cascade', label: 'Case book',
+    line: 'what failed, what amplified it, what made recovery slow',
+    note: '130 production failure mechanisms across 9 tracks. You commit a call before the write-up opens, which trains recognition speed rather than derivation.'
+  },
+  {
+    href: 'sub/leastauthority/dist/', kind: 'practice',
+    name: 'Least Authority', label: 'Field notes',
+    line: 'systems that act on untrusted input',
+    note: '140 principles across 9 tracks, from the 1970s canon through to agent tool permissioning. Entries expire rather than being reinforced into folklore.'
+  },
+  {
+    href: 'sub/baserate/dist/', kind: 'practice',
+    name: 'Base Rate', label: 'Notebook',
+    line: 'whether a number means anything',
+    note: '135 entries on measurement and inference across 9 tracks, with a forecast book that scores you. A Brier score that has not moved is the one signal you cannot argue with.'
+  },
+  {
+    href: 'sub/grossmargin/dist/', kind: 'practice',
+    name: 'Gross Margin', label: 'Ledger',
+    line: 'the architecture decisions a CFO later reports',
+    note: '150 entries on the unit economics of B2B infrastructure SaaS, from the cloud bill your architecture sets to the board metrics that decide headcount.'
+  },
+  {
+    href: 'sub/compositor/dist/', kind: 'practice',
+    name: 'Compositor', label: 'Workbook',
+    line: 'sentence craft, drilled on your own drafts',
+    note: '136 prose moves across 9 tracks, each applied to a paragraph you actually wrote that day. The charter, the deprecation plan, the incident write-up.'
+  },
+  {
+    href: 'sub/maillard/dist/', kind: 'practice',
+    name: 'Maillard', label: 'Kitchen notes',
+    line: 'the chemistry under the cooking',
+    note: '160 mechanisms across 8 tracks, plus a log of what actually happened in the pan. The one here that is deliberately not about work.'
+  },
+  {
+    href: 'sub/contactpatch/dist/', kind: 'practice',
+    name: 'Contact Patch', label: 'Setup sheet',
+    line: 'what four hands of rubber can actually do',
+    note: 'Vehicle dynamics on one side, crash epidemiology on the other, and they disagree: the physics is settled and the evidence that knowing it makes you safer is not. 30 entries so far, of a planned nine tracks.'
+  },
+  {
+    href: 'sub/andon/dist/', kind: 'practice',
+    name: 'Andon', label: 'Pull log',
+    line: 'saying the unwelcome thing, in the room, in time',
+    note: '135 entries on voicing disagreement, from noticing you disagree through to what it costs you a year later. Each one stays shut until you have written the sentence you would actually say, and every claim carries a verdict on how well established it is.'
+  },
+  {
+    href: 'sub/flight/', kind: 'dashboard',
+    name: 'Flight', label: 'Dashboard',
+    note: 'Routes on a world map, airlines, aircraft models, hours in the air, spending and country coverage.'
+  },
+  {
+    href: 'sub/run/', kind: 'dashboard',
+    name: 'Run', label: 'Dashboard',
+    note: 'Daily distance, day-of-week patterns, cumulative km, shoe leaderboard and a monthly heatmap.'
+  },
+  {
+    href: 'sub/travel/', kind: 'dashboard',
+    name: 'Travel', label: 'Dashboard',
+    note: 'Trip-level expenses by category and location, daily spend timeline and photo counts in AUD.'
+  },
+  {
+    href: 'sub/competition/', kind: 'dashboard',
+    name: 'Competition', label: 'Dashboard',
+    note: 'Race results across distances, personal bests per category, pace progression and a full race history.'
+  },
+  {
+    href: 'sub/garage/', kind: 'dashboard',
+    name: 'Garage', label: 'Service book',
+    line: 'every part that has failed and what it cost',
+    note: '140 service records across five cars - Tiguan, Forester, HiAce, MX-5, B200 - with running spend by system and by year, the biggest single jobs, and photos of the parts that came out.'
+  },
+  {
+    href: 'sub/diff/', kind: 'tool',
+    name: 'Diff', label: 'Utility',
+    note: 'Line diff by the Myers algorithm, the one git uses, with word-level highlighting inside changed lines. Side-by-side or unified, and options to ignore whitespace and case.'
+  },
+  {
+    href: 'sub/dice/', kind: 'tool',
+    name: 'Dice', label: 'Utility',
+    note: 'Standard notation - 3d6, 1d20+5, 4d6kh3, d% - rolled from the platform cryptographic random source with the modulo bias removed. Keeps a session tally and a history.'
+  },
+  {
+    href: 'sub/scorepad/', kind: 'tool',
+    name: 'Scorepad', label: 'Utility',
+    note: 'Round-by-round board game scoring for up to eight players. Quick plus and minus buttons or an editable grid, ties ranked properly, and the game survives a refresh.'
+  }
+];
+
+const SOCIALS = [
+  { label: 'GitHub',   url: 'https://github.com/tczhao' },
+  { label: 'LinkedIn', url: 'https://au.linkedin.com/in/tczhao' },
+  { label: 'Medium',   url: 'https://wklytech.medium.com/' },
+  { label: 'Kaggle',   url: 'https://www.kaggle.com/tobycat' }
+];
+
+function renderWork(work) {
+  const card = document.createElement('a');
+  card.className = 'work';
+  card.href = work.href;
+  card.dataset.kind = work.kind;
+
+  const kind = document.createElement('span');
+  kind.className = 'work-kind';
+  kind.textContent = work.label;
+
+  const name = document.createElement('h2');
+  name.className = 'work-name';
+  name.textContent = work.name;
+
+  card.append(kind, name);
+
+  if (work.line) {
+    const line = document.createElement('p');
+    line.className = 'work-line';
+    line.textContent = work.line;
+    card.append(line);
+  }
+
+  const note = document.createElement('p');
+  note.className = 'work-note';
+  note.textContent = work.note;
+  card.append(note);
+
+  return card;
+}
+
+function renderNav(target, onPick) {
+  FILTERS.forEach(filter => {
+    const li = document.createElement('li');
+    const button = document.createElement('button');
+    button.className = 'nav-item';
+    button.type = 'button';
+    button.textContent = filter.label;
+    button.setAttribute('aria-pressed', String(filter.id === 'all'));
+    button.addEventListener('click', () => onPick(filter.id, button));
+    li.append(button);
+    target.append(li);
+  });
+}
+
+function renderTail(copyrightTarget, linksTarget) {
+  copyrightTarget.textContent = '© ' + new Date().getFullYear() + ' Tianchu Zhao';
+
+  SOCIALS.forEach(social => {
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = social.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = social.label;
+    li.append(link);
+    linksTarget.append(li);
+  });
+}
+
+const grid = document.getElementById('grid');
+grid.append(...WORKS.map(renderWork));
+
+function applyFilter(kind, button) {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.setAttribute('aria-pressed', String(item === button));
+  });
+  grid.querySelectorAll('.work').forEach(card => {
+    card.style.display = (kind === 'all' || card.dataset.kind === kind) ? '' : 'none';
+  });
+}
+
+renderNav(document.getElementById('nav'), applyFilter);
+renderTail(document.getElementById('copyright'), document.getElementById('tailLinks'));
+</script>
 </body>
 </html>
