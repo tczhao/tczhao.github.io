@@ -391,7 +391,7 @@ function renderWork(work, index) {
     tile.className = 'tile';
     tile.style.setProperty('--ratio', work.ratio);
     const img = document.createElement('img');
-    img.src = 'img/tiles/' + work.img + '.jpg';
+    img.src = 'img/tiles/' + work.img + '.webp';
     img.alt = '';
     img.decoding = 'async';
     if (index >= 4) img.loading = 'lazy';

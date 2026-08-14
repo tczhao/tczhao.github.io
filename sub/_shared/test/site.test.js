@@ -38,12 +38,46 @@ check('the site config is valid', () => {
   assert.deepStrictEqual(errs, [], errs.join('; '));
 });
 
+/* Reads a sibling's declared key without running its content. site.js is a
+   single assignment to window.SITE, so evaluating it in a bare object is
+   enough and is what lib/build.js already does to load a config. Returns null
+   for a directory that is not an engine site. */
+function siblingKey(dir) {
+  const p = path.join(ROOT, '..', dir, 'site.js');
+  if (!fs.existsSync(p)) return null;
+  const win = {};
+  try {
+    new Function('window', fs.readFileSync(p, 'utf8'))(win);
+  } catch (e) {
+    return null;
+  }
+  return win.SITE ? win.SITE.key : null;
+}
+
+function siblingSites() {
+  return fs.readdirSync(path.join(ROOT, '..'))
+    .filter(d => d !== path.basename(ROOT) && !d.startsWith('_') && !d.startsWith('.'))
+    .map(d => ({ dir: d, key: siblingKey(d) }))
+    .filter(s => s.key);
+}
+
 check('the storage key is this site\'s own', () => {
   // Every site in this family ships as a separate page against the same
   // origin, so a shared key would have one silently eat another's history.
   assert.ok(/^[a-z]+\.v\d+$/.test(config.key), 'key should look like <slug>.v<n>, got ' + config.key);
-  assert.notStrictEqual(config.key, 'practicum.v1', 'this would overwrite practicum');
   assert.notStrictEqual(config.key, 'daily.v1', 'the engine default is not a site key');
+
+  // TODO(you): assert no sibling site declares this same key.
+  //
+  // siblingSites() returns [{ dir, key }] for every other engine site under
+  // sub/, already excluding this one, _shared, and dotfiles. There are 11
+  // sites sharing one origin and until now only practicum was protected, by
+  // name; two siblings colliding with each other was never checked at all.
+  //
+  // Worth deciding as you write it:
+  //   - what the failure message needs to name for someone to act on it
+  //   - whether a sibling that fails to parse should be silently skipped
+  //     (siblingKey returns null today) or should fail this check loudly
 });
 
 check('the corpus validates', () => {

@@ -1,8 +1,8 @@
 {
-  "name": "practicum",
+  "name": "parallax",
   "version": "1.0.0",
   "private": true,
-  "description": "A daily logbook for management practice - one entry a day, with spaced review",
+  "description": "Parallax - what you sent and what they received. One move a day, gated behind predicting how your own draft will be misread.",
   "scripts": {
     "build": "node ../_shared/lib/build.js",
     "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
