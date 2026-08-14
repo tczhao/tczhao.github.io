@@ -120,7 +120,9 @@ function makeEnv(nowMs, storageKey) {
  * rendered HTML keeps handler tests independent of markup details. */
 function target(dataset, isNav) {
   const t = {
-    dataset, id: dataset.elId || '', value: dataset.value || '',
+    dataset, id: dataset.elId || '', value: dataset.value || '', attrs: {},
+    setAttribute(k, v) { t.attrs[k] = String(v); },
+    getAttribute(k) { return k in t.attrs ? t.attrs[k] : null; },
     closest(sel) {
       if (sel === '.nav__item') return isNav ? t : null;
       if (sel === '[data-act]') return dataset.act ? t : null;

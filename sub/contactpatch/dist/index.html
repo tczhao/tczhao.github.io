@@ -2418,7 +2418,15 @@ window.SITE = {
   }
 
   function step() {
-    if (at >= queue.length) { finish(); return; }
+    /* The one place a read is known to have reached the end, and so the only
+       place onDone fires. stop() and a refused utterance both land in finish()
+       as well, and neither of those means the entry was heard through -
+       collapsing the three would have pressing Stop start the next entry. */
+    if (at >= queue.length) {
+      finish();
+      if (hooks.onDone) hooks.onDone();
+      return;
+    }
 
     var mine = gen;
     var item = queue[at];
@@ -2734,7 +2742,8 @@ window.SITE = {
     streak: { count: 0, best: 0, lastOn: null },
     forecasts: {},
     profile: {},
-    theme: null
+    theme: null,
+    autoplay: false
   };
 
   /* Everything here depends on being able to write locally. If a browser or
@@ -3370,15 +3379,51 @@ window.SITE = {
      away from being in. */
   var SPEAK_PARTS = ['title', 'idea', 'why', 'failure', 'experiment'];
 
-  function readerHTML() {
-    return '<div class="reader">' +
-      '<button class="btn btn--quiet reader__btn" data-act="speak">' +
-      esc(COPY.listenCta || 'Listen') + '</button>' +
-      '<button class="btn btn--quiet reader__btn" data-act="speak-stop" hidden>' +
-      esc(COPY.listenStop || 'Stop') + '</button>' +
-      '<span class="reader__note">' + esc(COPY.listenNote ||
-        'Read aloud by this browser. Nothing is downloaded and nothing is sent anywhere.') +
+  function readerHTML(l, canAdvance) {
+    var h = '<div class="reader">';
+    h += '<button class="btn btn--quiet reader__btn" data-act="speak" data-id="' + esc(l.id) + '">' +
+      esc(COPY.listenCta || 'Listen') + '</button>';
+    h += '<button class="btn btn--quiet reader__btn" data-act="speak-stop" hidden>' +
+      esc(COPY.listenStop || 'Stop') + '</button>';
+
+    /* Library only, on exactly the reasoning that keeps the pager there: Today
+       is deliberately one entry, and anything that walks to the next one would
+       undo the mechanic the whole page is built around. Reading ahead is
+       already free here, so a run of entries is only fewer clicks than the
+       pager, not a new permission. */
+    if (canAdvance) {
+      h += '<button class="chip reader__auto" data-act="autoplay" aria-pressed="' +
+        (!!state.autoplay) + '">' + esc(COPY.autoplayCta || 'Keep playing') + '</button>';
+    }
+
+    h += '<span class="reader__note">' + esc(COPY.listenNote ||
+      'Read aloud by this browser. Nothing is downloaded and nothing is sent anywhere.') +
       '</span></div>';
+    return h;
+  }
+
+  /* A beat between entries. Without it the next title begins on the last
+     syllable of the previous entry and a run turns into one undifferentiated
+     stream, which is the thing that makes it hard to notice you stopped
+     listening two entries ago. Long enough to register as a break, short
+     enough not to read as the run having ended. */
+  var AUTOPLAY_GAP = 1200;
+  var autoTimer = null;
+
+  /* Forwards only, in the order the library is showing, which is the order the
+     pager already offers. It stops at the end rather than wrapping: the corpus
+     is a sequence with a last entry, and looping to the start would quietly
+     restart a run somebody thought was winding down. */
+  function playNext(id) {
+    var nb = libNeighbours(id);
+    if (!nb.next) { toast(COPY.autoplayEnd || 'That was the last entry'); return; }
+
+    libOpen = nb.next.id;
+    renderLibrary();
+    el('field').scrollIntoView({ block: 'start', behavior: 'auto' });
+
+    var btn = el('view-library').querySelector('[data-act="speak"]');
+    if (btn) startReading(btn);
   }
 
   /* Collected from the rendered DOM rather than from the entry object, so what
@@ -3405,6 +3450,13 @@ window.SITE = {
     var parts = speakableParts(entry);
     if (!parts.length) { toast(COPY.listenEmpty || 'Nothing to read on this one'); return; }
 
+    /* A new read supersedes any advance still waiting out its gap. Without
+       this, pressing Listen again during the pause leaves two timers armed for
+       the same entry and the run jumps two entries instead of one. */
+    clearTimeout(autoTimer);
+    autoTimer = null;
+
+    var id = btn.dataset.id;
     var stopBtn = entry.querySelector('[data-act="speak-stop"]');
     var lit = null;
 
@@ -3428,6 +3480,18 @@ window.SITE = {
         toast(why === 'network'
           ? (COPY.listenNetworkGone || 'That voice is served over the network and it did not answer')
           : (COPY.listenStopped || 'The voice stopped and would not start again'));
+      },
+      /* The conditions are tested when the gap expires rather than when it is
+         scheduled. A second is long enough to leave the library in, open a
+         different entry in, or switch the toggle off in, and all three should
+         call the run off - so what was true when the entry finished is not
+         what decides whether the next one starts. */
+      onDone: function () {
+        if (!state.autoplay) return;
+        autoTimer = setTimeout(function () {
+          autoTimer = null;
+          if (state.autoplay && view === 'library' && libOpen === id) playNext(id);
+        }, AUTOPLAY_GAP);
       }
     });
 
@@ -3456,7 +3520,7 @@ window.SITE = {
     h += '<p class="entry__source" data-speak="source">' + esc(COPY.sourcePrefix || 'After') + ' <em>' + esc(l.source) + '</em></p>';
     /* Offered only past the gate. Below it the entry is the gate, and a button
        promising to read the entry aloud would be reading out a form. */
-    if (SPEECH.available && !locked) h += readerHTML();
+    if (SPEECH.available && !locked) h += readerHTML(l, !opts.canComplete);
     h += '</header>';
 
     /* An entry that declares a sum uses the arithmetic gate. Anything else on
@@ -4244,6 +4308,16 @@ window.SITE = {
       return;
     }
     if (act === 'speak-stop') { SPEECH.stop(); return; }
+
+    /* The attribute is set in place rather than re-rendered, because every
+       render path stops the reader - flipping this mid-entry would silence the
+       thing it is about to keep playing. */
+    if (act === 'autoplay') {
+      state.autoplay = !state.autoplay;
+      save();
+      b.setAttribute('aria-pressed', String(state.autoplay));
+      return;
+    }
 
     if (act === 'lib-open') { libOpen = id; renderLibrary(); el('field').scrollIntoView({ block: 'start' }); return; }
     if (act === 'lib-close') { libOpen = null; renderLibrary(); return; }

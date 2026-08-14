@@ -156,7 +156,15 @@
   }
 
   function step() {
-    if (at >= queue.length) { finish(); return; }
+    /* The one place a read is known to have reached the end, and so the only
+       place onDone fires. stop() and a refused utterance both land in finish()
+       as well, and neither of those means the entry was heard through -
+       collapsing the three would have pressing Stop start the next entry. */
+    if (at >= queue.length) {
+      finish();
+      if (hooks.onDone) hooks.onDone();
+      return;
+    }
 
     var mine = gen;
     var item = queue[at];

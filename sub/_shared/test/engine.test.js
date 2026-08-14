@@ -1160,6 +1160,74 @@ check('a pool of nothing but toys yields no preference at all', () => {
   assert.strictEqual(env.window.SPEECH.voice(), null);
 });
 
+/* --- Autoplay ------------------------------------------------------------
+   The whole feature hangs on one distinction: a read that reached the end,
+   versus one that was stopped or refused. Get that wrong and pressing Stop
+   starts the next entry. */
+
+check('reaching the end of an entry reports it', () => {
+  const env = boot(PLAIN, T0);
+  let done = 0;
+  env.window.SPEECH.speak([{ text: 'One sentence.' }], { onDone: () => { done++; } });
+  assert.strictEqual(done, 1);
+});
+
+check('stopping a read is not reaching the end of it', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.speak = u => { e.window.__live = u; };
+  });
+  let done = 0;
+  env.window.SPEECH.speak([{ text: 'One sentence.' }], { onDone: () => { done++; } });
+  env.window.SPEECH.stop();
+  assert.strictEqual(done, 0, 'Stop must never walk on to the next entry');
+});
+
+check('a refused voice is not reaching the end either', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.speak = u => { u.onerror({ error: 'synthesis-failed' }); };
+  });
+  let done = 0;
+  env.window.SPEECH.speak([{ text: 'One sentence.' }], { onDone: () => { done++; } });
+  assert.strictEqual(done, 0, 'a failed read must not autoplay past itself');
+});
+
+check('the toggle is offered in the library and withheld from today', () => {
+  const env = boot(PLAIN, T0);
+  assert.ok(!env.els['view-today'].innerHTML.includes('data-act="autoplay"'),
+    'today is one entry on purpose - walking onward would undo the mechanic');
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: env.window.LESSONS[0].id }));
+  assert.ok(env.els['view-library'].innerHTML.includes('data-act="autoplay"'),
+    'the library already permits reading ahead, so a run of entries is only fewer clicks');
+});
+
+check('the toggle survives a reload', () => {
+  const a = boot(PLAIN, T0);
+  a.fire('click', target({ act: 'autoplay' }));
+  assert.strictEqual(a.state().autoplay, true);
+
+  const b = boot(PLAIN, T0, { ...a.store });
+  b.fire('click', target({ act: 'go', view: 'library' }));
+  b.fire('click', target({ act: 'lib-open', id: b.window.LESSONS[0].id }));
+  assert.ok(b.els['view-library'].innerHTML.includes('aria-pressed="true"'));
+});
+
+check('an old record without the field boots with it off', () => {
+  // load() merges onto the blank, so a browser holding a record written before
+  // the setting existed reads as off rather than as undefined.
+  const a = boot(PLAIN, T0);
+  a.fire('click', target({ act: 'autoplay' }));
+  const stored = JSON.parse(a.store['fixt-plain.v1']);
+  assert.strictEqual(stored.autoplay, true, 'precondition: the toggle was saved');
+  delete stored.autoplay;
+
+  const b = boot(PLAIN, T0, { 'fixt-plain.v1': JSON.stringify(stored) });
+  b.fire('click', target({ act: 'go', view: 'library' }));
+  b.fire('click', target({ act: 'lib-open', id: b.window.LESSONS[0].id }));
+  assert.ok(b.els['view-library'].innerHTML.includes('aria-pressed="false"'));
+});
+
 check('a sentence with nowhere to break is spoken whole rather than cut badly', () => {
   // One long utterance beats a pause dropped into the middle of a clause. The
   // limit exists to dodge a browser bug; a stumble every time is the worse
