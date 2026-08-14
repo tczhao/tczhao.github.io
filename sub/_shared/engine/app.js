@@ -15,6 +15,7 @@
   var SITE = window.SITE || {};
   var LESSONS = window.LESSONS || [];
   var EXPR = window.EXPR;                    // engine/expr.js, loaded before this
+  var SPEECH = window.SPEECH;                // engine/speech.js, same
 
   var KEY = SITE.key;
   var TRACKS = SITE.tracks || [];
@@ -63,7 +64,7 @@
     var h = '<div class="evidence" data-rep="' + esc(l.replication) + '"' +
       (stale(l) ? ' data-stale="1"' : '') + '>';
     h += '<p class="block__label">' + esc(COPY.labelEvidence || 'The evidence') + '</p>';
-    h += '<p class="evidence__cite">' + esc(l.evidence) + '</p>';
+    h += '<p class="evidence__cite" data-speak="evidence">' + esc(l.evidence) + '</p>';
     if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
       h += '<p class="evidence__interval">' + esc(l.interval.measure || 'interval') + ' ' +
         l.interval.lo + ' to ' + l.interval.hi + '</p>';
@@ -818,6 +819,87 @@
       '</nav>';
   }
 
+  /* --- The reader ---------------------------------------------------------
+     Which marked parts of a rendered entry get spoken, as a set. Document
+     order decides the sequence, so a name added here cannot reorder the read.
+
+     Fail-closed on purpose. A block carrying no data-speak, or one whose name
+     is missing from this set, is silent. A block added later therefore stays
+     out of the audio until somebody decides it belongs, which is the right
+     default on a page built around withholding things until the reader has
+     committed to an answer of their own.
+
+     Marked but deliberately unread: 'source' is a citation and lands as an
+     interruption between the title and the idea, 'evidence' is intervals and
+     verdicts that are read with the eye rather than the ear, and 'worked' and
+     'reflection' are prose that could reasonably belong. All four are one word
+     away from being in. */
+  var SPEAK_PARTS = ['title', 'idea', 'why', 'failure', 'experiment'];
+
+  function readerHTML() {
+    return '<div class="reader">' +
+      '<button class="btn btn--quiet reader__btn" data-act="speak">' +
+      esc(COPY.listenCta || 'Listen') + '</button>' +
+      '<button class="btn btn--quiet reader__btn" data-act="speak-stop" hidden>' +
+      esc(COPY.listenStop || 'Stop') + '</button>' +
+      '<span class="reader__note">' + esc(COPY.listenNote ||
+        'Read aloud by this browser. Nothing is downloaded and nothing is sent anywhere.') +
+      '</span></div>';
+  }
+
+  /* Collected from the rendered DOM rather than from the entry object, so what
+     is spoken is what is on the screen and the two cannot drift apart. A
+     locked entry has no body to collect, which is why the gate needs no
+     handling here. */
+  function speakableParts(entry) {
+    var out = [];
+    Array.prototype.forEach.call(entry.querySelectorAll('[data-speak]'), function (node) {
+      if (SPEAK_PARTS.indexOf(node.getAttribute('data-speak')) === -1) return;
+      var text = (node.innerText || node.textContent || '').trim();
+      if (text) out.push({ node: node, text: text });
+    });
+    return out;
+  }
+
+  /* The button drives itself from the reader's callbacks instead of going
+     through render(), because a re-render mid-read would replace the element
+     the reader is highlighting. */
+  function startReading(btn) {
+    var entry = btn.closest('.entry');
+    if (!entry) return;
+
+    var parts = speakableParts(entry);
+    if (!parts.length) { toast(COPY.listenEmpty || 'Nothing to read on this one'); return; }
+
+    var stopBtn = entry.querySelector('[data-act="speak-stop"]');
+    var lit = null;
+
+    var started = SPEECH.speak(parts, {
+      onPart: function (i) {
+        if (lit) lit.removeAttribute('data-reading');
+        lit = i >= 0 ? parts[i].node : null;
+        if (lit) lit.setAttribute('data-reading', 'true');
+      },
+      onState: function (s) {
+        btn.textContent = s === 'playing' ? (COPY.listenPause || 'Pause')
+          : s === 'paused' ? (COPY.listenResume || 'Resume')
+            : (COPY.listenCta || 'Listen');
+        if (stopBtn) stopBtn.hidden = s === 'idle';
+      },
+      /* Without this the button just resets and the reader is left to guess
+         whether they mis-clicked. Neither message asks them to check their
+         connection, because the reader cannot tell a dropped one from a
+         captive portal or an endpoint that is simply down. */
+      onFail: function (why) {
+        toast(why === 'network'
+          ? (COPY.listenNetworkGone || 'That voice is served over the network and it did not answer')
+          : (COPY.listenStopped || 'The voice stopped and would not start again'));
+      }
+    });
+
+    if (!started) toast(COPY.listenNoVoice || 'This browser has no voice installed to read with');
+  }
+
   /* --- Entry (shared by Today and Library reader) ------------------------ */
   function entryHTML(l, opts) {
     opts = opts || {};
@@ -835,9 +917,12 @@
     h += '<span class="tag tag--time">' + readMinutes(l) + ' min</span>';
     if (lapsed(l)) h += '<span class="tag tag--lapsed">lapsed ' + esc(shortDate(l.expires)) + '</span>';
     h += '</div>';
-    h += '<h2 class="entry__title">' + esc(l.title) + '</h2>';
+    h += '<h2 class="entry__title" data-speak="title">' + esc(l.title) + '</h2>';
     h += '<div class="entry__rule"></div>';
-    h += '<p class="entry__source">' + esc(COPY.sourcePrefix || 'After') + ' <em>' + esc(l.source) + '</em></p>';
+    h += '<p class="entry__source" data-speak="source">' + esc(COPY.sourcePrefix || 'After') + ' <em>' + esc(l.source) + '</em></p>';
+    /* Offered only past the gate. Below it the entry is the gate, and a button
+       promising to read the entry aloud would be reading out a form. */
+    if (SPEECH.available && !locked) h += readerHTML();
     h += '</header>';
 
     /* An entry that declares a sum uses the arithmetic gate. Anything else on
@@ -864,17 +949,17 @@
     }
 
     h += '<div class="block"><p class="block__label">' + esc(COPY.labelIdea || 'The idea') + '</p>';
-    h += '<div class="block__body"><p class="lead">' + esc(l.idea) + '</p></div></div>';
+    h += '<div class="block__body" data-speak="idea"><p class="lead">' + esc(l.idea) + '</p></div></div>';
 
     /* Above the mechanism rather than below it. The prose is what drifts past
        the citation, so the citation has to be read first to be a check on it. */
     if (HAS_EVIDENCE && l.evidence) h += evidenceHTML(l);
 
     h += '<div class="block"><p class="block__label">' + esc(COPY.labelWhy || 'Why it holds') + '</p>';
-    h += '<div class="block__body">' + paras(l.why) + '</div></div>';
+    h += '<div class="block__body" data-speak="why">' + paras(l.why) + '</div></div>';
 
     h += '<div class="block block--failure"><p class="block__label">' + esc(COPY.labelFailure || 'What goes wrong without it') + '</p>';
-    h += '<div class="block__body">' + paras(l.failureMode) + '</div></div>';
+    h += '<div class="block__body" data-speak="failure">' + paras(l.failureMode) + '</div></div>';
 
     /* Immediately after the diagnosis, because broken then repaired is the pair
        the reader is actually comparing. Only reachable past the gate: this is
@@ -882,11 +967,11 @@
        early while the entry is locked. */
     if (l.worked) {
       h += '<div class="worked"><p class="block__label">' + esc(COPY.labelWorked || 'One good repair') + '</p>';
-      h += '<div class="worked__body">' + paras(l.worked) + '</div></div>';
+      h += '<div class="worked__body" data-speak="worked">' + paras(l.worked) + '</div></div>';
     }
 
     h += '<div class="experiment"><p class="experiment__label">' + esc(COPY.labelExperiment || 'Try this today') + '</p>';
-    h += '<div class="experiment__body">' + paras(l.experiment) + '</div></div>';
+    h += '<div class="experiment__body" data-speak="experiment">' + paras(l.experiment) + '</div></div>';
 
     if (HAS_FORECAST && l.forecast) {
       var already = forecastList().filter(function (f) { return f.source === l.id; })[0];
@@ -906,7 +991,7 @@
 
     h += '<div class="reflect">';
     h += '<p class="block__label">' + esc(COPY.labelReflect || 'Log it') + '</p>';
-    h += '<p class="reflect__prompt">' + esc(l.reflection) + '</p>';
+    h += '<p class="reflect__prompt" data-speak="reflection">' + esc(l.reflection) + '</p>';
     h += '<textarea class="reflect__field" id="note-field" data-id="' + esc(l.id) + '" ' +
       'placeholder="' + esc(COPY.reflectPlaceholder || 'Write what actually happened, not what should have.') + '">' + esc(r.note || '') + '</textarea>';
     h += '<p class="reflect__state" id="note-state"></p>';
@@ -1133,6 +1218,7 @@
   }
 
   function renderLibrary() {
+    SPEECH.stop();
     var host = el('view-library');
 
     if (libOpen && BY_ID[libOpen]) {
@@ -1457,7 +1543,12 @@
     el('view-progress').innerHTML = h;
   }
 
+  /* Any re-render replaces the elements the reader is speaking from and
+     highlighting, so the read ends with them rather than carrying on against a
+     page that has moved underneath it. renderLibrary stops separately because
+     the filter and pager actions call it without coming through here. */
   function render() {
+    SPEECH.stop();
     renderChrome();
     VIEWS.forEach(function (v) { el('view-' + v).hidden = v !== view; });
     if (view === 'today') renderToday();
@@ -1611,6 +1702,15 @@
       return;
     }
 
+    if (act === 'speak') {
+      var sp = SPEECH.state();
+      if (sp === 'playing') SPEECH.pause();
+      else if (sp === 'paused') SPEECH.resume();
+      else startReading(b);
+      return;
+    }
+    if (act === 'speak-stop') { SPEECH.stop(); return; }
+
     if (act === 'lib-open') { libOpen = id; renderLibrary(); el('field').scrollIntoView({ block: 'start' }); return; }
     if (act === 'lib-close') { libOpen = null; renderLibrary(); return; }
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
@@ -1729,6 +1829,7 @@
     gateOpen: gateOpen, lapsed: lapsed, brier: brier, calibration: calibration,
     addForecast: addForecast, resolveForecast: resolveForecast, deepDivePrompt: deepDivePrompt,
     gapStats: gapStats, commitCompute: commitCompute, saveProfile: saveProfile,
+    speakableParts: speakableParts,
     state: function () { return state; }, seq: function () { return SEQ; }, go: go, render: render
   };
 })();

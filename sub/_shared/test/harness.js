@@ -74,7 +74,28 @@ function makeEnv(nowMs, storageKey) {
     execCommand: () => true
   };
 
-  const window = { LESSONS: [], SITE: null, matchMedia: () => ({ matches: false }) };
+  /* A synthesiser that speaks instantly and remembers what it was handed, so a
+   * test can assert on the words that would have come out of the speaker.
+   * Utterances finish synchronously: the reader queues the next one from onend,
+   * so this drains the whole queue inside the speak() that started it. */
+  const spoken = [];
+  const speechSynthesis = {
+    getVoices: () => [{ name: 'Test', lang: 'en-GB', localService: true }],
+    addEventListener() {},
+    speak(u) { spoken.push(u.text); if (u.onend) u.onend(); },
+    cancel() {}, pause() {}, resume() {}
+  };
+
+  const window = {
+    LESSONS: [], SITE: null,
+    matchMedia: () => ({ matches: false }),
+    addEventListener() {},
+    /* Present and online by default, which is what a browser reports unless it
+     * is certain otherwise. A test that wants the offline path sets onLine. */
+    navigator: { onLine: true },
+    speechSynthesis,
+    SpeechSynthesisUtterance: function (text) { this.text = text; }
+  };
 
   const localStorage = {
     getItem: k => (k in store ? store[k] : null),
@@ -83,7 +104,7 @@ function makeEnv(nowMs, storageKey) {
   };
 
   return {
-    els, window, document, localStorage, store, handlers, fields,
+    els, window, document, localStorage, store, handlers, fields, spoken,
     fire(type, target) { (handlers[type] || []).forEach(fn => fn({ target })); },
     setAttemptField(id, text) {
       const e = makeEl('attempt-' + id);
@@ -133,6 +154,8 @@ function boot(siteDir, nowMs, seedStore, mutate) {
 
   // expr.js publishes window.EXPR and app.js reads it, same order as the page.
   new Function('self', fs.readFileSync(path.join(ENGINE, 'expr.js'), 'utf8'))(env.window);
+  // speech.js publishes window.SPEECH, and likewise.
+  new Function('window', fs.readFileSync(path.join(ENGINE, 'speech.js'), 'utf8'))(env.window);
 
   const app = fs.readFileSync(path.join(ENGINE, 'app.js'), 'utf8');
   new Function('window', 'document', 'localStorage', 'navigator', 'setTimeout',

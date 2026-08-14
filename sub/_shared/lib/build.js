@@ -324,6 +324,7 @@ function assemble(cfg, mode) {
     const js = [fs.readFileSync(path.join(ROOT, 'site.js'), 'utf8')]
       .concat(files.map(f => fs.readFileSync(path.join(CONTENT, f), 'utf8')))
       .concat([fs.readFileSync(path.join(ENGINE, 'expr.js'), 'utf8')])
+      .concat([fs.readFileSync(path.join(ENGINE, 'speech.js'), 'utf8')])
       .concat([fs.readFileSync(path.join(ENGINE, 'app.js'), 'utf8')]);
     scripts = js.map(s => '<script>\n' + guard(s) + '\n</script>').join('\n');
   } else {
@@ -335,7 +336,7 @@ function assemble(cfg, mode) {
       .map(h => `<link rel="stylesheet" href="${h}">`).join('\n');
     scripts = ['site.js']
       .concat(files.map(f => 'content/' + f))
-      .concat([eng + 'expr.js', eng + 'app.js'])
+      .concat([eng + 'expr.js', eng + 'speech.js', eng + 'app.js'])
       .map(s => `<script src="${s}"></script>`).join('\n');
   }
 

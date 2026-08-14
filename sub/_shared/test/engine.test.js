@@ -391,6 +391,7 @@ check('blocked storage is surfaced instead of failing silently', () => {
   env.localStorage.setItem = () => { throw new Error('blocked'); };
   new Function('window', fs.readFileSync(path.join(FULL, 'site.js'), 'utf8'))(env.window);
   new Function('window', fs.readFileSync(path.join(FULL, 'content', '01.js'), 'utf8'))(env.window);
+  new Function('window', fs.readFileSync(path.join(ENGINE, 'speech.js'), 'utf8'))(env.window);
   const app = fs.readFileSync(path.join(ENGINE, 'app.js'), 'utf8');
   new Function('window', 'document', 'localStorage', 'navigator', 'setTimeout',
     'clearTimeout', 'Date', 'URL', 'Blob', app)(
@@ -949,6 +950,224 @@ check('the median absolute gap is reported across committed entries', () => {
   const html = env.els['view-progress'].innerHTML;
   assert.ok(/Median gap/.test(html), 'the gap has to reach the progress view, not just the api');
   assert.ok(/you read low/.test(html), 'and it has to say which direction');
+});
+
+/* --- The reader ----------------------------------------------------------
+   What the reader must never do is speak something the page is withholding, so
+   the checks below are mostly about silence: what it refuses to read, and what
+   is not in the page for it to read in the first place. */
+
+/* A stand-in for a rendered entry. querySelectorAll returning the marked nodes
+   in the order they were written is the only thing speakableParts asks of a
+   real one. */
+function markedEntry(marks) {
+  return {
+    querySelectorAll: () => marks.map(m => ({
+      getAttribute: k => (k === 'data-speak' ? m[0] : null),
+      innerText: m[1]
+    }))
+  };
+}
+
+check('the reader speaks the named parts, in the order they are written', () => {
+  const env = boot(PLAIN, T0);
+  const parts = env.api.speakableParts(markedEntry([
+    ['title', 'The title'],
+    ['source', 'After somebody'],
+    ['idea', 'The idea'],
+    ['why', 'The mechanism']
+  ]));
+  assert.deepStrictEqual(parts.map(p => p.text), ['The title', 'The idea', 'The mechanism'],
+    'the citation is marked but unread, and document order decides the rest');
+});
+
+check('a part nobody named is silent, however it is marked', () => {
+  // Fail-closed, which is the point. A block added to the entry later stays out
+  // of the audio until somebody decides it belongs, rather than being read
+  // aloud the day it ships.
+  const env = boot(PLAIN, T0);
+  const parts = env.api.speakableParts(markedEntry([
+    ['answer', 'The recall answer'],
+    ['idea', 'The idea']
+  ]));
+  assert.deepStrictEqual(parts.map(p => p.text), ['The idea']);
+});
+
+check('a gated entry offers no reader, because there is nothing yet to read', () => {
+  const env = boot(FULL, T0);
+  const shut = env.els['view-today'].innerHTML;
+  assert.ok(!shut.includes('data-act="speak"'), 'no reader over a gate');
+  assert.ok(!/data-speak="idea"/.test(shut), 'and the body it would read is not in the page at all');
+
+  env.document.getElementById('gate-field').value = 'a real call, written first';
+  env.fire('click', target({ act: 'gate-unlock', id: todayId(env) }));
+
+  const open = env.els['view-today'].innerHTML;
+  assert.ok(open.includes('data-act="speak"'), 'past the gate it is offered');
+  assert.ok(/data-speak="idea"/.test(open), 'and now there is a body to read');
+});
+
+check('a browser with no synthesiser is offered nothing', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    delete e.window.speechSynthesis;
+    delete e.window.SpeechSynthesisUtterance;
+  });
+  assert.strictEqual(env.window.SPEECH.available, false);
+  assert.ok(!env.els['view-today'].innerHTML.includes('data-act="speak"'),
+    'no control where pressing it could do nothing');
+});
+
+check('speaking drains every part and ends idle', () => {
+  const env = boot(PLAIN, T0);
+  env.window.SPEECH.speak([{ text: 'First part. Second sentence.' }, { text: 'Another part.' }], {});
+  assert.deepStrictEqual(env.spoken, ['First part.', 'Second sentence.', 'Another part.']);
+  assert.strictEqual(env.window.SPEECH.state(), 'idle', 'a finished read must not stay stuck playing');
+});
+
+check('prose is split into utterances short enough to finish', () => {
+  // Chrome gives up on one utterance after about fifteen seconds and says
+  // nothing, so the read has to arrive already in small pieces.
+  const env = boot(PLAIN, T0);
+  const long = 'Alpha beta gamma. ' + 'delta epsilon zeta eta theta, '.repeat(20) + 'and it ends.';
+  const chunks = env.window.SPEECH.split(long);
+  assert.ok(chunks.length > 2, 'it has to actually split');
+  assert.strictEqual(chunks[0], 'Alpha beta gamma.', 'and split on sentences first');
+  chunks.forEach(c => assert.ok(c.length <= 200, 'chunk left over the limit at ' + c.length));
+});
+
+/* The voice list is the single biggest thing between this and sounding like a
+   person, and the API says nothing about quality, so these pin the name rules
+   that stand in for it. */
+function withVoices(list) {
+  return boot(PLAIN, T0, null, e => { e.window.speechSynthesis.getVoices = () => list; });
+}
+const v = (name, lang, localService, def) => ({ name, lang, localService, default: !!def });
+
+check('a downloaded neural voice beats the old default', () => {
+  const env = withVoices([
+    v('Samantha', 'en-US', true, true),
+    v('Zarvox', 'en-US', true),
+    v('Ava (Premium)', 'en-US', true)
+  ]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Ava (Premium)');
+});
+
+check('a network voice beats the local 1990s set', () => {
+  const env = withVoices([
+    v('Samantha', 'en-US', true, true),
+    v('Google UK English Female', 'en-GB', false)
+  ]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Google UK English Female',
+    'offline-first must not mean settling for the worst voice on the machine');
+});
+
+check('but a local neural voice beats a network one', () => {
+  const env = withVoices([
+    v('Google UK English Female', 'en-GB', false),
+    v('Daniel (Enhanced)', 'en-GB', true)
+  ]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Daniel (Enhanced)');
+});
+
+check('with nothing marked, the browser default is taken rather than guessed at', () => {
+  const env = withVoices([
+    v('Bubbles', 'en-US', true),
+    v('Zarvox', 'en-US', true),
+    v('Samantha', 'en-US', true, true)
+  ]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Samantha',
+    'list order must never decide this, or the reader speaks in a novelty voice');
+});
+
+check('offline, a network voice is dropped rather than chosen and failed on', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.navigator.onLine = false;
+    e.window.speechSynthesis.getVoices = () => [
+      v('Google US English', 'en-US', false),
+      v('Samantha', 'en-US', true, true)
+    ];
+  });
+  env.window.SPEECH.speak([{ text: 'Something.' }], {});
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Samantha',
+    'the offline-forever property has to survive the quality ranking');
+});
+
+check('online, the same pair picks the better voice', () => {
+  // The pair above with one thing changed, so the guard is doing the work
+  // rather than the ranking having quietly reverted.
+  const env = withVoices([v('Google US English', 'en-US', false), v('Samantha', 'en-US', true, true)]);
+  env.window.SPEECH.speak([{ text: 'Something.' }], {});
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Google US English');
+});
+
+check('connectivity is re-read at the moment of use, not at boot', () => {
+  const env = withVoices([v('Google US English', 'en-US', false), v('Samantha', 'en-US', true, true)]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Google US English', 'online at boot');
+  env.window.navigator.onLine = false;
+  env.window.SPEECH.speak([{ text: 'Something.' }], {});
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Samantha',
+    'a laptop that loses wifi between entries must not fail on the next click');
+});
+
+check('offline with nothing local leaves the choice to the browser', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.navigator.onLine = false;
+    e.window.speechSynthesis.getVoices = () => [v('Google US English', 'en-US', false)];
+  });
+  assert.strictEqual(env.window.SPEECH.voice(), null);
+});
+
+check('a network voice that will not answer says which kind of failure it was', () => {
+  // navigator.onLine cannot see a captive portal, so this path is the only
+  // thing standing between the reader and a button that silently does nothing.
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.getVoices = () => [v('Google US English', 'en-US', false)];
+    e.window.speechSynthesis.speak = u => { u.onerror({ error: 'network' }); };
+  });
+  let why = null;
+  env.window.SPEECH.speak([{ text: 'Something.' }], { onFail: r => { why = r; } });
+  assert.strictEqual(why, 'network');
+  assert.strictEqual(env.window.SPEECH.state(), 'idle', 'and it must not stay stuck playing');
+});
+
+check('a local voice that will not speak is reported as itself', () => {
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.getVoices = () => [v('Samantha', 'en-US', true, true)];
+    e.window.speechSynthesis.speak = u => { u.onerror({ error: 'synthesis-failed' }); };
+  });
+  let why = null;
+  env.window.SPEECH.speak([{ text: 'Something.' }], { onFail: r => { why = r; } });
+  assert.strictEqual(why, 'voice');
+});
+
+check('a cancelled read is not reported as a failure', () => {
+  // stop() cancels, and browsers deliver that as an error on the utterance in
+  // flight. Reporting it would fire a toast every time somebody pressed Stop.
+  const env = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.speak = u => { e.window.__live = u; };
+  });
+  let why = null;
+  env.window.SPEECH.speak([{ text: 'Something.' }], { onFail: r => { why = r; } });
+  env.window.SPEECH.stop();
+  env.window.__live.onerror({ error: 'canceled' });
+  assert.strictEqual(why, null);
+});
+
+check('a pool of nothing but toys yields no preference at all', () => {
+  // Declining to choose hands it to the browser. Choosing anything here picks a
+  // toy, which is worse than any default could be.
+  const env = withVoices([v('Bubbles', 'en-US', true), v('Zarvox', 'en-US', true)]);
+  assert.strictEqual(env.window.SPEECH.voice(), null);
+});
+
+check('a sentence with nowhere to break is spoken whole rather than cut badly', () => {
+  // One long utterance beats a pause dropped into the middle of a clause. The
+  // limit exists to dodge a browser bug; a stumble every time is the worse
+  // trade of the two.
+  const env = boot(PLAIN, T0);
+  const unbroken = 'word '.repeat(80).trim() + '.';
+  assert.ok(unbroken.length > 200, 'the fixture has to be over the limit to test anything');
+  assert.deepStrictEqual(env.window.SPEECH.split(unbroken), [unbroken]);
 });
 
 report('engine');

@@ -521,6 +521,38 @@ button { font: inherit; color: inherit; }
   color: var(--accent-ink);
 }
 
+/* --- The reader ----------------------------------------------------------
+   Sits under the source line, in the header rather than in the actions row at
+   the foot: it is an offer about how to take the entry in, so it has to be
+   there before you have read it. */
+.reader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--u);
+  margin-top: var(--u);
+}
+
+.reader__btn {
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1.6);
+  font-size: 0.75rem;
+}
+
+.reader__note {
+  font-family: var(--face-ui);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+/* The tint is bled outwards with a spread shadow rather than padding, so the
+   block being spoken lights up without the prose reflowing under it. */
+[data-reading] {
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 6px var(--accent-soft);
+  border-radius: 1px;
+  transition: background 0.2s ease;
+}
+
 /* --- Library pager -------------------------------------------------------
    Two equal columns so the next entry keeps the right-hand side whether or not
    there is a previous one to balance it. auto-fit rather than a breakpoint:
