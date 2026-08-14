@@ -50,7 +50,15 @@ window.SITE = {
      refuses a track with no entries and a declared empty track would ship as a
      hole in the sequence. */
   tracks: [
-    { id: 'question', name: 'The live question' }
+    { id: 'question', name: 'The live question' },
+    { id: 'order', name: 'Where the answer goes' },
+    { id: 'standing', name: 'Standing' },
+    { id: 'boundary', name: 'The boundary' },
+    { id: 'specific', name: 'This case, not the policy' },
+    { id: 'reads', name: 'What it will read as' },
+    { id: 'distance', name: 'Distance' },
+    { id: 'commitment', name: 'The commitment' },
+    { id: 'after', name: 'After it lands' }
   ],
 
   /* Graded by how far the message travels and how hard it is to take back. A

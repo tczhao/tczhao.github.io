@@ -19,6 +19,7 @@ No attribution is required under these licences; recorded here for provenance.
 | leastauthority | Padlock Gate | Michael Bennett | CC0 | https://stocksnap.io/photo/padlock-gate-2CIM1SFTOK |
 | maillard | Frying pan pot rack | Alan Kyker | PDM | https://www.flickr.com/photos/188479097@N07/52296704418 |
 | nomogram | Circular Slide Rule, William J | unknown | CC0 | https://www.rawpixel.com/image/9064897/circular-slide-rule-william-powell |
+| parallax | Troughton & Simms theodolite, lenses, bronze and wood | Wilfredor | CC0 | https://commons.wikimedia.org/w/index.php?curid=186559908 |
 | practicum | Blank Notebook | Messala Ciulla | CC0 | https://stocksnap.io/photo/blank-notebook-YYJBMNVN6Q |
 | run | Sport Sneaker Shoe | unknown | CC0 | https://www.rawpixel.com/image/5917192/sport-sneaker-shoe-free-public-domain-cc0-image |
 | scorepad | Free abacus image | unknown | CC0 | https://www.rawpixel.com/image/5913120/image-public-domain-art-office |
