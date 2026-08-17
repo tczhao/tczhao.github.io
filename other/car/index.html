@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Port Injection &middot; 1995&ndash;2025</title>
+<meta name="description" content="Five port-injected cars a year, 1995 to 2025, ranked for owning and fixing yourself. Australian market.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abel&family=Source+Code+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --fg: #16150f;
+    --fg-mid: #4a483d;
+    --fg-dim: #7c7969;
+    --rule: #ded9cc;
+    --rule-soft: #ebe7dc;
+    --panel: #f3f0e8;
+    --ink: #16150f;
+    --max-w: 1080px;
+    --pad: 4vw;
+
+    /* Three categorical slots, assigned in fixed order and never cycled. Validated
+       against this page's own surfaces in both modes: worst all-pairs CVD deltaE 9.2
+       light and 9.4 dark against a target of 8. Slot 3 sits at 2.7:1 on the light
+       surface, so the relief rule applies and is met by the row labels on the chart
+       and the year lists in text below. */
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --grid: #e6e2d6;
+    --axis: #c9c4b4;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14140f;
+      --fg: #efece2;
+      --fg-mid: #b3af9f;
+      --fg-dim: #83806f;
+      --rule: #33322a;
+      --rule-soft: #262620;
+      --panel: #1c1c15;
+      --ink: #efece2;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --grid: #2b2b23;
+      --axis: #3d3c31;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Abel', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* masthead */
+
+  .masthead { padding-block: 4vw 0; }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    letter-spacing: 0.01em;
+    margin-bottom: 10px;
+  }
+
+  .standfirst {
+    font-size: 0.86rem;
+    font-style: italic;
+    color: var(--fg-mid);
+    max-width: 60ch;
+  }
+
+  .range {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    color: var(--fg-dim);
+  }
+  .range::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--axis), transparent);
+  }
+
+  /* stat row */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: clamp(30px, 4vw, 46px);
+  }
+
+  .stat {
+    background: var(--bg);
+    padding: 16px 18px 14px;
+  }
+
+  .stat-value {
+    font-family: 'Abel', sans-serif;
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-top: 9px;
+  }
+
+  .stat-sub {
+    font-size: 0.7rem;
+    color: var(--fg-mid);
+    margin-top: 3px;
+  }
+
+  /* span chart */
+
+  .viz {
+    border-top: 1px solid var(--rule);
+    margin-top: clamp(36px, 5vw, 64px);
+    padding-top: clamp(26px, 3vw, 38px);
+  }
+
+  .viz-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-bottom: 6px;
+  }
+
+  .viz-title {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  .viz-note {
+    font-size: 0.78rem;
+    color: var(--fg-mid);
+    max-width: 70ch;
+    margin-bottom: 18px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+
+  .viz-count {
+    font-size: 0.64rem;
+    color: var(--fg-dim);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.7rem;
+    color: var(--fg-mid);
+  }
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--swatch);
+    flex: none;
+  }
+
+  .viz-scroll {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .viz-scroll svg { display: block; min-width: 660px; width: 100%; }
+
+  .row-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 8.5px;
+    fill: var(--fg-mid);
+  }
+  .row-label.is-active { fill: var(--fg); font-weight: 600; }
+
+  .axis-tick {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 9px;
+    fill: var(--fg-dim);
+  }
+
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .axisline { stroke: var(--axis); stroke-width: 1; }
+  .year-band { fill: var(--panel); }
+
+  .span-bar { cursor: pointer; fill: var(--swatch); }
+  .viz-scroll.is-hovering .span-bar { opacity: 0.28; }
+  .viz-scroll.is-hovering .span-bar.is-active { opacity: 1; }
+
+  .viz-tip {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    background: var(--bg);
+    border: 1px solid var(--axis);
+    border-radius: 3px;
+    padding: 8px 11px 9px;
+    min-width: 190px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+  }
+  .viz-tip.is-on { opacity: 1; }
+  .viz-tip b { font-family: 'Abel', sans-serif; font-weight: 400; font-size: 0.95rem; }
+  .viz-tip dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1px 10px;
+    margin-top: 6px;
+    font-size: 0.68rem;
+  }
+  .viz-tip dt { color: var(--fg-dim); }
+  .viz-tip dd { color: var(--fg-mid); }
+
+  /* prose blocks */
+
+  .intro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+    border-top: 1px solid var(--rule);
+    margin-top: clamp(36px, 5vw, 64px);
+    padding-top: clamp(28px, 3vw, 40px);
+  }
+
+  .intro h2 {
+    font-size: 0.68rem;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 14px;
+  }
+
+  .intro p { font-size: 0.82rem; color: var(--fg-mid); }
+  .intro p + p { margin-top: 12px; }
+
+  .criteria { list-style: none; counter-reset: c; }
+  .criteria li {
+    counter-increment: c;
+    font-size: 0.82rem;
+    color: var(--fg-mid);
+    padding-left: 30px;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .criteria li::before {
+    content: counter(c);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.68rem;
+    color: var(--fg-dim);
+  }
+  .criteria b { font-weight: 600; color: var(--fg); }
+
+  .stance {
+    border-left: 1px solid var(--rule);
+    padding-left: 14px;
+    margin-top: 18px;
+  }
+  .stance b { font-weight: 600; color: var(--fg); }
+
+  /* controls */
+
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    margin-top: clamp(36px, 5vw, 64px);
+    padding-block: 14px;
+  }
+
+  /* One wrapping line of segmented groups. The 31 years live in a select rather
+     than a chip rail, which is what used to eat the screen. */
+  .control-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px 16px;
+  }
+
+  .group { display: flex; align-items: center; gap: 7px; }
+
+  .control-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .chips {
+    display: flex;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .chip {
+    font: inherit;
+    font-size: 0.66rem;
+    line-height: 1.6;
+    color: var(--fg-mid);
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--rule);
+    padding: 1px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .chip:first-child { border-left: 0; }
+  .chip:hover { color: var(--fg); background: var(--panel); }
+  .chip[aria-pressed="true"] { color: var(--bg); background: var(--ink); }
+
+  .year-select {
+    font: inherit;
+    font-size: 0.66rem;
+    color: var(--fg-mid);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1px 4px;
+    cursor: pointer;
+  }
+  .year-select:hover { color: var(--fg); }
+
+  .tally {
+    font-size: 0.64rem;
+    color: var(--fg-dim);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* year blocks */
+
+  main { padding-top: clamp(30px, 4vw, 52px); }
+
+  .year {
+    border-top: 1px solid var(--rule-soft);
+    padding-top: 22px;
+    margin-bottom: clamp(38px, 4vw, 60px);
+    scroll-margin-top: 130px;
+  }
+  .year:first-child { border-top: 0; padding-top: 0; }
+
+  .year-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-bottom: 20px;
+  }
+
+  .year-num {
+    font-family: 'Abel', sans-serif;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .year-note {
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--fg-mid);
+    max-width: 62ch;
+  }
+
+  .picks { list-style: none; }
+
+  .pick {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 0 12px;
+    padding: 16px 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .pick:first-child { border-top: 0; padding-top: 0; }
+
+  .pick-rank {
+    font-size: 0.72rem;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  /* The figure is removed on load error, so a missing file falls back to the
+     text-only layout rather than a broken image. */
+  .pick-main { display: flex; align-items: flex-start; gap: 18px; }
+  .pick-text { flex: 1; min-width: 0; }
+
+  .pick-figure { flex: 0 0 172px; margin: 0; }
+  .pick-figure img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+    background: var(--panel);
+    border-radius: 2px;
+  }
+  .pick-figure figcaption {
+    font-size: 0.55rem;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    color: var(--fg-dim);
+    margin-top: 5px;
+  }
+
+  .pick-model {
+    font-family: 'Abel', sans-serif;
+    font-size: 1.32rem;
+    line-height: 1.2;
+  }
+  .pick-model .gen {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.68rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+
+  .pick-engine {
+    font-size: 0.78rem;
+    color: var(--fg-mid);
+    margin-top: 3px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+
+  .tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-mid);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 0 5px;
+    line-height: 1.75;
+  }
+  /* Identity rides a swatch, not the text colour, so the tag reads the same as
+     the chart legend and the label keeps its ink contrast. */
+  .tag.inj::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--swatch);
+  }
+  /* Slot classes carry identity everywhere: tag swatch, legend swatch, chart bar. */
+  .slot-1 { --swatch: var(--series-1); }
+  .slot-2 { --swatch: var(--series-2); }
+  .slot-3 { --swatch: var(--series-3); }
+
+  .pick-body { margin-top: 11px; max-width: 74ch; }
+
+  .pick-body p {
+    font-size: 0.8rem;
+    color: var(--fg-mid);
+  }
+  .pick-body p + p { margin-top: 7px; }
+
+  .pick-body .k {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+
+  .empty {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--fg-dim);
+    padding: 4px 0 8px;
+  }
+
+  /* tail */
+
+  .tail {
+    border-top: 1px solid var(--rule);
+    margin-top: clamp(30px, 4vw, 50px);
+    padding: clamp(28px, 3vw, 40px) 0 clamp(44px, 5vw, 70px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+  }
+
+  .tail h2 {
+    font-size: 0.68rem;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 14px;
+  }
+  .tail p { font-size: 0.78rem; color: var(--fg-mid); }
+  .tail p + p { margin-top: 11px; }
+
+  @media (max-width: 599px) {
+    .pick { grid-template-columns: 22px minmax(0, 1fr); }
+    .pick-model .gen { display: block; margin-left: 0; margin-top: 2px; }
+    .tally { margin-left: 0; width: 100%; }
+    .pick-main { flex-direction: column; gap: 12px; }
+    .pick-figure { flex-basis: auto; width: 100%; max-width: 280px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead wrap">
+  <h1>Port Injection</h1>
+  <p class="standfirst">Five cars a year from 1995 to 2025, ranked for the person who does their own spanner work. Australian-delivered models, port injection first.</p>
+
+  <p class="range">1995 &nbsp;&rarr;&nbsp; 2025</p>
+
+  <div class="stats" id="stats"></div>
+
+  <section class="viz">
+    <div class="viz-head">
+      <h2 class="viz-title">What you could actually buy</h2>
+      <div class="legend" id="vizLegend"></div>
+      <span class="viz-count" id="vizCount"></span>
+    </div>
+    <p class="viz-note">Every platform on this list, drawn across the years it was on sale here, and it follows the filters. On petrol the thesis is visible in the shape: dense for two decades, thinning sharply after 2016, and what carries port injectors into the 2020s is a handful of live-axle four wheel drives plus Toyota running port and direct together. On diesel the story is a clean handover, mechanical injection stopping dead around 2007 and common rail taking the whole field. A squared-off left edge means the model was already on sale before 1995.</p>
+    <div class="viz-scroll" id="vizScroll">
+      <svg id="spanChart" role="img" aria-label="Production spans of all 60 platforms from 1995 to 2025, coloured by injection type"></svg>
+      <div class="viz-tip" id="vizTip"></div>
+    </div>
+  </section>
+
+  <div class="intro">
+    <div>
+      <h2>What this ranks for</h2>
+      <ol class="criteria">
+        <li><b>Parts, decades out.</b> An OEM supply or a real aftermarket, not one seller with a used one.</li>
+        <li><b>Access.</b> Can you reach the thing that fails without pulling the engine. A transverse V6 rear bank is a penalty.</li>
+        <li><b>Documentation.</b> A factory manual in circulation and a forum that quotes torque specs.</li>
+        <li><b>Predictability.</b> Known failure points beat mystery electronics. A car with a famous weak spot is easier to own than one with none listed.</li>
+        <li><b>Tooling.</b> No dealer-only scan tool to bleed brakes, register a battery or reset a service light.</li>
+        <li><b>Structure.</b> A body that survives the sun and holds a jack point where you need one.</li>
+      </ol>
+      <p class="stance"><b>A timing belt is not a demerit here.</b> A belt is a scheduled front-of-engine job on a known interval for a few hundred dollars in parts. A chain has no interval, so it gets deferred until it rattles, and by then the job is often sump-off or engine-out. The chain advantage belongs to whoever pays a shop and sells the car at 150,000&nbsp;km. If you are doing the work yourself the belt is the better deal, and the timing filter below is a preference rather than a ranking.</p>
+      <p class="stance"><b>A famous weak spot is not a demerit either.</b> A documented failure with cheap parts and a written procedure is easier to own than a car with nothing listed against it, because nothing listed usually means nobody has published the fix yet. That is why the EJ Subarus are here despite their head gaskets.</p>
+    </div>
+    <div>
+      <h2>Why the years are not comparable</h2>
+      <p>Port injection is not a discriminator for most of this range. From 1995 to about 2006 nearly every petrol car sold here was port injected, so the filter selects nothing and these years are ranked on mechanics alone.</p>
+      <p>Direct injection arrives around 2007 and spreads. By 2016 the constraint has inverted and port injection is the scarce thing. By 2024 a new port-injected petrol car in Australia is a Jimny, a Pentastar Jeep or a Toyota that keeps port injectors as half of a dual system.</p>
+      <p>Entries marked <span class="tag dual">dual</span> run port and direct injectors on the same engine, Toyota&rsquo;s D-4S being the common case. They keep the intake valves washed and keep a low-pressure circuit alive, which is most of what you wanted from port injection, but they add a high-pressure pump and a second set of injectors. Filter them out with the control below if you want the pure article.</p>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="wrap control-bar">
+    <div class="group">
+      <span class="control-label">Fuel</span>
+      <div class="chips" id="fuelChips"></div>
+    </div>
+    <div class="group">
+      <span class="control-label">Injection</span>
+      <div class="chips" id="injChips"></div>
+    </div>
+    <div class="group">
+      <span class="control-label">Driven</span>
+      <div class="chips" id="driveChips"></div>
+    </div>
+    <div class="group">
+      <span class="control-label">Timing</span>
+      <div class="chips" id="timingChips"></div>
+    </div>
+    <div class="group">
+      <span class="control-label">Year</span>
+      <select class="year-select" id="yearSelect" aria-label="Year"></select>
+    </div>
+    <span class="tally" id="tally"></span>
+  </div>
+</div>
+
+<main class="wrap" id="years"></main>
+
+<footer class="tail wrap">
+  <div>
+    <h2>Check before you buy</h2>
+    <p>Engine codes and injection types are the load-bearing claims on this page, and Australian-delivered specification sometimes differs from the same model sold in the United States or Japan. Read the engine code off the compliance plate or the block on the actual car, then confirm the fuel system against a factory manual for that market and build date.</p>
+    <p>Mid-generation changes are common and rarely advertised. Subaru moved the naturally aspirated boxers from the EJ to the FB inside a single model code, and Mazda swapped the MZR for Skyactiv inside the BL Mazda 3.</p>
+  </div>
+  <div>
+    <h2>What is deliberately missing</h2>
+    <p>Diesels. Every modern common-rail diesel is direct injected by definition, so the whole category falls outside the question even though a 1HZ or a 1KZ-TE is a fine thing to own and fix.</p>
+    <p>Cars whose parts supply has already gone. A platform can be mechanically simple and still be a bad long-term prospect once the only source for a wear item is a wrecker.</p>
+    <p>Rankings within a year are a judgement call, not a measurement. The engine codes and injection types are checkable facts. The order is an opinion about what your weekends will feel like.</p>
+  </div>
+</footer>
+
+<script>
+// Each platform appears once. Years reference them, because a good platform stays
+// good across its production run and a wrong engine code should only need one fix.
+// span: Australian sale years for that generation and engine combination.
+const PLATFORMS = {
+  'lc80': {
+    model: 'Toyota LandCruiser 80', gen: 'FZJ80', span: '1992-1998',
+    engine: '1FZ-FE 4.5 DOHC I6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'Cast iron block, one cylinder head, straight six, and live axles at both ends. Everything that fails is reachable standing at the guard, the factory manual has been in circulation for thirty years and the aftermarket treats it as a current model.',
+    watch: 'Head gasket past high kilometres, birfield joints if the grease service was skipped, rear main seal, and the front brake booster on early cars.'
+  },
+  'lc105': {
+    model: 'Toyota LandCruiser 105', gen: 'FZJ105', span: '1998-2007',
+    engine: '1FZ-FE 4.5 DOHC I6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The 1FZ-FE carried into the 100 Series body on a live front axle. You get a decade newer body and wiring with the same six and none of the independent front end that makes the 100 harder to work under.',
+    watch: 'Same head gasket story as the 80, plus front swivel hub seals and a thirst that is not a fault.'
+  },
+  'lc100': {
+    model: 'Toyota LandCruiser 100', gen: 'UZJ100', span: '1998-2007',
+    engine: '2UZ-FE 4.7 V8', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'An iron block V8 with a belt you can change on a Saturday and no known appetite for eating itself. Longitudinal layout means both banks are open from above, unlike every transverse V6 on this page.',
+    watch: 'Timing belt and water pump on interval, exhaust manifold studs, front wheel bearings, and the plastic timing belt covers going brittle.'
+  },
+  'lc200-2uz': {
+    model: 'Toyota LandCruiser 200', gen: 'UZJ200', span: '2007-2012',
+    engine: '2UZ-FE 4.7 V8', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'The 2UZ-FE in its last body. Mechanically the known quantity from the 100 Series, in a chassis with far better brakes and cooling.',
+    watch: 'Timing belt interval, and a lot more electronics between you and a diagnosis than the 100 Series had.'
+  },
+  'lc200-1ur': {
+    model: 'Toyota LandCruiser 200', gen: 'URJ202', span: '2012-2021',
+    engine: '1UR-FE 4.6 V8', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'Port injection on a chain-driven V8 that Toyota kept selling until 2021. The last full size wagon here where routine service is all hand tools and the fuel system has no high pressure side.',
+    watch: 'Cam tower and timing cover seepage, secondary air injection pump valves on early cars, and suspension bushes if it has towed.'
+  },
+  'lc70': {
+    model: 'Toyota LandCruiser 70', gen: 'GRJ76/78/79', span: '2007-2024',
+    engine: '1GR-FE 4.0 V6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The clearest answer on this page. A 1970s chassis with live axles, a coil-on-plug V6 with a chain, and a factory parts book that stayed open for seventeen years. Nothing on it needs a special tool and almost nothing on it is a one-off.',
+    watch: 'Front wheel bearing preload, water pump, rear main on very high kilometre examples, and the timing chain job being genuine work when it does come due.'
+  },
+  'prado90': {
+    model: 'Toyota Prado 90', gen: 'VZJ95', span: '1996-2002',
+    engine: '5VZ-FE 3.4 V6', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'Longitudinal V6, so both banks and all six plugs are accessible. The 5VZ-FE is the engine Toyota trusted with the Hilux and the 4Runner for a decade, and the belt is a two hour job with the radiator out.',
+    watch: 'Timing belt every 100,000 km, oil pump seal behind the belt, and the plastic radiator end tanks.'
+  },
+  'prado120': {
+    model: 'Toyota Prado 120', gen: 'GRJ120', span: '2003-2009',
+    engine: '1GR-FE 4.0 V6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The 1GR-FE in place of the 5VZ-FE, still mounted north-south so both banks stay open from above. Same engine as the 70 Series, in a body with air conditioning that works. The chain trades a 100,000 km belt job for a much larger job much later, which is a trade rather than an upgrade.',
+    watch: 'Secondary air injection valves on later builds, front lower ball joints, and rear air suspension on high spec cars.'
+  },
+  'prado150': {
+    model: 'Toyota Prado 150', gen: 'GRJ150', span: '2009-2023',
+    engine: '1GR-FE 4.0 V6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'Fourteen years of one port-injected V6 in one body means parts, manuals and forum answers in enormous supply. Petrol 150s sold in smaller numbers than the diesel here, which usually means a cheaper buy for the same mechanicals.',
+    watch: 'Secondary air injection pump, front diff breather if it has seen water, and dust ingress at the rear hatch seal.'
+  },
+  'hilux-22re': {
+    model: 'Toyota Hilux', gen: 'RN106/110', span: '1989-1997',
+    engine: '22R-E 2.4 I4', inj: 'PFI', timing: 'chain', drive: 'RWD/4WD',
+    why: 'Port injection bolted to an engine otherwise designed around a carburettor. Two valves per cylinder, a distributor, and a wiring loom you can trace end to end on the kitchen table.',
+    watch: 'Timing chain guides wearing through into the cover, head gasket, and rust at the rear spring hangers on coastal cars.'
+  },
+  'hilux-3rz': {
+    model: 'Toyota Hilux', gen: 'RZN149/169', span: '1997-2005',
+    engine: '3RZ-FE 2.7 I4', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The 22R-E replacement, and the sweet spot of the range. Four cylinders, chain, iron block, cam angle sensor in the distributor position, and enough room in the bay to get both hands past the engine.',
+    watch: 'Chain tensioner and guides around 250,000 km, exhaust manifold cracking, and the front crank seal.'
+  },
+  'hilux-5vz': {
+    model: 'Toyota Hilux', gen: 'VZN167', span: '1997-2005',
+    engine: '5VZ-FE 3.4 V6', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'The V6 Hilux for people who tow. Longitudinal mounting keeps the rear bank honest, and it shares its whole parts list with the 90 Series Prado.',
+    watch: 'Timing belt on interval with the water pump and idlers, and the oil pump o-ring while you are in there.'
+  },
+  'hilux-n70': {
+    model: 'Toyota Hilux N70', gen: 'TGN/GGN', span: '2005-2015',
+    engine: '2TR-FE 2.7 I4', inj: 'PFI', timing: 'chain', drive: 'RWD/4WD',
+    why: 'The most numerous port-injected engine on Australian roads. Chain driven, iron block, no variable valve trickery beyond intake cam timing, and a wrecker network that means used parts are always a phone call away.',
+    watch: 'Chain tensioner on high kilometre fleet cars, injector seals, and clutch slave cylinders on the manual.'
+  },
+  'hilux-n80': {
+    model: 'Toyota Hilux N80', gen: 'TGN121', span: '2015-2023',
+    engine: '2TR-FE 2.7 I4', inj: 'PFI', timing: 'chain', drive: 'RWD/4WD',
+    why: 'The same 2TR-FE in the current shape, sold as the Workmate while everything else went diesel or direct injected. A new-ish ute with no high pressure fuel pump and no diesel particulate filter is a rare combination.',
+    watch: 'Not much yet. Watch the timing chain at very high kilometres and the usual tray and tub mounting rust on coastal work cars.'
+  },
+  'patrol-gq': {
+    model: 'Nissan Patrol GQ', gen: 'Y60', span: '1988-1997',
+    engine: 'TB42E 4.2 I6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'A pushrod straight six with electronic injection and almost nothing else electronic. Coil sprung live axles, a chassis you can see through, and an aftermarket that has been supporting it continuously for thirty five years.',
+    watch: 'Rear main seal, tailshaft yokes, front wheel bearing preload, and thirst that gets worse as it ages.'
+  },
+  'patrol-tb45': {
+    model: 'Nissan Patrol GU', gen: 'Y61', span: '1997-2001',
+    engine: 'TB45E 4.5 I6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The GQ formula in a better body. Same straight six architecture, coil rear, and a factory manual that assumes you will be doing the work.',
+    watch: 'Head gasket if it has been worked hard, exhaust manifold studs, and gearbox synchros on the manual.'
+  },
+  'patrol-tb48': {
+    model: 'Nissan Patrol GU', gen: 'Y61',  span: '2001-2016',
+    engine: 'TB48DE 4.8 I6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'Twin cam version of the same iron straight six, sold here until 2016. Live axles, port injection, a chain, and a body Nissan kept building for fifteen years without changing the parts numbers much.',
+    watch: 'Coil packs, cam cover gaskets, and the automatic transmission cooler if it has towed.'
+  },
+  'navara-d22': {
+    model: 'Nissan Navara D22', gen: 'D22', span: '1997-2015',
+    engine: 'KA24DE 2.4 I4', inj: 'PFI', timing: 'chain', drive: 'RWD/4WD',
+    why: 'The KA24DE is a tuner engine that happened to spend most of its life in utes, so it has both a workshop community and a wrecker supply. Simple, iron blocked, chain driven, and cheap to buy wrong.',
+    watch: 'Chain guides, front timing cover leaks, and rust at the cab mounts and rear chassis rail.'
+  },
+  'navara-d40': {
+    model: 'Nissan Navara D40', gen: 'D40', span: '2005-2015',
+    engine: 'VQ40DE 4.0 V6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'A longitudinally mounted VQ, which is the version of that engine worth owning. Port injected and chain driven right through to 2015, and shared with the Pathfinder R51 so parts volumes are good.',
+    watch: 'Timing chain tensioners, exhaust manifold to catalyst studs, and the well documented chassis rust at the rear on early builds.'
+  },
+  'mx5-na': {
+    model: 'Mazda MX-5 NA', gen: 'NA6/NA8', span: '1989-1998',
+    engine: 'BP-ZE 1.8 I4', inj: 'PFI', timing: 'belt', drive: 'RWD',
+    why: 'The benchmark for doing your own work. Every panel, seal and bush is reproduced, the factory manual is everywhere, and the engine bay was laid out by someone who expected you to be in it.',
+    watch: 'Sill and rear subframe mount rust, crank keyway wear on the nose, and the belt with the water pump together.'
+  },
+  'mx5-nb': {
+    model: 'Mazda MX-5 NB', gen: 'NB8', span: '1998-2005',
+    engine: 'BP-4W 1.8 I4', inj: 'PFI', timing: 'belt', drive: 'RWD',
+    why: 'The NA with variable intake cam timing, better brakes and a stiffer shell. All the same access and the same aftermarket depth, with a body that has aged better.',
+    watch: 'Same rear subframe mounts as the NA, plus the plastic rear window on soft tops and the front crank seal.'
+  },
+  'mx5-nc': {
+    model: 'Mazda MX-5 NC', gen: 'NC', span: '2005-2015',
+    engine: 'LF-VE 2.0 I4', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The last port-injected MX-5. It is also the only one with a timing chain, which reads as a win until you price the job it eventually asks for against the belt it replaced. The ND that follows went direct injection, so this is where the model stops being an option for this list.',
+    watch: 'Variable valve timing actuator rattle on cold start, differential bush, and the retractable hard top mechanism if fitted.'
+  },
+  'commodore-vs': {
+    model: 'Holden Commodore VS', gen: 'VS', span: '1995-1997',
+    engine: 'L27/L36 3.8 V6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'Pushrod V6, rear wheel drive, and an engine bay you can lean into. Cheap to buy, cheap to fix wrong, and there were enough built that no part is hard to find.',
+    watch: 'Plastic upper intake manifold leaking coolant into the valley, front timing cover gasket, and automatic transmission cooler lines.'
+  },
+  'commodore-ls1': {
+    model: 'Holden Commodore', gen: 'VT-VZ', span: '1999-2006',
+    engine: 'LS1 5.7 V8', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'Two valves per cylinder, one camshaft, sixteen pushrods and a timing chain the length of your hand. The aftermarket support is the deepest of any V8 sold here and the engine comes apart on the bench with hand tools.',
+    watch: 'Rear main seal, oil pump o-ring, valve spring fatigue on early cars, and the plastic coolant crossover.'
+  },
+  'commodore-ve': {
+    model: 'Holden Commodore VE', gen: 'VE', span: '2006-2013',
+    engine: 'L98/L76 6.0 V8', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The port-injected choice in a VE, because the SIDI V6 that shares the showroom went direct injection. Pushrod V8 access in a modern chassis with parts still on shelves.',
+    watch: 'Active fuel management lifters on the L76, rear main seal, and the front strut top bearings.'
+  },
+  'commodore-vf': {
+    model: 'Holden Commodore VF', gen: 'VF', span: '2013-2017',
+    engine: 'LS3 6.2 V8', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The last port-injected V8 sedan built in Australia. A 2017 car with no high pressure fuel pump, no direct injectors and no carbon on the intake valves, plus every LS part ever made fitting it.',
+    watch: 'Clutch master on the manual, differential bushes, and valve spring wear if it has lived at high revs.'
+  },
+  'falcon-el': {
+    model: 'Ford Falcon EL', gen: 'EL', span: '1996-1998',
+    engine: '4.0 Intech SOHC I6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The last of the pre-Barra sixes and the simplest. One cam, one head, a chain, rear wheel drive, and the sort of engine bay where you can change a starter motor without removing anything else.',
+    watch: 'Cylinder head cracking between cylinders five and six on overheated cars, plastic thermostat housing, and rear leaf spring bushes on wagons.'
+  },
+  'falcon-ba': {
+    model: 'Ford Falcon BA', gen: 'BA', span: '2002-2005',
+    engine: 'Barra 182 4.0 DOHC I6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'Cast iron block, aluminium twin cam head, timing chain, port injection, and rear wheel drive. Australia built roughly a million of these, which means the deepest local parts and knowledge base of any car on this page.',
+    watch: 'Plastic thermostat housing and coolant pipes, cam cover gasket weeping onto the exhaust, coil packs, and the front crank pulley bolt.'
+  },
+  'falcon-bf': {
+    model: 'Ford Falcon BF', gen: 'BF', span: '2005-2008',
+    engine: 'Barra 190 4.0 I6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The BA with the known faults addressed and a better automatic. Same iron block six, same chain, same port injection, same enormous wrecker supply.',
+    watch: 'Thermostat housing still plastic, ZF transmission fluid service if it is the six speed, and the timing chain tensioner past 300,000 km.'
+  },
+  'falcon-fg': {
+    model: 'Ford Falcon FG', gen: 'FG', span: '2008-2014',
+    engine: 'Barra 195 4.0 I6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'A late model rear drive sedan with an iron block port-injected six. Direct injection had already reached most of the market by the time this car finished, and it never touched the Barra.',
+    watch: 'Coolant pipes behind the intake, ZF automatic fluid, and rear suspension bushes.'
+  },
+  'falcon-fgx': {
+    model: 'Ford Falcon FG-X', gen: 'FG-X', span: '2014-2016',
+    engine: 'Barra 195 4.0 I6', inj: 'PFI', timing: 'chain', drive: 'RWD',
+    why: 'The final Falcon and the youngest Barra you can buy. Everything the BA offered, built a dozen years later, with the whole 2002 to 2016 parts catalogue behind it.',
+    watch: 'Low kilometre examples sitting on original coolant and original plastic housings. Do the cooling system before it does you.'
+  },
+  'territory-sx': {
+    model: 'Ford Territory', gen: 'SX/SY', span: '2004-2011',
+    engine: 'Barra 4.0 I6', inj: 'PFI', timing: 'chain', drive: 'RWD/AWD',
+    why: 'The Barra in a wagon body, which makes it the practical version of the same DIY proposition. Shares its whole driveline parts list with the Falcon.',
+    watch: 'Front lower control arm ball joints, which is the famous one and a known job. Also the rear differential bush and the plastic cooling parts.'
+  },
+  'camry-sxv20': {
+    model: 'Toyota Camry SXV20', gen: 'SXV20', span: '1997-2002',
+    engine: '5S-FE 2.2 I4', inj: 'PFI', timing: 'belt', drive: 'FWD',
+    why: 'Four cylinders across the bay with the belt end facing the guard, so the timing job is done from the wheel arch rather than over the top. Iron block, no variable valve timing to fail, and thirty years of parts.',
+    watch: 'Timing belt and water pump on interval, front crank seal, and the plastic radiator tanks.'
+  },
+  'camry-asv70': {
+    model: 'Toyota Camry ASV70', gen: 'ASV70', span: '2017-2024',
+    engine: 'A25A-FKS 2.5 I4', inj: 'DUAL', timing: 'chain', drive: 'FWD',
+    why: 'Port injectors and direct injectors on the same engine, which is why its intake valves stay clean when a comparable pure direct injection four does not. A modern car with an old car service interval.',
+    watch: 'The high pressure fuel pump is a real part with a real price, unlike anything else on the pure port injection side of this list.'
+  },
+  'corolla-1zz': {
+    model: 'Toyota Corolla', gen: 'ZZE122', span: '2001-2007',
+    engine: '1ZZ-FE 1.8 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'A chain driven four in a car sold in absurd numbers, which means every part is cheap and every fault is documented. Nothing on it requires a dealer tool.',
+    watch: 'Oil consumption on pre-2003 pistons, which is the well known one. Also the rear engine mount and the plastic coolant outlet.'
+  },
+  'corolla-hybrid': {
+    model: 'Toyota Corolla hybrid', gen: 'ZWE211/219', span: '2016-2025',
+    engine: '2ZR-FXE 1.8 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'The petrol side of Toyota’s hybrid four stayed port injected while the equivalent non-hybrid moved to D-4S. No high pressure pump, no direct injectors, no throttle body carbon, and a drivetrain that does not wear a clutch or a starter.',
+    watch: 'Hybrid battery cooling intake blocked with dust, inverter coolant, and the fact that brake work needs the system properly depressurised.'
+  },
+  'echo': {
+    model: 'Toyota Echo', gen: 'NCP10', span: '1999-2005',
+    engine: '1NZ-FE 1.5 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'Small, chain driven, and almost impossible to break. The whole car is a lesson in what you do not need. Parts cost nothing and the engine bay is mostly air.',
+    watch: 'Oil control rings on high kilometre examples, rear brake cylinders, and the exhaust flex joint.'
+  },
+  'rav4-xa40': {
+    model: 'Toyota RAV4 XA40', gen: 'XA40', span: '2013-2018',
+    engine: '2AR-FE 2.5 I4', inj: 'PFI', timing: 'chain', drive: 'AWD',
+    why: 'The last port-injected RAV4 before the XA50 moved to D-4S. Chain driven, no turbo, no high pressure pump, and it shares the engine with the ASV50 Camry so parts volumes are large.',
+    watch: 'Water pump weep, oil cooler o-ring, and the rear differential coupling on the all wheel drive if fluid service was skipped.'
+  },
+  'aurion': {
+    model: 'Toyota Aurion', gen: 'XV40', span: '2006-2012',
+    engine: '2GR-FE 3.5 V6', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'A genuinely strong port-injected V6 with a chain, in a car nobody wants, which makes it cheap. Ranked below the four cylinder entries only because it is transverse and the rear bank plugs mean removing the intake.',
+    watch: 'The oil cooler hose that Toyota recalled, variable valve timing solenoid screens, and rear bank spark plugs being a two hour job rather than twenty minutes.'
+  },
+  'hiace-h300': {
+    model: 'Toyota HiAce H300', gen: 'H300', span: '2019-2025',
+    engine: '7GR-FKS 3.5 V6', inj: 'DUAL', timing: 'chain', drive: 'RWD',
+    why: 'D-4S on a chain driven V6, mounted longitudinally under a bonnet instead of under the seats, so for the first time in a HiAce you can service it standing up. Rear wheel drive, no diesel particulate filter, no turbo.',
+    watch: 'High pressure fuel pump as the one part that would not exist on a pure port engine, plus front brake wear if it works loaded.'
+  },
+  'gt86': {
+    model: 'Toyota 86', gen: 'ZN6', span: '2012-2021',
+    engine: 'FA20D 2.0 F4', inj: 'DUAL', timing: 'chain', drive: 'RWD',
+    why: 'Boxer four in a rear drive car with an enormous documentation base, and D-4S dual injection specifically so the intake valves stay clean. Access is good on both banks because the engine sits low and wide.',
+    watch: 'Valve spring recall on early cars, oil consumption if serviced late, and the high pressure pump being the one expensive fuel part.'
+  },
+  'gr86': {
+    model: 'Toyota GR86', gen: 'ZN8', span: '2022-2025',
+    engine: 'FA24D 2.4 F4', inj: 'DUAL', timing: 'chain', drive: 'RWD',
+    why: 'The ZN6 formula with more capacity and the same D-4S dual injection. A current model rear drive car with port injectors is close to the only one left that is not a ute.',
+    watch: 'Too new for a service record. Rod bearing chatter has been discussed on hard driven examples, so oil analysis is worth the money.'
+  },
+  'accord-cl9': {
+    model: 'Honda Accord Euro', gen: 'CL9', span: '2003-2008',
+    engine: 'K24A3 2.4 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'The K24 is the best documented four cylinder Honda ever built, chain driven, and it responds to being maintained rather than replaced. Valve clearances are adjustable with a feeler gauge and a screwdriver, which is increasingly rare.',
+    watch: 'Variable valve timing actuator rattle, exhaust manifold cracking, and front lower control arm bushes.'
+  },
+  'accord-cu2': {
+    model: 'Honda Accord Euro', gen: 'CU2', span: '2008-2015',
+    engine: 'K24Z3 2.4 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'A later K24 with the same adjustable valve train and the same chain. Port injected right through to 2015, by which point most of its competitors had moved to direct injection.',
+    watch: 'Variable valve timing actuator, rear differential on the all wheel drive variants overseas, and front brake judder.'
+  },
+  'civic-ek': {
+    model: 'Honda Civic EK', gen: 'EK', span: '1995-2000',
+    engine: 'D16Y / B16A2 1.6 I4', inj: 'PFI', timing: 'belt', drive: 'FWD',
+    why: 'A four cylinder with adjustable valve clearances, a belt you can change in an afternoon, and the largest aftermarket of any small car ever sold. Almost every fault has a written procedure attached.',
+    watch: 'Rust at the rear quarters and strut towers, distributor internals, and the fact that a lot of surviving examples have been modified badly.'
+  },
+  'civic-fc': {
+    model: 'Honda Civic FC', gen: 'FC', span: '2016-2021',
+    engine: 'K20C2 2.0 I4', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'Honda kept port injection on the naturally aspirated 2.0 while its 1.5 turbo sibling went direct injected. That makes this the cheap trim, and the cheap trim is the one with no high pressure pump and no fuel dilution complaints.',
+    watch: 'Rear trailing arm bushes, air conditioning condenser stone damage, and the continuously variable transmission needing fluid on schedule rather than never.'
+  },
+  'crv-re': {
+    model: 'Honda CR-V RE', gen: 'RE', span: '2007-2012',
+    engine: 'K24Z1 2.4 I4', inj: 'PFI', timing: 'chain', drive: 'AWD',
+    why: 'The K24 again, in a body with room to work and a bonnet you can stand under. Adjustable valve clearances, a chain, and no turbo anywhere in the range.',
+    watch: 'Rear differential fluid on the all wheel drive, air conditioning compressor clutch, and the variable valve timing actuator rattle shared with the Accord.'
+  },
+  'impreza-gc8': {
+    model: 'Subaru Impreza WRX', gen: 'GC8', span: '1994-2000',
+    engine: 'EJ20G 2.0 turbo F4', inj: 'PFI', timing: 'belt', drive: 'AWD',
+    why: 'Included with eyes open. The boxer layout puts both heads at the guards and the documentation and parts supply are extraordinary, so the work is easy even though there is more of it than a Toyota would ask for.',
+    watch: 'Head gaskets, timing belt discipline, front wheel bearings, and the fact that a stock unmodified one is now a rare find.'
+  },
+  'impreza-gd': {
+    model: 'Subaru Impreza WRX', gen: 'GD', span: '2000-2007',
+    engine: 'EJ205 2.0 turbo F4', inj: 'PFI', timing: 'belt', drive: 'AWD',
+    why: 'The GC8 proposition with better brakes and a stiffer shell. Port injected, belt driven, and every job on it has been filmed by someone.',
+    watch: 'Head gaskets on the 2.5 variants more than this one, turbo oil feed banjo filter, and the five speed gearbox on modified cars.'
+  },
+  'sti-va': {
+    model: 'Subaru WRX STI', gen: 'VA', span: '2014-2021',
+    engine: 'EJ257 2.5 turbo F4', inj: 'PFI', timing: 'belt', drive: 'AWD',
+    why: 'The strangest entry on the list and a genuinely useful one. Subaru kept the twenty year old port-injected EJ in the STI until 2021 while the WRX beside it ran direct injection. A 2021 car with a timing belt and no high pressure pump.',
+    watch: 'Ringland failure on tuned examples, head gaskets, timing belt interval, and buying one that has not been mapped by a stranger.'
+  },
+  'forester-sf': {
+    model: 'Subaru Forester SF', gen: 'SF', span: '1997-2002',
+    engine: 'EJ20 / EJ25 F4', inj: 'PFI', timing: 'belt', drive: 'AWD',
+    why: 'A tall wagon with a flat engine, which means you stand beside it rather than lean over it. Belt and water pump are a front-of-engine job with good clearance.',
+    watch: 'Head gaskets on the EJ25 specifically, rear wheel bearings, and rear subframe corrosion on southern cars.'
+  },
+  'forester-sh': {
+    model: 'Subaru Forester', gen: 'SG/SH', span: '2002-2012',
+    engine: 'EJ253 2.5 SOHC F4', inj: 'PFI', timing: 'belt', drive: 'AWD',
+    why: 'The EJ comes out of the car with the transmission left in place, which is a few hours rather than a project, and then the whole engine is on a stand at working height. That turns the jobs that would be shop work on anything else into home work. Belt, water pump and head gaskets are all cheap parts with better documentation than most current cars have.',
+    watch: 'External head gasket weep, usually on one bank and usually coolant before compression. It is the known fault, it is the reason these are cheap, and it is a weekend with a hoist rather than an afternoon. Also rear wheel bearings and the belt interval, which is cheap enough that deferring it is a false economy.'
+  },
+  'forester-fb': {
+    model: 'Subaru Forester', gen: 'SH.II/SJ', span: '2011-2018',
+    engine: 'FB25 2.5 F4', inj: 'PFI', timing: 'chain', drive: 'AWD',
+    why: 'The FB kept port injection until the SK arrived in 2018 and brought a much better head gasket record than the EJ. It also brought a chain, which is the half of the upgrade you may not want: the EJ belt is a cheap job on a known interval and the FB chain is neither.',
+    watch: 'Oil consumption on early FB25 pistons, valve rocker carrier assembly on high kilometre engines, and continuously variable transmission fluid service.'
+  },
+  'magna-te': {
+    model: 'Mitsubishi Magna/Verada', gen: 'TE-TL', span: '1996-2005',
+    engine: '6G72 3.0 / 6G74 3.5 V6', inj: 'PFI', timing: 'belt', drive: 'FWD',
+    why: 'A cheap large car with a V6 that Mitsubishi built for twenty years across half its range, so parts came from everywhere. Simple engine management and no electronics between you and a diagnosis.',
+    watch: 'Timing belt on interval since these are interference engines, front strut top mounts, and automatic transmissions that dislike being ignored.'
+  },
+  'pajero-nm': {
+    model: 'Mitsubishi Pajero NM', gen: 'NM', span: '2000-2006',
+    engine: '6G74 3.5 V6', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'Longitudinal V6, so the rear bank is not against the firewall. Independent front and rear with a monocoque, which trades some outback toughness for a car that is much easier to work on at home.',
+    watch: 'Timing belt every 100,000 km, transfer case chain on high kilometre examples, and rear diff bushes.'
+  },
+  'pajero-ns': {
+    model: 'Mitsubishi Pajero NS', gen: 'NS-NX', span: '2006-2021',
+    engine: '6G75 3.8 V6', inj: 'PFI', timing: 'belt', drive: '4WD',
+    why: 'Mitsubishi sold this port-injected V6 until 2021 with essentially no changes, so a fifteen year production run backs one parts list. The petrol version avoids the diesel particulate filter and injector costs that dominate its rivals.',
+    watch: 'Timing belt interval, which is the one job on it that cannot be deferred, plus rear differential and transfer case fluid.'
+  },
+  'jimny-sn413': {
+    model: 'Suzuki Jimny', gen: 'SN413', span: '1998-2018',
+    engine: 'M13A 1.3 I4', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'A live axle four wheel drive weighing barely a tonne, with a chain driven all-alloy four and a ladder chassis. You can lift the whole front end with a trolley jack and reach everything from a kneeling position.',
+    watch: 'Rear chassis rail and spring hanger rust, front swivel housing seals, and the third gear synchro on the manual.'
+  },
+  'jimny-jb74': {
+    model: 'Suzuki Jimny', gen: 'JB74', span: '2019-2025',
+    engine: 'K15B 1.5 I4', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The best pure port injection answer of the last five years. A current model car with a naturally aspirated port-injected four, a timing chain, a ladder chassis, live axles and a part time transfer case with a lever. There is almost nothing on it you cannot fix in a driveway.',
+    watch: 'Nothing structural yet. Front brake pad wear from the short wheelbase, and the automatic being only four speeds is a purchase decision rather than a fault.'
+  },
+  'mazda3-bk': {
+    model: 'Mazda 3 BK', gen: 'BK', span: '2004-2009',
+    engine: 'LF 2.0 / L3 2.3 MZR', inj: 'PFI', timing: 'chain', drive: 'FWD',
+    why: 'Chain driven, port injected, and built in volumes that keep parts cheap twenty years on. Straightforward engine management and a bay that is tight but logical.',
+    watch: 'Rear suspension arm bushes, variable valve timing actuator, front strut mounts, and rust at the rear wheel arch lip.'
+  },
+  'wrangler-jl': {
+    model: 'Jeep Wrangler JL / Gladiator', gen: 'JL/JT', span: '2018-2025',
+    engine: '3.6 Pentastar V6', inj: 'PFI', timing: 'chain', drive: '4WD',
+    why: 'The only current port-injected V6 in a live axle four wheel drive sold here. Chain driven, no high pressure pump, and a vehicle designed around the assumption that the owner will take parts of it off in the driveway.',
+    watch: 'Cylinder head on pre-2013 Pentastars rather than this generation, oil cooler housing and filter adapter seeping, and the death wobble discussion which is a steering damper and track bar issue.'
+  },
+
+  /* ---- diesel ----
+     IDI is the diesel counterpart to port injection: fuel goes into a pre-combustion
+     or swirl chamber rather than the cylinder, at pressures a bench tester can handle.
+     DI here means direct injection still driven by a mechanical pump. CR means common
+     rail, where the electronics and the emissions hardware arrive together. */
+
+  'lc80-1hz': {
+    model: 'Toyota LandCruiser 80', gen: 'HZJ80', span: '1990-1998',
+    engine: '1HZ 4.2 SOHC I6', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'The reference DIY diesel. A mechanical inline injection pump, no engine ECU, and nothing electronic that can strand you. Indirect injection means pressures an old bench tester can handle and injectors you can service yourself rather than send away.',
+    watch: 'Timing belt on interval, injector nozzles past high kilometres, and the head gasket if it has been overheated. It is slow, and no amount of work changes that.'
+  },
+  'lc105-1hz': {
+    model: 'Toyota LandCruiser 105', gen: 'HZJ105', span: '1998-2007',
+    engine: '1HZ 4.2 SOHC I6', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'The 1HZ in the 100 Series body on a live front axle. The best combination Toyota ever sold here for someone who wants a modern-ish wagon and a pre-electronic engine.',
+    watch: 'Belt and injectors as per the 80. Front swivel hub seals, and the front springs sagging if it has carried weight for years.'
+  },
+  'lc70-1hz': {
+    model: 'Toyota LandCruiser 70', gen: 'HZJ75/78/79', span: '1990-2007',
+    engine: '1HZ 4.2 SOHC I6', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'A mechanical indirect-injection six in a live axle ladder chassis with no electronics worth the name. If the brief is one vehicle you will still be fixing yourself in 2045, this is the answer and it is not close.',
+    watch: 'Timing belt, injectors, and the front axle knuckle seals. Rust at the rear crossmember on coastal trucks.'
+  },
+  'lc80-1hdft': {
+    model: 'Toyota LandCruiser 80', gen: 'HDJ80', span: '1995-1998',
+    engine: '1HD-FT 4.2 turbo I6', inj: 'DI', timing: 'belt', drive: '4WD',
+    why: 'Direct injection but still a mechanical pump, so you get the 1HZ ownership story with enough power to keep up with traffic. The engine and the community around it are both enormous.',
+    watch: 'Cracked pistons on hard-worked or over-fuelled examples, timing belt interval, and the front crank seal.'
+  },
+  'lc100-1hdfte': {
+    model: 'Toyota LandCruiser 100', gen: 'HDJ100', span: '1998-2007',
+    engine: '1HD-FTE 4.2 turbo I6', inj: 'DI', timing: 'belt', drive: '4WD',
+    why: 'Electronically controlled injection pump rather than common rail, which is the last stop before the modern era. Still a mechanical pump you can have rebuilt by a diesel shop rather than replaced by a dealer.',
+    watch: 'Injection pump and injectors as the expensive items, timing belt interval, and the independent front end being more work than the 105.'
+  },
+  'lc70-1hdfte': {
+    model: 'Toyota LandCruiser 70', gen: 'HDJ78/79', span: '1999-2007',
+    engine: '1HD-FTE 4.2 turbo I6', inj: 'DI', timing: 'belt', drive: '4WD',
+    why: 'The turbocharged 4.2 in the live axle 70 Series. Rare here and worth finding: the pulling power of the later V8 with a mechanical pump instead of a common rail and no particulate filter.',
+    watch: 'Injection pump timing after belt work, and the same cracked piston risk as the 1HD-FT if it has been over-fuelled.'
+  },
+  'lc70-1vd': {
+    model: 'Toyota LandCruiser 70', gen: 'VDJ76/78/79', span: '2007-2024',
+    engine: '1VD-FTV 4.5 V8 twin turbo', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'Common rail arrives, and with it the electronics. It is still the best chassis here, still live axles, still a factory manual that assumes you will do the work, and Toyota sold it for seventeen years so the parts supply is deep.',
+    watch: 'Injectors are the known expense and they are not cheap. Cracked exhaust manifolds, and diesel particulate filter regeneration on later builds if it only does short trips.'
+  },
+  'lc200-1vd': {
+    model: 'Toyota LandCruiser 200', gen: 'VDJ200', span: '2007-2021',
+    engine: '1VD-FTV 4.5 V8 twin turbo', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The same 1VD-FTV in a far more comfortable wagon. Enough of them sold here that specialists, parts and known procedures are all easy to find.',
+    watch: 'Injectors, the turbo actuators, and the particulate filter on 2016 and later builds. Front lower ball joints.'
+  },
+  'prado90-1kzte': {
+    model: 'Toyota Prado 90', gen: 'KZJ95', span: '1996-2002',
+    engine: '1KZ-TE 3.0 turbo I4', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'Indirect injection with electronic control of a mechanical pump, in a wagon small enough to work on in a single garage. Parts are cheap and the whole engine is documented to death.',
+    watch: 'Cylinder head cracking is the famous one and it is worth paying for a compression and coolant pressure test before you buy. Timing belt on interval.'
+  },
+  'prado120-1kd': {
+    model: 'Toyota Prado 120', gen: 'KDJ120', span: '2003-2009',
+    engine: '1KD-FTV 3.0 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The first Prado common rail, and early enough to predate particulate filters here. Chain driven, so the scheduled belt job disappears.',
+    watch: 'Injector seat erosion and the cracked piston issue on high hour examples. Suction control valve, and the EGR cooler clogging.'
+  },
+  'prado150-1kd': {
+    model: 'Toyota Prado 150', gen: 'KDJ150', span: '2009-2015',
+    engine: '1KD-FTV 3.0 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'A very well documented common rail in a body sold in huge numbers here, which is the practical measure of how easy something is to own.',
+    watch: 'Injectors, suction control valve, and the diesel particulate filter on later builds. Do not buy one that has only done school runs.'
+  },
+  'prado150-1gd': {
+    model: 'Toyota Prado 150', gen: 'GDJ150', span: '2015-2024',
+    engine: '1GD-FTV 2.8 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The 1GD is the best of the modern Toyota diesels to own: chain driven, and Toyota reworked the injector and particulate filter problems that dogged its first years.',
+    watch: 'Early 2016 to 2018 builds had the well publicised particulate filter and injector complaints. Check the recall and update history before buying.'
+  },
+  'prado250-1gd': {
+    model: 'Toyota Prado 250', gen: 'GDJ250', span: '2024-2025',
+    engine: '1GD-FTV 2.8 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The current Prado on a new platform but with the familiar 1GD, so the engine side of ownership is a known quantity even though the rest of the vehicle is not.',
+    watch: 'Too new to have a service record. The 48 volt system and the electronics around it are the unknown, not the engine.'
+  },
+  'hilux-3l': {
+    model: 'Toyota Hilux', gen: 'LN106/167', span: '1994-1997',
+    engine: '3L 2.8 I4 naturally aspirated', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'About as simple as a diesel gets. No turbo, no electronics, a mechanical pump and a swirl chamber head. Slow, loud, and almost impossible to kill by neglect.',
+    watch: 'Head gasket and head cracking at very high kilometres, timing belt, and rust at the rear spring hangers.'
+  },
+  'hilux-5le': {
+    model: 'Toyota Hilux', gen: 'LN167/172', span: '1998-2005',
+    engine: '5L-E 3.0 I4 naturally aspirated', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'The 3L grown to three litres with electronic pump control. Still indirect injection, still no turbo to fail, and it shares most of its parts list with the HiAce.',
+    watch: 'Timing belt, injector nozzles, and the fact that it is genuinely slow when loaded.'
+  },
+  'hilux-1kzte': {
+    model: 'Toyota Hilux', gen: 'KZN165', span: '1999-2005',
+    engine: '1KZ-TE 3.0 turbo I4', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'The turbo indirect-injection four, which is the sweet spot for a Hilux you intend to keep. Enough power to be useful and no common rail to price you out of a repair.',
+    watch: 'Cylinder head cracking, same as the Prado. Test before you buy rather than after.'
+  },
+  'hilux-n70-1kd': {
+    model: 'Toyota Hilux N70', gen: 'KUN26', span: '2005-2015',
+    engine: '1KD-FTV 3.0 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The most common diesel ute in the country for a decade, which means the cheapest parts, the most wreckers and the most written-up faults of any common rail here.',
+    watch: 'Injector seat erosion, cracked pistons on chipped examples, and the suction control valve. Avoid one with an unknown tune.'
+  },
+  'hilux-n80-1gd': {
+    model: 'Toyota Hilux N80', gen: 'GUN126', span: '2015-2025',
+    engine: '1GD-FTV 2.8 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The current 1GD, chain driven, and by now with a long enough record to know what goes wrong. It is the modern diesel with the best parts and knowledge base in Australia.',
+    watch: 'The 2016 to 2018 particulate filter and injector campaign. Later builds are the ones to have.'
+  },
+  'patrol-gq-td42': {
+    model: 'Nissan Patrol GQ', gen: 'Y60', span: '1988-1997',
+    engine: 'TD42 4.2 I6 naturally aspirated', inj: 'DI', timing: 'gear', drive: '4WD',
+    why: 'Gear driven timing, so there is no belt and no chain to ever replace. A mechanical pump, no ECU, direct injection, an iron block and coil sprung live axles. There is nothing on it a competent owner cannot fix.',
+    watch: 'Rear main seal, injector nozzles, and the front wheel bearing preload. Rust at the rear chassis and spring hangers.'
+  },
+  'patrol-gu-td42': {
+    model: 'Nissan Patrol GU', gen: 'Y61', span: '1997-2007',
+    engine: 'TD42 4.2 I6 naturally aspirated', inj: 'DI', timing: 'gear', drive: '4WD',
+    why: 'The gear driven mechanical six in the better GU body. Nothing to time, nothing to plug in, and a following that has documented every job on it.',
+    watch: 'Injectors and the pump at very high hours, plus the usual coastal rust. Slow, and thirstier than the numbers suggest.'
+  },
+  'patrol-gu-td42t': {
+    model: 'Nissan Patrol GU', gen: 'Y61', span: '1999-2007',
+    engine: 'TD42Ti 4.2 turbo I6', inj: 'DI', timing: 'gear', drive: '4WD',
+    why: 'The factory turbo version, and the one to have. Same gear driven mechanical simplicity with enough torque to tow, and the aftermarket support in Australia is second only to the 1HZ.',
+    watch: 'Head gasket and cracked heads on over-boosted examples. Buy one with a documented tune or none at all.'
+  },
+  'navara-td27': {
+    model: 'Nissan Navara D21/D22', gen: 'D21/D22', span: '1992-2001',
+    engine: 'TD27 2.7 I4 naturally aspirated', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'A small mechanical indirect-injection four with nothing to go wrong. The cheap end of this list, and cheap here means genuinely cheap to run rather than cheap to buy and expensive to keep.',
+    watch: 'Timing belt, head gasket, and chassis rust at the rear which is the usual reason these get retired.'
+  },
+  'navara-d40-yd25': {
+    model: 'Nissan Navara D40', gen: 'D40', span: '2005-2015',
+    engine: 'YD25DDTi 2.5 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'Included because the volumes make parts cheap and every fault is documented, not because it is the most robust thing here. Chain driven, and the engine bay is reasonable to work in.',
+    watch: 'Timing chain and tensioner earlier than you would expect, the well known chassis rust at the rear on early builds, and the automatic transmission cooler.'
+  },
+  'defender-300tdi': {
+    model: 'Land Rover Defender', gen: '300Tdi', span: '1994-1998',
+    engine: '300Tdi 2.5 turbo I4', inj: 'DI', timing: 'belt', drive: '4WD',
+    why: 'Direct injection on a mechanical Bosch rotary pump, in a vehicle designed to be repaired in the field with the panels unbolted. Every part is available new, which almost nothing else from 1994 can claim.',
+    watch: 'Timing belt with the correct tensioner kit, oil leaks as a way of life, bulkhead corrosion at the footwells, and the chassis outriggers.'
+  },
+  'om606': {
+    model: 'Mercedes-Benz E300 Diesel', gen: 'W124/W210', span: '1993-1999',
+    engine: 'OM606 3.0 I6', inj: 'IDI', timing: 'chain', drive: 'RWD',
+    why: 'Pre-chamber injection, a mechanical pump, an iron block and a timing chain. It is the engine with the strongest million kilometre reputation of anything on this page, and the W124 around it was built like nothing since.',
+    watch: 'On the W210, rust everywhere and the biodegradable wiring insulation on early cars. The vacuum system runs half the car, so buy a hand pump.'
+  },
+  'musso-om602': {
+    model: 'SsangYong Musso', gen: 'Musso', span: '1996-2006',
+    engine: 'OM602 2.9 I5', inj: 'IDI', timing: 'chain', drive: '4WD',
+    why: 'A licensed Mercedes pre-chamber five cylinder in a cheap body on a ladder chassis. The engine is a known Mercedes quantity with Mercedes parts availability, at a fraction of the price of the car it came from.',
+    watch: 'Everything that is not the engine. Body and interior parts are the hard bit, and the automatic is the weak link.'
+  },
+  'rodeo-4jb1t': {
+    model: 'Holden Rodeo / Jackaroo', gen: 'TF/UBS', span: '1990-2003',
+    engine: '4JB1-T 2.8 turbo I4', inj: 'DI', timing: 'gear', drive: '4WD',
+    why: 'Gear driven timing and a mechanical pump on an Isuzu industrial engine that also went into light trucks and generators, so parts come from outside the car world entirely.',
+    watch: 'Head gasket, injector nozzles, and rust. The engine will outlast the body by a wide margin.'
+  },
+  'golf-tdi': {
+    model: 'Volkswagen Golf Mk4 TDI', gen: 'Mk4', span: '1999-2004',
+    engine: '1.9 TDI ALH turbo I4', inj: 'DI', timing: 'belt', drive: 'FWD',
+    why: 'Direct injection on a distributor pump rather than a common rail, in a car small enough and common enough that parts cost very little. The most economical thing on either list.',
+    watch: 'Timing belt with the full kit and it is not optional, this being an interference engine. Also the automatic if fitted, window regulators, and the wiring in the door looms.'
+  },
+  'triton-4d56t': {
+    model: 'Mitsubishi Triton MK', gen: 'MK', span: '1996-2006',
+    engine: '4D56T 2.5 turbo I4', inj: 'IDI', timing: 'belt', drive: '4WD',
+    why: 'Indirect injection with a mechanical pump in a simple leaf sprung ute. Cheap to buy, cheap to fix, and the engine appeared in enough Mitsubishis that parts are still easy.',
+    watch: 'Timing belt including the balance shaft belt, head gasket, and rust at the rear chassis and cab mounts.'
+  },
+  'triton-4d56crd': {
+    model: 'Mitsubishi Triton ML/MN', gen: 'ML/MN', span: '2006-2015',
+    engine: '4D56 2.5 DI-D turbo I4', inj: 'CR', timing: 'belt', drive: '4WD',
+    why: 'The common rail version of an engine whose mechanical ancestor is on this list, which means the block and much of the ancillary layout are already familiar. Cheap to buy used.',
+    watch: 'Timing belt on a common rail engine, so both the belt interval and the injectors are on your list. Also the flywheel and clutch on hard worked examples.'
+  },
+  'triton-4n15': {
+    model: 'Mitsubishi Triton MQ/MR', gen: 'MQ/MR', span: '2015-2025',
+    engine: '4N15 2.4 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'Aluminium block, chain driven, and the cheapest way into a modern diesel ute here. The low purchase price is the argument, and it is a real one when you are doing your own labour.',
+    watch: 'Diesel particulate filter regeneration on short trip cars, and the well aired complaints about that on this engine specifically.'
+  },
+  'pajero-4m41': {
+    model: 'Mitsubishi Pajero', gen: 'NM-NX', span: '2000-2021',
+    engine: '4M41 3.2 DI-D turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'Twenty one years of one engine in one body means an unusually deep parts and knowledge base for a car this cheap. Chain driven, and the monocoque makes it easier to work under than a ladder chassis ute.',
+    watch: 'Injectors, the intake manifold clogging with soot, and the particulate filter on post-2016 builds. Rear diff and transfer case fluid.'
+  },
+  'dmax-4jj1': {
+    model: 'Isuzu D-Max / MU-X', gen: 'RC/RT', span: '2007-2020',
+    engine: '4JJ1-TC 3.0 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'An engine designed for light trucks and detuned for a ute, which is exactly the direction you want that borrowing to go. Chain driven, undersquare, and known for high hours in commercial service.',
+    watch: 'Injectors and the fuel supply pump as the main expenses, the EGR cooler, and the particulate filter on later builds.'
+  },
+  'dmax-4jj3': {
+    model: 'Isuzu D-Max / MU-X', gen: 'RG', span: '2020-2025',
+    engine: '4JJ3-TCX 3.0 turbo I4', inj: 'CR', timing: 'chain', drive: '4WD',
+    why: 'The current version of the same truck engine, still chain driven and still undersquare. If you have to buy a new common rail diesel to keep for twenty years, this is the one with the most commercial service history behind its design.',
+    watch: 'Too new for a verdict. Particulate filter behaviour on short trips, and the fact that the electronics around the engine are now doing far more than in the 4JJ1.'
+  },
+  'ranger-px': {
+    model: 'Ford Ranger PX', gen: 'PX', span: '2011-2022',
+    engine: '3.2 Duratorq turbo I5', inj: 'CR', timing: 'belt', drive: '4WD',
+    why: 'A five cylinder with genuine torque, sold in enormous numbers here so parts and specialists are everywhere. Better to work on than the numbers suggest because the bay is unusually roomy.',
+    watch: 'Timing belt, which surprises people on a modern diesel. Also the particulate filter, the coolant hose recall history, and the automatic if it has towed hard.'
+  },
+  'hiace-5le': {
+    model: 'Toyota HiAce', gen: 'H100', span: '1998-2004',
+    engine: '5L-E 3.0 I4 naturally aspirated', inj: 'IDI', timing: 'belt', drive: 'RWD',
+    why: 'A mechanical indirect-injection four in a van, which is a rare and useful combination. No turbo, no electronics, and it shares its parts list with the Hilux.',
+    watch: 'The engine lives under the seats, so every job starts with lifting the floor. Timing belt, and rust at the rear door aperture.'
+  },
+  'hiace-2kd': {
+    model: 'Toyota HiAce', gen: 'H200', span: '2006-2019',
+    engine: '2KD-FTV 2.5 turbo I4', inj: 'CR', timing: 'chain', drive: 'RWD',
+    why: 'Chain driven, and sold to every trade in the country, which is the best guarantee of parts and know-how you can get. The cheapest reliable working diesel on this list.',
+    watch: 'Injectors, the suction control valve, and access. It is still a cab-over, so the engine is under the seats.'
+  },
+  'hiace-1gd-h300': {
+    model: 'Toyota HiAce H300', gen: 'H300', span: '2019-2025',
+    engine: '1GD-FTV 2.8 turbo I4', inj: 'CR', timing: 'chain', drive: 'RWD',
+    why: 'The 1GD moved under a bonnet ahead of the driver, so a HiAce diesel is finally a vehicle you service standing up rather than through a hatch in the floor.',
+    watch: 'Particulate filter on stop-start city work, which is exactly what most of these do. Injectors as the long-term expense.'
+  }
+};
+
+// Fuel is derived from the injection type rather than stored twice.
+const FUEL_OF = { PFI: 'petrol', DUAL: 'petrol', IDI: 'diesel', DI: 'diesel', CR: 'diesel' };
+
+const TRACKS = {};
+
+TRACKS.petrol = [
+  { year: 1995, note: 'Port injection is universal, distributors are still fitted, and engine management is simple enough to fault-find with a multimeter. The filter selects nothing, so this is a ranking of mechanics.',
+    picks: ['lc80', 'patrol-gq', 'mx5-na', 'hilux-22re', 'commodore-vs'] },
+  { year: 1996, note: 'The 5VZ-FE arrives in the 90 Series Prado and the Magna moves to the TE. Nothing on sale here uses anything but manifold injection.',
+    picks: ['lc80', 'prado90', 'patrol-gq', 'mx5-na', 'magna-te'] },
+  { year: 1997, note: 'The Hilux facelift brings the 3RZ-FE, the Patrol GU replaces the GQ, and the EL is the last of the pre-Barra Falcon sixes.',
+    picks: ['hilux-3rz', 'lc80', 'patrol-tb45', 'falcon-el', 'impreza-gc8'] },
+  { year: 1998, note: 'The 100 Series splits into an independent front end and the live axle 105. The MX-5 NB replaces the NA. Both are still port injected, as is everything else.',
+    picks: ['lc105', 'hilux-3rz', 'mx5-nb', 'patrol-tb45', 'camry-sxv20'] },
+  { year: 1999, note: 'The LS1 lands in the VT Series II, and the SN413 Jimny arrives. Two of the most DIY-friendly things sold in Australia turn up in the same year.',
+    picks: ['lc105', 'commodore-ls1', 'jimny-sn413', 'hilux-3rz', 'civic-ek'] },
+  { year: 2000, note: 'The Patrol GU gets the twin cam TB48DE. Small cars start moving to timing chains, which removes a scheduled job from the handbook without removing it from the car.',
+    picks: ['lc105', 'patrol-tb45', 'commodore-ls1', 'forester-sf', 'echo'] },
+  { year: 2001, note: 'The Corolla moves to the chain driven 1ZZ-FE. Direct injection exists overseas in Mitsubishi GDI form but has no meaningful presence here.',
+    picks: ['lc100', 'hilux-5vz', 'corolla-1zz', 'jimny-sn413', 'pajero-nm'] },
+  { year: 2002, note: 'The BA Falcon brings the Barra: cast iron block, twin cam alloy head, timing chain, port injection, rear wheel drive. It becomes the default answer for the next fourteen years.',
+    picks: ['falcon-ba', 'lc100', 'patrol-tb48', 'hilux-5vz', 'impreza-gd'] },
+  { year: 2003, note: 'The 120 Series Prado introduces the 1GR-FE, which will still be on sale in 2024. The Accord Euro brings the K24 and its adjustable valve clearances.',
+    picks: ['falcon-ba', 'prado120', 'accord-cl9', 'lc100', 'commodore-ls1'] },
+  { year: 2004, note: 'The Territory puts the Barra in a wagon. The VZ Commodore introduces the Alloytec V6, port injected but with a rear bank and a chain job that make it a worse home proposition than the pushrod V8 beside it.',
+    picks: ['falcon-ba', 'prado120', 'territory-sx', 'navara-d22', 'mazda3-bk'] },
+  { year: 2005, note: 'The N70 Hilux arrives with the 2TR-FE, which becomes the most common port-injected engine on Australian roads. The NC is the last MX-5 before direct injection.',
+    picks: ['hilux-n70', 'falcon-bf', 'navara-d40', 'mx5-nc', 'prado120'] },
+  { year: 2006, note: 'The VE Commodore arrives. Direct injection is now on sale here in European turbo petrols, so from this point the filter starts doing real work.',
+    picks: ['hilux-n70', 'falcon-bf', 'commodore-ve', 'aurion', 'territory-sx'] },
+  { year: 2007, note: 'The 70 Series gets the 1GR-FE V6, and it becomes the single most serviceable new vehicle sold in Australia for the next seventeen years. The 200 Series replaces the 100.',
+    picks: ['lc70', 'hilux-n70', 'lc200-2uz', 'pajero-ns', 'falcon-bf'] },
+  { year: 2008, note: 'The FG Falcon continues the Barra. Direct injection spreads through European petrol ranges while Japanese naturally aspirated engines stay on port injection.',
+    picks: ['lc70', 'falcon-fg', 'forester-sh', 'crv-re', 'accord-cu2'] },
+  { year: 2009, note: 'The 150 Series Prado arrives with the 1GR-FE. Holden’s SIDI V6 goes direct injected, which makes the V8 the port-injected choice in a Commodore from here on.',
+    picks: ['lc70', 'prado150', 'falcon-fg', 'hilux-n70', 'commodore-ve'] },
+  { year: 2010, note: 'The last strong year for choice. Almost every Japanese naturally aspirated engine on sale is still port injected, and the ones that are not are clearly labelled as turbos.',
+    picks: ['lc70', 'prado150', 'falcon-fg', 'forester-sh', 'mx5-nc'] },
+  { year: 2011, note: 'Subaru replaces the EJ with the FB in the naturally aspirated cars, keeping port injection but adding a chain. The 200 Series petrol moves to the 1UR-FE.',
+    picks: ['lc70', 'prado150', 'falcon-fg', 'hilux-n70', 'forester-fb'] },
+  { year: 2012, note: 'The 86 arrives with D-4S, port and direct injectors on one engine, specifically so the intake valves stay clean. This is the pattern Toyota will use everywhere by 2020.',
+    picks: ['lc200-1ur', 'lc70', 'gt86', 'falcon-fg', 'prado150'] },
+  { year: 2013, note: 'The VF Commodore arrives with the LS3, and the RAV4 XA40 with the 2AR-FE. Both are the last port-injected versions of their model lines.',
+    picks: ['lc70', 'commodore-vf', 'falcon-fg', 'gt86', 'rav4-xa40'] },
+  { year: 2014, note: 'The FG-X is the Barra’s last chassis. The WRX moves to direct injection while the STI beside it keeps the port-injected EJ257, which is the clearest single illustration of the transition.',
+    picks: ['lc70', 'falcon-fgx', 'commodore-vf', 'gt86', 'hilux-n70'] },
+  { year: 2015, note: 'The N80 Hilux keeps the 2TR-FE. The ND MX-5 goes direct injected, closing the model out for this list. Choice is now thinning fast.',
+    picks: ['lc70', 'hilux-n80', 'falcon-fgx', 'commodore-vf', 'forester-fb'] },
+  { year: 2016, note: 'Falcon production ends in October. The Civic FC keeps port injection on the naturally aspirated 2.0 while its 1.5 turbo sibling goes direct, so the cheap trim is the one you want.',
+    picks: ['lc70', 'hilux-n80', 'falcon-fgx', 'commodore-vf', 'civic-fc'] },
+  { year: 2017, note: 'Commodore production ends in October, taking the last locally built port-injected V8 with it. From here the list is mostly four wheel drives, utes and Toyota’s dual injection.',
+    picks: ['lc70', 'hilux-n80', 'commodore-vf', 'sti-va', 'civic-fc'] },
+  { year: 2018, note: 'The Forester SK moves to direct injection. Pure port injection is now the 70 Series, the Hilux Workmate, the STI and a handful of hybrids.',
+    picks: ['lc70', 'hilux-n80', 'sti-va', 'camry-asv70', 'corolla-hybrid'] },
+  { year: 2019, note: 'The JB74 Jimny lands here in January and immediately becomes the best new port-injected car for a home mechanic. The H300 HiAce brings a D-4S V6 under a bonnet instead of under the seats.',
+    picks: ['lc70', 'jimny-jb74', 'hilux-n80', 'hiace-h300', 'sti-va'] },
+  { year: 2020, note: 'The 200 Series is in its final years with the port-injected 1UR-FE. Nothing arriving to replace any of these keeps port injection on its own.',
+    picks: ['lc70', 'jimny-jb74', 'hilux-n80', 'lc200-1ur', 'hiace-h300'] },
+  { year: 2021, note: 'The 200 Series ends and the 300 replaces it with a twin turbo direct injected V6. The STI finishes its run. Two of the list’s anchors disappear in one year.',
+    picks: ['lc70', 'jimny-jb74', 'hilux-n80', 'sti-va', 'hiace-h300'] },
+  { year: 2022, note: 'The GR86 continues D-4S with the FA24. Pure port injection is now a short list: light four wheel drives, a Hilux trim level and some hybrids.',
+    picks: ['lc70', 'jimny-jb74', 'hilux-n80', 'gr86', 'hiace-h300'] },
+  { year: 2023, note: 'The 2TR-FE Hilux and the 150 Series Prado both finish. The Jeep Pentastar becomes one of the few remaining new port-injected V6s on sale.',
+    picks: ['lc70', 'jimny-jb74', 'gr86', 'hiace-h300', 'wrangler-jl'] },
+  { year: 2024, note: 'The 70 Series moves to a four cylinder diesel and the petrol V6 winds down. Pure port injection in a new car here is now close to a two model list.',
+    picks: ['jimny-jb74', 'lc70', 'wrangler-jl', 'gr86', 'hiace-h300'] },
+  { year: 2025, note: 'A new port-injected petrol car in Australia is a Jimny, a Pentastar Jeep or a Toyota hybrid. Everything else that still has port injectors runs them as half of a dual system.',
+    picks: ['jimny-jb74', 'wrangler-jl', 'hiace-h300', 'gr86', 'corolla-hybrid'] }
+];
+
+TRACKS.diesel = [
+  { year: 1995, note: 'Diesel here is entirely mechanical. Indirect injection into a pre-chamber, an inline pump, no engine ECU and nothing that needs a scan tool. This is the high water mark for a diesel you intend to fix yourself.',
+    picks: ['lc80-1hz', 'patrol-gq-td42', 'lc80-1hdft', 'hilux-3l', 'om606'] },
+  { year: 1996, note: 'The 1KZ-TE brings electronic control to a mechanical pump, and the Defender 300Tdi shows what direct injection looks like before common rail. There is no high pressure rail anywhere in the market.',
+    picks: ['lc80-1hz', 'patrol-gq-td42', 'prado90-1kzte', 'defender-300tdi', 'musso-om602'] },
+  { year: 1997, note: 'The Patrol GU replaces the GQ and keeps the gear driven TD42. Nothing in the segment has an injector you cannot have rebuilt by a local diesel shop.',
+    picks: ['lc80-1hz', 'patrol-gq-td42', 'prado90-1kzte', 'defender-300tdi', 'lc80-1hdft'] },
+  { year: 1998, note: 'The 100 Series splits into the electronically pumped 1HD-FTE and the live axle 105 with the mechanical 1HZ. For an owner-mechanic the 105 is the one that ages better.',
+    picks: ['lc105-1hz', 'patrol-gu-td42', 'lc100-1hdfte', 'prado90-1kzte', 'hilux-5le'] },
+  { year: 1999, note: 'Toyota starts selling the 1HZ in 70 Series wagons and troop carriers here, which is the most durable combination on either list.',
+    picks: ['lc105-1hz', 'patrol-gu-td42', 'lc70-1hz', 'hilux-1kzte', 'om606'] },
+  { year: 2000, note: 'Common rail is on sale in Japan and Europe but not yet in the Australian four wheel drives. The ZD30 arrives in the Patrol and earns a reputation for cracked pistons that keeps it off this list entirely.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'patrol-gu-td42t', 'hilux-1kzte', 'rodeo-4jb1t'] },
+  { year: 2001, note: 'Diesel reaches small cars with the Golf TDI, still direct injection on a distributor pump rather than a rail.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'patrol-gu-td42t', 'navara-td27', 'golf-tdi'] },
+  { year: 2002, note: 'The last full year in which every diesel worth buying here is mechanically injected.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'patrol-gu-td42t', 'hilux-1kzte', 'hiace-5le'] },
+  { year: 2003, note: 'The 120 Series Prado brings the 1KD-FTV and the first mainstream common rail in an Australian four wheel drive. Particulate filters are still years away.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'patrol-gu-td42t', 'prado120-1kd', 'triton-4d56t'] },
+  { year: 2004, note: 'Mechanical pumps and common rails are on sale side by side, which makes this a useful year for seeing exactly what you give up in each direction.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'lc70-1hdfte', 'patrol-gu-td42t', 'prado120-1kd'] },
+  { year: 2005, note: 'The N70 Hilux goes common rail. From here the mechanical injection pump is on borrowed time in anything new.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'patrol-gu-td42t', 'hilux-n70-1kd', 'prado120-1kd'] },
+  { year: 2006, note: 'The last year you can buy a new 1HZ or a new TD42 in Australia. After this every new diesel four wheel drive has a rail and an engine ECU.',
+    picks: ['lc105-1hz', 'lc70-1hz', 'hilux-n70-1kd', 'prado120-1kd', 'triton-4d56t'] },
+  { year: 2007, note: 'The 70 Series and the 200 both move to the 1VD-FTV. The mechanical era ends, and the parts you now worry about cost roughly ten times what they used to.',
+    picks: ['lc70-1hz', 'lc105-1hz', 'hilux-n70-1kd', 'prado120-1kd', 'dmax-4jj1'] },
+  { year: 2008, note: 'Common rail is universal. The ownership question changes from how simple is it to which set of injectors will I be paying for.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado120-1kd', 'dmax-4jj1', 'lc200-1vd'] },
+  { year: 2009, note: 'The 150 Series Prado arrives and emissions hardware starts appearing on Australian diesels in earnest.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'hiace-2kd'] },
+  { year: 2010, note: 'Particulate filters spread through the segment. For the first time a diesel that only does short trips is a genuinely bad purchase.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'pajero-4m41'] },
+  { year: 2011, note: 'The PX Ranger arrives with a belt driven five cylinder common rail, which is an unusual pairing and worth knowing about before you buy one.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'navara-d40-yd25'] },
+  { year: 2012, note: 'Nothing new for the owner-mechanic. The field is entirely common rail and the differences are in how much emissions hardware each carries.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'ranger-px'] },
+  { year: 2013, note: 'The 4JJ1 is the pick of the era on the argument that it was designed as a truck engine and detuned for a ute rather than the other way around.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'ranger-px'] },
+  { year: 2014, note: 'The last year before the current generation of Toyota diesels. Injector cost is now the dominant long-term risk on every entry here.',
+    picks: ['lc70-1vd', 'hilux-n70-1kd', 'prado150-1kd', 'dmax-4jj1', 'triton-4d56crd'] },
+  { year: 2015, note: 'The 1GD-FTV replaces the 1KD. Its first three years carry the particulate filter and injector complaints Toyota later addressed, so build date matters more than model.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj1', 'lc200-1vd'] },
+  { year: 2016, note: 'Euro 5 is standard here, which means every entry has exhaust gas recirculation and a particulate filter whether you wanted them or not.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj1', 'triton-4n15'] },
+  { year: 2017, note: 'The 200 Series is in its late years. Nothing on sale is mechanically injected and nothing will be again.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj1', 'lc200-1vd'] },
+  { year: 2018, note: 'Later 1GD builds have the early faults resolved, which makes model year a bigger factor than model across this part of the range.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj1', 'ranger-px'] },
+  { year: 2019, note: 'The H300 HiAce finally puts the engine under a bonnet. Selective catalytic reduction and AdBlue start appearing on the heavier vehicles.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj1', 'hiace-1gd-h300'] },
+  { year: 2020, note: 'The D-Max moves to the 4JJ3. The 200 Series is in its final full year with the 1VD-FTV.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj3', 'lc200-1vd'] },
+  { year: 2021, note: 'The 200 Series ends. The 70 Series carries on with the V8, which is now the last of its kind on sale anywhere here.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj3', 'hiace-1gd-h300'] },
+  { year: 2022, note: 'The field is settled: four common rail four cylinders and one V8. The question is now entirely about emissions hardware and injector price.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj3', 'triton-4n15'] },
+  { year: 2023, note: 'Nothing mechanical and nothing without a particulate filter. The choice comes down to which manufacturer has the best parts supply near you.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado150-1gd', 'dmax-4jj3', 'hiace-1gd-h300'] },
+  { year: 2024, note: 'The 70 Series V8 finishes and the four cylinder 1GD takes over. The Prado moves to the 250 on a new platform with the same engine.',
+    picks: ['lc70-1vd', 'hilux-n80-1gd', 'prado250-1gd', 'dmax-4jj3', 'hiace-1gd-h300'] },
+  { year: 2025, note: 'Every diesel on sale is common rail with a particulate filter and most now use AdBlue. The 1GD and the 4JJ3 are the two with the deepest service records behind them.',
+    picks: ['hilux-n80-1gd', 'prado250-1gd', 'dmax-4jj3', 'hiace-1gd-h300', 'triton-4n15'] }
+];
+
+// Fixed slot order per fuel, so a colour always means the same architecture and a
+// filter never repaints the survivors.
+const SLOT_OF = { PFI: 1, DUAL: 2, IDI: 1, DI: 2, CR: 3 };
+
+const INJ_LABEL = {
+  PFI: 'port', DUAL: 'dual',
+  IDI: 'indirect', DI: 'direct, mechanical', CR: 'common rail'
+};
+
+const FUEL_FILTERS = [
+  { id: 'petrol', label: 'Petrol' },
+  { id: 'diesel', label: 'Diesel' }
+];
+
+const INJ_FILTERS = {
+  petrol: [
+    { id: 'all', label: 'Any' },
+    { id: 'PFI', label: 'Port' },
+    { id: 'DUAL', label: 'Dual' }
+  ],
+  diesel: [
+    { id: 'all', label: 'Any' },
+    { id: 'IDI', label: 'Indirect' },
+    { id: 'DI', label: 'Direct, mech' },
+    { id: 'CR', label: 'Common rail' }
+  ]
+};
+
+const DRIVE_FILTERS = [
+  { id: 'all', label: 'Any' },
+  { id: '4WD', label: '4WD' },
+  { id: 'RWD', label: 'RWD' },
+  { id: 'AWD', label: 'AWD' },
+  { id: 'FWD', label: 'FWD' }
+];
+
+const TIMING_FILTERS = [
+  { id: 'all', label: 'Any' },
+  { id: 'chain', label: 'Chain' },
+  { id: 'belt', label: 'Belt' },
+  { id: 'gear', label: 'Gear' }
+];
+
+const state = { fuel: 'petrol', inj: 'all', drive: 'all', timing: 'all', year: 'all' };
+
+const track = () => TRACKS[state.fuel];
+
+// The one judgement call in this file. "Port injection" is not a settled category
+// once dual injection exists, and drive tags overlap (a Hilux is RWD/4WD).
+function passes(platform) {
+  if (FUEL_OF[platform.inj] !== state.fuel) return false;
+  if (state.inj !== 'all' && platform.inj !== state.inj) return false;
+  if (state.drive !== 'all' && !platform.drive.split('/').includes(state.drive)) return false;
+  if (state.timing !== 'all' && platform.timing !== state.timing) return false;
+  return true;
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+// Photos are looked up by platform id at image/<id>.webp, so adding one is a
+// matter of dropping the file in. CREDITS supplies the caption where the licence
+// asks for attribution; entries without one render no caption.
+const CREDITS = {};
+
+function renderFigure(id, p) {
+  const figure = el('figure', 'pick-figure');
+  const img = el('img');
+  img.src = 'image/' + id + '.webp';
+  img.alt = p.model + ', ' + p.gen;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.addEventListener('error', () => figure.remove());
+  figure.append(img);
+
+  if (CREDITS[id]) figure.append(el('figcaption', null, CREDITS[id]));
+  return figure;
+}
+
+function renderPick(id, rank) {
+  const p = PLATFORMS[id];
+  const li = el('li', 'pick');
+
+  li.append(el('span', 'pick-rank', String(rank)));
+
+  const row = el('div', 'pick-main');
+  row.append(renderFigure(id, p));
+
+  const main = el('div', 'pick-text');
+
+  const model = el('h3', 'pick-model', p.model);
+  model.append(el('span', 'gen', p.gen + ' · ' + p.span));
+  main.append(model);
+
+  main.append(el('p', 'pick-engine', p.engine));
+
+  const tags = el('div', 'tags');
+  tags.append(el('span', 'tag inj slot-' + SLOT_OF[p.inj], INJ_LABEL[p.inj]));
+  tags.append(el('span', 'tag', p.timing));
+  tags.append(el('span', 'tag', p.drive));
+  main.append(tags);
+
+  const body = el('div', 'pick-body');
+  body.append(el('p', null, p.why));
+
+  const watch = el('p');
+  watch.append(el('span', 'k', 'Watch'));
+  watch.append(document.createTextNode(p.watch));
+  body.append(watch);
+
+  main.append(body);
+  row.append(main);
+  li.append(row);
+  return li;
+}
+
+function renderYear(entry) {
+  const section = el('section', 'year');
+  section.id = 'y' + entry.year;
+
+  const head = el('div', 'year-head');
+  head.append(el('span', 'year-num', String(entry.year)));
+  head.append(el('p', 'year-note', entry.note));
+  section.append(head);
+
+  const kept = entry.picks.filter(id => passes(PLATFORMS[id]));
+
+  if (!kept.length) {
+    section.append(el('p', 'empty', 'No pick this year matches the current filters.'));
+    return { node: section, count: 0 };
+  }
+
+  const list = el('ol', 'picks');
+  // Rank is the position in the unfiltered year list, so filtering never implies
+  // a car was ranked higher than it was.
+  kept.forEach(id => list.append(renderPick(id, entry.picks.indexOf(id) + 1)));
+  section.append(list);
+
+  return { node: section, count: kept.length };
+}
+
+function render() {
+  const host = document.getElementById('years');
+  const all = track();
+  const shown = state.year === 'all' ? all : all.filter(y => y.year === state.year);
+
+  let total = 0;
+  const nodes = shown.map(entry => {
+    const { node, count } = renderYear(entry);
+    total += count;
+    return node;
+  });
+
+  host.replaceChildren(...nodes);
+
+  const ceiling = all.reduce((n, y) => n + y.picks.length, 0);
+  const years = shown.length === 1 ? '1 year' : shown.length + ' years';
+  document.getElementById('tally').textContent = total + ' of ' + ceiling + ' · ' + years;
+
+  renderStats();
+  renderSpanChart();
+}
+
+function renderChips(hostId, options, key, onPick) {
+  const host = document.getElementById(hostId);
+  host.replaceChildren();
+  options.forEach(option => {
+    const button = el('button', 'chip', option.label);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', String(state[key] === option.id));
+    button.addEventListener('click', () => {
+      state[key] = option.id;
+      host.querySelectorAll('.chip').forEach(chip => {
+        chip.setAttribute('aria-pressed', String(chip === button));
+      });
+      if (onPick) onPick(option.id);
+      render();
+    });
+    host.append(button);
+  });
+}
+
+/* ---------- stat row ---------- */
+
+// The headline tile is the architecture this page is actually about: port injection
+// on the petrol side, mechanical injection on the diesel side.
+const HEADLINE = { petrol: ['PFI'], diesel: ['IDI', 'DI'] };
+
+function renderStats() {
+  const years = track();
+  const ids = Object.keys(PLATFORMS).filter(id => FUEL_OF[PLATFORMS[id].inj] === state.fuel);
+
+  const counts = {};
+  let headlinePicks = 0;
+  let totalPicks = 0;
+  let lastHeadlineYear = -Infinity;
+
+  years.forEach(y => y.picks.forEach(id => {
+    const inj = PLATFORMS[id].inj;
+    counts[inj] = (counts[inj] || 0) + 1;
+    totalPicks++;
+    if (HEADLINE[state.fuel].includes(inj)) {
+      headlinePicks++;
+      lastHeadlineYear = Math.max(lastHeadlineYear, y.year);
+    }
+  }));
+
+  const mix = Object.keys(SLOT_OF)
+    .filter(inj => counts[inj])
+    .map(inj => counts[inj] + ' ' + INJ_LABEL[inj].split(',')[0])
+    .join(', ');
+
+  const headlineLabel = state.fuel === 'petrol' ? 'Pure port picks' : 'Mechanical picks';
+
+  const tiles = [
+    { value: years.length, label: 'Model years', sub: years[0].year + ' to ' + years[years.length - 1].year },
+    { value: ids.length, label: 'Platforms', sub: state.fuel === 'petrol' ? 'petrol' : 'diesel' },
+    { value: headlinePicks, label: headlineLabel, sub: 'of ' + totalPicks + ' picks' },
+    { value: lastHeadlineYear, label: 'Last one on sale', sub: mix }
+  ];
+
+  document.getElementById('stats').replaceChildren(...tiles.map(t => {
+    const cell = el('div', 'stat');
+    cell.append(el('div', 'stat-value', String(t.value)));
+    cell.append(el('div', 'stat-label', t.label));
+    cell.append(el('div', 'stat-sub', t.sub));
+    return cell;
+  }));
+}
+
+/* ---------- span chart ---------- */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svg(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => node.setAttribute(k, String(v)));
+  return node;
+}
+
+// Independent left and right corner radii, so a bar clipped by the start of the
+// range can square off that end and stay honest about being cut.
+function barPath(x, y, w, h, rl, rr) {
+  const a = Math.min(rl, w / 2, h / 2);
+  const b = Math.min(rr, w / 2, h / 2);
+  return 'M' + (x + a) + ',' + y +
+    'H' + (x + w - b) + (b ? 'A' + b + ',' + b + ' 0 0 1 ' + (x + w) + ',' + (y + b) : '') +
+    'V' + (y + h - b) + (b ? 'A' + b + ',' + b + ' 0 0 1 ' + (x + w - b) + ',' + (y + h) : '') +
+    'H' + (x + a) + (a ? 'A' + a + ',' + a + ' 0 0 1 ' + x + ',' + (y + h - a) : '') +
+    'V' + (y + a) + (a ? 'A' + a + ',' + a + ' 0 0 1 ' + (x + a) + ',' + y : '') + 'Z';
+}
+
+const CHART = {
+  gutter: 196, rightPad: 22, topPad: 24, bottomPad: 22,
+  rowH: 10, rowGap: 4
+};
+
+function renderLegend(rows) {
+  const present = [];
+  rows.forEach(row => { if (!present.includes(row.p.inj)) present.push(row.p.inj); });
+  present.sort((a, b) => SLOT_OF[a] - SLOT_OF[b]);
+
+  const host = document.getElementById('vizLegend');
+  host.replaceChildren(...present.map(inj => {
+    const item = el('span', 'legend-item slot-' + SLOT_OF[inj]);
+    item.append(el('span', 'legend-swatch'));
+    item.append(document.createTextNode(
+      inj === 'DUAL' ? 'Dual, port and direct'
+        : inj === 'PFI' ? 'Port injection'
+        : inj === 'IDI' ? 'Indirect injection'
+        : inj === 'DI' ? 'Direct, mechanical pump'
+        : 'Common rail'
+    ));
+    return item;
+  }));
+}
+
+function renderSpanChart() {
+  const years = track();
+  const from = years[0].year;
+  const to = years[years.length - 1].year;
+  const chart = document.getElementById('spanChart');
+  const scroll = document.getElementById('vizScroll');
+  const tip = document.getElementById('vizTip');
+
+  tip.classList.remove('is-on');
+  scroll.classList.remove('is-hovering');
+
+  const rows = Object.entries(PLATFORMS)
+    .filter(([, p]) => passes(p))
+    .map(([id, p]) => {
+      const [rawStart, rawEnd] = p.span.split('-').map(Number);
+      return {
+        id, p, rawStart, rawEnd,
+        start: Math.max(rawStart, from),
+        end: Math.min(rawEnd, to)
+      };
+    })
+    // A chosen year keeps only what was on sale that year, each still drawn across
+    // its whole span, so the chart answers the same question the list does.
+    .filter(row => state.year === 'all' || (row.rawStart <= state.year && row.rawEnd >= state.year))
+    .sort((a, b) => a.start - b.start || a.end - b.end || a.p.model.localeCompare(b.p.model));
+
+  renderLegend(rows);
+  document.getElementById('vizCount').textContent =
+    rows.length + (rows.length === 1 ? ' platform' : ' platforms');
+
+  if (!rows.length) {
+    chart.removeAttribute('viewBox');
+    chart.replaceChildren();
+    return;
+  }
+
+  const step = CHART.rowH + CHART.rowGap;
+  const plotW = 690;
+  const width = CHART.gutter + plotW + CHART.rightPad;
+  const height = CHART.topPad + rows.length * step + CHART.bottomPad;
+
+  chart.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  chart.replaceChildren();
+
+  // Domain runs to to+1 so the final year occupies a full column.
+  const x = year => CHART.gutter + ((year - from) / (to + 1 - from)) * plotW;
+
+  const ticks = [];
+  for (let year = from; year <= to; year += 5) ticks.push(year);
+  if (ticks[ticks.length - 1] !== to) ticks.push(to);
+
+  ticks.forEach(year => {
+    chart.append(svg('line', {
+      class: 'gridline', x1: x(year), x2: x(year),
+      y1: CHART.topPad - 8, y2: height - CHART.bottomPad + 4
+    }));
+    [CHART.topPad - 12, height - CHART.bottomPad + 15].forEach(y => {
+      const label = svg('text', { class: 'axis-tick', x: x(year), y, 'text-anchor': 'middle' });
+      label.textContent = String(year);
+      chart.append(label);
+    });
+  });
+
+  chart.append(svg('line', {
+    class: 'axisline', x1: CHART.gutter, x2: CHART.gutter,
+    y1: CHART.topPad - 8, y2: height - CHART.bottomPad + 4
+  }));
+
+  if (state.year !== 'all') {
+    chart.append(svg('rect', {
+      class: 'year-band', x: x(state.year), y: CHART.topPad - 8,
+      width: Math.max(x(state.year + 1) - x(state.year), 2),
+      height: height - CHART.bottomPad + 12 - CHART.topPad
+    }));
+  }
+
+  const bars = [];
+
+  rows.forEach((row, i) => {
+    const y = CHART.topPad + i * step;
+
+    const label = svg('text', {
+      class: 'row-label', x: CHART.gutter - 10, y: y + CHART.rowH - 1.5, 'text-anchor': 'end'
+    });
+    label.textContent = row.p.model + '  ' + row.p.gen;
+    chart.append(label);
+
+    const x0 = x(row.start);
+    const x1 = x(row.end + 1);
+    const clipStart = row.rawStart < from;
+    const clipEnd = row.rawEnd > to;
+    const bar = svg('path', {
+      class: 'span-bar slot-' + SLOT_OF[row.p.inj],
+      'data-clip': (clipStart ? 'start' : '') + (clipEnd ? 'end' : '') || 'none',
+      d: barPath(x0, y, Math.max(x1 - x0, 3), CHART.rowH, clipStart ? 0 : 4, clipEnd ? 0 : 4),
+      tabindex: '0', role: 'listitem',
+      'aria-label': row.p.model + ', ' + row.p.span + ', ' + INJ_LABEL[row.p.inj] + ' injection'
+    });
+
+    const show = event => {
+      scroll.classList.add('is-hovering');
+      bars.forEach(b => b.classList.remove('is-active'));
+      bar.classList.add('is-active');
+      label.classList.add('is-active');
+
+      tip.replaceChildren();
+      const name = el('b', null, row.p.model);
+      tip.append(name);
+      const dl = el('dl');
+      [
+        ['Code', row.p.gen],
+        ['Sold', row.p.span],
+        ['Engine', row.p.engine],
+        ['Fuel', state.fuel === 'petrol' ? 'Petrol' : 'Diesel'],
+        ['Injection', INJ_LABEL[row.p.inj]],
+        ['Timing', row.p.timing],
+        ['Driven', row.p.drive]
+      ].forEach(([k, v]) => { dl.append(el('dt', null, k), el('dd', null, v)); });
+      tip.append(dl);
+      tip.classList.add('is-on');
+
+      // Keyboard focus carries no pointer coordinates, so fall back to the bar.
+      const box = scroll.getBoundingClientRect();
+      const anchor = bar.getBoundingClientRect();
+      const cx = event.clientX === undefined ? anchor.left + anchor.width / 2 : event.clientX;
+      const cy = event.clientY === undefined ? anchor.top : event.clientY;
+
+      const left = cx - box.left + scroll.scrollLeft;
+      tip.style.left = Math.max(104, Math.min(left, scroll.scrollWidth - 104)) + 'px';
+      tip.style.top = (cy - box.top + scroll.scrollTop - 12) + 'px';
+    };
+
+    const hide = () => {
+      scroll.classList.remove('is-hovering');
+      bar.classList.remove('is-active');
+      label.classList.remove('is-active');
+      tip.classList.remove('is-on');
+    };
+
+    bar.addEventListener('mouseenter', show);
+    bar.addEventListener('mousemove', show);
+    bar.addEventListener('mouseleave', hide);
+    bar.addEventListener('focus', show);
+    bar.addEventListener('blur', hide);
+
+    bars.push(bar);
+    chart.append(bar);
+  });
+}
+
+function renderYearSelect() {
+  const select = document.getElementById('yearSelect');
+  const options = [{ value: 'all', label: 'All years' }]
+    .concat(track().map(entry => ({ value: entry.year, label: String(entry.year) })));
+
+  select.replaceChildren(...options.map(option => {
+    const node = el('option', null, option.label);
+    node.value = String(option.value);
+    if (String(state.year) === String(option.value)) node.selected = true;
+    return node;
+  }));
+}
+
+document.getElementById('yearSelect').addEventListener('change', event => {
+  state.year = event.target.value === 'all' ? 'all' : Number(event.target.value);
+  render();
+});
+
+// Switching fuel changes which injection types exist, so those chips are rebuilt and
+// the injection filter resets rather than silently matching nothing.
+renderChips('fuelChips', FUEL_FILTERS, 'fuel', () => {
+  state.inj = 'all';
+  renderChips('injChips', INJ_FILTERS[state.fuel], 'inj');
+});
+
+renderChips('injChips', INJ_FILTERS[state.fuel], 'inj');
+renderChips('driveChips', DRIVE_FILTERS, 'drive');
+renderChips('timingChips', TIMING_FILTERS, 'timing');
+renderYearSelect();
+
+render();
+</script>
+</body>
+</html>

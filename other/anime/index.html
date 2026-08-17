@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Exposure Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap');
+
+  :root {
+    --bg-primary: #08090d;
+    --bg-band: #0b0d13;
+    --bg-card: #11141c;
+    --bg-card-hover: #171b26;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.16);
+    --rule: rgba(255,255,255,0.05);
+    --text-primary: #f2f4fa;
+    --text-secondary: #99a1b8;
+    --text-muted: #7d859c;
+    --peg-hole: #000000;
+    --accent: #ff2e88;
+    --accent-2: #22d3ee;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --plate-fill: rgba(255,255,255,0.03);
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #f6f7fb;
+    --bg-band: #eef0f7;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fbfcff;
+    --border: rgba(16,20,32,0.09);
+    --border-hover: rgba(16,20,32,0.2);
+    --rule: rgba(16,20,32,0.07);
+    --text-primary: #12151f;
+    --text-secondary: #4a5265;
+    --text-muted: #626a7c;
+    --peg-hole: #ced4e2;
+    --plate-fill: rgba(16,20,32,0.03);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 120px; }
+
+  body {
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── masthead ───────────────────────────────────────── */
+
+  .masthead { padding: 72px 0 0; position: relative; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .masthead h1 {
+    font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.6rem, 8.5vw, 6.2rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    margin: 22px 0 0;
+  }
+  .masthead h1 .tint { color: var(--accent); }
+
+  .standfirst {
+    margin: 22px 0 0;
+    max-width: 46ch;
+    font-size: 1.0625rem;
+    color: var(--text-secondary);
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .theme-toggle {
+    flex: none;
+    width: 54px;
+    height: 29px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--border-hover); }
+  .theme-toggle .thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.28s cubic-bezier(0.4, 0.1, 0.2, 1);
+  }
+  [data-theme="light"] .theme-toggle .thumb { transform: translateX(25px); }
+
+  /* ── methodology ────────────────────────────────────── */
+
+  .method {
+    margin-top: 36px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 20px 32px;
+  }
+  .method dt {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .method dd {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  /* ── controls ───────────────────────────────────────── */
+
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    margin-top: 28px;
+  }
+  .controls-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .search {
+    flex: 1 1 200px;
+    min-width: 160px;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: 9px 12px 9px 32px;
+    transition: border-color 0.18s;
+  }
+  .search input::placeholder { color: var(--text-muted); }
+  .search input:focus { border-color: var(--accent); }
+  .search input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .search svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    stroke: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .chips { display: flex; gap: 6px; }
+  .chip {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.18s, border-color 0.18s, background 0.18s;
+  }
+  .chip:hover { border-color: var(--border-hover); color: var(--text-primary); }
+  .chip[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .rail { display: flex; gap: 2px; margin-left: auto; }
+  .rail a {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    transition: color 0.18s, background 0.18s;
+  }
+  .rail a:hover { color: var(--text-primary); background: var(--bg-card); }
+  .rail a.here { color: var(--bg-primary); background: var(--accent); }
+  [data-theme="light"] .rail a.here { color: #fff; }
+
+  .tally {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ── decade bands ───────────────────────────────────── */
+
+  .decade { position: relative; padding: 64px 0 8px; }
+
+  /* Each era's accent is declared twice on purpose: on the band so it paints
+     correctly on first render, and on :root so the sticky chrome outside the
+     band picks it up as you scroll. */
+  :root[data-era="1980"], .decade[data-era="1980"] { --accent: #ff2e88; --accent-2: #22d3ee; }
+  :root[data-era="1990"], .decade[data-era="1990"] { --accent: #ffab1f; --accent-2: #ff6b3d; }
+  :root[data-era="2000"], .decade[data-era="2000"] { --accent: #24d6c4; --accent-2: #3b82f6; }
+  :root[data-era="2010"], .decade[data-era="2010"] { --accent: #9d7bff; --accent-2: #e879f9; }
+  :root[data-era="2020"], .decade[data-era="2020"] { --accent: #ff4d63; --accent-2: #ffab1f; }
+
+  /* The era accents are tuned for the dark ground and go pale on near-white,
+     so light mode gets darker siblings that hold the same hue. */
+  :root[data-theme="light"][data-era="1980"], [data-theme="light"] .decade[data-era="1980"] { --accent: #d10063; }
+  :root[data-theme="light"][data-era="1990"], [data-theme="light"] .decade[data-era="1990"] { --accent: #9a6500; }
+  :root[data-theme="light"][data-era="2000"], [data-theme="light"] .decade[data-era="2000"] { --accent: #007872; }
+  :root[data-theme="light"][data-era="2010"], [data-theme="light"] .decade[data-era="2010"] { --accent: #6b45e0; }
+  :root[data-theme="light"][data-era="2020"], [data-theme="light"] .decade[data-era="2020"] { --accent: #d4133a; }
+  [data-theme="light"] { --accent: #d10063; }
+
+  .controls, .chip, .method dt, .theme-toggle .thumb {
+    transition: color 0.45s ease, background-color 0.45s ease, border-color 0.45s ease;
+  }
+  /* the active-decade pill must never look like two are lit mid-scroll */
+  .rail a { transition: color 0.18s ease, background-color 0.12s ease; }
+
+  .decade:nth-of-type(even) { background: var(--bg-band); }
+
+  .decade-head {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .decade-head h2 {
+    font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--accent);
+  }
+  .decade-head .medium {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .decade-head::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0.5;
+    align-self: center;
+  }
+
+  /* ── year block ─────────────────────────────────────── */
+
+  .year {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 0 30px;
+    padding: 26px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .year:first-of-type { border-top: none; }
+
+  /* peg bar: the round-slot-round punch strip along the edge of animation paper */
+  .plate { position: relative; padding-left: 34px; }
+  .plate::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 10px;
+    width: 17px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--plate-fill);
+  }
+  .plate::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 12px;
+    width: 7px;
+    height: 72px;
+    background:
+      radial-gradient(circle at 3.5px 3.5px, var(--peg-hole) 3.4px, transparent 3.7px) top center / 7px 7px no-repeat,
+      linear-gradient(var(--peg-hole), var(--peg-hole)) center center / 7px 22px no-repeat,
+      radial-gradient(circle at 3.5px 3.5px, var(--peg-hole) 3.4px, transparent 3.7px) bottom center / 7px 7px no-repeat;
+    border-radius: 3.5px;
+  }
+
+  .plate .num {
+    font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 2.75rem;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    display: block;
+    color: var(--text-primary);
+  }
+  .plate .num .cut { color: var(--accent); }
+  .plate .sheet {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* the shelf: five covers a year, layer A first */
+  .shelf {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 22px 16px;
+  }
+
+  .pick { display: flex; flex-direction: column; min-width: 0; }
+
+  .poster {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--plate-fill);
+    overflow: hidden;
+  }
+  .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .poster { transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.22s, box-shadow 0.22s; }
+    .pick:hover .poster { transform: translateY(-5px); }
+  }
+  .pick:hover .poster {
+    border-color: var(--accent);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+  }
+  [data-theme="light"] .pick:hover .poster { box-shadow: 0 12px 26px rgba(16, 20, 32, 0.16); }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+
+  /* only shown if a cover file is ever missing */
+  .poster--empty::after {
+    content: attr(data-ch);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--text-muted);
+  }
+
+  .card-title {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.34;
+    letter-spacing: -0.008em;
+  }
+  .pick.lead .card-title { font-weight: 600; }
+
+  .card-ja {
+    margin-top: 3px;
+    font-family: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1.42;
+    color: var(--text-muted);
+    word-break: break-word;
+  }
+
+  /* cards stretch to the tallest in the row, so pinning the studio line to the
+     bottom keeps it level across a shelf however the titles wrap */
+  .card-sub {
+    margin-top: auto;
+    padding-top: 7px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+  }
+  .format {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 2px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .pick.lead .format { border-color: var(--accent); color: var(--accent); }
+
+  .lead-note {
+    margin: 20px 0 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--accent);
+    font-size: 0.875rem;
+    line-height: 1.62;
+    color: var(--text-secondary);
+    max-width: 76ch;
+  }
+
+  .year[hidden], .pick[hidden], .decade[hidden], .lead-note[hidden] { display: none; }
+
+  /* A shelf is five wide, so 4 columns would leave a single orphan on row two.
+     Keep five across for as long as it fits, then break to 3 + 2 and 2 + 2 + 1. */
+  @media (max-width: 720px) { .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 14px; } }
+  @media (max-width: 520px) { .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; } }
+
+  /* ── empty state ────────────────────────────────────── */
+
+  .empty {
+    display: none;
+    padding: 88px 24px 96px;
+    text-align: center;
+  }
+  .empty.on { display: block; }
+  .empty h3 {
+    font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0 0 8px;
+  }
+  .empty p { margin: 0; color: var(--text-secondary); font-size: 0.9375rem; }
+
+  /* ── colophon ───────────────────────────────────────── */
+
+  .colophon {
+    border-top: 1px solid var(--border);
+    margin-top: 64px;
+    padding: 32px 0 72px;
+  }
+  .colophon p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    max-width: 68ch;
+    margin: 0 0 10px;
+  }
+
+  /* ── motion ─────────────────────────────────────────── */
+
+  .year { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .year.pending { opacity: 0; transform: translateY(14px); }
+    .year.shown {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+  }
+
+  /* ── narrow ─────────────────────────────────────────── */
+
+  @media (max-width: 860px) {
+    .rail { margin-left: 0; }
+    .tally { display: none; }
+  }
+
+  /* Hand the shelf the full width before the posters get cramped: the year plate
+     lays down flat above it rather than holding a 150px column. */
+  @media (max-width: 900px) {
+    html { scroll-padding-top: 170px; }
+    .year { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .plate { display: flex; align-items: baseline; gap: 13px; padding-left: 30px; }
+    .plate::before { top: 0; bottom: auto; height: 46px; }
+    .plate::after { top: 8px; height: 30px;
+      background:
+        radial-gradient(circle at 3.5px 3.5px, var(--peg-hole) 3.4px, transparent 3.7px) top center / 7px 7px no-repeat,
+        linear-gradient(var(--peg-hole), var(--peg-hole)) center center / 7px 9px no-repeat,
+        radial-gradient(circle at 3.5px 3.5px, var(--peg-hole) 3.4px, transparent 3.7px) bottom center / 7px 7px no-repeat; }
+    .plate .num { font-size: 2rem; }
+    .plate .sheet { margin-top: 0; }
+    .masthead { padding-top: 44px; }
+    .lead-note { margin-top: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead wrap">
+  <div class="masthead-top">
+    <p class="eyebrow">Exposure sheet · 40 years · 200 titles</p>
+    <button class="theme-toggle" id="themeToggle" aria-label="Switch between dark and light">
+      <span class="thumb"></span>
+    </button>
+  </div>
+  <h1>Five a year,<br><span class="tint">1981 to 2020</span></h1>
+  <p class="standfirst">
+    One shelf per year, ranked left to right. The first cover is the pick and carries the
+    note; the other four are the rest of the shortlist, in order. Every cover links out
+    to AniList.
+  </p>
+
+  <dl class="method">
+    <div>
+      <dt>What ranks</dt>
+      <dd>Broad critical and fan consensus, not personal taste. Where a year had an obvious
+        landmark it takes first place even if something else is more fun to watch.</dd>
+    </div>
+    <div>
+      <dt>How years are set</dt>
+      <dd>First release in Japan. A series is filed under its premiere year, so long runs
+        appear once. Split-cour sequels are listed separately only when they are usually
+        judged as their own work.</dd>
+    </div>
+    <div>
+      <dt>What counts</dt>
+      <dd>TV series, theatrical films and OVAs compete in the same list. The 1980s need it:
+        1988 is carried by two films, not television.</dd>
+    </div>
+    <div>
+      <dt>Colour</dt>
+      <dd>Each decade takes its accent from how the work was actually made, from cel and
+        airbrush through to digital compositing.</dd>
+    </div>
+  </dl>
+</header>
+
+<nav class="controls" aria-label="Filter and jump">
+  <div class="controls-inner">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.5-4.5"></path>
+      </svg>
+      <input type="search" id="q" placeholder="Search title or studio" autocomplete="off"
+             aria-label="Search title or studio">
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filter by format">
+      <button class="chip" data-fmt="ALL" aria-pressed="true">All</button>
+      <button class="chip" data-fmt="TV" aria-pressed="false">TV</button>
+      <button class="chip" data-fmt="FILM" aria-pressed="false">Film</button>
+      <button class="chip" data-fmt="OVA" aria-pressed="false">OVA</button>
+    </div>
+    <span class="tally" id="tally"></span>
+    <div class="rail" id="rail">
+      <a href="#d1980">80s</a><a href="#d1990">90s</a><a href="#d2000">00s</a><a href="#d2010">10s</a><a href="#d2020">20</a>
+    </div>
+  </div>
+</nav>
+
+<main id="sheet"></main>
+
+<div class="empty" id="empty">
+  <h3>Nothing on this sheet matches</h3>
+  <p>Clear the search, or try a studio instead — Madhouse, Sunrise, Kyoto Animation.</p>
+</div>
+
+<footer class="colophon wrap">
+  <p>A recommendation list, not a database. Titles, studios and years were compiled by hand
+    from long-standing critical and fan consensus; treat any single studio credit as a
+    starting point rather than a citation, since production credits on older OVAs are
+    frequently shared and inconsistently recorded.</p>
+  <p>Ranking basis: consensus canon. Scope: TV, film and OVA.</p>
+  <p>Cover images and Japanese titles were matched against the AniList database; the images
+    are stored locally in <code>img/</code>, so the page renders without network access.
+    The artwork remains the copyright of the original studios and licensors, reproduced
+    here at thumbnail size for identification in a personal, unlisted index.</p>
+</footer>
+
+<script>
+/* Each year: five picks in rank order. A pick is
+   [title, format, studio] and layer A adds a fourth field, the note. */
+const SHEET = [
+  { y: 1981, era: 1980, picks: [
+    ['Urusei Yatsura', 'TV', 'Studio Pierrot', "Oshii's first long-form playground, and where a decade of anime comedy timing gets worked out in public."],
+    ['Dr. Slump: Arale-chan', 'TV', 'Toei Animation'],
+    ['Mobile Suit Gundam I', 'FILM', 'Sunrise'],
+    ['Adieu Galaxy Express 999', 'FILM', 'Toei Animation'],
+    ['Fang of the Sun Dougram', 'TV', 'Sunrise'],
+  ]},
+  { y: 1982, era: 1980, picks: [
+    ['Super Dimension Fortress Macross', 'TV', 'Artland', "Idol songs, a love triangle and transforming jets, all taken equally seriously. Half of mecha still follows the template."],
+    ['Space Adventure Cobra', 'TV', 'Tokyo Movie Shinsha'],
+    ['Combat Mecha Xabungle', 'TV', 'Sunrise'],
+    ['Mobile Suit Gundam III: Encounters in Space', 'FILM', 'Sunrise'],
+    ['Magical Princess Minky Momo', 'TV', 'Ashi Productions'],
+  ]},
+  { y: 1983, era: 1980, picks: [
+    ['Armored Trooper VOTOMS', 'TV', 'Sunrise', "Mecha as disposable military hardware. Chirico walks out of a war that has already finished using him."],
+    ['Aura Battler Dunbine', 'TV', 'Sunrise'],
+    ['Barefoot Gen', 'FILM', 'Madhouse'],
+    ['Dallos', 'OVA', 'Studio Pierrot'],
+    ['Harmagedon', 'FILM', 'Madhouse'],
+  ]},
+  { y: 1984, era: 1980, picks: [
+    ['Nausicaä of the Valley of the Wind', 'FILM', 'Topcraft', "The film that paid for Ghibli: an ecological epic with no villain available to defeat."],
+    ['Urusei Yatsura 2: Beautiful Dreamer', 'FILM', 'Studio Pierrot'],
+    ['Macross: Do You Remember Love?', 'FILM', 'Artland'],
+    ['Fist of the North Star', 'TV', 'Toei Animation'],
+    ['Sherlock Hound', 'TV', 'Tokyo Movie Shinsha'],
+  ]},
+  { y: 1985, era: 1980, picks: [
+    ['Mobile Suit Zeta Gundam', 'TV', 'Sunrise', "The sequel that turned the franchise into tragedy. Kamille is the first Gundam lead the war actually breaks."],
+    ['Touch', 'TV', 'Group TAC'],
+    ["Angel's Egg", 'OVA', 'Studio Deen'],
+    ['Megazone 23', 'OVA', 'AIC / Artmic'],
+    ['Vampire Hunter D', 'OVA', 'Ashi Productions'],
+  ]},
+  { y: 1986, era: 1980, picks: [
+    ['Castle in the Sky', 'FILM', 'Studio Ghibli', "Ghibli's official first film, and the cleanest adventure Miyazaki ever built."],
+    ['Dragon Ball', 'TV', 'Toei Animation'],
+    ['Saint Seiya', 'TV', 'Toei Animation'],
+    ['Maison Ikkoku', 'TV', 'Studio Deen'],
+    ['Project A-ko', 'FILM', 'A.P.P.P.'],
+  ]},
+  { y: 1987, era: 1980, picks: [
+    ['Royal Space Force: The Wings of Honnêamise', 'FILM', 'Gainax', "Gainax spend an entire debut feature on the unglamorous engineering behind a first spaceflight, and it works."],
+    ['City Hunter', 'TV', 'Sunrise'],
+    ['Bubblegum Crisis', 'OVA', 'AIC / Artmic'],
+    ['Kimagure Orange Road', 'TV', 'Studio Pierrot'],
+    ['Robot Carnival', 'OVA', 'A.P.P.P.'],
+  ]},
+  { y: 1988, era: 1980, picks: [
+    ['Akira', 'FILM', 'Tokyo Movie Shinsha', "Otomo animates his own manga on a budget nobody had risked before, and exports anime to everywhere else."],
+    ['My Neighbor Totoro', 'FILM', 'Studio Ghibli'],
+    ['Grave of the Fireflies', 'FILM', 'Studio Ghibli'],
+    ['Legend of the Galactic Heroes', 'OVA', 'Kitty Film / Artland'],
+    ['Gunbuster', 'OVA', 'Gainax'],
+  ]},
+  { y: 1989, era: 1980, picks: [
+    ["Kiki's Delivery Service", 'FILM', 'Studio Ghibli', "A film about losing the ability to do the one thing you are good at. Gentler than that sounds, and sharper."],
+    ['Patlabor: The Movie', 'FILM', 'Studio Deen'],
+    ['Mobile Suit Gundam 0080: War in the Pocket', 'OVA', 'Sunrise'],
+    ['Ranma ½', 'TV', 'Studio Deen'],
+    ['Dragon Ball Z', 'TV', 'Toei Animation'],
+  ]},
+
+  { y: 1990, era: 1990, picks: [
+    ['Nadia: The Secret of Blue Water', 'TV', 'Gainax / Group TAC', "Gainax's Verne adaptation: brilliant for two thirds, and visibly out of money for the rest."],
+    ['Record of Lodoss War', 'OVA', 'Madhouse'],
+    ['Cyber City Oedo 808', 'OVA', 'Madhouse'],
+    ['Chibi Maruko-chan', 'TV', 'Nippon Animation'],
+    ['Brave Exkaiser', 'TV', 'Sunrise'],
+  ]},
+  { y: 1991, era: 1990, picks: [
+    ['Only Yesterday', 'FILM', 'Studio Ghibli', "Takahata films an adult woman auditing her own childhood. Almost nothing happens and it lands hard."],
+    ['Mobile Suit Gundam F91', 'FILM', 'Sunrise'],
+    ['Roujin Z', 'FILM', 'A.P.P.P.'],
+    ['Otaku no Video', 'OVA', 'Gainax'],
+    ['Future GPX Cyber Formula', 'TV', 'Sunrise'],
+  ]},
+  { y: 1992, era: 1990, picks: [
+    ['Sailor Moon', 'TV', 'Toei Animation', "Magical girl and super team welded into one format, with a generation of shoujo built on top of it."],
+    ['Porco Rosso', 'FILM', 'Studio Ghibli'],
+    ['Yu Yu Hakusho', 'TV', 'Studio Pierrot'],
+    ['Giant Robo: The Day the Earth Stood Still', 'OVA', 'Mu Animation Studio'],
+    ['Crayon Shin-chan', 'TV', 'Shin-Ei Animation'],
+  ]},
+  { y: 1993, era: 1990, picks: [
+    ['Patlabor 2: The Movie', 'FILM', 'Production I.G', "Oshii uses a police procedural to stage a coup and argue about postwar Japan. The city does most of the acting."],
+    ['Ninja Scroll', 'FILM', 'Madhouse'],
+    ['Slam Dunk', 'TV', 'Toei Animation'],
+    ['Sailor Moon R', 'TV', 'Toei Animation'],
+    ['Oh My Goddess!', 'OVA', 'AIC'],
+  ]},
+  { y: 1994, era: 1990, picks: [
+    ['Macross Plus', 'OVA', 'Triangle Staff / Production I.G', "Kawamori and Watanabe on dogfights and a virtual pop star, carrying Kanno's best score."],
+    ['Pom Poko', 'FILM', 'Studio Ghibli'],
+    ['Magic Knight Rayearth', 'TV', 'Tokyo Movie Shinsha'],
+    ['Mobile Fighter G Gundam', 'TV', 'Sunrise'],
+    ['Marmalade Boy', 'TV', 'Toei Animation'],
+  ]},
+  { y: 1995, era: 1990, picks: [
+    ['Neon Genesis Evangelion', 'TV', 'Gainax', "The one the industry reorganised itself around. Still unpleasant in exactly the way it intends to be."],
+    ['Ghost in the Shell', 'FILM', 'Production I.G'],
+    ['Whisper of the Heart', 'FILM', 'Studio Ghibli'],
+    ['Mobile Suit Gundam Wing', 'TV', 'Sunrise'],
+    ['Slayers', 'TV', 'E&G Films'],
+  ]},
+  { y: 1996, era: 1990, picks: [
+    ['The Vision of Escaflowne', 'TV', 'Sunrise', "Shoujo romance bolted to a mecha war, Kanno scoring again, and tighter than a 26-episode fantasy has any right to be."],
+    ['Rurouni Kenshin', 'TV', 'Studio Gallop'],
+    ['Martian Successor Nadesico', 'TV', 'Xebec'],
+    ['Detective Conan', 'TV', 'Tokyo Movie Shinsha'],
+    ['Slayers Next', 'TV', 'E&G Films'],
+  ]},
+  { y: 1997, era: 1990, picks: [
+    ['Princess Mononoke', 'FILM', 'Studio Ghibli', "Miyazaki's angriest film. Nobody in it is wrong, which is the whole problem."],
+    ['Revolutionary Girl Utena', 'TV', 'J.C.Staff'],
+    ['The End of Evangelion', 'FILM', 'Gainax / Production I.G'],
+    ['Berserk', 'TV', 'OLM'],
+    ['Pokémon', 'TV', 'OLM'],
+  ]},
+  { y: 1998, era: 1990, picks: [
+    ['Cowboy Bebop', 'TV', 'Sunrise', "Jazz, bounty hunters and 26 episodes of near-flawless craft. The usual entry point into anime, deservedly."],
+    ['Serial Experiments Lain', 'TV', 'Triangle Staff'],
+    ['Perfect Blue', 'FILM', 'Madhouse'],
+    ['Cardcaptor Sakura', 'TV', 'Madhouse'],
+    ['Trigun', 'TV', 'Madhouse'],
+  ]},
+  { y: 1999, era: 1990, picks: [
+    ['One Piece', 'TV', 'Toei Animation', "Twenty years on, it is the argument for long-form shounen. Start here and clear your calendar."],
+    ['Great Teacher Onizuka', 'TV', 'Studio Pierrot'],
+    ['Hunter x Hunter', 'TV', 'Nippon Animation'],
+    ['Turn A Gundam', 'TV', 'Sunrise'],
+    ['Digimon Adventure', 'TV', 'Toei Animation'],
+  ]},
+
+  { y: 2000, era: 2000, picks: [
+    ['FLCL', 'OVA', 'Gainax / Production I.G', "Six episodes of Gainax animators showing off, about a boy refusing to grow up. Nothing else moves like it."],
+    ['Vampire Hunter D: Bloodlust', 'FILM', 'Madhouse'],
+    ['Jin-Roh: The Wolf Brigade', 'FILM', 'Production I.G'],
+    ['InuYasha', 'TV', 'Sunrise'],
+    ['Love Hina', 'TV', 'Xebec'],
+  ]},
+  { y: 2001, era: 2000, picks: [
+    ['Spirited Away', 'FILM', 'Studio Ghibli', "Japan's highest-grossing film for two decades, and still fundamentally a strange story about a girl doing a job."],
+    ["Cowboy Bebop: Knockin' on Heaven's Door", 'FILM', 'Bones'],
+    ['Fruits Basket', 'TV', 'Studio Deen'],
+    ['Metropolis', 'FILM', 'Madhouse'],
+    ['Hellsing', 'TV', 'Gonzo'],
+  ]},
+  { y: 2002, era: 2000, picks: [
+    ['Ghost in the Shell: Stand Alone Complex', 'TV', 'Production I.G', "Kamiyama turns Shirow's premise into procedural political science. The best television Production I.G has made."],
+    ['Naruto', 'TV', 'Studio Pierrot'],
+    ['Millennium Actress', 'FILM', 'Madhouse'],
+    ['Azumanga Daioh', 'TV', 'J.C.Staff'],
+    ['RahXephon', 'TV', 'Bones'],
+  ]},
+  { y: 2003, era: 2000, picks: [
+    ['Fullmetal Alchemist', 'TV', 'Bones', "The 2003 series leaves the manga behind and gets grimmer for it. Watch it alongside Brotherhood, not instead."],
+    ['Planetes', 'TV', 'Sunrise'],
+    ['Tokyo Godfathers', 'FILM', 'Madhouse'],
+    ["Kino's Journey", 'TV', 'A.C.G.T.'],
+    ['Last Exile', 'TV', 'Gonzo'],
+  ]},
+  { y: 2004, era: 2000, picks: [
+    ['Monster', 'TV', 'Madhouse', "Urasawa's thriller adapted almost panel for panel across 74 episodes. Patient, and genuinely frightening."],
+    ["Howl's Moving Castle", 'FILM', 'Studio Ghibli'],
+    ['Ghost in the Shell 2: Innocence', 'FILM', 'Production I.G'],
+    ['Paranoia Agent', 'TV', 'Madhouse'],
+    ['Bleach', 'TV', 'Studio Pierrot'],
+  ]},
+  { y: 2005, era: 2000, picks: [
+    ['Mushishi', 'TV', 'Artland', "Episodic folklore at a walking pace, and the best-looking quiet show of the decade."],
+    ['Eureka Seven', 'TV', 'Bones'],
+    ['Honey and Clover', 'TV', 'J.C.Staff'],
+    ['Air', 'TV', 'Kyoto Animation'],
+    ['Aria the Animation', 'TV', 'Hal Film Maker'],
+  ]},
+  { y: 2006, era: 2000, picks: [
+    ['Death Note', 'TV', 'Madhouse', "Two geniuses and a notebook. The first half is airtight, and the reason everyone argues about the second."],
+    ['Code Geass: Lelouch of the Rebellion', 'TV', 'Sunrise'],
+    ['The Melancholy of Haruhi Suzumiya', 'TV', 'Kyoto Animation'],
+    ['Paprika', 'FILM', 'Madhouse'],
+    ['The Girl Who Leapt Through Time', 'FILM', 'Madhouse'],
+  ]},
+  { y: 2007, era: 2000, picks: [
+    ['Tengen Toppa Gurren Lagann', 'TV', 'Gainax', "Twenty-seven episodes of escalation that never lose the thread, and stay sincere about it."],
+    ['Dennou Coil', 'TV', 'Madhouse'],
+    ['Baccano!', 'TV', "Brain's Base"],
+    ['Clannad', 'TV', 'Kyoto Animation'],
+    ['5 Centimeters per Second', 'FILM', 'CoMix Wave Films'],
+  ]},
+  { y: 2008, era: 2000, picks: [
+    ['Clannad: After Story', 'TV', 'Kyoto Animation', "The visual novel adaptation that earned its reputation, once it stops being a school comedy."],
+    ['Code Geass: Lelouch of the Rebellion R2', 'TV', 'Sunrise'],
+    ['Ponyo', 'FILM', 'Studio Ghibli'],
+    ['Toradora!', 'TV', 'J.C.Staff'],
+    ['Kaiba', 'TV', 'Madhouse'],
+  ]},
+  { y: 2009, era: 2000, picks: [
+    ['Fullmetal Alchemist: Brotherhood', 'TV', 'Bones', "The complete manga, animated properly. If you only ever watch one shounen, make it this one."],
+    ['Bakemonogatari', 'TV', 'Shaft'],
+    ['Summer Wars', 'FILM', 'Madhouse'],
+    ['K-On!', 'TV', 'Kyoto Animation'],
+    ['Eden of the East', 'TV', 'Production I.G'],
+  ]},
+
+  { y: 2010, era: 2010, picks: [
+    ['The Tatami Galaxy', 'TV', 'Madhouse', "Yuasa at maximum density: a student reruns four years of university and narrates faster than you can read."],
+    ['The Disappearance of Haruhi Suzumiya', 'FILM', 'Kyoto Animation'],
+    ['Durarara!!', 'TV', "Brain's Base"],
+    ['Redline', 'FILM', 'Madhouse'],
+    ['Katanagatari', 'TV', 'White Fox'],
+  ]},
+  { y: 2011, era: 2010, picks: [
+    ['Puella Magi Madoka Magica', 'TV', 'Shaft', "Urobuchi and Shaft dismantle the magical girl show from the inside. Twelve episodes, no slack anywhere."],
+    ['Steins;Gate', 'TV', 'White Fox'],
+    ['Hunter x Hunter (2011)', 'TV', 'Madhouse'],
+    ['Nichijou', 'TV', 'Kyoto Animation'],
+    ['Anohana: The Flower We Saw That Day', 'TV', 'A-1 Pictures'],
+  ]},
+  { y: 2012, era: 2010, picks: [
+    ['Wolf Children', 'FILM', 'Studio Chizu', "Hosoda on single parenthood, with the fantasy premise kept deliberately in the background."],
+    ['Psycho-Pass', 'TV', 'Production I.G'],
+    ['Hyouka', 'TV', 'Kyoto Animation'],
+    ['Space Brothers', 'TV', 'A-1 Pictures'],
+    ['Kids on the Slope', 'TV', 'MAPPA / Tezuka Productions'],
+  ]},
+  { y: 2013, era: 2010, picks: [
+    ['Attack on Titan', 'TV', 'Wit Studio', "The first season still holds the best action direction of the decade, and it knew exactly how to end an episode."],
+    ['The Wind Rises', 'FILM', 'Studio Ghibli'],
+    ['The Tale of the Princess Kaguya', 'FILM', 'Studio Ghibli'],
+    ['Monogatari Series: Second Season', 'TV', 'Shaft'],
+    ['Kill la Kill', 'TV', 'Trigger'],
+  ]},
+  { y: 2014, era: 2010, picks: [
+    ['Ping Pong the Animation', 'TV', 'Tatsunoko Production', "Yuasa draws table tennis like nobody else, then quietly makes it a story about talent and friendship."],
+    ['Shirobako', 'TV', 'P.A. Works'],
+    ['Your Lie in April', 'TV', 'A-1 Pictures'],
+    ['Space Dandy', 'TV', 'Bones'],
+    ['Haikyu!!', 'TV', 'Production I.G'],
+  ]},
+  { y: 2015, era: 2010, picks: [
+    ['One Punch Man', 'TV', 'Madhouse', "Madhouse animate a joke premise with total seriousness, and the fights come out as the year's best."],
+    ['Death Parade', 'TV', 'Madhouse'],
+    ['Assassination Classroom', 'TV', 'Lerche'],
+    ['Food Wars! Shokugeki no Soma', 'TV', 'J.C.Staff'],
+    ['The Boy and the Beast', 'FILM', 'Studio Chizu'],
+  ]},
+  { y: 2016, era: 2010, picks: [
+    ['Your Name.', 'FILM', 'CoMix Wave Films', "Shinkai's craft finally meets a structure that can hold it, and the decade gets its commercial peak."],
+    ['A Silent Voice', 'FILM', 'Kyoto Animation'],
+    ['Mob Psycho 100', 'TV', 'Bones'],
+    ['Showa Genroku Rakugo Shinju', 'TV', 'Studio Deen'],
+    ['In This Corner of the World', 'FILM', 'MAPPA'],
+  ]},
+  { y: 2017, era: 2010, picks: [
+    ['Made in Abyss', 'TV', 'Kinema Citrus', "A charming expedition into a hole that keeps getting worse. Kevin Penkin's score does an enormous amount of the work."],
+    ['Land of the Lustrous', 'TV', 'Orange'],
+    ["Girls' Last Tour", 'TV', 'White Fox'],
+    ['March Comes in Like a Lion 2nd Season', 'TV', 'Shaft'],
+    ["The Ancient Magus' Bride", 'TV', 'Wit Studio'],
+  ]},
+  { y: 2018, era: 2010, picks: [
+    ['Devilman Crybaby', 'TV', 'Science SARU', "Yuasa takes Nagai's 1972 manga at its ugliest and animates it without flinching once."],
+    ['A Place Further than the Universe', 'TV', 'Madhouse'],
+    ['Violet Evergarden', 'TV', 'Kyoto Animation'],
+    ['Megalo Box', 'TV', 'TMS Entertainment'],
+    ['Mirai', 'FILM', 'Studio Chizu'],
+  ]},
+  { y: 2019, era: 2010, picks: [
+    ['Demon Slayer: Kimetsu no Yaiba', 'TV', 'ufotable', "ufotable's compositing turns a straightforward shounen into the spectacle everybody spent the year talking about."],
+    ['Vinland Saga', 'TV', 'Wit Studio'],
+    ['Mob Psycho 100 II', 'TV', 'Bones'],
+    ['The Promised Neverland', 'TV', 'CloverWorks'],
+    ['Weathering with You', 'FILM', 'CoMix Wave Films'],
+  ]},
+
+  { y: 2020, era: 2020, picks: [
+    ['Jujutsu Kaisen', 'TV', 'MAPPA', "MAPPA at full stretch, and the most confident action television since Attack on Titan's debut."],
+    ["Keep Your Hands Off Eizouken!", 'TV', 'Science SARU'],
+    ['Demon Slayer: Mugen Train', 'FILM', 'ufotable'],
+    ['Great Pretender', 'TV', 'Wit Studio'],
+    ['Dorohedoro', 'TV', 'MAPPA'],
+  ]},
+];
+
+/* AniList ids, keyed by the same slug as the cover files. Each card links out. */
+const ANILIST = {
+  "1981-urusei-yatsura":[1293,"うる星やつら"], "1981-dr-slump-arale-chan":[2222,"Dr.スランプ・アラレちゃん"],
+  "1981-mobile-suit-gundam-i":[1090,"機動戦士ガンダムⅠ"],
+  "1981-adieu-galaxy-express-999":[1302,"さよなら銀河鉄道999 -アンドロメダ終着駅-"],
+  "1981-fang-of-the-sun-dougram":[2257,"太陽の牙ダグラム"], "1982-super-dimension-fortress-macross":[1088,"超時空要塞マクロス"],
+  "1982-space-adventure-cobra":[2451,"スペースコブラ"], "1982-combat-mecha-xabungle":[2254,"戦闘メカザブングル"],
+  "1982-mobile-suit-gundam-iii-encounters-in-space":[1092,"機動戦士ガンダムⅢ　めぐりあい宇宙編"],
+  "1982-magical-princess-minky-momo":[518,"魔法のプリンセス ミンキーモモ"], "1983-armored-trooper-votoms":[2582,"装甲騎兵ボトムズ"],
+  "1983-aura-battler-dunbine":[929,"聖戦士ダンバイン"], "1983-barefoot-gen":[1824,"はだしのゲン"], "1983-dallos":[3060,"ダロス"],
+  "1983-harmagedon":[1626,"幻魔大戦"], "1984-nausicaa-of-the-valley-of-the-wind":[572,"風の谷のナウシカ"],
+  "1984-urusei-yatsura-2-beautiful-dreamer":[1921,"うる星やつら2 ビューティフル・ドリーマー"],
+  "1984-macross-do-you-remember-love":[1089,"超時空要塞マクロス -愛・おぼえていますか-"],
+  "1984-fist-of-the-north-star":[967,"北斗の拳"], "1984-sherlock-hound":[1972,"名探偵ホームズ"],
+  "1985-mobile-suit-zeta-gundam":[85,"機動戦士Zガンダム"], "1985-touch":[1065,"タッチ"], "1985-angel-s-egg":[885,"天使のたまご"],
+  "1985-megazone-23":[1935,"メガゾーン23"], "1985-vampire-hunter-d":[732,"吸血鬼ハンターD"],
+  "1986-castle-in-the-sky":[513,"天空の城ラピュタ"], "1986-dragon-ball":[223,"ドラゴンボール"],
+  "1986-saint-seiya":[1254,"聖闘士星矢"], "1986-maison-ikkoku":[1453,"めぞん一刻"], "1986-project-a-ko":[212,"プロジェクトA子"],
+  "1987-royal-space-force-the-wings-of-honneamise":[1034,"王立宇宙軍 オネアミスの翼"], "1987-city-hunter":[1470,"シティーハンター"],
+  "1987-bubblegum-crisis":[1347,"バブルガムクライシス"], "1987-kimagure-orange-road":[1087,"きまぐれオレンジ☆ロード"],
+  "1987-robot-carnival":[2182,"ロボット・カーニバル"], "1988-akira":[47,"AKIRA"],
+  "1988-my-neighbor-totoro":[523,"となりのトトロ"], "1988-grave-of-the-fireflies":[578,"火垂るの墓"],
+  "1988-legend-of-the-galactic-heroes":[820,"銀河英雄伝説"], "1988-gunbuster":[949,"トップをねらえ! GunBuster"],
+  "1989-kiki-s-delivery-service":[512,"魔女の宅急便"], "1989-patlabor-the-movie":[1095,"機動警察パトレイバー 劇場版"],
+  "1989-mobile-suit-gundam-0080-war-in-the-pocket":[82,"機動戦士ガンダム 0080 ポケットの中の戦争"],
+  "1989-ranma-1-2":[210,"らんま1/2"], "1989-dragon-ball-z":[813,"ドラゴンボールZ"],
+  "1990-nadia-the-secret-of-blue-water":[1251,"ふしぎの海のナディア"], "1990-record-of-lodoss-war":[207,"ロードス島戦記"],
+  "1990-cyber-city-oedo-808":[1352,"サイバーシティ OEDO 808"], "1990-chibi-maruko-chan":[951,"ちびまる子ちゃん"],
+  "1990-brave-exkaiser":[3325,"勇者エクスカイザー"], "1991-only-yesterday":[1029,"おもひでぽろぽろ"],
+  "1991-mobile-suit-gundam-f91":[88,"機動戦士ガンダムF91"], "1991-roujin-z":[2000,"老人Ｚ"],
+  "1991-otaku-no-video":[785,"おたくのビデオ"], "1991-future-gpx-cyber-formula":[1391,"新世紀GPXサイバーフォーミュラ"],
+  "1992-sailor-moon":[530,"美少女戦士セーラームーン"], "1992-porco-rosso":[416,"紅の豚"], "1992-yu-yu-hakusho":[392,"幽☆遊☆白書"],
+  "1992-giant-robo-the-day-the-earth-stood-still":[2321,"ジャイアントロボ THE ANIMATION 地球が静止する日"],
+  "1992-crayon-shin-chan":[966,"クレヨンしんちゃん"], "1993-patlabor-2-the-movie":[1096,"機動警察パトレイバー2 the Movie"],
+  "1993-ninja-scroll":[617,"獣兵衛忍風帖"], "1993-slam-dunk":[170,"SLAM DUNK"],
+  "1993-sailor-moon-r":[740,"美少女戦士セーラームーン R"], "1993-oh-my-goddess":[49,"ああっ女神さまっ"],
+  "1994-macross-plus":[474,"マクロスプラス"], "1994-pom-poko":[1030,"平成狸合戦ぽんぽこ"],
+  "1994-magic-knight-rayearth":[435,"魔法騎士（マジックナイト）レイアース"], "1994-mobile-fighter-g-gundam":[96,"機動武闘伝Gガンダム"],
+  "1994-marmalade-boy":[334,"ママレード・ボーイ"], "1995-neon-genesis-evangelion":[30,"新世紀エヴァンゲリオン"],
+  "1995-ghost-in-the-shell":[43,"GHOST IN THE SHELL / 攻殻機動隊"], "1995-whisper-of-the-heart":[585,"耳をすませば"],
+  "1995-mobile-suit-gundam-wing":[90,"新機動戦記ガンダムW"], "1995-slayers":[534,"スレイヤーズ"],
+  "1996-the-vision-of-escaflowne":[182,"天空のエスカフローネ"], "1996-rurouni-kenshin":[45,"るろうに剣心 -明治剣客浪漫譚-"],
+  "1996-martian-successor-nadesico":[218,"機動戦艦ナデシコ"], "1996-detective-conan":[235,"名探偵コナン"],
+  "1996-slayers-next":[535,"スレイヤーズ NEXT"], "1997-princess-mononoke":[164,"もののけ姫"],
+  "1997-revolutionary-girl-utena":[440,"少女革命ウテナ"],
+  "1997-the-end-of-evangelion":[32,"新世紀エヴァンゲリオン劇場版 Air/まごころを、君に"], "1997-berserk":[33,"剣風伝奇ベルセルク"],
+  "1997-pokemon":[527,"ポケットモンスター"], "1998-cowboy-bebop":[1,"カウボーイビバップ"],
+  "1998-serial-experiments-lain":[339,"serial experiments lain"], "1998-perfect-blue":[437,"PERFECT BLUE"],
+  "1998-cardcaptor-sakura":[232,"カードキャプターさくら"], "1998-trigun":[6,"TRIGUN"], "1999-one-piece":[21,"ONE PIECE"],
+  "1999-great-teacher-onizuka":[245,"GTO"], "1999-hunter-x-hunter":[136,"HUNTER×HUNTER"],
+  "1999-turn-a-gundam":[95,"∀ガンダム"], "1999-digimon-adventure":[552,"デジモンアドベンチャー"], "2000-flcl":[227,"フリクリ"],
+  "2000-vampire-hunter-d-bloodlust":[543,"バンパイアハンターD"], "2000-jin-roh-the-wolf-brigade":[570,"人狼 JIN-ROH"],
+  "2000-inuyasha":[249,"犬夜叉"], "2000-love-hina":[189,"ラブひな"], "2001-spirited-away":[199,"千と千尋の神隠し"],
+  "2001-cowboy-bebop-knockin-on-heaven-s-door":[5,"カウボーイビバップ天国の扉"], "2001-fruits-basket":[120,"フルーツバスケット"],
+  "2001-metropolis":[522,"メトロポリス"], "2001-hellsing":[270,"HELLSING"],
+  "2002-ghost-in-the-shell-stand-alone-complex":[467,"攻殻機動隊 STAND ALONE COMPLEX"],
+  "2002-naruto":[20,"NARUTO -ナルト-"], "2002-millennium-actress":[1033,"千年女優"],
+  "2002-azumanga-daioh":[66,"あずまんが大王 THE ANIMATION"], "2002-rahxephon":[165,"ラーゼフォン"],
+  "2003-fullmetal-alchemist":[121,"鋼の錬金術師"], "2003-planetes":[329,"プラネテス"],
+  "2003-tokyo-godfathers":[759,"東京ゴッドファーザーズ"], "2003-kino-s-journey":[486,"キノの旅 -the Beautiful World-"],
+  "2003-last-exile":[97,"ラストエグザイル"], "2004-monster":[19,"MONSTER"], "2004-howl-s-moving-castle":[431,"ハウルの動く城"],
+  "2004-ghost-in-the-shell-2-innocence":[468,"イノセンス"], "2004-paranoia-agent":[323,"妄想代理人"],
+  "2004-bleach":[269,"BLEACH"], "2005-mushishi":[457,"蟲師"], "2005-eureka-seven":[237,"交響詩篇エウレカセブン"],
+  "2005-honey-and-clover":[16,"ハチミツとクローバー"], "2005-air":[101,"AIR"],
+  "2005-aria-the-animation":[477,"ARIA The ANIMATION"], "2006-death-note":[1535,"DEATH NOTE"],
+  "2006-code-geass-lelouch-of-the-rebellion":[1575,"コードギアス 反逆のルルーシュ"],
+  "2006-the-melancholy-of-haruhi-suzumiya":[849,"涼宮ハルヒの憂鬱"], "2006-paprika":[1943,"パプリカ"],
+  "2006-the-girl-who-leapt-through-time":[2236,"時をかける少女"], "2007-tengen-toppa-gurren-lagann":[2001,"天元突破グレンラガン"],
+  "2007-dennou-coil":[2164,"電脳コイル"], "2007-baccano":[2251,"バッカーノ！"], "2007-clannad":[2167,"ＣＬＡＮＮＡＤ -クラナド-"],
+  "2007-5-centimeters-per-second":[1689,"秒速５センチメートル"],
+  "2008-clannad-after-story":[4181,"ＣＬＡＮＮＡＤ ~After Story~ クラナド アフターストーリー"],
+  "2008-code-geass-lelouch-of-the-rebellion-r2":[2904,"コードギアス 反逆のルルーシュ R2"], "2008-ponyo":[2890,"崖の上のポニョ"],
+  "2008-toradora":[4224,"とらドラ！"], "2008-kaiba":[3701,"カイバ"],
+  "2009-fullmetal-alchemist-brotherhood":[5114,"鋼の錬金術師 FULLMETAL ALCHEMIST"], "2009-bakemonogatari":[5081,"化物語"],
+  "2009-summer-wars":[5681,"サマーウォーズ"], "2009-k-on":[5680,"けいおん!"], "2009-eden-of-the-east":[5630,"東のエデン"],
+  "2010-the-tatami-galaxy":[7785,"四畳半神話大系"], "2010-the-disappearance-of-haruhi-suzumiya":[7311,"涼宮ハルヒの消失"],
+  "2010-durarara":[6746,"デュラララ!!"], "2010-redline":[6675,"REDLINE"], "2010-katanagatari":[6594,"刀語"],
+  "2011-puella-magi-madoka-magica":[9756,"魔法少女まどか☆マギカ"], "2011-steins-gate":[9253,"シュタインズ・ゲート"],
+  "2011-hunter-x-hunter-2011":[11061,"HUNTER×HUNTER (2011)"], "2011-nichijou":[10165,"日常"],
+  "2011-anohana-the-flower-we-saw-that-day":[9989,"あの日見た花の名前を僕達はまだ知らない。"],
+  "2012-wolf-children":[12355,"おおかみこどもの雨と雪"], "2012-psycho-pass":[13601,"PSYCHO-PASS サイコパス"],
+  "2012-hyouka":[12189,"氷菓"], "2012-space-brothers":[12431,"宇宙兄弟"], "2012-kids-on-the-slope":[12531,"坂道のアポロン"],
+  "2013-attack-on-titan":[16498,"進撃の巨人"], "2013-the-wind-rises":[16662,"風立ちぬ"],
+  "2013-the-tale-of-the-princess-kaguya":[16664,"かぐや姫の物語"],
+  "2013-monogatari-series-second-season":[17074,"〈物語〉シリーズ セカンドシーズン"], "2013-kill-la-kill":[18679,"キルラキル"],
+  "2014-ping-pong-the-animation":[20607,"ピンポン THE ANIMATION"], "2014-shirobako":[20812,"SHIROBAKO"],
+  "2014-your-lie-in-april":[20665,"四月は君の嘘"], "2014-space-dandy":[20057,"スペース☆ダンディ"],
+  "2014-haikyu":[20464,"ハイキュー!!"], "2015-one-punch-man":[21087,"ワンパンマン"], "2015-death-parade":[20931,"デス・パレード"],
+  "2015-assassination-classroom":[20755,"暗殺教室"], "2015-food-wars-shokugeki-no-soma":[20923,"食戟のソーマ"],
+  "2015-the-boy-and-the-beast":[20981,"バケモノの子"], "2016-your-name":[21519,"君の名は。"],
+  "2016-a-silent-voice":[20954,"聲の形"], "2016-mob-psycho-100":[21507,"モブサイコ100"],
+  "2016-showa-genroku-rakugo-shinju":[20972,"昭和元禄落語心中"], "2016-in-this-corner-of-the-world":[15227,"この世界の片隅に"],
+  "2017-made-in-abyss":[97986,"メイドインアビス"], "2017-land-of-the-lustrous":[98707,"宝石の国"],
+  "2017-girls-last-tour":[99420,"少女終末旅行"], "2017-march-comes-in-like-a-lion-2nd-season":[98478,"３月のライオン 第2シリーズ"],
+  "2017-the-ancient-magus-bride":[98436,"魔法使いの嫁"], "2018-devilman-crybaby":[98460,"DEVILMAN crybaby"],
+  "2018-a-place-further-than-the-universe":[99426,"宇宙よりも遠い場所"],
+  "2018-violet-evergarden":[21827,"ヴァイオレット・エヴァーガーデン"], "2018-megalo-box":[100298,"メガロボクス"],
+  "2018-mirai":[100749,"未来のミライ"], "2019-demon-slayer-kimetsu-no-yaiba":[101922,"鬼滅の刃"],
+  "2019-vinland-saga":[101348,"ヴィンランド・サガ"], "2019-mob-psycho-100-ii":[101338,"モブサイコ100 II"],
+  "2019-the-promised-neverland":[101759,"約束のネバーランド"], "2019-weathering-with-you":[106286,"天気の子"],
+  "2020-jujutsu-kaisen":[113415,"呪術廻戦"], "2020-keep-your-hands-off-eizouken":[109298,"映像研には手を出すな！"],
+  "2020-demon-slayer-mugen-train":[112151,"鬼滅の刃 無限列車編"], "2020-great-pretender":[110349,"GREAT PRETENDER"],
+  "2020-dorohedoro":[105228,"ドロヘドロ"]
+};
+const ERA_MEDIUM = {
+  1980: 'Cel and airbrush',
+  1990: 'Late cel, laserdisc masters',
+  2000: 'Digital paint arrives',
+  2010: 'Compositing takes over',
+  2020: 'Where the sheet ends',
+};
+const ERA_LABEL = {
+  1980: 'The 1980s', 1990: 'The 1990s', 2000: 'The 2000s',
+  2010: 'The 2010s', 2020: '2020',
+};
+
+/* ── render ─────────────────────────────────────────── */
+
+/* Cover filenames are derived, not stored: this must stay identical to the
+   slug used when the images were fetched into img/. */
+function coverSlug(year, title) {
+  return year + '-' + title.toLowerCase().normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function pickCard(entry, i, year) {
+  const [title, format, studio] = entry;
+  const key = coverSlug(year, title);
+
+  const li = document.createElement('li');
+  li.className = i === 0 ? 'pick lead' : 'pick';
+  li.dataset.format = format;
+  li.dataset.hay = (title + ' ' + studio).toLowerCase();
+
+  const [id, japanese] = ANILIST[key] || [];
+  if (japanese) li.dataset.hay += ' ' + japanese;
+
+  const card = document.createElement(id ? 'a' : 'div');
+  card.className = 'card';
+  if (id) {
+    card.href = 'https://anilist.co/anime/' + id;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    card.title = title + ' on AniList';
+  }
+
+  const poster = document.createElement('span');
+  poster.className = 'poster';
+  poster.dataset.ch = title.slice(0, 1);
+
+  const img = document.createElement('img');
+  img.src = 'img/' + key + '.jpg';
+  img.alt = '';
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.width = 240;
+  img.height = 360;
+  img.addEventListener('error', () => {
+    img.remove();
+    poster.classList.add('poster--empty');
+  });
+  poster.appendChild(img);
+
+  const h = document.createElement('span');
+  h.className = 'card-title';
+  h.textContent = title;
+
+  const ja = document.createElement('span');
+  ja.className = 'card-ja';
+  ja.lang = 'ja';
+  ja.textContent = japanese || '';
+
+  const sub = document.createElement('span');
+  sub.className = 'card-sub';
+  const st = document.createElement('span');
+  st.textContent = studio;
+  const fm = document.createElement('span');
+  fm.className = 'format';
+  fm.textContent = format;
+  sub.append(st, fm);
+
+  card.append(poster, h, ja, sub);
+  li.appendChild(card);
+  return li;
+}
+
+function yearBlock(row) {
+  const sec = document.createElement('section');
+  sec.className = 'year';
+  sec.dataset.year = row.y;
+
+  const plate = document.createElement('div');
+  plate.className = 'plate';
+  const num = document.createElement('span');
+  num.className = 'num';
+  const ys = String(row.y);
+  num.innerHTML = ys.slice(0, 2) + '<span class="cut">' + ys.slice(2) + '</span>';
+  const sheet = document.createElement('span');
+  sheet.className = 'sheet';
+  sheet.textContent = 'Sheet ' + String(row.y - 1980).padStart(2, '0') + ' / 40';
+  plate.append(num, sheet);
+
+  const body = document.createElement('div');
+  body.className = 'year-body';
+
+  const ul = document.createElement('ul');
+  ul.className = 'shelf';
+  row.picks.forEach((p, i) => ul.appendChild(pickCard(p, i, row.y)));
+  body.appendChild(ul);
+
+  const note = row.picks[0][3];
+  if (note) {
+    const p = document.createElement('p');
+    p.className = 'lead-note';
+    p.textContent = note;
+    body.appendChild(p);
+  }
+
+  sec.append(plate, body);
+  return sec;
+}
+
+function build() {
+  const host = document.getElementById('sheet');
+  const eras = [...new Set(SHEET.map(r => r.era))];
+
+  eras.forEach(era => {
+    const band = document.createElement('section');
+    band.className = 'decade';
+    band.id = 'd' + era;
+    band.dataset.era = era;
+
+    const head = document.createElement('div');
+    head.className = 'decade-head';
+    const h2 = document.createElement('h2');
+    h2.textContent = ERA_LABEL[era];
+    const med = document.createElement('span');
+    med.className = 'medium';
+    med.textContent = ERA_MEDIUM[era];
+    head.append(h2, med);
+
+    const inner = document.createElement('div');
+    inner.className = 'wrap';
+    SHEET.filter(r => r.era === era).forEach(r => inner.appendChild(yearBlock(r)));
+
+    band.append(head, inner);
+    host.appendChild(band);
+  });
+}
+
+/* ── filtering ──────────────────────────────────────────
+   Search matches title and studio. Text and format combine as AND, and a
+   year block stays on the sheet only while at least one of its picks
+   survives, so the sheet closes up rather than leaving gaps. */
+
+let format = 'ALL';
+
+function matchesPick(el, query) {
+  const okFormat = format === 'ALL' || el.dataset.format === format;
+  const okQuery = !query || el.dataset.hay.includes(query);
+  return okFormat && okQuery;
+}
+
+function applyFilters() {
+  const query = document.getElementById('q').value.trim().toLowerCase();
+  let shown = 0;
+
+  document.querySelectorAll('.year').forEach(year => {
+    let kept = 0;
+    year.querySelectorAll('.pick').forEach(pick => {
+      const ok = matchesPick(pick, query);
+      pick.hidden = !ok;
+      if (ok) kept++;
+    });
+    const lead = year.querySelector('.pick.lead');
+    const note = year.querySelector('.lead-note');
+    if (note) note.hidden = !lead || lead.hidden;
+    year.hidden = kept === 0;
+    shown += kept;
+  });
+
+  document.querySelectorAll('.decade').forEach(band => {
+    band.hidden = !band.querySelector('.year:not([hidden])');
+  });
+
+  document.getElementById('empty').classList.toggle('on', shown === 0);
+  const filtered = format !== 'ALL' || query;
+  document.getElementById('tally').textContent =
+    filtered ? shown + ' of 200' : '200 titles';
+}
+
+/* ── chrome ─────────────────────────────────────────── */
+
+function wireControls() {
+  document.getElementById('q').addEventListener('input', applyFilters);
+
+  document.getElementById('chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    format = chip.dataset.fmt;
+    document.querySelectorAll('.chip').forEach(c => {
+      c.setAttribute('aria-pressed', String(c === chip));
+    });
+    applyFilters();
+  });
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    if (next === 'light') html.setAttribute('data-theme', 'light');
+    else html.removeAttribute('data-theme');
+    try { localStorage.setItem('anime-sheet-theme', next); } catch (_) {}
+  });
+}
+
+function wireRail() {
+  const links = [...document.querySelectorAll('#rail a')];
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const id = '#' + en.target.id;
+      links.forEach(a => a.classList.toggle('here', a.getAttribute('href') === id));
+      document.documentElement.dataset.era = en.target.dataset.era;
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  document.querySelectorAll('.decade').forEach(b => spy.observe(b));
+}
+
+function wireReveal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const years = document.querySelectorAll('.year');
+  years.forEach(y => y.classList.add('pending'));
+  const seen = new IntersectionObserver((entries, obs) => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('shown');
+      obs.unobserve(en.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  years.forEach(y => seen.observe(y));
+}
+
+(function init() {
+  try {
+    if (localStorage.getItem('anime-sheet-theme') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (_) {}
+  build();
+  wireControls();
+  wireRail();
+  wireReveal();
+  applyFilters();
+})();
+</script>
+
+</body>
+</html>
