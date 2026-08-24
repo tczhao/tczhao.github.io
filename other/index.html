@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Annex</title>
+<meta name="description" content="Four rooms for the things that fit nowhere else.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abel&family=Source+Serif+4:ital,opsz,wght@1,8..60,500;1,8..60,600&family=Spline+Sans+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@900&family=Zilla+Slab:wght@600&display=swap">
+<style>
+  :root {
+    --hall-bg: #0c0b09;
+    --hall-ink: #e9e3d6;
+    --hall-dim: #7a7362;
+    --hall-line: rgba(233,227,214,0.16);
+    --mono: 'Spline Sans Mono', ui-monospace, monospace;
+    --header-h: 58px;
+    --ease-room: cubic-bezier(0.22, 0.8, 0.25, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--hall-bg);
+    color: var(--hall-ink);
+    font-family: var(--mono);
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .masthead {
+    height: var(--header-h);
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--hall-line);
+    animation: fade 0.6s ease both 0.15s;
+  }
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    min-width: 0;
+  }
+  .wordmark .name {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+  }
+  .wordmark .tag {
+    font-size: 11px;
+    color: var(--hall-dim);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .home {
+    font-size: 11.5px;
+    color: var(--hall-dim);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.25s;
+    white-space: nowrap;
+  }
+  .home:hover, .home:focus-visible { color: var(--hall-ink); }
+
+  main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
+  .room {
+    --ac: var(--hall-ink);
+    flex: 1 1 0;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 24px 26px;
+    text-decoration: none;
+    border-right: 1px solid rgba(0,0,0,0.55);
+    transition: flex-grow 0.55s var(--ease-room), filter 0.45s ease;
+    animation: rise 0.65s var(--ease-room) both;
+    animation-delay: calc(var(--i) * 95ms);
+  }
+  .room:last-child { border-right: none; }
+
+  @media (hover: hover) and (min-width: 861px) {
+    .room:hover, .room:focus-visible { flex-grow: 2.05; }
+    main:has(.room:is(:hover,:focus-visible)) .room:not(:hover,:focus-visible) {
+      filter: brightness(0.72) saturate(0.82);
+    }
+  }
+  .room:focus-visible {
+    outline: 2px solid var(--ac);
+    outline-offset: -8px;
+  }
+
+  .eyebrow {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ac);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .scene {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .room-title {
+    font-size: clamp(24px, 2.6vw, 42px);
+    line-height: 1.04;
+    margin-bottom: 12px;
+    transform-origin: left bottom;
+    transition: transform 0.55s var(--ease-room);
+  }
+  @media (hover: hover) and (min-width: 861px) {
+    .room:is(:hover,:focus-visible) .room-title { transform: scale(1.05); }
+  }
+
+  .plaque { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.5s var(--ease-room); }
+  .plaque > span { display: block; overflow: hidden; }
+  @media (hover: hover) and (min-width: 861px) {
+    .room:is(:hover,:focus-visible) .plaque { grid-template-rows: 1fr; }
+  }
+  @media (hover: none), (max-width: 860px) {
+    .plaque { grid-template-rows: 1fr; }
+  }
+
+  .desc {
+    display: block;
+    max-width: 52ch;
+    font-size: 12.5px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    padding-top: 2px;
+  }
+  .enter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ac);
+  }
+  .enter .arrow { transition: transform 0.3s var(--ease-room); }
+  .room:is(:hover,:focus-visible) .enter .arrow { transform: translateX(5px); }
+
+  /* room 1 — exposure sheet */
+  .room--cel {
+    --ac: #ef8da4;
+    background: linear-gradient(180deg, #171a33 0%, #0e1024 100%);
+    color: #e7e9f6;
+  }
+  .room--cel .desc { color: #9ba1c4; }
+  .room--cel .room-title {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .room--cel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+  }
+  .shelf {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(231,233,246,0.22);
+  }
+  .cel {
+    width: 34px;
+    height: 47px;
+    border: 1.5px solid rgba(231,233,246,0.3);
+    border-radius: 3px;
+    background: rgba(231,233,246,0.04);
+    transform: rotate(var(--tilt));
+    transition: transform 0.4s var(--ease-room);
+  }
+  .cel:nth-child(1) { --tilt: -4deg; border-color: var(--ac); background: rgba(239,141,164,0.14); box-shadow: 0 0 14px rgba(239,141,164,0.35); }
+  .cel:nth-child(2) { --tilt: 2deg; }
+  .cel:nth-child(3) { --tilt: -1.5deg; }
+  .cel:nth-child(4) { --tilt: 3deg; }
+  .cel:nth-child(5) { --tilt: -2.5deg; }
+  .room--cel:is(:hover,:focus-visible) .cel { transform: rotate(0deg) translateY(-7px); }
+  .room--cel:is(:hover,:focus-visible) .cel:nth-child(1) { transition-delay: 0s; }
+  .room--cel:is(:hover,:focus-visible) .cel:nth-child(2) { transition-delay: 0.05s; }
+  .room--cel:is(:hover,:focus-visible) .cel:nth-child(3) { transition-delay: 0.1s; }
+  .room--cel:is(:hover,:focus-visible) .cel:nth-child(4) { transition-delay: 0.15s; }
+  .room--cel:is(:hover,:focus-visible) .cel:nth-child(5) { transition-delay: 0.2s; }
+
+  /* room 2 — overnight */
+  .room--pine {
+    --ac: #ffc46b;
+    background: linear-gradient(180deg, #0f231a 0%, #07130e 100%);
+    color: #dcead9;
+  }
+  .room--pine .desc { color: #93ac9c; }
+  .room--pine .room-title {
+    font-family: 'Zilla Slab', serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .campsite { position: relative; width: 150px; height: 110px; }
+  .moon {
+    position: absolute;
+    top: 0;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #d5e3d2;
+    box-shadow: 0 0 18px rgba(213,227,210,0.45);
+  }
+  .stars {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(220,234,217,0.8);
+    box-shadow: 26px 14px 0 rgba(220,234,217,0.55), 58px 2px 0 rgba(220,234,217,0.7),
+                84px 20px 0 rgba(220,234,217,0.45), 44px 30px 0 rgba(220,234,217,0.5);
+  }
+  .tent {
+    position: absolute;
+    bottom: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92px;
+    height: 60px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    background: #16352a;
+    transition: background 0.5s ease;
+  }
+  .tent::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 34px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    background: rgba(255,196,107,0.35);
+    transition: background 0.5s ease, box-shadow 0.5s ease;
+  }
+  .room--pine:is(:hover,:focus-visible) .tent { background: #1c4234; }
+  .room--pine:is(:hover,:focus-visible) .tent::after { background: rgba(255,196,107,0.85); box-shadow: 0 0 24px rgba(255,196,107,0.5); }
+  .ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(220,234,217,0.25);
+  }
+  .firefly {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ffe08f;
+    box-shadow: 0 0 6px rgba(255,224,143,0.8);
+    animation: drift 5.5s ease-in-out infinite;
+  }
+  .firefly:nth-child(6) { left: 18px; bottom: 26px; animation-delay: 0s; }
+  .firefly:nth-child(7) { right: 22px; bottom: 40px; animation-delay: 1.8s; animation-duration: 6.5s; }
+  .firefly:nth-child(8) { left: 34px; bottom: 52px; animation-delay: 3.2s; animation-duration: 7s; }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); opacity: 0.25; }
+    30% { opacity: 1; }
+    50% { transform: translate(9px, -12px); opacity: 0.6; }
+    75% { opacity: 0.95; }
+  }
+
+  /* room 3 — port injection */
+  .room--port {
+    --ac: #f7602d;
+    background: linear-gradient(180deg, #1c1f24 0%, #0f1114 100%);
+    color: #e6e9ec;
+  }
+  .room--port .desc { color: #97a1ac; }
+  .room--port .room-title {
+    font-family: 'Abel', sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .room--port::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(151,163,176,0.055) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(151,163,176,0.055) 1px, transparent 1px);
+    background-size: 34px 34px;
+    pointer-events: none;
+  }
+  .gauge { position: relative; width: 140px; height: 82px; }
+  .dial {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 140px;
+    height: 70px;
+    border: 2px solid rgba(151,163,176,0.4);
+    border-bottom: none;
+    border-radius: 70px 70px 0 0;
+  }
+  .tick {
+    position: absolute;
+    bottom: 12px;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: 58px;
+    background: linear-gradient(rgba(151,163,176,0.55) 0 9px, transparent 9px);
+    transform-origin: bottom center;
+    transform: rotate(var(--a));
+  }
+  .tick.red { background: linear-gradient(var(--ac) 0 9px, transparent 9px); }
+  .needle {
+    position: absolute;
+    bottom: 12px;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: 52px;
+    background: var(--ac);
+    box-shadow: 0 0 8px rgba(247,96,45,0.55);
+    transform-origin: bottom center;
+    transform: rotate(-78deg);
+    transition: transform 1s cubic-bezier(0.3, 1.35, 0.45, 1);
+  }
+  .needle::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ac);
+  }
+  .room--port:is(:hover,:focus-visible) .needle { transform: rotate(62deg); }
+  .readout {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    color: #97a1ac;
+  }
+
+  /* room 4 — commonplace */
+  .room--paper {
+    --ac: #a63c28;
+    background: radial-gradient(120% 95% at 50% 8%, #f4ecda 0%, #efe4cc 68%, #e7dabd 100%);
+    color: #241e15;
+  }
+  .room--paper .desc { color: #6f6350; }
+  .room--paper .room-title {
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .page-scene { position: relative; width: 200px; height: 112px; }
+  .rules {
+    position: absolute;
+    inset: 14px 0 0;
+    background: repeating-linear-gradient(transparent 0 25px, rgba(36,30,21,0.16) 25px 26px);
+  }
+  .qmark {
+    position: absolute;
+    top: -6px;
+    left: 6px;
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 150px;
+    line-height: 0.9;
+    color: var(--ac);
+    opacity: 0.88;
+    transform: rotate(0deg);
+    transition: transform 0.55s var(--ease-room);
+  }
+  .room--paper:is(:hover,:focus-visible) .qmark { transform: rotate(-4deg) translateY(-4px); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(26px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (max-width: 860px) {
+    html, body { height: auto; }
+    body { min-height: 100dvh; }
+    main { flex-direction: column; }
+    .room {
+      flex: none;
+      border-right: none;
+      border-bottom: 1px solid rgba(0,0,0,0.55);
+      padding: 22px 20px 24px;
+    }
+    .room:last-child { border-bottom: none; }
+    .scene { min-height: 120px; padding: 18px 0 14px; }
+    .room-title { font-size: 30px; }
+    .wordmark .tag { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .plaque { grid-template-rows: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wordmark">
+    <span class="name">Annex</span>
+    <span class="tag">four rooms off the main hall</span>
+  </div>
+  <a class="home" href="/">&larr; tianchuzhao.com</a>
+</header>
+
+<main>
+  <a class="room room--cel" href="anime/" style="--i:0">
+    <span class="eyebrow">anime &middot; five a year &middot; 1981&ndash;2020</span>
+    <span class="scene">
+      <span class="shelf">
+        <span class="cel"></span><span class="cel"></span><span class="cel"></span><span class="cel"></span><span class="cel"></span>
+      </span>
+    </span>
+    <span class="room-title">Exposure Sheet</span>
+    <span class="plaque"><span>
+      <span class="desc">One shelf per year, ranked left to right. The first cover is the pick and carries the note; every cover links out to AniList.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span></span>
+  </a>
+
+  <a class="room room--pine" href="camping/" style="--i:1">
+    <span class="eyebrow">camping &middot; one night &middot; one pack</span>
+    <span class="scene">
+      <span class="campsite">
+        <span class="stars"></span>
+        <span class="moon"></span>
+        <span class="tent"></span>
+        <span class="ground"></span>
+        <span class="firefly"></span>
+        <span class="firefly"></span>
+        <span class="firefly"></span>
+      </span>
+    </span>
+    <span class="room-title">Overnight</span>
+    <span class="plaque"><span>
+      <span class="desc">The pack list for one night out on your back.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span></span>
+  </a>
+
+  <a class="room room--port" href="car/" style="--i:2">
+    <span class="eyebrow">cars &middot; five a year &middot; 1995&ndash;2025</span>
+    <span class="scene">
+      <span class="gauge">
+        <span class="dial"></span>
+        <span class="tick" style="--a:-78deg"></span>
+        <span class="tick" style="--a:-39deg"></span>
+        <span class="tick" style="--a:0deg"></span>
+        <span class="tick" style="--a:39deg"></span>
+        <span class="tick red" style="--a:78deg"></span>
+        <span class="needle"></span>
+        <span class="readout">1995&ndash;2025</span>
+      </span>
+    </span>
+    <span class="room-title">Port Injection</span>
+    <span class="plaque"><span>
+      <span class="desc">Five port-injected cars a year, ranked for owning and fixing yourself. Australian market.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span></span>
+  </a>
+
+  <a class="room room--paper" href="quote/" style="--i:3">
+    <span class="eyebrow">quotes &middot; kept lines</span>
+    <span class="scene">
+      <span class="page-scene">
+        <span class="rules"></span>
+        <span class="qmark">&ldquo;</span>
+      </span>
+    </span>
+    <span class="room-title">Commonplace</span>
+    <span class="plaque"><span>
+      <span class="desc">Notes I keep, in the words I wrote them down in.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span></span>
+  </a>
+</main>
+
+</body>
+</html>

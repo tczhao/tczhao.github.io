@@ -19,7 +19,7 @@
     --rule-soft: #ebe7dc;
     --panel: #f3f0e8;
     --ink: #16150f;
-    --max-w: 1080px;
+    --max-w: 1340px;
     --pad: 4vw;
 
     /* Three categorical slots, assigned in fixed order and never cycled. Validated
@@ -386,24 +386,22 @@
   main { padding-top: clamp(30px, 4vw, 52px); }
 
   .year {
-    border-top: 1px solid var(--rule-soft);
-    padding-top: 22px;
-    margin-bottom: clamp(38px, 4vw, 60px);
-    scroll-margin-top: 130px;
+    padding-top: 16px;
+    margin-bottom: clamp(26px, 2.4vw, 40px);
+    scroll-margin-top: 90px;
   }
-  .year:first-child { border-top: 0; padding-top: 0; }
 
   .year-head {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
-    gap: 6px 20px;
-    margin-bottom: 20px;
+    gap: 4px 18px;
+    margin-bottom: 13px;
   }
 
   .year-num {
     font-family: 'Abel', sans-serif;
-    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    font-size: clamp(1.7rem, 3vw, 2.2rem);
     letter-spacing: 0.02em;
     line-height: 1;
   }
@@ -415,29 +413,35 @@
     max-width: 62ch;
   }
 
-  .picks { list-style: none; }
+  /* Five across, one column per rank. */
+  .picks {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(12px, 1.5vw, 22px);
+  }
+  @media (max-width: 1199px) { .picks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 767px)  { .picks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 479px)  { .picks { grid-template-columns: minmax(0, 1fr); } }
 
   .pick {
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
-    gap: 0 12px;
-    padding: 16px 0;
-    border-top: 1px solid var(--rule-soft);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-top: 1px solid var(--rule);
+    padding-top: 11px;
   }
-  .pick:first-child { border-top: 0; padding-top: 0; }
 
   .pick-rank {
-    font-size: 0.72rem;
+    font-size: 0.62rem;
     color: var(--fg-dim);
-    padding-top: 3px;
+    margin-right: 7px;
+    vertical-align: 2px;
   }
 
-  /* The figure is removed on load error, so a missing file falls back to the
-     text-only layout rather than a broken image. */
-  .pick-main { display: flex; align-items: flex-start; gap: 18px; }
-  .pick-text { flex: 1; min-width: 0; }
-
-  .pick-figure { flex: 0 0 172px; margin: 0; }
+  /* The figure is removed on load error, so a missing file falls back to a
+     text-only card rather than a broken image. */
+  .pick-figure { margin: 0 0 11px; }
   .pick-figure img {
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -446,36 +450,41 @@
     background: var(--panel);
     border-radius: 2px;
   }
+  /* Attribution wraps rather than truncating, because a clipped credit is not a credit. */
   .pick-figure figcaption {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     line-height: 1.5;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     color: var(--fg-dim);
-    margin-top: 5px;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
   }
+  .pick-figure figcaption a { color: inherit; text-decoration: none; }
+  .pick-figure figcaption a:hover { color: var(--fg-mid); text-decoration: underline; }
 
   .pick-model {
     font-family: 'Abel', sans-serif;
-    font-size: 1.32rem;
+    font-size: 1.08rem;
     line-height: 1.2;
   }
   .pick-model .gen {
+    display: block;
     font-family: 'Source Code Pro', monospace;
-    font-size: 0.68rem;
+    font-size: 0.6rem;
     font-weight: 300;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     color: var(--fg-dim);
-    margin-left: 8px;
-    white-space: nowrap;
-  }
-
-  .pick-engine {
-    font-size: 0.78rem;
-    color: var(--fg-mid);
     margin-top: 3px;
   }
 
-  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .pick-engine {
+    font-size: 0.68rem;
+    line-height: 1.5;
+    color: var(--fg-mid);
+    margin-top: 5px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 
   .tag {
     font-size: 0.6rem;
@@ -504,20 +513,26 @@
   .slot-2 { --swatch: var(--series-2); }
   .slot-3 { --swatch: var(--series-3); }
 
-  .pick-body { margin-top: 11px; max-width: 74ch; }
+  .pick-body { margin-top: 10px; }
 
   .pick-body p {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    line-height: 1.65;
     color: var(--fg-mid);
   }
-  .pick-body p + p { margin-top: 7px; }
+  .pick-body p + p {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
 
   .pick-body .k {
-    font-size: 0.6rem;
+    display: block;
+    font-size: 0.53rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--fg-dim);
-    margin-right: 8px;
+    margin-bottom: 2px;
   }
 
   .empty {
@@ -551,11 +566,8 @@
   .tail p + p { margin-top: 11px; }
 
   @media (max-width: 599px) {
-    .pick { grid-template-columns: 22px minmax(0, 1fr); }
-    .pick-model .gen { display: block; margin-left: 0; margin-top: 2px; }
     .tally { margin-left: 0; width: 100%; }
-    .pick-main { flex-direction: column; gap: 12px; }
-    .pick-figure { flex-basis: auto; width: 100%; max-width: 280px; }
+    .viz-count { margin-left: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1455,7 +1467,68 @@ function el(tag, className, text) {
 // Photos are looked up by platform id at image/<id>.webp, so adding one is a
 // matter of dropping the file in. CREDITS supplies the caption where the licence
 // asks for attribution; entries without one render no caption.
-const CREDITS = {};
+const CREDITS = {
+  'accord-cl9': { text: "Elise240SX, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2005_Honda_Accord_LX-G_Sedan_in_Eternal_Blue_Pearl,_Front_Left,_2024-02-22.jpg" },
+  'accord-cu2': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2005-2008_Honda_Accord_Euro_sedan_01.jpg" },
+  'aurion': { text: "Original uploader was Capital photographer (Adam Spence) at en.wikipedia, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:2007_Toyota_Aurion_Prodigy_01.jpg" },
+  'camry-asv70': { text: "User3204, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:2018_GAC-Toyota_Camry_(front).jpg" },
+  'camry-sxv20': { text: "MercurySable99, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:1999_Toyota_Camry_LE_V6,_front_left,_11-19-2022.jpg" },
+  'civic-ek': { text: "M.rJirapat, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:1998-1999_Honda_Civic_(EK)_1.8_Si_Sedan_(19-08-2017)_01.jpg" },
+  'civic-fc': { text: "MercurySable99, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2022_Honda_Civic_LX_Sedan,_front_right,_11-02-2022.jpg" },
+  'commodore-ls1': { text: "Sardaka; edited by OSX, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:1999-2000_Holden_Commodore_(VT_II)_SS_sedan_(2008-02-02).jpg" },
+  'commodore-ve': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2006-2007_Holden_Commodore_(VE)_SS_V_sedan_(2007-05-07).jpg" },
+  'commodore-vf': { text: "FotoSleuth, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:2013_Holden_Commodore_(VF_MY14)_SS_V_sedan_(14023481681).jpg" },
+  'commodore-vs': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:1996_Holden_Commodore_(VS_II)_Equipe_station_wagon_(2008-09-23).jpg" },
+  'corolla-1zz': { text: "Vauxford, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2003_Toyota_Corolla_D-4D_Diesel_Colln_2.0_Front.jpg" },
+  'corolla-hybrid': { text: "Kevauto, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2020_Toyota_Corolla_Hybrid_front_NYIAS_2019.jpg" },
+  'crv-re': { text: "M 93, Public domain", href: "https://commons.wikimedia.org/wiki/File:Honda_CR-V_20090228_front.jpg" },
+  'echo': { text: "Bull-Doser, Public domain", href: "https://commons.wikimedia.org/wiki/File:2000-2002_Toyota_Echo_Sedan.JPG" },
+  'falcon-ba': { text: "Original uploader was Pyroslim (Lawrence Restuccia) at en.wikipedia, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:2004-2005_Ford_Falcon_(BA_II)_XR6_Turbo_sedan_(2007-04-07)_02.jpg" },
+  'falcon-bf': { text: "TCY Images, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:2006-2007_Ford_Falcon_(BF_II)_XR6_sedan_(2007-07-28)_01.jpg" },
+  'falcon-el': { text: "timb. from Sydney, New South Wales, Australia., CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:1997_Ford_Falcon_(EL)_GLi_sedan_(2006-10-14).jpg" },
+  'falcon-fg': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2008_Ford_Falcon_(FG)_XR6_sedan_(2009-01-18)_01.jpg" },
+  'falcon-fgx': { text: "TuRbO_J from Adelaide, Australia, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:2014_Ford_Falcon_(FG_X)_G6E_sedan_(16367130241).jpg" },
+  'forester-fb': { text: "Tokumeigakarinoaoshima, CC0", href: "https://commons.wikimedia.org/wiki/File:Subaru_FORESTER_2.0XT_(SJ)_front.JPG" },
+  'forester-sf': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:1998-1999_Subaru_Forester_(SF5_MY99)_GT_wagon_(2009-01-31)_01.jpg" },
+  'forester-sh': { text: "Tabercil from Canadian, CC BY-SA 2.0", href: "https://commons.wikimedia.org/wiki/File:Subaru_2010_Forester_Right_Side.jpg" },
+  'gr86': { text: "Elise240SX, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2022_Toyota_GR86_Premium_in_Halo,_Front_Right,_04-10-2022.jpg" },
+  'gt86': { text: "Tokumeigakarinoaoshima, CC0", href: "https://commons.wikimedia.org/wiki/File:Toyota_86_GT%22Limited%22_(ZN6)_front.jpg" },
+  'hiace-h300': { text: "User3204, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2019_Toyota_HiAce_(front).jpg" },
+  'hilux-22re': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:1994-1997_Toyota_Hilux_(RN90R)_DX_Xtra_Cab_2-door_utility_01.jpg" },
+  'hilux-3rz': { text: "RL GNZLZ from Chile, CC BY-SA 2.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Hilux_2.4_1999_(52667383931).jpg" },
+  'hilux-5vz': { text: "Captainmorlypogi1959, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Hilux_4x4_SR5_2003.jpg" },
+  'hilux-n70': { text: "Ominae, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Hilux_PNP_truck_side_view.JPG" },
+  'hilux-n80': { text: "Vauxford, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2018_Toyota_Hilux_Invincible_X_D-4d_4WD_2.4_Front.jpg" },
+  'impreza-gc8': { text: "FotoSleuth, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:1999_Subaru_Impreza_(GC8_MY00)_WRX_sedan_(9611510115).jpg" },
+  'impreza-gd': { text: "IFCAR, Public domain", href: "https://commons.wikimedia.org/wiki/File:2004-2005_Subaru_Impreza_WRX_wagon_--_01-27-2012_front.jpg" },
+  'jimny-jb74': { text: "Vauxford, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2019_Suzuki_Jimny_SZ5_4X4_Automatic_1.5_Front.jpg" },
+  'jimny-sn413': { text: "Mr.choppers, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2005_Suzuki_Jimny_XC_in_Silky_Silver_Metallic,_front_right.jpg" },
+  'lc100': { text: "OWS Photography, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Land_Cruiser_(J100)_Washington_DC_Metro_Area,_USA.jpg" },
+  'lc105': { text: "Detectandpreserve, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Land_Cruiser_HZJ105_1998-2004_frontleft_2008-06-04_U.jpg" },
+  'lc200-1ur': { text: "DY5W-sport, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Land_Cruiser_ZX_(URJ202W)_Rear_2015_4201.jpg" },
+  'lc200-2uz': { text: "Tennen-Gas, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Land_Cruiser_200_002.JPG" },
+  'lc70': { text: "Keitsist, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Landcruiser_HZJ-79_double_cab_in_Kitgum_Uganda.jpg" },
+  'lc80': { text: "Rutger van der Maar, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:1993_Toyota_Land_Cruiser_Customwagon_(80)_4.2_TD_VX_Commercial_front.jpg" },
+  'magna-te': { text: "The original uploader was Metaxj55 at English Wikipedia., Public domain", href: "https://commons.wikimedia.org/wiki/File:1996-1999_Mitsubishi_TE-TF_Magna_Executive_sedan_(9_may_2006).jpg" },
+  'mazda3-bk': { text: "G.M. Kowalewska, CC BY-SA 2.5", href: "https://commons.wikimedia.org/wiki/File:2007_Mazda_3_front.JPG" },
+  'mx5-na': { text: "Original uploader was Mightyrollaman at en.wikipedia, Public domain", href: "https://commons.wikimedia.org/wiki/File:1990-1991_Mazda_MX-5_(NA)_Limited_Edition_convertible_01.jpg" },
+  'mx5-nb': { text: "DieselFordMondeo, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2001_Mazda_MX-5_S_(NB)_-_1.8_(140PS)_petrol_manual_-_2025-05-05,_front_right.jpg" },
+  'mx5-nc': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2004-2009_Mazda_MX-5_(NC_Series_1)_softtop_01.jpg" },
+  'navara-d22': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2006_Nissan_Navara_(D22_S2)_ST-R_4-door_utility_(2007-10-03).jpg" },
+  'navara-d40': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2005-2007_Nissan_Navara_(D40)_RX_4-door_utility_(2007-12-12)_02.jpg" },
+  'pajero-nm': { text: "Ethan Llamas, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2003_Mitsubishi_Pajero_2.8_Field_Master_4x2,_front_left.jpg" },
+  'pajero-ns': { text: "Mike384, CC BY 3.0", href: "https://commons.wikimedia.org/wiki/File:93-98_Mitsubishi_Pajero_Ph.JPG" },
+  'patrol-gq': { text: "Ethan Llamas, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Nissan_Patrol_Y60_Safari_1996.jpg" },
+  'patrol-tb45': { text: "Radosław Drożdżewski (Zwiadowca21), CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Nissan_Patrol_GR_5-door_(Y61)_%272001%E2%80%9304.jpg" },
+  'patrol-tb48': { text: "Ethan Llamas, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Nissan_Patrol_Y61_3.0_Super_Safari_4x4_2010_(1).jpg" },
+  'prado120': { text: "Tennen-Gas, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Toyota_Land_Cruiser_Prado_120_002.JPG" },
+  'prado150': { text: "OSX, Public domain", href: "https://commons.wikimedia.org/wiki/File:2009-2011_Toyota_Land_Cruiser_Prado_(KDJ150R)_VX_5-door_wagon_(2011-10-25)_01.jpg" },
+  'prado90': { text: "Ethan Llamas, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:1997_Toyota_Land_Cruiser_Prado_90_GX,_front_right,_06-30-2024.jpg" },
+  'rav4-xa40': { text: "Mr.choppers, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:2013_Toyota_RAV4_XLE_AWD_front_left.jpg" },
+  'sti-va': { text: "Koenigseggvibes, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2018_Subaru_WRX_STi_Front.jpg" },
+  'territory-sx': { text: "The original uploader was Maisflocke at English Wikipedia., CC BY 2.5", href: "https://commons.wikimedia.org/wiki/File:2004-2005_Ford_Territory_(SX)_TX_wagon_01.jpg" },
+  'wrangler-jl': { text: "SsmIntrigue, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2019_Jeep_Wrangler_Unlimited_Sport,_Front_Left,_10-21-2020.jpg" }
+};
 
 function renderFigure(id, p) {
   const figure = el('figure', 'pick-figure');
@@ -1467,22 +1540,29 @@ function renderFigure(id, p) {
   img.addEventListener('error', () => figure.remove());
   figure.append(img);
 
-  if (CREDITS[id]) figure.append(el('figcaption', null, CREDITS[id]));
+  const credit = CREDITS[id];
+  if (credit) {
+    const caption = el('figcaption');
+    const link = el('a', null, credit.text);
+    link.href = credit.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    caption.append(link);
+    figure.append(caption);
+  }
   return figure;
 }
 
 function renderPick(id, rank) {
   const p = PLATFORMS[id];
   const li = el('li', 'pick');
-
-  li.append(el('span', 'pick-rank', String(rank)));
-
-  const row = el('div', 'pick-main');
-  row.append(renderFigure(id, p));
+  li.append(renderFigure(id, p));
 
   const main = el('div', 'pick-text');
 
-  const model = el('h3', 'pick-model', p.model);
+  const model = el('h3', 'pick-model');
+  model.append(el('span', 'pick-rank', String(rank)));
+  model.append(document.createTextNode(p.model));
   model.append(el('span', 'gen', p.gen + ' · ' + p.span));
   main.append(model);
 
@@ -1503,8 +1583,7 @@ function renderPick(id, rank) {
   body.append(watch);
 
   main.append(body);
-  row.append(main);
-  li.append(row);
+  li.append(main);
   return li;
 }
 

@@ -1,0 +1,11 @@
+{
+  "name": "handshake",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Handshake - what is allowed to talk to what, and how it proves it. One entry a day on application security at the network layer.",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}

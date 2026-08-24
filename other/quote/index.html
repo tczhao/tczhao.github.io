@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Commonplace</title>
+<meta name="description" content="Notes I keep, in the words I wrote them down in.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --fg: #16150f;
+    --fg-mid: #4a483d;
+    --fg-dim: #7c7969;
+    --rule: #ded9cc;
+    --rule-soft: #ebe7dc;
+    --panel: #f3f0e8;
+    --accent: #b4472e;
+    --max-w: 1180px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Six type sizes and six spacing steps, and nothing off the ladder. What
+       was here before was fifteen sizes, seven of them inside two pixels of
+       each other, and ten unrelated spacing clamps. */
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.5rem, 2.9vw, 2.15rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14140f;
+      --fg: #efece2;
+      --fg-mid: #b3af9f;
+      --fg-dim: #83806f;
+      --rule: #33322a;
+      --rule-soft: #262620;
+      --panel: #1c1c15;
+      --accent: #d9714f;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Paper. Warm stock has tooth, and a flat fill reads as a screen. Kept low
+     enough not to touch text contrast; slightly stronger on the dark stock
+     because the same amplitude reads fainter against black. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) {
+    .grain { opacity: 0.085; }
+    .e-line, .e-note, .e-script p, .field dd, .seq-lead, .standfirst, .tail p {
+      font-variation-settings: 'opsz' 9, 'wght' 400;
+    }
+  }
+  /* The nav is excluded because this rule outranks `.tracknav` on
+     specificity and would quietly turn its `sticky` back into `relative`. */
+  body > *:not(.grain):not(.tracknav) { position: relative; z-index: 1; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    font-weight: 400;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    /* Short measures and hyphenation are a bad pair: a ragged edge reads
+       better than a column of broken words. */
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+
+  h1, h2, h3 {
+    font-family: var(--font-text);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  :focus-visible { outline: 1px solid var(--fg); outline-offset: 5px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ───────────────────────────────────────── */
+
+  .masthead { padding-block: var(--s3) 0; }
+
+  .masthead-band {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s5);
+    margin-top: var(--s4);
+  }
+  @media (max-width: 767px) {
+    .masthead-band { flex-direction: column; gap: var(--s2); }
+  }
+
+  .backlink {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .backlink:hover { color: var(--fg); }
+
+  .masthead h1 {
+    flex: none;
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    letter-spacing: -0.018em;
+    font-variation-settings: 'opsz' 60, 'wght' 600;
+  }
+
+  .standfirst {
+    max-width: 34ch;
+    font-size: var(--t-aside);
+    font-style: italic;
+    line-height: 1.55;
+    text-align: right;
+    text-wrap: pretty;
+    color: var(--fg-mid);
+  }
+  @media (max-width: 767px) {
+    .standfirst { text-align: left; max-width: 46ch; }
+  }
+
+  /* ── today ──────────────────────────────────────────── */
+
+  .opening {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .today {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--s4);
+    border-top: 1px solid var(--fg);
+    padding-block: 18px 0;
+  }
+
+  .today-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .today-actions { display: flex; gap: 18px; }
+
+  .today-label {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  .today-label .from {
+    color: var(--fg-dim);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+  }
+
+  .another {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    color: var(--fg-mid);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    padding: 0 0 3px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .another:hover { color: var(--fg); border-bottom-color: var(--fg); }
+
+  #card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: clamp(18px, 3vh, 40px) clamp(34px, 6.5vh, 92px);
+  }
+
+  /* the scroll cue marks where the opening ends and the book starts */
+  .scrollcue {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: clamp(18px, 3vh, 34px);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .scrollcue::before {
+    content: '';
+    width: 34px;
+    height: 1px;
+    background: var(--rule);
+  }
+  .scrollcue .arrow { animation: drift 2.6s ease-in-out infinite; }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3px); }
+  }
+
+  /* the card holds a single entry, so it drops the spacing that separates
+     entries from each other in a list */
+  #card .entry { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
+
+  /* Display type is set on the container and inherited, so one size class
+     drives both the face and the measure. A three-word note wants to be huge;
+     a forty-five word paragraph cannot be, so it steps down instead of
+     overflowing. Same machinery serves the card and focus mode. */
+  #card .e-line, #card .e-note, #card .e-script p,
+  .focus-body .e-line, .focus-body .e-note, .focus-body .e-script p,
+  .reel .entry .e-line, .reel .entry .e-note, .reel .entry .e-script p {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    max-width: var(--measure, 30ch);
+    /* Big type breaks on sense, not on wherever the box happens to end. */
+    text-wrap: balance;
+  }
+
+  /* Tracking is a function of size: the larger the setting, the more air each
+     pair already has, so it wants pulling in. Optical size moves with it. */
+  .s-xl {
+    font-size: clamp(2.1rem, 6.6vw, 5rem); line-height: 1.06; --measure: 17ch;
+    letter-spacing: -0.03em;
+    font-variation-settings: 'opsz' 60, 'wght' 400;
+  }
+  .s-lg {
+    font-size: clamp(1.8rem, 4.8vw, 3.6rem); line-height: 1.12; --measure: 21ch;
+    letter-spacing: -0.024em;
+    font-variation-settings: 'opsz' 56, 'wght' 400;
+  }
+  .s-md {
+    font-size: clamp(1.45rem, 3.2vw, 2.4rem); line-height: 1.24; --measure: 26ch;
+    letter-spacing: -0.014em;
+    font-variation-settings: 'opsz' 42, 'wght' 400;
+  }
+  .s-sm {
+    font-size: clamp(1.2rem, 2.3vw, 1.7rem); line-height: 1.42; --measure: 34ch;
+    letter-spacing: -0.006em;
+    font-variation-settings: 'opsz' 30, 'wght' 400;
+  }
+
+  #card .play-name, #card .seq-name,
+  .focus-body .play-name, .focus-body .seq-name {
+    font-size: var(--t-display);
+  }
+  #card .e-kind, .focus-body .e-kind { font-size: var(--t-micro); }
+
+  /* ── track nav ──────────────────────────────────────── */
+
+  .tracknav {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px 32px;
+    flex-wrap: wrap;
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding-block: var(--s2);
+    scroll-margin-top: 0;
+  }
+  /* keep snapped screens clear of the bar that now sits over them */
+  /* --navh is written by script from the bar's real height, because it wraps
+     to two and three rows as the viewport narrows and any fixed value here
+     leaves snapped entries tucked underneath it at some width. */
+  html { scroll-padding-top: calc(var(--navh, 4.75rem) + 10px); }
+
+  .nav-right {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+  }
+
+  .views { display: flex; align-items: baseline; gap: 7px; }
+  .view-item {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .view-item:hover { color: var(--fg-mid); }
+  .view-item[aria-pressed="true"] { color: var(--fg); }
+  .views .sep { color: var(--rule); }
+
+  .meter {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .tracks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px var(--s3);
+    list-style: none;
+  }
+
+  .track-item {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-mid);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    padding: 0 0 3px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .track-item:hover { border-bottom-color: var(--rule); color: var(--fg); }
+  .track-item[aria-pressed="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+  .track-item .count {
+    font-size: var(--t-micro);
+    color: var(--fg-dim);
+    margin-left: 5px;
+  }
+
+  /* ── sections ───────────────────────────────────────── */
+
+  main { padding-bottom: var(--s6); }
+
+  .section { padding-top: var(--s5); }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 12px;
+    margin-bottom: var(--s3);
+  }
+  .section-head h2 { font-size: var(--t-display); }
+  .section-head .n {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* One column throughout. Two columns fit more on screen but 22 objection
+     entries read as a wall, and the long ones need a measure more than they
+     need density. 70ch of this serif lands around 72 characters a line. */
+  .entries { max-width: 70ch; }
+
+  .entry {
+    position: relative;
+    margin-bottom: var(--s4);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .entry:last-child { border-bottom: 0; }
+
+  .entry-open {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 0;
+    padding: 4px 0 4px 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+  .entry:hover .entry-open,
+  .entry:focus-within .entry-open,
+  .entry-open:focus-visible { opacity: 1; }
+  .entry-open:hover { color: var(--fg); }
+
+  /* Entries rise as they arrive. The class is added in script, so a failed
+     observer leaves everything visible rather than blank. */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.in { opacity: 1; transform: none; }
+  }
+
+  .e-kind {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: 11px;
+  }
+
+  .e-line {
+    font-size: var(--t-read);
+    line-height: 1.7;
+  }
+
+  .e-note {
+    font-size: var(--t-read);
+    line-height: 1.7;
+    color: var(--fg);
+  }
+
+  .e-script {
+    border-left: 2px solid var(--accent);
+    padding-left: 18px;
+  }
+  .e-script p {
+    font-size: var(--t-read);
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--fg);
+  }
+  .e-script .e-kind { color: var(--accent); }
+
+  .e-stub {
+    border: 1px dashed var(--rule);
+    padding: 18px 20px;
+    color: var(--fg-dim);
+  }
+  .e-stub .e-title {
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .e-stub .e-unwritten {
+    font-family: var(--font-mono);
+    display: block;
+    margin-top: 8px;
+    font-size: var(--t-micro);
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── sequences and plays ────────────────────────────── */
+
+  .seq-name, .play-name {
+    font-size: var(--t-sub);
+    margin-bottom: 14px;
+  }
+
+  .seq-lead {
+    font-size: var(--t-aside);
+    color: var(--fg-mid);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .seq-steps { list-style: none; counter-reset: step; }
+  .seq-steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 14px;
+    font-size: var(--t-read);
+    line-height: 1.6;
+    padding-block: 7px;
+  }
+  .seq-steps li::before {
+    content: counter(step);
+    flex: none;
+    width: 1.6em;
+    font-size: var(--t-micro);
+    color: var(--accent);
+    padding-top: 0.25em;
+  }
+
+  .play-steps { list-style: none; counter-reset: move; }
+  .play-steps > li {
+    counter-increment: move;
+    padding-block: 20px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .play-steps > li:first-child { border-top: 0; padding-top: 0; }
+
+  .move-name {
+    display: flex;
+    gap: 14px;
+    font-family: var(--font-text);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    margin-bottom: 12px;
+  }
+  .move-name::before {
+    content: counter(move);
+    flex: none;
+    width: 1.6em;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    color: var(--accent);
+    padding-top: 0.35em;
+  }
+
+  .fields { margin-left: calc(1.6em + 14px); }
+  .field {
+    display: grid;
+    grid-template-columns: 7.5em 1fr;
+    gap: 4px 14px;
+    padding-block: 5px;
+    font-size: var(--t-aside);
+    line-height: 1.7;
+  }
+  @media (max-width: 599px) {
+    .fields { margin-left: 0; }
+    .field { grid-template-columns: 1fr; }
+  }
+  .field dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    padding-top: 0.45em;
+  }
+  .field dd { color: var(--fg-mid); }
+
+  /* ── group divider ──────────────────────────────────── */
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--s4);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ── reel ───────────────────────────────────────────── */
+  /*
+     One entry to a screen. The size ladder already knows how to fit a line to a
+     viewport, so the body simply borrows what the card was doing and the page
+     stops being display type sitting on top of a list. Snapping is `proximity`
+     rather than `mandatory`: a play is taller than a screen and mandatory would
+     fight the reader trying to scroll through it.
+  */
+
+  html.snap { scroll-snap-type: y proximity; }
+
+  .reel .section { padding-top: 0; }
+
+  /* each track opens on its own name, which gives the reel chapters */
+  .reel .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--s1);
+    border-bottom: 0;
+    padding-block: var(--s6) var(--s4);
+    margin-bottom: 0;
+  }
+  .reel .section-head h2 {
+    font-size: clamp(2.2rem, 6vw, 4.25rem);
+    letter-spacing: -0.03em;
+    font-variation-settings: 'opsz' 60, 'wght' 600;
+    text-wrap: balance;
+  }
+  .reel .section-head .n { margin-left: 0; }
+
+  .reel .entries { max-width: none; padding-left: 0; }
+
+  .reel .entry {
+    min-height: 72svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--s5);
+    margin-bottom: 0;
+    border-bottom: 0;
+    scroll-snap-align: start;
+  }
+
+  /* A four-step play is a document, not a statement. It keeps its reading size
+     and its own height instead of being stretched over a screen it cannot
+     fill. */
+  .reel .entry-doc {
+    min-height: 0;
+    padding-block: var(--s5);
+    max-width: 70ch;
+  }
+  .reel .entry-doc .e-place { margin-bottom: var(--s3); }
+
+  .reel .entry .e-stub { max-width: 34ch; }
+  .reel .divider { display: none; }
+  .reel .e-kind { display: none; }
+
+  .e-place {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: var(--s2);
+  }
+  .e-place .say { color: var(--accent); }
+
+  /* ── focus ──────────────────────────────────────────── */
+
+  .focus {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    color: var(--fg);
+    overflow: hidden;
+  }
+  .focus::backdrop { background: var(--bg); }
+
+  .focus-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  .focus-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    padding-block: 20px 0;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .focus-bar .where { color: var(--fg); }
+
+  .focus-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+    padding-block: clamp(20px, 4vh, 48px);
+  }
+  .focus-body .entry {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .focus-body .entry-open { display: none; }
+
+  .focus-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-top: 1px solid var(--rule);
+    padding-block: 16px;
+    padding-bottom: clamp(16px, 3vh, 30px);
+  }
+
+  .step {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-mid);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .step:hover { color: var(--fg); border-bottom-color: var(--fg); }
+  .focus-steps { display: flex; gap: 24px; }
+
+  /* ── keys ───────────────────────────────────────────── */
+
+  .keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    color: var(--fg-dim);
+  }
+  .keys b {
+    font-weight: 600;
+    color: var(--fg-mid);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-right: 6px;
+  }
+  .keys { padding-bottom: var(--s4); }
+  @media (max-width: 599px) { .keys { display: none; } }
+
+  /* ── tail ───────────────────────────────────────────── */
+
+  .tail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--s4);
+    border-top: 1px solid var(--rule);
+    padding: 30px 0 52px;
+  }
+  .tail h2 {
+    font-size: var(--t-lead);
+    margin-bottom: 12px;
+  }
+  .tail p { font-size: var(--t-aside); color: var(--fg-mid); }
+  .tail p + p { margin-top: 11px; }
+
+  /* On a phone the wrapped nav ran to three rows and 137px, a sixth of the
+     screen given up permanently. The tracks become one scrollable strip and the
+     meter, the least load-bearing thing in the bar, stands down. */
+  @media (max-width: 599px) {
+    .tracks {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tracks::-webkit-scrollbar { display: none; }
+    .tracknav { gap: 10px 18px; }
+    .meter { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<section class="opening">
+  <header class="masthead wrap">
+    <a class="backlink" href="/">Tianchu Zhao</a>
+    <div class="masthead-band">
+      <h1>Commonplace</h1>
+      <p class="standfirst">Notes I keep, in the words I wrote them down in. Most of them are about disagreeing out loud.</p>
+    </div>
+  </header>
+
+  <div class="today wrap">
+    <div class="today-head">
+      <span class="today-label">Today <span class="from" id="cardFrom"></span></span>
+      <div class="today-actions">
+        <button class="another" id="another" type="button">another</button>
+        <button class="another" id="focusToday" type="button">focus &#8599;</button>
+      </div>
+    </div>
+    <div id="card"></div>
+  </div>
+
+  <p class="scrollcue wrap"><span class="arrow">&darr;</span> the book</p>
+</section>
+
+<nav class="tracknav wrap" aria-label="Tracks">
+  <ul class="tracks" id="tracks"></ul>
+  <div class="nav-right">
+    <div class="views" id="views" role="group" aria-label="View"></div>
+    <span class="meter" id="meter"></span>
+  </div>
+</nav>
+
+<main class="wrap" id="body"></main>
+
+<div class="keys wrap">
+  <span><b>n</b>another</span>
+  <span><b>f</b>focus</span>
+  <span><b>&larr; &rarr;</b>move</span>
+  <span><b>esc</b>close</span>
+  <span><b>1&ndash;7</b>tracks</span>
+  <span><b>v</b>view</span>
+</div>
+
+<footer class="tail wrap">
+  <div>
+    <h2>What this is</h2>
+    <p>A commonplace book, which is the old name for exactly this: a place you copy the lines worth keeping so you meet them again. Everything here is transcribed from my own notes rather than sourced, so treat it as what I concluded, not as what is true.</p>
+    <p>Two entries are marked unwritten. They were headings I never filled in, and they stay visible so they keep asking.</p>
+  </div>
+  <div>
+    <h2>How the card picks</h2>
+    <p>The card at the top is chosen from the date, so it holds for the whole day and changes at local midnight. Pressing <em>Another</em> steps forward without committing.</p>
+    <p>Unwritten entries never surface as a card. Everything else is equally likely, including the four-step plays, which are longer than a card wants to be but are the ones worth rehearsing.</p>
+  </div>
+</footer>
+
+<dialog class="focus" id="focus" aria-label="Focused entry">
+  <div class="focus-inner">
+    <div class="focus-bar">
+      <span class="where" id="focusWhere"></span>
+      <span id="focusPos"></span>
+    </div>
+    <div class="focus-body" id="focusBody"></div>
+    <div class="focus-foot">
+      <div class="focus-steps">
+        <button class="step" id="focusPrev" type="button">&larr; prev</button>
+        <button class="step" id="focusNext" type="button">next &rarr;</button>
+      </div>
+      <button class="step" id="focusClose" type="button">close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+// Notes transcribed from other/quote/quote.md. Wording is the source wording; the
+// only edits are two spelling fixes. Entries carry a type because the material is
+// not uniform - a sentence you say out loud wants different treatment from a
+// four-step procedure, and both want different treatment from a three-word note.
+//
+//   note    terse shorthand, complete as written
+//   line    an aphorism, kept verbatim
+//   script  a sentence to actually say in the room
+//   seq     an ordered sequence of plain steps
+//   play    a named framework whose steps carry labelled fields
+//   stub    a heading with nothing under it yet
+
+const TRACKS = [
+  { id: 'arun',      nav: 'Arun',      head: 'Arun' },
+  { id: 'rhythm',    nav: 'Rhythm',    head: 'Rhythm' },
+  { id: 'objection', nav: 'Objection', head: 'Objection' },
+  { id: 'wrong',     nav: 'Wrong',     head: 'Telling someone they are wrong' },
+  { id: 'align',     nav: 'Align',     head: 'Defend and align' },
+  { id: 'me',        nav: 'Me',        head: 'Me' }
+];
+
+const ENTRIES = [
+  { track: 'arun', type: 'note', text: 'challenge the status quo' },
+  { track: 'arun', type: 'note', text: 'compassionate, communicate' },
+  { track: 'arun', type: 'note', text: 'ask for 5 why, go deep in problem statement' },
+  { track: 'arun', type: 'note', text: 'whos your customer, win win' },
+
+  { track: 'rhythm', type: 'stub', title: '90-20 ultradian rhythm' },
+
+  { track: 'objection', type: 'seq', name: 'The sequence',
+    lead: 'silence → no risk. ask permission to disagree',
+    steps: [
+      'object first',
+      'put observation',
+      'draw conclusion',
+      'action (who, when, what) writing'
+    ] },
+  { track: 'objection', type: 'line', text: 'name what can change your mind is cheapest objection' },
+
+  { track: 'objection', group: 'quirk', type: 'line', text: 'instead of concern, assume project fail, ask why' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'ask what would have to be true for it to work' },
+  { track: 'objection', group: 'quirk', type: 'line', text: "decision is theirs, i'm not here to contest" },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'say twice but make 2nd explicit' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'support real concern with 2nd voice, even if argument is weak' },
+  { track: 'objection', group: 'quirk', type: 'stub', title: 'manager objective' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'sync with manager before the room' },
+  { track: 'objection', group: 'quirk', type: 'line', text: "you can't feel defensiveness, it's identical to explaining" },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'Route the objection so that the person can change position without a public reversal, because the cost you are asking them to bear is not being wrong but being seen to have been wrong, and those are priced very differently' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'Assume your written objection will be read at the harshest reading its words permit' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'You are not the only one, but make it public' },
+  { track: 'objection', group: 'quirk', type: 'line', text: 'Ask for a decision you will not like rather than accepting a deferral you will' },
+
+  { track: 'objection', group: 'later', type: 'line', text: 'Your invitation to disagree is worth nothing until the first uncomfortable one arrives' },
+  { track: 'objection', group: 'later', type: 'line', text: 'Your memory of how right you were is manufactured after the fact' },
+  { track: 'objection', group: 'later', type: 'line', text: 'Treat the physical signal as reportable in itself, and say it out loud before you can defend it, because the alternative is to stay quiet until the argument is ready and the argument is never ready in time.' },
+  { track: 'objection', group: 'later', type: 'line', text: 'The objection arrives as a physical state several minutes before it arrives as a sentence' },
+  { track: 'objection', group: 'later', type: 'script', text: 'Something about this timeline feels tight to me. Is anyone else picking up that tension, or is it just my angle' },
+  { track: 'objection', group: 'later', type: 'script', text: "I'm feeling some friction around this assumption, but I haven't fully unraveled why yet. Can we spend two minutes pressure-testing it?" },
+  { track: 'objection', group: 'later', type: 'line', text: 'Escalate to the next level rather than the level that can fix it, and tell the person you are going past, because the skip is what gets remembered and the intermediate rung frequently resolves it anyway.' },
+  { track: 'objection', group: 'later', type: 'line', text: "Don't always mix praise with bad news" },
+
+  { track: 'wrong', type: 'play', name: 'Tell someone is wrong', steps: [
+    { name: 'The Effort Buffer', fields: [
+      ['Goal', 'Acknowledge the initiative to prevent an immediate defensive posture.'],
+      ['Mechanism', `Start with positive or neutral recognition of the action taken ("Thanks for taking a pass at this...").`]
+    ] },
+    { name: 'Externalize the Blame', fields: [
+      ['Goal', `Attribute the error to inputs, tools, or missing context rather than the individual's capability.`],
+      ['Mechanism', `Frame the flaw as a system issue ("It looks like some context was missing in the prompt...") instead of a personal failure ("You missed key details").`]
+    ] },
+    { name: 'Softened Precision', fields: [
+      ['Goal', 'Be explicit about the problem while stripping out punitive language.'],
+      ['Mechanism', `Swap absolute or loaded terms like "wrong," "incorrect," or "skill gap" for constructive equivalents like "slightly off," "needs alignment," or "requires fine-tuning."`]
+    ] },
+    { name: 'Shared-Win Horizon', fields: [
+      ['Goal', 'State the desired change as a collective benefit rather than a reprimand.'],
+      ['Mechanism', `Reframe negative outcomes ("so we stop wasting tokens") into positive goals ("so we can optimize token efficiency across the team").`]
+    ] }
+  ] },
+
+  { track: 'align', type: 'play', name: 'Defend and align', steps: [
+    { name: 'Lead with Positive Validation', fields: [
+      ['Skill', 'Relationship management and feedback encouragement.'],
+      ['Shift', `Instead of jumping straight to internal logic ("For runtime..."), open by validating the sender's effort.`],
+      ['Application', 'Start immediately with positive reinforcement so the stakeholder feels heard before you explain system constraints.']
+    ] },
+    { name: 'Explain the Strategy and the "Why"', fields: [
+      ['Skill', 'Strategic storytelling.'],
+      ['Shift', `Replace vague goals ("attack broad patterns") with the underlying rationale for your prioritization.`],
+      ['Application', `Name the business mechanism driving your choices (e.g., "compounding spend across the fleet") so your default focus makes logical sense to outsiders.`]
+    ] },
+    { name: 'Reframe Defensive Limitations into Value', fields: [
+      ['Skill', 'Constructive reframing.'],
+      ['Shift', `The original phrasing presents tenant-specific work as "reactive" and lower priority. The revised version treats tenant reports as high-value diagnostic inputs ("leads, not one-offs").`],
+      ['Application', `Never label your response to a user as "reactive." Frame single-tenant issues as the primary evidence used to uncover system-wide solutions.`]
+    ] },
+    { name: 'Ground the Response in Concrete Data and Actions', fields: [
+      ['Skill', 'Precise operational execution.'],
+      ['Shift', `Move from abstract promises ("we will go deep") to specific references, explicit data requests, and a clear feedback loop.`],
+      ['Application', 'Call out the specific assets/IDs, request the exact artifact needed (dashboard link), and explicitly promise a return update.']
+    ] }
+  ] },
+
+  { track: 'me', type: 'line', text: 'tell a story not just stats' }
+];
+
+// Only the kinds whose label carries something the form does not already
+// announce. A line labelled LINE is noise repeated eighteen times; a script
+// labelled SAY THIS is an instruction, and an unwritten stub needs saying.
+const KIND_LABEL = {
+  script: 'Say this',
+  stub: 'Unwritten'
+};
+
+const GROUP_LABEL = { quirk: 'quirk' };
+
+// ── typesetting ─────────────────────────────────────
+//
+// Entries are stored exactly as they were written, straight quotes and all.
+// Curling them is a setting decision rather than an edit, so it happens here on
+// the way to the page and never reaches the data. Dashes are left alone: every
+// hyphen in these notes is a real hyphen.
+
+function typeset(text) {
+  return String(text)
+    .replace(/\.\.\./g, '\u2026')
+    .replace(/"/g, (match, at, whole) =>
+      at === 0 || /[\s(\[]/.test(whole[at - 1]) ? '\u201C' : '\u201D')
+    .replace(/'/g, '\u2019');
+}
+
+// Round and diagonal capitals carry more apparent space to their left than
+// flat-sided ones, so a line opening on T sits visibly inset from one opening
+// on H. Invisible at reading size, plainly wrong at seventy pixels.
+const BEARING = {
+  T: -0.042, V: -0.04, W: -0.036, Y: -0.042, A: -0.028, J: -0.022,
+  O: -0.014, C: -0.014, G: -0.014, Q: -0.014, S: -0.01,
+  '\u201C': -0.34, '\u2019': -0.18
+};
+
+function optical(container) {
+  const node = container.querySelector('.e-line, .e-note, .e-script p');
+  if (!node) return;
+  const shift = BEARING[node.textContent.trim()[0]];
+  node.style.textIndent = shift ? shift + 'em' : '';
+}
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function renderFields(fields) {
+  const dl = el('dl', 'fields');
+  fields.forEach(([label, value]) => {
+    const row = el('div', 'field');
+    row.append(el('dt', null, label), el('dd', null, typeset(value)));
+    dl.append(row);
+  });
+  return dl;
+}
+
+function renderEntry(entry) {
+  const wrap = el('article', 'entry');
+
+  if (KIND_LABEL[entry.type]) wrap.append(el('span', 'e-kind', KIND_LABEL[entry.type]));
+
+  if (entry.type === 'note' || entry.type === 'line') {
+    wrap.append(el('p', entry.type === 'note' ? 'e-note' : 'e-line', typeset(entry.text)));
+  } else if (entry.type === 'script') {
+    const quote = el('div', 'e-script');
+    quote.append(el('p', null, typeset(entry.text)));
+    wrap.append(quote);
+  } else if (entry.type === 'stub') {
+    const stub = el('div', 'e-stub');
+    stub.append(el('p', 'e-title', typeset(entry.title)));
+    stub.append(el('span', 'e-unwritten', 'nothing written under this yet'));
+    wrap.append(stub);
+  } else if (entry.type === 'seq') {
+    wrap.append(el('h3', 'seq-name', typeset(entry.name)));
+    wrap.append(el('p', 'seq-lead', typeset(entry.lead)));
+    const list = el('ol', 'seq-steps');
+    entry.steps.forEach(step => list.append(el('li', null, typeset(step))));
+    wrap.append(list);
+  } else if (entry.type === 'play') {
+    wrap.append(el('h3', 'play-name', typeset(entry.name)));
+    const list = el('ol', 'play-steps');
+    entry.steps.forEach(step => {
+      const li = el('li');
+      li.append(el('h4', 'move-name', typeset(step.name)), renderFields(step.fields));
+      list.append(li);
+    });
+    wrap.append(list);
+  }
+
+  return wrap;
+}
+
+// ── what you have already sat with ───────────────────
+//
+// Ids hash the entry text rather than its position, so reordering the file or
+// inserting a line does not quietly reset the count.
+
+const SEEN_KEY = 'commonplace-seen';
+
+function idOf(entry) {
+  const source = entry.text || entry.title || entry.name || '';
+  let h = 5381;
+  for (let i = 0; i < source.length; i++) h = ((h * 33) ^ source.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+const seen = (() => {
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY)) || {}; } catch (_) { return {}; }
+})();
+
+function markSeen(entry) {
+  const id = idOf(entry);
+  seen[id] = (seen[id] || 0) + 1;
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); } catch (_) {}
+  paintMeter();
+}
+
+// ── the daily card ──────────────────────────────────
+//
+// Deterministic on the date, so the same entry holds all day and turns over at
+// local midnight. `nudge` advances it without changing what tomorrow shows.
+//
+// This is still the one real design decision here and it is easy to swap. The
+// alternatives, roughly: pure random per load gives more variety but nothing
+// sticks; least-recently-seen would use the `seen` map above to guarantee you
+// cover the whole set before repeating; weighting by type would let the long
+// aphorisms surface more often than the three-word notes.
+
+const CARD_POOL = ENTRIES.filter(entry => entry.type !== 'stub');
+
+function scramble(n) {
+  n = (n ^ 61) ^ (n >>> 16);
+  n = n + (n << 3);
+  n = n ^ (n >>> 4);
+  n = Math.imul(n, 0x27d4eb2d);
+  n = n ^ (n >>> 15);
+  return n >>> 0;
+}
+
+function pickCard(pool, nudge) {
+  const now = new Date();
+  const day = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  return pool[scramble(day + nudge) % pool.length];
+}
+
+// ── display sizing ──────────────────────────────────
+//
+// Length picks the scale. Three words can carry a whole viewport; forty-five
+// cannot, so they step down instead of overflowing it.
+
+function sizeClass(entry) {
+  if (entry.type === 'play' || entry.type === 'seq') return 's-sm';
+  const length = (entry.text || entry.title || '').length;
+  if (length < 45) return 's-xl';
+  if (length < 95) return 's-lg';
+  if (length < 175) return 's-md';
+  return 's-sm';
+}
+
+const cardTarget = document.getElementById('card');
+const cardFrom = document.getElementById('cardFrom');
+const meter = document.getElementById('meter');
+let nudge = 0;
+let cardEntry = null;
+
+function paintMeter() {
+  const done = CARD_POOL.filter(entry => seen[idOf(entry)]).length;
+  meter.textContent = done + ' / ' + CARD_POOL.length + ' rehearsed';
+}
+
+function renderCard() {
+  cardEntry = pickCard(CARD_POOL, nudge);
+  const track = TRACKS.find(item => item.id === cardEntry.track);
+  cardFrom.textContent = '· ' + track.nav;
+  cardTarget.className = sizeClass(cardEntry);
+  cardTarget.replaceChildren(renderEntry(cardEntry));
+  optical(cardTarget);
+}
+
+document.getElementById('another').addEventListener('click', () => {
+  nudge += 1;
+  renderCard();
+});
+
+// ── focus ─────────────────────────────────────────
+//
+// One entry, the whole screen, nothing else. These are lines you have to say
+// out loud in a room, and reading one at rehearsal size is closer to that than
+// scanning it in a list.
+//
+// A native dialog, so Escape, the top layer and focus handling come from the
+// platform rather than from code that would get them subtly wrong.
+
+const focusEl = document.getElementById('focus');
+const focusBody = document.getElementById('focusBody');
+const focusWhere = document.getElementById('focusWhere');
+const focusPos = document.getElementById('focusPos');
+let focusList = [];
+let focusIndex = 0;
+
+function paintFocus() {
+  const entry = focusList[focusIndex];
+  const track = TRACKS.find(item => item.id === entry.track);
+  focusWhere.textContent = track.nav;
+  focusPos.textContent = (focusIndex + 1) + ' / ' + focusList.length;
+  focusBody.className = 'focus-body ' + sizeClass(entry);
+  focusBody.replaceChildren(renderEntry(entry));
+  optical(focusBody);
+  focusBody.scrollTop = 0;
+  markSeen(entry);
+}
+
+function openFocus(list, index) {
+  if (!list.length || index < 0) return;
+  focusList = list;
+  focusIndex = index;
+  paintFocus();
+  if (!focusEl.open) focusEl.showModal();
+}
+
+function moveFocus(step) {
+  focusIndex = (focusIndex + step + focusList.length) % focusList.length;
+  paintFocus();
+}
+
+function openToday() {
+  openFocus(CARD_POOL, CARD_POOL.indexOf(cardEntry));
+}
+
+document.getElementById('focusToday').addEventListener('click', openToday);
+document.getElementById('focusPrev').addEventListener('click', () => moveFocus(-1));
+document.getElementById('focusNext').addEventListener('click', () => moveFocus(1));
+document.getElementById('focusClose').addEventListener('click', () => focusEl.close());
+
+// the side gutters are the dialog itself, so clicking off the column closes
+focusEl.addEventListener('click', event => {
+  if (event.target === focusEl) focusEl.close();
+});
+
+// ── the body ──────────────────────────────────────
+
+const body = document.getElementById('body');
+const tracknav = document.querySelector('.tracknav');
+
+// Reel gives every entry a screen of its own; list keeps the scannable column.
+// Browsing and finding are different jobs and one layout cannot do both well.
+const VIEW_KEY = 'commonplace-view';
+const VIEWS = [{ id: 'reel', label: 'Reel' }, { id: 'list', label: 'List' }];
+let currentView = 'reel';
+try {
+  const saved = localStorage.getItem(VIEW_KEY);
+  if (saved === 'reel' || saved === 'list') currentView = saved;
+} catch (_) {}
+const TRACK_OPTIONS = [{ id: 'all', nav: 'All' }].concat(TRACKS);
+const trackButtons = new Map();
+let currentTrack = 'all';
+let visible = [];
+
+// The class is added here rather than in the stylesheet, so if the observer is
+// missing the entries stay visible instead of staying blank.
+const reveal = 'IntersectionObserver' in window
+  ? new IntersectionObserver(items => {
+      items.forEach(item => {
+        if (!item.isIntersecting) return;
+        item.target.classList.add('in');
+        reveal.unobserve(item.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px' })
+  : null;
+
+function renderBody() {
+  const reel = currentView === 'reel';
+  body.classList.toggle('reel', reel);
+  document.documentElement.classList.toggle('snap', reel);
+
+  const shown = TRACKS.filter(track => currentTrack === 'all' || track.id === currentTrack);
+  visible = ENTRIES.filter(entry => currentTrack === 'all' || entry.track === currentTrack);
+
+  body.replaceChildren(...shown.map(track => {
+    const entries = ENTRIES.filter(entry => entry.track === track.id);
+    const section = el('section', 'section');
+
+    const head = el('div', 'section-head');
+    head.append(el('h2', null, track.head));
+    head.append(el('span', 'n', entries.length + (entries.length === 1 ? ' entry' : ' entries')));
+    section.append(head);
+
+    const list = el('div', 'entries');
+
+    // Source order is preserved, and a divider marks where the file changed
+    // grouping. Only `quirk` was labelled; the block after it was not, so it
+    // gets a bare rule rather than a name I would have had to invent.
+    let group;
+    entries.forEach((entry, i) => {
+      if (i > 0 && entry.group !== group) {
+        list.append(el('div', 'divider', GROUP_LABEL[entry.group] || ''));
+      }
+      group = entry.group;
+
+      const node = renderEntry(entry);
+
+      if (reel) {
+        node.classList.add(sizeClass(entry));
+        if (entry.type === 'play' || entry.type === 'seq') node.classList.add('entry-doc');
+
+        // On an otherwise empty screen you lose your place, so each one says
+        // where it is. This replaces the kind label rather than joining it.
+        const place = el('span', 'e-place', track.nav + ' · ' + String(visible.indexOf(entry) + 1).padStart(2, '0'));
+        if (KIND_LABEL[entry.type]) {
+          place.append(document.createTextNode(' · '));
+          place.append(el('span', 'say', KIND_LABEL[entry.type]));
+        }
+        node.prepend(place);
+      }
+
+      const open = el('button', 'entry-open', 'focus');
+      open.type = 'button';
+      open.addEventListener('click', () => openFocus(visible, visible.indexOf(entry)));
+      node.append(open);
+
+      // In the reel an entry fills the screen, so a click anywhere would open
+      // focus by accident. There the small button is the only way in.
+      if (!reel) {
+        node.addEventListener('click', event => {
+          if (!event.target.closest('.entry-open')) openFocus(visible, visible.indexOf(entry));
+        });
+      }
+
+      if (reveal) {
+        node.classList.add('reveal');
+        reveal.observe(node);
+      }
+
+      list.append(node);
+    });
+
+    section.append(list);
+    return section;
+  }));
+}
+
+const motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// The sticky bar wraps to more rows as the viewport narrows, so it reports its
+// own height and the snap offset follows it instead of guessing.
+if ('ResizeObserver' in window) {
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--navh', tracknav.offsetHeight + 'px');
+  }).observe(tracknav);
+}
+
+function selectTrack(id) {
+  if (id === currentTrack) return;
+  currentTrack = id;
+  trackButtons.forEach((button, key) => {
+    button.setAttribute('aria-pressed', String(key === id));
+  });
+  renderBody();
+  // The opening spread is a full viewport, so a filter pressed from up there
+  // would otherwise rearrange the page silently below the fold.
+  tracknav.scrollIntoView({ behavior: motionOK ? 'smooth' : 'auto', block: 'start' });
+}
+
+function selectView(id) {
+  if (id === currentView) return;
+  currentView = id;
+  try { localStorage.setItem(VIEW_KEY, id); } catch (_) {}
+  viewButtons.forEach((button, key) => {
+    button.setAttribute('aria-pressed', String(key === id));
+  });
+  renderBody();
+  tracknav.scrollIntoView({ behavior: motionOK ? 'smooth' : 'auto', block: 'start' });
+}
+
+const viewButtons = new Map();
+
+function renderViews() {
+  const target = document.getElementById('views');
+
+  VIEWS.forEach((view, i) => {
+    if (i) {
+      const sep = el('span', 'sep', '/');
+      sep.setAttribute('aria-hidden', 'true');
+      target.append(sep);
+    }
+    const button = el('button', 'view-item', view.label);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', String(view.id === currentView));
+    button.addEventListener('click', () => selectView(view.id));
+    viewButtons.set(view.id, button);
+    target.append(button);
+  });
+}
+
+function renderTracks() {
+  const target = document.getElementById('tracks');
+
+  TRACK_OPTIONS.forEach(option => {
+    const li = el('li');
+    const button = el('button', 'track-item');
+    button.type = 'button';
+    button.append(document.createTextNode(option.nav));
+
+    const total = option.id === 'all'
+      ? ENTRIES.length
+      : ENTRIES.filter(entry => entry.track === option.id).length;
+    button.append(el('span', 'count', total));
+
+    button.setAttribute('aria-pressed', String(option.id === currentTrack));
+    button.addEventListener('click', () => selectTrack(option.id));
+
+    trackButtons.set(option.id, button);
+    li.append(button);
+    target.append(li);
+  });
+}
+
+// ── keyboard ─────────────────────────────────────
+
+document.addEventListener('keydown', event => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+  if (focusEl.open) {
+    if (event.key === 'ArrowRight' || event.key === ' ') { event.preventDefault(); moveFocus(1); }
+    else if (event.key === 'ArrowLeft') { event.preventDefault(); moveFocus(-1); }
+    return;
+  }
+
+  const tag = event.target.tagName;
+  const onControl = tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA';
+  if (onControl && (event.key === ' ' || event.key === 'Enter')) return;
+
+  if (event.key === 'n') {
+    event.preventDefault();
+    nudge += 1;
+    renderCard();
+  } else if (event.key === 'f') {
+    event.preventDefault();
+    openToday();
+  } else if (event.key === 'v') {
+    event.preventDefault();
+    selectView(currentView === 'reel' ? 'list' : 'reel');
+  } else {
+    const slot = Number(event.key);
+    if (Number.isInteger(slot) && slot >= 1 && slot <= TRACK_OPTIONS.length) {
+      selectTrack(TRACK_OPTIONS[slot - 1].id);
+    }
+  }
+});
+
+renderTracks();
+renderViews();
+renderCard();
+renderBody();
+paintMeter();
+</script>
+</body>
+</html>
