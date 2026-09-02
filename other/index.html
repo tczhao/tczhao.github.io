@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>Annex</title>
-<meta name="description" content="Four rooms for the things that fit nowhere else.">
+<meta name="description" content="Five rooms for the things that fit nowhere else.">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -417,6 +417,63 @@
   }
   .room--paper:is(:hover,:focus-visible) .qmark { transform: rotate(-4deg) translateY(-4px); }
 
+  /* room 5 — breaker panel */
+  .room--panel {
+    --ac: #4fb8c9;
+    background: linear-gradient(180deg, #1b1f24 0%, #0d1013 100%);
+    color: #dfe6ea;
+  }
+  .room--panel .desc { color: #8e9aa3; }
+  .room--panel .room-title {
+    font-family: var(--mono);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: clamp(21px, 2.1vw, 33px);
+  }
+  .room--panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(223,230,234,0.03) 0 1px, transparent 1px 4px);
+    pointer-events: none;
+  }
+  .breakers {
+    display: flex;
+    gap: 11px;
+    padding: 12px 13px;
+    border: 1px solid rgba(223,230,234,0.22);
+    border-radius: 4px;
+    background: rgba(223,230,234,0.03);
+  }
+  .sw {
+    position: relative;
+    width: 22px;
+    height: 54px;
+    border-radius: 3px;
+    background: rgba(223,230,234,0.07);
+    box-shadow: inset 0 0 0 1px rgba(223,230,234,0.14);
+  }
+  .sw::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 4px;
+    height: 20px;
+    border-radius: 2px;
+    background: #b8c3ca;
+    transition: transform 0.45s var(--ease-room), background 0.45s ease, box-shadow 0.45s ease;
+  }
+  /* One breaker is already down on arrival; hovering trips a second, which is
+     the whole point of the room behind it. */
+  .sw.tripped::after,
+  .room--panel:is(:hover,:focus-visible) .sw:nth-child(2)::after {
+    transform: translateY(26px);
+    background: var(--ac);
+    box-shadow: 0 0 12px rgba(79,184,201,0.6);
+  }
+
   @keyframes rise {
     from { opacity: 0; transform: translateY(26px); }
     to { opacity: 1; transform: translateY(0); }
@@ -456,7 +513,7 @@
 <header class="masthead">
   <div class="wordmark">
     <span class="name">Annex</span>
-    <span class="tag">four rooms off the main hall</span>
+    <span class="tag">five rooms off the main hall</span>
   </div>
   <a class="home" href="/">&larr; tianchuzhao.com</a>
 </header>
@@ -531,6 +588,23 @@
       <span class="enter">Enter <span class="arrow">&rarr;</span></span>
     </span></span>
   </a>
+  <a class="room room--panel" href="exit/" style="--i:4">
+    <span class="eyebrow">assets &middot; pre-committed exits</span>
+    <span class="scene">
+      <span class="breakers">
+        <span class="sw"></span>
+        <span class="sw"></span>
+        <span class="sw tripped"></span>
+        <span class="sw"></span>
+      </span>
+    </span>
+    <span class="room-title">Circuit Breaker</span>
+    <span class="plaque"><span>
+      <span class="desc">Four caps that end the hold on any asset, six numbers for the apartment, and the pattern that keeps me holding anyway.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span></span>
+  </a>
+
 </main>
 
 </body>

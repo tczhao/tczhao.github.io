@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Circuit Breaker</title>
+<meta name="description" content="Pre-committed exit conditions for compromised assets, and the pattern that stops me using them.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --fg: #16150f;
+    --fg-mid: #4a483d;
+    --fg-dim: #7c7969;
+    --rule: #ded9cc;
+    --rule-soft: #ebe7dc;
+    --panel: #f3f0e8;
+    --accent: #b4472e;
+    --max-w: 1180px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14140f;
+      --fg: #efece2;
+      --fg-mid: #b3af9f;
+      --fg-dim: #83806f;
+      --rule: #33322a;
+      --rule-soft: #262620;
+      --panel: #1c1c15;
+      --accent: #d9714f;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) { .grain { opacity: 0.085; } }
+  body > *:not(.grain) { position: relative; z-index: 1; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ───────────────────────────────────────── */
+
+  .masthead { padding-block: var(--s3); }
+
+  .backlink {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .backlink:hover { color: var(--fg); }
+
+  .masthead-band {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s5);
+    margin-top: var(--s4);
+  }
+  @media (max-width: 767px) {
+    .masthead-band { flex-direction: column; gap: var(--s2); }
+  }
+
+  .masthead h1 {
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.018em;
+    font-variation-settings: 'opsz' 60, 'wght' 600;
+  }
+
+  .standfirst {
+    max-width: 38ch;
+    font-size: var(--t-aside);
+    font-style: italic;
+    line-height: 1.55;
+    text-align: right;
+    text-wrap: pretty;
+    color: var(--fg-mid);
+  }
+  @media (max-width: 767px) {
+    .standfirst { text-align: left; max-width: 46ch; }
+  }
+
+  /* ── section heads ──────────────────────────────────── */
+
+  main { padding-block: var(--s3) var(--s5); }
+
+  .band { margin-top: var(--s5); }
+  .band:first-child { margin-top: 0; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    border-top: 1px solid var(--fg);
+    padding-top: 10px;
+    margin-bottom: var(--s2);
+  }
+  .section-head h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .section-head .n {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+  /* These heads are long enough to collide with their caption on a phone, so
+     the caption drops to its own line rather than squeezing the head. */
+  @media (max-width: 599px) {
+    .section-head { flex-direction: column; align-items: flex-start; gap: 3px; }
+  }
+
+  .lede {
+    max-width: 62ch;
+    font-size: var(--t-read);
+    line-height: 1.6;
+    color: var(--fg-mid);
+    text-wrap: pretty;
+    margin-bottom: var(--s3);
+  }
+
+  /* ── the rules ──────────────────────────────────────── */
+
+  /* A group head is a quiet label, not a second-level heading competing with
+     the band above it. The rules underneath carry the weight. */
+  .group {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin: var(--s3) 0 var(--s1);
+  }
+  .group:first-of-type { margin-top: 0; }
+
+  .rule {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr auto;
+    gap: 4px var(--s2);
+    align-items: baseline;
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .rule .num {
+    grid-row: 1 / span 3;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    color: var(--fg-dim);
+  }
+
+  .rule h3 {
+    font-size: var(--t-lead);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  /* The testable condition, and the loudest thing in the row. Reading this
+     line alone should be enough to know whether the rule has tripped. */
+  .cond {
+    grid-column: 2 / span 2;
+    position: relative;
+    padding-left: 1.7em;
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+  /* Absolute rather than inline, so a condition that wraps keeps a hanging
+     indent instead of tucking its second line under the dash. */
+  .cond::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 1.1em;
+    border-top: 1px solid var(--accent);
+  }
+
+  .rule p {
+    grid-column: 2 / span 2;
+    max-width: 74ch;
+    font-size: var(--t-aside);
+    line-height: 1.6;
+    color: var(--fg-mid);
+    text-wrap: pretty;
+    margin-top: 2px;
+  }
+
+  /* Three escalating verdicts, so the row is triaged before it is read. */
+  .act {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1px 7px;
+    color: var(--fg-dim);
+  }
+  .act--sell { border-color: var(--fg-mid); color: var(--fg); }
+  .act--now { border-color: var(--accent); background: var(--accent); color: var(--bg); }
+
+  @media (max-width: 599px) {
+    .rule { grid-template-columns: 2.2rem 1fr; }
+    .cond, .rule p { grid-column: 2; }
+    .act { grid-column: 2; grid-row: auto; justify-self: start; margin-top: 6px; }
+  }
+
+  /* ── prose bands ────────────────────────────────────── */
+
+  .notes {
+    columns: 320px;
+    column-gap: var(--s4);
+    list-style: none;
+  }
+  .notes li {
+    break-inside: avoid;
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: var(--t-aside);
+    line-height: 1.6;
+    color: var(--fg-mid);
+    text-wrap: pretty;
+  }
+  .notes b {
+    display: block;
+    font-family: var(--font-text);
+    font-size: var(--t-read);
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 3px;
+  }
+
+  /* ── the patterns ───────────────────────────────────── */
+
+  /* Two by two, and panelled rather than ruled. Everything above this point
+     is about the asset; these four are about me, and the shift in register
+     is worth a shift in the surface they sit on. */
+  .patterns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s2);
+    list-style: none;
+  }
+  /* Fixed at two columns rather than auto-fit, because four cards auto-fitting
+     into three tracks leaves the fourth stranded beside two card-widths of
+     nothing. Two by two, or one by four. */
+  @media (max-width: 767px) { .patterns { grid-template-columns: 1fr; } }
+  .pattern {
+    background: var(--panel);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: var(--s2) var(--s3) var(--s3);
+  }
+  .pattern .num {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    color: var(--fg-dim);
+  }
+  .pattern h3 {
+    font-size: var(--t-lead);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin: 3px 0 5px;
+  }
+  .pattern p {
+    font-size: var(--t-aside);
+    line-height: 1.6;
+    color: var(--fg-mid);
+    text-wrap: pretty;
+  }
+
+  /* ── the expandable trap ────────────────────────────── */
+
+  /* Grid, not the multicol the other note lists use. Every trap here opens,
+     and an opened <details> inside a multicol makes the browser rebalance all
+     the columns, so unrelated traps jump between columns on click. Grid rows
+     are independent, so opening one only grows its own row. */
+  /* Track count is declared rather than auto-fit, because the open state below
+     has to compute one column's width and auto-fit gives CSS no way to know
+     how many tracks it made. */
+  .notes--traps {
+    --cols: 3;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    column-gap: var(--s4);
+  }
+  @media (max-width: 1023px) { .notes--traps { --cols: 2; } }
+  @media (max-width: 767px)  { .notes--traps { --cols: 1; } }
+
+  /* The card never leaves its cell - no grid-column trickery, so nothing about
+     it moves on open. Instead the panel alone breaks out sideways to the full
+     grid width, offset by however many columns sit to its left. Percentages
+     here resolve against the cell, so 100% is one column. */
+  .anatomy-body {
+    width: calc(var(--cols) * 100% + (var(--cols) - 1) * var(--s4));
+  }
+  .notes--traps > li:nth-child(3n+2) .anatomy-body { margin-left: calc(-100% - var(--s4)); }
+  .notes--traps > li:nth-child(3n+3) .anatomy-body { margin-left: calc(-200% - 2 * var(--s4)); }
+
+  @media (max-width: 1023px) {
+    .notes--traps > li:nth-child(3n+2) .anatomy-body,
+    .notes--traps > li:nth-child(3n+3) .anatomy-body { margin-left: 0; }
+    .notes--traps > li:nth-child(2n) .anatomy-body { margin-left: calc(-100% - var(--s4)); }
+  }
+  @media (max-width: 767px) {
+    .notes--traps > li:nth-child(2n) .anatomy-body { margin-left: 0; }
+  }
+  .notes--traps .trap-def { max-width: 74ch; }
+
+  /* Above the name rather than in a left gutter: a 2.6rem gutter costs a third
+     of a 300px column. */
+  .notes--traps > li > .num {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    color: var(--fg-dim);
+    margin-bottom: 2px;
+  }
+
+  .anatomy { margin-top: var(--s2); }
+  .anatomy summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 3px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .anatomy summary::-webkit-details-marker { display: none; }
+  .anatomy summary::before { content: '+'; color: var(--accent); }
+  .anatomy[open] summary::before { content: '\2212'; }
+  .anatomy summary:hover { color: var(--fg); border-bottom-color: var(--fg); }
+
+  .anatomy-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: var(--s2) var(--s4);
+    margin-top: var(--s3);
+  }
+  .anatomy-body ul { list-style: none; }
+  .anatomy-body li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: var(--t-aside);
+    line-height: 1.55;
+  }
+  .anatomy-body li:last-child { border-bottom: 0; }
+  /* .notes b is display:block for the trap headings; inside the anatomy the
+     lead-in has to stay inline with the sentence it opens. */
+  .anatomy-body b {
+    display: inline;
+    font-size: inherit;
+    margin: 0;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .anatomy-body .stub { font-style: italic; color: var(--fg-dim); }
+
+  /* ── tail ───────────────────────────────────────────── */
+
+  .tail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--s4);
+    border-top: 1px solid var(--rule);
+    padding: 30px 0 52px;
+  }
+  .tail h2 {
+    font-size: var(--t-lead);
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .tail p { font-size: var(--t-aside); color: var(--fg-mid); }
+  .tail p + p { margin-top: 11px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+
+  @media print {
+    .grain, .backlink { display: none; }
+    body { background: #fff; color: #000; }
+    .act--now { background: none; color: #000; }
+    .rule, .notes li { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="masthead wrap">
+  <a class="backlink" href="/other/">Annex</a>
+  <div class="masthead-band">
+    <h1>Circuit Breaker</h1>
+    <p class="standfirst">Exit conditions written in advance, so money, labour and hope stop going into a compromised asset just to avoid taking a clean, direct loss.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="band" aria-labelledby="traps-general-head">
+    <div class="section-head">
+      <h2 id="traps-general-head">Common financial traps</h2>
+      <span class="n">seven, none of them arithmetic</span>
+    </div>
+
+    <p class="lede">Most financial traps do not come from poor mathematical ability. They come from subtle psychological shortcuts, where short-term emotional comfort overrides long-term maths.</p>
+
+    <ul class="notes notes--traps">
+      <li>
+        <span class="num">01</span>
+        <b>Lifestyle creep</b>
+        <p class="trap-def">Spending rises automatically as earnings do, which turns a temporary pay rise into a permanent baseline expense and stops real net worth ever accumulating. The hedonic treadmill.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">02</span>
+        <b>The heroic salvage</b>
+        <p class="trap-def">Injecting extra capital, personal labour or emotional hope into a compromised asset to avoid taking a clean, direct loss. It turns a bad initial purchase into a prolonged financial and mental drain.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <div>
+              <p class="group">Core psychological mechanics</p>
+              <ul>
+                <li><b>The &ldquo;one fix left&rdquo; illusion.</b> Treating a continuous chain of repairs as a temporary finish line. What gets paid for is relief from the discomfort of an unfinished project, not true market value.</li>
+                <li><b>The false-binary trap.</b> Framing the crisis as either paying the exorbitant fee or doubling down with my own money and effort, while ignoring liquidating the asset as-is.</li>
+                <li><b>Rationalising regret.</b> Framing wasted money and hundreds of stressed hours as gaining valuable experience, or believing a prime location will fix systemic defects.</li>
+                <li><b>The zero-dollar labour fallacy.</b> Treating my own weekends, mental bandwidth and stress as free resources, to justify avoiding a commercial bill.</li>
+              </ul>
+            </div>
+            <div>
+              <p class="group">Circuit breakers</p>
+              <ul>
+                <li><b>The cascade commitment test.</b> Before paying for fix one, ask whether I would walk away if fix two appeared next month. If the answer is no, because I already spent money on fix one, abandon the asset today, before paying for fix one.</li>
+                <li><b>The pre-mortem.</b> Assume total failure of the asset two years from today. Trace the exact choices that caused it, and turn them into non-negotiable exit triggers before acquiring or maintaining it.</li>
+                <li><b>Hard percentage caps.</b> Sell or scrap automatically once a single repair or levy exceeds a set share of market value. Committed below as the 20% capital cap.</li>
+                <li><b>The two-strike rule.</b> Two major emergency interventions inside the window are proof of a structurally broken asset, not isolated bad luck. Committed below as a 12-month window.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">03</span>
+        <b>Penny-wise, pound-foolish</b>
+        <p class="trap-def">High cognitive energy spent tracking minor discounts on daily items, while the massive capital leaks go unexamined: an uncompetitive mortgage rate, high investment management fees, a poor tax structure.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">04</span>
+        <b>The illiquidity trap</b>
+        <p class="trap-def">Asset-rich and cash-poor. All available net worth tied up in fixed real estate or other non-liquid assets, leaving high monthly debt obligations and no liquid buffer for an emergency or a new opportunity.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">05</span>
+        <b>Financing depreciating assets</b>
+        <p class="trap-def">High-interest consumer debt, car loans or buy-now-pay-later used to fund things that lose value instantly, which compounds the real cost of the consumption.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">06</span>
+        <b>Single-asset bias</b>
+        <p class="trap-def">Assuming one asset class, usually residential property, is inherently safe, while underestimating holding costs, high transaction friction - stamp duty, legal fees, agent commissions - and micro-market volatility.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+      <li>
+        <span class="num">07</span>
+        <b>Anchoring to purchase price</b>
+        <p class="trap-def">Refusing to sell an underperforming asset because market value sits below entry price, which ignores the opportunity cost of holding flat capital rather than reallocating to something higher-yielding.</p>
+        <details class="anatomy">
+          <summary>The full anatomy</summary>
+          <div class="anatomy-body">
+            <!-- Detail goes here, in the same shape as The heroic salvage:
+                 one div per grouping, each holding a p.group label and a list
+                 of items. Delete the stub line below when it lands. -->
+            <p class="stub">Not written yet.</p>
+          </div>
+        </details>
+      </li>
+    </ul>
+  </section>
+
+  <section class="band" aria-labelledby="breakers-head">
+    <div class="section-head">
+      <h2 id="breakers-head">The breakers</h2>
+      <span class="n">four caps, any asset</span>
+    </div>
+
+    <p class="lede">Pre-committed exit conditions work as emotional circuit breakers. They take the decision out of my hands the moment a crisis hits, which is the only reliable way to stop rescue mode taking over.</p>
+
+    <article class="rule">
+      <span class="num">01</span>
+      <h3>The 20% capital cap</h3>
+      <span class="act act--sell">Sell</span>
+      <p class="cond">A single repair, levy or cash injection exceeds 20% of current market value</p>
+      <p>Disposal is automatic. No negotiation, no hope-based fixes.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">02</span>
+      <h3>The labour budget</h3>
+      <span class="act act--sell">Hand off</span>
+      <p class="cond">20 hours of my own labour on one project</p>
+      <p>At the cap I either pay a professional or sell the asset as-is. My free time is a finite financial resource, and this is the line that treats it as one.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">03</span>
+      <h3>The structural hazard trigger</h3>
+      <span class="act act--now">Exit now</span>
+      <p class="cond">The problem moves from operational to structural</p>
+      <p>Routine maintenance is operational. Building defect litigation, or a damaged vehicle frame or engine block, is structural. Structural issues permanently destroy market liquidity and breed hidden costs without end.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">04</span>
+      <h3>The two-strike rule</h3>
+      <span class="act act--now">Exit now</span>
+      <p class="cond">Two major emergency interventions inside a 12-month window</p>
+      <p>Treat the asset as fundamentally flawed and exit immediately.</p>
+    </article>
+  </section>
+
+  <section class="band" aria-labelledby="triggers-head">
+    <div class="section-head">
+      <h2 id="triggers-head">The apartment</h2>
+      <span class="n">the same test, six specific numbers</span>
+    </div>
+
+    <p class="group">Financial and levy</p>
+
+    <article class="rule">
+      <span class="num">01</span>
+      <h3>The 5% levy cap</h3>
+      <span class="act">Review</span>
+      <p class="cond">A single special levy, or cumulative levies over 12&ndash;18 months, exceeds 5% of market value</p>
+      <p>Trigger an automatic sale review. Massive levies rarely solve structural problems on budget, and they permanently suppress buyer interest.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">02</span>
+      <h3>Out-of-pocket cash flow ceiling</h3>
+      <span class="act act--sell">Sell</span>
+      <p class="cond">Net monthly top-up above $500 AUD for 3 consecutive months</p>
+      <p>A hard dollar limit on negative gearing top-ups. If rising interest rates, strata hikes or vacancies push the top-up past this threshold and hold it there, sell.</p>
+    </article>
+
+    <p class="group">Strata and governance</p>
+
+    <article class="rule">
+      <span class="num">03</span>
+      <h3>Litigation and major defects</h3>
+      <span class="act act--now">Exit now</span>
+      <p class="cond">The owners corporation initiates multi-year proceedings over major defects</p>
+      <p>Combustible cladding, concrete cancer, structural leaks. Litigation locks prospective buyers out of traditional bank financing, which tanks the value.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">04</span>
+      <h3>Underfunded capital works</h3>
+      <span class="act">Review</span>
+      <p class="cond">Sinking fund below 70% of the balance the 10-year plan recommends</p>
+      <p>Trigger an exit evaluation. Below that line, future emergency levies are inevitable rather than possible.</p>
+    </article>
+
+    <p class="group">Market and opportunity cost</p>
+
+    <article class="rule">
+      <span class="num">05</span>
+      <h3>Local supply surge</h3>
+      <span class="act act--sell">Sell</span>
+      <p class="cond">Council approves hundreds of competing units within 1&nbsp;km</p>
+      <p>A multi-tower development on the doorstep dilutes rental yield and resale scarcity at the same time.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">06</span>
+      <h3>The 3-year opportunity cost benchmark</h3>
+      <span class="act act--sell">Sell</span>
+      <p class="cond">Rolling 3-year net return below a passive index fund</p>
+      <p>Total net return is capital growth plus net rental yield, measured against something as basic as the ASX 200 or the S&amp;P 500. Underperform over a rolling three years and the answer is to cut losses and reallocate the equity.</p>
+    </article>
+  </section>
+
+  <section class="band" aria-labelledby="signals-head">
+    <div class="section-head">
+      <h2 id="signals-head">Signals I would miss</h2>
+      <span class="n">the operational blind spots</span>
+    </div>
+    <ul class="notes">
+      <li>
+        <b>Strata minutes whisper before they shout</b>
+        Major levies almost never appear out of nowhere. The signals sit in body corporate AGM minutes 12&ndash;24 months ahead: recurring line items for diagnostic engineering reports, investigating membrane leaks, or repeated deferrals of routine maintenance.
+      </li>
+      <li>
+        <b>Lending restrictions move first</b>
+        Long before market value declines on paper, major banks quietly change their internal lending criteria. When lenders cap loan-to-value ratios or refuse to finance buyers in a specific complex over structural risk or cladding, buyer liquidity vanishes overnight.
+      </li>
+      <li>
+        <b>Supply surges are hyper-local</b>
+        Macro news about a national housing shortage hides the micro-market reality. One council approving three high-density towers within a 500&nbsp;metre radius creates a local glut that caps capital growth and suppresses rent for years.
+      </li>
+    </ul>
+  </section>
+
+  <section class="band" aria-labelledby="traps-head">
+    <div class="section-head">
+      <h2 id="traps-head">Wishful thinking</h2>
+      <span class="n">the cognitive traps</span>
+    </div>
+    <ul class="notes">
+      <li>
+        <b>The prime location fallacy</b>
+        That proximity to amenities overrides building defects. Location drives long-term value mostly through land content, and a high-density apartment carries very little land per owner - you largely own air space and a share of a structure. A top-tier postcode cannot compensate for systemic building failure.
+      </li>
+      <li>
+        <b>The sunk cost cure</b>
+        That paying a $30,000 special levy adds $30,000 or more to market value. Levies usually just return a compromised building to baseline function. Buyers discount a defect-plagued building whether or not the repairs were recently paid for.
+      </li>
+      <li>
+        <b>Anchoring to purchase price</b>
+        Waiting for the market to return what you paid plus expenses before you are willing to sell. The market runs strictly on current supply, demand and risk. It has no awareness of, and no obligation to, your entry price.
+      </li>
+    </ul>
+  </section>
+
+  <section class="band" aria-labelledby="patterns-head">
+    <div class="section-head">
+      <h2 id="patterns-head">The pattern underneath</h2>
+      <span class="n">four behaviours, two assets</span>
+    </div>
+    <ul class="patterns">
+      <li class="pattern">
+        <span class="num">01</span>
+        <h3>The false-binary trap</h3>
+        <p>A crisis - a massive levy, a $20k quote - frames itself as a choice between two options: pay the exorbitant fee, or double down with my own effort and capital. Option C goes unconsidered every time. Liquidate on day one, take a modest hit, keep the peace of mind.</p>
+      </li>
+      <li class="pattern">
+        <span class="num">02</span>
+        <h3>Reframing regret as rationalisation</h3>
+        <p>When an asset starts to fail I build silver linings to justify staying in the fight. For the apartment it was <em>prime location will save it</em>. For the car it was <em>at least I am gaining DIY skills</em>. The justification works as an emotional shield, and the shield is what delays the rational exit.</p>
+      </li>
+      <li class="pattern">
+        <span class="num">03</span>
+        <h3>High friction for low upside</h3>
+        <p>I picked assets with high systemic friction: a high-density strata apartment with shared structural liability, and a complex European car known for cascading failures. Neither carries enough structural upside to justify the mental energy it takes to run.</p>
+      </li>
+      <li class="pattern">
+        <span class="num">04</span>
+        <h3>Discounting my own labour</h3>
+        <p>The maths penalises out-of-pocket cash heavily and treats hundreds of hours of my time, weekend stress and cognitive bandwidth as effectively free.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="band" aria-labelledby="moves-head">
+    <div class="section-head">
+      <h2 id="moves-head">Making it stick</h2>
+      <span class="n">a rule nobody enforces is a preference</span>
+    </div>
+
+    <article class="rule">
+      <span class="num">01</span>
+      <h3>Document at the point of purchase</h3>
+      <p class="cond">Write the exit triggers down the day the asset is acquired</p>
+      <p>Or at the very first sign of trouble, if that day has already gone. Treating them as non-negotiable policy is what prevents rationalisation in real time.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">02</span>
+      <h3>The clean slate test</h3>
+      <p class="cond">If I did not already own this, would I buy it today, in this condition, at this cost?</p>
+      <p>Ask it every time an asset demands a fresh injection of capital or time. If the answer is no, cut losses immediately.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">03</span>
+      <h3>Price Option C first</h3>
+      <p class="cond">Get a cash quote for selling as-is before pricing any repair</p>
+      <p>List the car as a mechanic&rsquo;s special, price the property below market. Establishing the immediate walk-away value first is what makes sinking money into a rescue attempt look as bad as it is.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">04</span>
+      <h3>Outsource accountability</h3>
+      <p class="cond">Give one other person permission to call it</p>
+      <p>A partner, a trusted friend, an adviser. Someone neutral who holds the criteria in writing and is allowed to name wishful thinking out loud makes doubling down much harder.</p>
+    </article>
+
+    <article class="rule">
+      <span class="num">05</span>
+      <h3>Pivot to low-friction vehicles</h3>
+      <p class="cond">Passive over managed, reliable over interesting</p>
+      <p>Shift away from high-maintenance assets. Broad-market index funds ahead of property, and low-friction, high-reliability daily tools where maintenance never dominates my mental real estate.</p>
+    </article>
+  </section>
+
+</main>
+
+<footer class="tail wrap">
+  <div>
+    <h2>What the actions mean</h2>
+    <p><em>Review</em> opens the question. <em>Sell</em> is the default answer unless something specific has changed. <em>Hand off</em> ends my own involvement in the work, by cheque or by sale. <em>Exit now</em> does not wait for the next quarter.</p>
+    <p>The numbers are here to be argued with now, while nothing has tripped, rather than in the week a levy notice arrives.</p>
+  </div>
+  <div>
+    <h2>Where to look</h2>
+    <p>Four of the apartment&rsquo;s six triggers are readable from documents anyone can request: the AGM minutes, the 10-year capital works plan, the sinking fund balance and the council DA register.</p>
+    <p>The other two are my own numbers - the monthly top-up and the rolling three-year return - and they only work if they are actually calculated on a schedule.</p>
+  </div>
+</footer>
+
+</body>
+</html>
