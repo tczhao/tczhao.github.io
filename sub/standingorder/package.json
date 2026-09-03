@@ -1,0 +1,11 @@
+{
+  "name": "standingorder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standing Order - the wealth that comes from what you install, not what you know. One entry a day, and the entry stays shut until you have written the instruction.",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}
