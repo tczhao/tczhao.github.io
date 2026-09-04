@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tips</title>
+<meta name="description" content="Short pieces on working with other people, each one built around the sentences you would actually say.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Palette, ladder and faces are shared with the tip pages so the section
+     reads as one property. Change them in both or in neither. */
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+
+    --max-w: 880px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(2rem, 5vw, 3.5rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+    }
+    .lede, .entry-standfirst { font-variation-settings: 'opsz' 9; }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2 { font-family: var(--font-text); font-weight: 600; line-height: 1.1; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 6px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  .head { padding-block: var(--s5) var(--s4); }
+  .head h1 {
+    font-size: var(--t-display);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--s2);
+  }
+  .lede {
+    max-width: 60ch;
+    font-size: var(--t-lead);
+    color: var(--fg-mid);
+  }
+  .lede + .lede { margin-top: var(--s1); }
+
+  .list-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s1);
+    border-bottom: 1px solid var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .list-head .count { margin-left: auto; }
+
+  /* ── entries ─────────────────────────────────────────── */
+
+  .entry {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0 var(--s3);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    color: inherit;
+  }
+  .entry:last-child { border-bottom: none; }
+
+  .entry-no {
+    grid-row: 1 / span 4;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    padding-top: 8px;
+    transition: color 0.25s ease;
+  }
+  .entry:hover .entry-no { color: var(--accent); }
+
+  .entry-title {
+    font-size: var(--t-sub);
+    letter-spacing: -0.005em;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 6px;
+    transition: text-decoration-color 0.25s ease;
+  }
+  .entry:hover .entry-title { text-decoration-color: var(--accent); }
+
+  .entry-standfirst {
+    max-width: 62ch;
+    margin-top: var(--s1);
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+
+  /* Each tip's own table of contents. It is here because with a section this
+     small, the shape of a piece is more use to a reader than a longer list of
+     titles would be. */
+  .entry-parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px var(--s1);
+    margin-top: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+  }
+  .entry-parts li { list-style: none; }
+  .entry-parts li:not(:last-child)::after {
+    content: ' ·';
+    color: var(--rule);
+    margin-left: var(--s1);
+  }
+
+  .entry-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px var(--s2);
+    margin-top: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .entry-meta .go { color: var(--accent); }
+  .entry-meta .go .arrow {
+    display: inline-block;
+    transition: transform 0.25s ease;
+  }
+  .entry:hover .entry-meta .go .arrow { transform: translateX(4px); }
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s3) var(--s5);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 599px) {
+    .entry { grid-template-columns: 1fr; }
+    .entry-no { grid-row: auto; padding-top: 0; margin-bottom: var(--s1); }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead wrap">
+  <span class="wordmark">Tips</span>
+  <a class="home" href="/">&larr; tianchuzhao.com</a>
+</header>
+
+<div class="head wrap">
+  <h1>Tips</h1>
+  <p class="lede">Short pieces on the parts of the job that are other people. Each one is built around the sentences you would actually say, not the principle behind them.</p>
+  <p class="lede">A tip earns its place here by being something I got wrong first.</p>
+</div>
+
+<main class="wrap">
+  <div class="list-head">
+    <span>The pieces</span>
+    <span class="count" id="count"></span>
+  </div>
+  <div id="entries"></div>
+</main>
+
+<footer class="tail wrap" id="tail"></footer>
+
+<script>
+// Newest first. Adding a tip is a new folder plus one entry here.
+//
+// `parts` is whatever that tip divides into - phases in one, dials in another.
+// The label is deliberately generic because the pieces are not the same shape
+// from tip to tip, and pretending otherwise would flatten them.
+const TIPS = [
+  {
+    href: 'money-conversations/',
+    no: 'Tip 03',
+    kicker: 'what you are paid',
+    title: 'Ask Price',
+    standfirst: 'Seven conversations that set what you are paid, each carried through to the second move - the reply you get, and what you say to it. That is where these are decided and where most advice stops.',
+    parts: ['Band', 'The ask', 'Counter', 'Scope', 'Rate', 'Title', 'Walk'],
+    meta: '7 conversations'
+  },
+  {
+    href: 'working-across-difference/',
+    no: 'Tip 02',
+    kicker: 'working with people',
+    title: 'Impedance Match',
+    standfirst: 'Six dials people vary on, what to look for, and the same message written twice - once to each end. There is no wording that works on everybody, so what transfers is the reading rather than the script.',
+    parts: ['Directness', 'Order', 'Medium', 'Deciding', 'Rank', 'Confidence'],
+    meta: '6 dials'
+  },
+  {
+    href: 'moving-work-through-peers/',
+    no: 'Tip 01',
+    kicker: 'working with people',
+    title: 'Right of Way',
+    standfirst: 'Twelve plays for moving work through people who do not report to you, each with the sentence to actually send. They work by making the ask cheap and its state visible, not by being clever.',
+    parts: ['Make it cheap', 'Set the clock', 'When it goes quiet', 'When it is stuck', 'After it lands'],
+    meta: '12 plays'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+function renderEntry(tip) {
+  const card = el('a', 'entry');
+  card.href = tip.href;
+
+  card.append(el('span', 'entry-no', tip.no));
+  card.append(el('h2', 'entry-title', tip.title));
+  card.append(el('p', 'entry-standfirst', tip.standfirst));
+
+  const parts = el('ul', 'entry-parts');
+  tip.parts.forEach(part => parts.append(el('li', null, part)));
+  card.append(parts);
+
+  const meta = el('div', 'entry-meta');
+  meta.append(el('span', null, tip.kicker), el('span', null, tip.meta));
+
+  const go = el('span', 'go');
+  go.append(document.createTextNode('Read '), el('span', 'arrow', '→'));
+  meta.append(go);
+
+  card.append(meta);
+  return card;
+}
+
+document.getElementById('entries').append(...TIPS.map(renderEntry));
+document.getElementById('count').textContent = TIPS.length === 1 ? '1 tip' : TIPS.length + ' tips';
+document.getElementById('tail').textContent = '© ' + new Date().getFullYear() + ' Tianchu Zhao';
+</script>
+</body>
+</html>

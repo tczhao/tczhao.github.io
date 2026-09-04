@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Right of Way</title>
+<meta name="description" content="Twelve plays for moving work through people who do not report to you, each with the sentence to actually send.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+    --script-bg: #f2f5f2;
+    --script-rule: #cfdcd4;
+
+    /* Narrow, because this is a text piece. The rules and the script blocks sit
+       a little wider than the measure so the number gutter has somewhere to be,
+       and no wider, or the section rules stop reading as the same column. */
+    --max-w: 840px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Same six-size, six-step ladder the Commonplace page uses. Nothing off it. */
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.75rem, 3.6vw, 2.75rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+      --script-bg: #151a17;
+      --script-rule: #2d3b34;
+    }
+    /* Source Serif 4 is a variable face: at the same nominal weight it reads
+       thinner on a dark ground, so the optical size axis compensates. */
+    .standfirst, .play-why, .play-fails, .phase-lead, .tail p {
+      font-variation-settings: 'opsz' 9;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ────────────────────────────────────────── */
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── title block ─────────────────────────────────────── */
+
+  .head { padding-block: var(--s5) var(--s4); }
+
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s2);
+  }
+
+  .standfirst {
+    max-width: 62ch;
+    font-size: var(--t-lead);
+    color: var(--fg-mid);
+  }
+  .standfirst + .standfirst { margin-top: var(--s1); }
+
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--s2);
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  /* ── phase nav ───────────────────────────────────────── */
+  /*
+     Sticky because the plays are long enough that you lose your place, and the
+     nav doubles as the table of contents this page otherwise has nowhere to put.
+  */
+  .phasenav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-block: var(--s1);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .phasenav-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+  }
+  .phasenav-inner {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .phasenav-inner::-webkit-scrollbar { display: none; }
+
+  .phasenav a {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .phasenav a:hover { color: var(--fg); }
+  .phasenav a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .modes {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+  }
+  .mode {
+    font: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .mode:hover { color: var(--fg); }
+  .mode[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+  .modes .sep { color: var(--rule); }
+
+  /* ── phases ──────────────────────────────────────────── */
+
+  .phase { padding-block: var(--s5) 0; scroll-margin-top: 60px; }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--fg);
+  }
+  .phase-head h2 { font-size: var(--t-sub); }
+  .phase-head .phase-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .phase-lead {
+    max-width: 60ch;
+    margin-top: var(--s2);
+    font-size: var(--t-aside);
+    font-style: italic;
+    color: var(--fg-mid);
+  }
+
+  /* ── plays ───────────────────────────────────────────── */
+
+  .play {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .phase .play:last-child { border-bottom: none; }
+
+  .play-no {
+    grid-row: 1 / span 6;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  .play-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+  }
+
+  .play-when {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+  }
+  .play-when b {
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: var(--t-micro);
+  }
+
+  /* The script is the only part of a play you take away with you, so it is the
+     only part set as an artifact rather than as prose. */
+  .script {
+    position: relative;
+    margin-top: var(--s2);
+    padding: var(--s2) var(--s2) var(--s2);
+    background: var(--script-bg);
+    border: 1px solid var(--script-rule);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+  }
+  .script p {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    line-height: 1.65;
+    color: var(--fg);
+    max-width: 58ch;
+  }
+  .script p + p { margin-top: 0.75em; }
+
+  /* Absolute on wide screens, where the measure leaves clear space beside the
+     script. Below 600px there is no clear space and it would sit on the words,
+     so it drops into the flow instead. */
+  .copy {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 1px solid transparent;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--script-rule); }
+  .copy[data-state="done"] { color: var(--accent); border-color: transparent; }
+  .copy[data-state="failed"] { color: var(--fg); border-color: var(--script-rule); }
+
+  .play-why, .play-fails {
+    margin-top: var(--s2);
+    max-width: 62ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .play-why b, .play-fails b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+  .play-fails b { color: var(--accent); }
+
+  /* Compact drops everything that is argument and keeps everything that is
+     artifact, for the reader who already knows the plays and wants the line. */
+  body[data-mode="compact"] .play-when,
+  body[data-mode="compact"] .play-why,
+  body[data-mode="compact"] .play-fails,
+  body[data-mode="compact"] .phase-lead { display: none; }
+  body[data-mode="compact"] .play { padding-block: var(--s3); }
+
+  /* ── tail ────────────────────────────────────────────── */
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s4) var(--s5);
+    border-top: 1px solid var(--fg);
+  }
+  .tail h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+  .tail p {
+    max-width: 62ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .tail p + p { margin-top: var(--s2); }
+
+  @media (max-width: 599px) {
+    .play { grid-template-columns: 1fr; }
+    .play-no { grid-row: auto; margin-bottom: 6px; padding-top: 0; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .copy {
+      position: static;
+      display: block;
+      margin: var(--s1) -7px calc(var(--s1) * -1) auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .phasenav { position: static; }
+  }
+</style>
+</head>
+<body data-mode="full">
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/tips/">Tips</a>
+  <a class="home" href="/tips/">&larr; all tips</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Tip 01 &middot; working with people</span>
+  <h1>Right of Way</h1>
+  <p class="standfirst">Twelve plays for moving work through people who do not report to you, each with the sentence to actually send.</p>
+  <p class="standfirst">They work by making the ask cheap and its state visible, not by being clever. The manipulative version of any one of them burns the relationship the next one depends on.</p>
+  <div class="head-meta" id="headMeta"></div>
+</div>
+
+<nav class="phasenav">
+  <div class="wrap phasenav-row">
+    <div class="phasenav-inner" id="phaseNav"></div>
+    <div class="modes" role="group" aria-label="Detail">
+      <button class="mode" type="button" data-mode="full" aria-pressed="true">Full</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button class="mode" type="button" data-mode="compact" aria-pressed="false">Compact</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="phases"></main>
+
+<footer class="tail wrap">
+  <h2>The limit</h2>
+  <p>None of this works on someone who is simply overloaded. A person with four things due this week and no way to drop any of them does not need a better-worded ask, and pressing one on them converts a capacity problem into a personal one. The fix there is fewer asks or a different owner, and it is a conversation with whoever sets their queue.</p>
+  <p>The plays also assume you are right that the work matters. Half the times I have wanted to push harder, the honest answer was that my thing was less important than theirs and I did not want it to be.</p>
+</footer>
+
+<script>
+// Phases run in the order the situation does: before you ask, when you ask,
+// when it goes quiet, when it is genuinely stuck, after it lands.
+const PHASES = [
+  {
+    id: 'cheap',
+    nav: 'Make it cheap',
+    title: 'Make the ask cheap',
+    lead: 'Most of what reads as someone being slow is the cost of working out what you wanted.'
+  },
+  {
+    id: 'clock',
+    nav: 'Set the clock',
+    title: 'Set the clock',
+    lead: 'A request with no date is a request to be done after everything that has one.'
+  },
+  {
+    id: 'quiet',
+    nav: 'When it goes quiet',
+    title: 'When it goes quiet',
+    lead: 'Silence is information. Chasing it at random is not.'
+  },
+  {
+    id: 'stuck',
+    nav: 'When it is stuck',
+    title: 'When it is actually stuck',
+    lead: 'At this point the problem is a priority collision, and you cannot resolve one you have not named.'
+  },
+  {
+    id: 'after',
+    nav: 'After it lands',
+    title: 'After it lands',
+    lead: 'The part everyone skips, and the only part that changes what happens next time.'
+  }
+];
+
+const PLAYS = [
+  {
+    phase: 'cheap',
+    name: 'The one-line ask',
+    when: 'any request in a channel or a thread',
+    say: ['Need: your sign-off on the schema change in #4412, by Thursday.', 'Context below if you want it, but the sign-off is the whole ask.'],
+    why: 'People decide whether to act before they decide whether to read. An ask buried in the third paragraph gets skimmed once and forgotten by the next notification, and the reader is not being lazy - they are triaging fifty of these a day.',
+    fails: 'the ask genuinely cannot be stated in a line. That is usually a sign you have not worked out what you want yet, and sending it anyway makes that their problem.'
+  },
+  {
+    phase: 'cheap',
+    name: 'Ship the diff, not the blank page',
+    when: 'you need expertise or approval from someone with no room in their week',
+    say: ['I have drafted the migration plan the way I would do it - link below.', 'Ten minutes of your red pen is worth more than an hour of me guessing. Tell me what is wrong with it rather than writing it.'],
+    why: 'Reviewing costs a fraction of what creating costs, and it turns an open-ended task into a bounded one. People who never get around to "can you write X" will answer "is this X wrong" the same day, because being wrong in public is a stronger motivator than being helpful.',
+    fails: 'your draft is far enough off that fixing it costs more than starting over. If you do not know the domain at all, ask for the shape first and draft against that.'
+  },
+  {
+    phase: 'cheap',
+    name: 'One owner, named',
+    when: 'posting anywhere more than one person could pick it up',
+    say: ['@nadia - putting this one on you unless you want to hand it off.', 'Posting in the channel rather than a DM so everyone downstream can see where it sits.'],
+    why: 'A request addressed to a group is a request to nobody. Six people read it, each assumes one of the other five has it, and the thread dies with everyone believing it is handled.',
+    fails: 'you do not actually know who owns it. Then make that the one-line ask instead, and address it to whoever can answer it.'
+  },
+  {
+    phase: 'clock',
+    name: 'The dated assumption',
+    when: 'you need a decision and the thread has gone quiet',
+    say: ['Unless I hear otherwise by Thursday 5pm, I am going with Postgres and moving on.', 'No reply needed if that is fine.'],
+    why: 'It converts silence from a blocker into consent. They now have to act to stop you rather than act to unblock you, and most of the time the silence really did mean "I do not care enough to type" - this lets that be a valid answer instead of a stall.',
+    fails: 'the default is one they cannot live with and they are on leave. Check the calendar before starting a clock the other person cannot see, and never use it on anything you could not cheaply reverse.'
+  },
+  {
+    phase: 'clock',
+    name: 'Ask for a date, not an update',
+    when: 'something you depend on has no visible end',
+    say: ['What date should I put against this on my side of the plan?'],
+    why: '"How is it going" is answerable with "yeah, good" - which costs them nothing and tells you nothing. A date is a commitment someone has to actually think about, and if they cannot give you one, that is the status you were fishing for.',
+    fails: 'they are blocked on something unestimatable. Then the honest answer is "I cannot date it until X lands", which is more useful than a date, and now you know what to go and unblock.'
+  },
+  {
+    phase: 'clock',
+    name: 'Say where the deadline comes from',
+    when: 'your date is competing with three other people’s dates in their queue',
+    say: ['This needs to land by the 14th because the renewal review is on the 16th and it is in the deck.', 'If that is not workable, tell me now and I will change what goes in the deck.'],
+    why: 'Nobody can prioritise against your queue, only their own. A date with a visible constraint behind it can be ranked against their other constraints. A bare date reads as impatience and gets ranked accordingly.',
+    fails: 'there is no real constraint and you invent one. That works exactly once. Afterwards every date you give gets discounted, including the true ones, and you will not be told that it is happening.'
+  },
+  {
+    phase: 'quiet',
+    name: 'Check your own court first',
+    when: 'you are about to follow up for the second time',
+    say: ['Before I chase this - is there anything you are waiting on from me that I have not sent?'],
+    why: 'A large share of "they are slow" is really "they replied with a question and I never answered it". Chasing someone who is blocked on you is the fastest way to make a working relationship stop working, and you will not notice you did it.',
+    fails: 'nothing. This one costs a single message and it is the message that saves you if you were the problem.'
+  },
+  {
+    phase: 'quiet',
+    name: 'Announce the follow-up',
+    when: 'the work will take longer than one exchange',
+    say: ['I will check back on this Tuesday. If it has moved before then there is no need to reply.'],
+    why: 'Chasing at random reads as anxiety and trains people to tune you out. A scheduled check-in is predictable, so it does not land as pressure, and it means you stop holding the thread open in your head between now and Tuesday.',
+    fails: 'you announce a schedule and then do not keep it. You have now taught them that your dates are soft, which is the opposite of what the play is for.'
+  },
+  {
+    phase: 'quiet',
+    name: 'Move it where the dependency is visible',
+    when: 'their delay lands on someone other than you',
+    say: ['Moving this out of DMs into #project-atlas so the people downstream can see where it is sitting.'],
+    why: 'Not to shame anyone - to stop being the only person carrying the information. In a DM you are a nag with an opinion. In the channel you are the person keeping the state visible, and the argument about priority happens between them and whoever sets their queue instead of between them and you.',
+    fails: 'you deploy it as a threat, or only when you are annoyed. Do it as routine from the start or do not do it at all.'
+  },
+  {
+    phase: 'stuck',
+    name: 'Escalate the collision, not the colleague',
+    when: 'you have done all of the above and it still has not moved',
+    say: ['Two things are competing for Sam’s week and I do not think it is Sam’s call which one wins. Can we decide which one slips?'],
+    why: 'Escalating a person gets you one delivery and one enemy. Escalating the collision gets you a decision, and it is the accurate description most of the time - they are not ignoring you, they are triaging, and nobody has told them how.',
+    fails: 'it genuinely is the person. Then it is a management conversation and it is not yours to have in a channel.'
+  },
+  {
+    phase: 'stuck',
+    name: 'Offer to take it',
+    when: 'the work is more urgent to you than to them, which it usually is',
+    say: ['If this is not getting a slot this month, I will do it and you review.', 'Either is fine by me - tell me which you would prefer.'],
+    why: 'It is an honest read of a real priority difference, and it forces a choice between two acceptable outcomes instead of leaving one unacceptable outcome drifting. Often the offer alone moves it, because few people enjoy watching their own area get done by someone else.',
+    fails: 'you cannot actually do it. Do not bluff this one - you will be taken up on it, and by someone who is relieved.'
+  },
+  {
+    phase: 'after',
+    name: 'Close the loop where you opened it',
+    when: 'always, and this is the one everybody skips',
+    say: ['This shipped Tuesday. You were right about the index - it would have locked the table for about four minutes in prod.', 'Thanks for catching it.'],
+    why: 'It is the only evidence anyone gets that helping you was worth doing. People who never find out what their help produced quietly deprioritise you next time, and they will not experience that as a decision, so you cannot appeal it.',
+    fails: 'nothing. One message. The compounding is the entire point of the set.'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+// The label is set in markup rather than by class so the copied text and the
+// visible text never drift apart.
+function labelled(tag, cls, label, text) {
+  const node = el(tag, cls);
+  node.append(el('b', null, label), document.createTextNode(text));
+  return node;
+}
+
+function renderPlay(play, number) {
+  const wrap = el('article', 'play');
+  wrap.id = 'play-' + number;
+
+  wrap.append(el('span', 'play-no', String(number).padStart(2, '0')));
+  wrap.append(el('h3', 'play-name', play.name));
+  wrap.append(labelled('p', 'play-when', 'Use when', ' ' + play.when));
+
+  const script = el('div', 'script');
+  play.say.forEach(line => script.append(el('p', null, line)));
+
+  const copy = el('button', 'copy', 'Copy');
+  copy.type = 'button';
+  copy.setAttribute('aria-label', 'Copy the script for ' + play.name);
+  copy.addEventListener('click', () => copyScript(copy, play.say.join('\n\n')));
+  script.append(copy);
+
+  wrap.append(script);
+  wrap.append(labelled('p', 'play-why', 'Why', play.why));
+  wrap.append(labelled('p', 'play-fails', 'Fails when', ' ' + play.fails));
+
+  return wrap;
+}
+
+// Clipboard access is denied outright in some contexts rather than throwing on
+// a permission check, so the button reports the failure instead of pretending.
+async function copyScript(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.dataset.state = 'done';
+    button.textContent = 'Copied';
+  } catch (_) {
+    button.dataset.state = 'failed';
+    button.textContent = 'Select it';
+  }
+  setTimeout(() => {
+    delete button.dataset.state;
+    button.textContent = 'Copy';
+  }, 1800);
+}
+
+function renderPhase(phase, plays, firstNumber) {
+  const section = el('section', 'phase');
+  section.id = phase.id;
+
+  const head = el('div', 'phase-head');
+  head.append(el('h2', null, phase.title));
+  head.append(el('span', 'phase-count', plays.length + (plays.length === 1 ? ' play' : ' plays')));
+  section.append(head);
+  section.append(el('p', 'phase-lead', phase.lead));
+
+  plays.forEach((play, i) => section.append(renderPlay(play, firstNumber + i)));
+  return section;
+}
+
+const phasesTarget = document.getElementById('phases');
+let counter = 1;
+const sections = PHASES.map(phase => {
+  const plays = PLAYS.filter(play => play.phase === phase.id);
+  const section = renderPhase(phase, plays, counter);
+  counter += plays.length;
+  return section;
+});
+phasesTarget.append(...sections);
+
+document.getElementById('headMeta').append(
+  el('span', null, PLAYS.length + ' plays'),
+  el('span', null, PHASES.length + ' phases'),
+  el('span', null, 'every one has a sentence')
+);
+
+const navTarget = document.getElementById('phaseNav');
+PHASES.forEach(phase => {
+  const link = el('a', null, phase.nav);
+  link.href = '#' + phase.id;
+  navTarget.append(link);
+});
+
+// Scroll spy. rootMargin pins the trigger line just under the sticky nav, so a
+// phase becomes current when its heading reaches the nav rather than when the
+// section happens to occupy the most pixels.
+//
+// The band's top edge has to sit *below* where an anchor jump lands a heading
+// (`scroll-margin-top` on .phase, 60px). Otherwise following a nav link leaves
+// the outgoing section clipping the band by those few pixels, and it wins the
+// document-order tie against the section you actually asked for.
+const SPY_TOP = 72;
+
+const navLinks = new Map(PHASES.map(phase => [phase.id, navTarget.querySelector('a[href="#' + phase.id + '"]')]));
+const visible = new Set();
+
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) visible.add(entry.target.id);
+    else visible.delete(entry.target.id);
+  });
+  const current = PHASES.map(phase => phase.id).find(id => visible.has(id));
+  // Nothing in the band means the tail has scrolled up past it. Holding the
+  // last phase reads better there than dropping the highlight entirely.
+  if (!current) return;
+  navLinks.forEach((link, id) => {
+    if (id === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}, { rootMargin: '-' + SPY_TOP + 'px 0px -70% 0px' });
+
+sections.forEach(section => spy.observe(section));
+
+const MODE_KEY = 'tips-detail';
+const modeButtons = document.querySelectorAll('.mode');
+
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  try { localStorage.setItem(MODE_KEY, mode); } catch (_) {}
+}
+
+modeButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+});
+
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved === 'compact') setMode('compact');
+} catch (_) {}
+</script>
+</body>
+</html>

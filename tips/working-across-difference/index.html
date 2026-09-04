@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impedance Match</title>
+<meta name="description" content="Six dials people vary on, what to look for, and the same message sent to each end of each one.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+    --script-bg: #f2f5f2;
+    --script-rule: #cfdcd4;
+
+    /* Wider than Tip 01, because the two renderings sit side by side and the
+       contrast between them is the argument. Below about 900px the pair would
+       drop to 37 mono characters a line, which breaks every script. */
+    --max-w: 940px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.75rem, 3.6vw, 2.75rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+      --script-bg: #151a17;
+      --script-rule: #2d3b34;
+    }
+    .standfirst, .dial-read, .dial-shift, .dial-misread, .rule-body, .tail p {
+      font-variation-settings: 'opsz' 9;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ────────────────────────────────────────── */
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── title block ─────────────────────────────────────── */
+
+  .head { padding-block: var(--s5) var(--s4); }
+
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  h1 { font-size: var(--t-display); letter-spacing: -0.015em; margin-bottom: var(--s2); }
+
+  .standfirst { max-width: 62ch; font-size: var(--t-lead); color: var(--fg-mid); }
+  .standfirst + .standfirst { margin-top: var(--s1); }
+
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--s2);
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  /* ── nav ─────────────────────────────────────────────── */
+
+  .phasenav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-block: var(--s1);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .phasenav-row { display: flex; align-items: center; gap: var(--s2); }
+  .phasenav-inner {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .phasenav-inner::-webkit-scrollbar { display: none; }
+
+  .phasenav a {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .phasenav a:hover { color: var(--fg); }
+  .phasenav a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .modes {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+  }
+  .mode {
+    font: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .mode:hover { color: var(--fg); }
+  .mode[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+  .modes .sep { color: var(--rule); }
+
+  /* ── sections ────────────────────────────────────────── */
+
+  .sect { padding-block: var(--s5) 0; scroll-margin-top: 60px; }
+
+  .sect-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--fg);
+  }
+  .sect-head h2 { font-size: var(--t-sub); }
+  .sect-head .sect-note {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .sect-lead {
+    max-width: 60ch;
+    margin-top: var(--s2);
+    font-size: var(--t-aside);
+    font-style: italic;
+    color: var(--fg-mid);
+  }
+
+  /* ── the reading rules ───────────────────────────────── */
+
+  .rule-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-no {
+    grid-row: 1 / span 2;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+  .rule-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .rule-body { margin-top: 6px; max-width: 66ch; font-size: var(--t-read); color: var(--fg-mid); }
+
+  /* ── dials ───────────────────────────────────────────── */
+
+  /* Each dial is its own anchor target, so it carries the same landing offset
+     the sections do. Keep this in step with SPY_TOP in the script. */
+  .dial {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule-soft);
+    scroll-margin-top: 60px;
+  }
+  .dial:last-child { border-bottom: none; }
+
+  .dial-no {
+    grid-row: 1 / span 6;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  /* The two poles with a span of track between them. The bar is the whole
+     point of the page in one element: a position, not a setting. */
+  .poles {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+  }
+  .poles .bar {
+    flex: 1;
+    min-width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--rule) 25%, var(--rule) 75%, var(--accent));
+  }
+  .poles .tip { color: var(--accent); font-weight: 400; }
+
+  .dial-subject {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+  }
+
+  .dial-read, .dial-shift, .dial-misread {
+    margin-top: var(--s2);
+    max-width: 66ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .dial-read b, .dial-shift b, .dial-misread b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+  .dial-misread b { color: var(--accent); }
+
+  /* Same intent, two renderings, side by side. Stacking them on a narrow
+     screen loses the comparison, so the labels carry it there instead. */
+  .renderings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s2);
+    margin-top: var(--s2);
+  }
+  @media (max-width: 719px) {
+    .renderings { grid-template-columns: 1fr; }
+  }
+
+  .rendering { display: flex; flex-direction: column; }
+  .rendering-to {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .script {
+    position: relative;
+    flex: 1;
+    padding: var(--s2);
+    background: var(--script-bg);
+    border: 1px solid var(--script-rule);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+  }
+  .script p {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    line-height: 1.65;
+    color: var(--fg);
+  }
+  .script p + p { margin-top: 0.75em; }
+
+  /* In the two-column layout there is no clear space beside the text for an
+     absolute button, so it sits in the flow under the script at every width. */
+  .copy {
+    display: block;
+    margin: var(--s1) -7px calc(var(--s1) * -1) auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 1px solid transparent;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--script-rule); }
+  .copy[data-state="done"] { color: var(--accent); }
+
+  body[data-mode="compact"] .dial-read,
+  body[data-mode="compact"] .dial-shift,
+  body[data-mode="compact"] .dial-misread,
+  body[data-mode="compact"] .sect-lead,
+  body[data-mode="compact"] .rule-body { display: none; }
+  body[data-mode="compact"] .dial { padding-block: var(--s3); }
+
+  /* ── tail ────────────────────────────────────────────── */
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s4) var(--s5);
+    border-top: 1px solid var(--fg);
+  }
+  .tail h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+  .tail p { max-width: 66ch; font-size: var(--t-read); color: var(--fg-mid); }
+  .tail p + p { margin-top: var(--s2); }
+
+  @media (max-width: 599px) {
+    .dial, .rule-item { grid-template-columns: 1fr; }
+    .dial-no, .rule-no { grid-row: auto; margin-bottom: 6px; padding-top: 0; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .poles { flex-wrap: wrap; }
+    .poles .bar { min-width: 40px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .phasenav { position: static; }
+  }
+</style>
+</head>
+<body data-mode="full">
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/tips/">Tips</a>
+  <a class="home" href="/tips/">&larr; all tips</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Tip 02 &middot; working with people</span>
+  <h1>Impedance Match</h1>
+  <p class="standfirst">Six dials people vary on, what to look for, and the same message sent to each end of each one. There is no wording that works on everybody, which is the point - what transfers between people is the reading, not the script.</p>
+  <p class="standfirst">None of these dials is a nationality, a generation or a personality type. Those give you a weak prior at best. The person in front of you gives you a better one inside two exchanges, and when the two disagree, the person wins.</p>
+  <div class="head-meta" id="headMeta"></div>
+</div>
+
+<nav class="phasenav">
+  <div class="wrap phasenav-row">
+    <div class="phasenav-inner" id="phaseNav"></div>
+    <div class="modes" role="group" aria-label="Detail">
+      <button class="mode" type="button" data-mode="full" aria-pressed="true">Full</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button class="mode" type="button" data-mode="compact" aria-pressed="false">Compact</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="main"></main>
+
+<footer class="tail wrap">
+  <h2>The limit</h2>
+  <p>Adapting the delivery is not adapting the message. If the plan is wrong you still say the plan is wrong - you are choosing the packaging, not the content. The moment the accommodation starts eating the substance, and the concern gets softened until it is no longer a concern, you have stopped working with someone and started failing them quietly.</p>
+  <p>The cost here is also not shared evenly. The person doing the adapting is usually the one with less power in the room, and "communicate better" is advice that gets handed down far more often than it gets handed up. If you are the senior person, most of the value on this page is in noticing which dials your team has silently been matching to you, and moving toward them for once.</p>
+</footer>
+
+<script>
+const RULES = [
+  {
+    name: 'Behaviour beats category',
+    body: 'Nationality, generation, function and personality-test letters give you a weak prior and not much more, because the variation inside any of those groups is larger than the gap between them. Two real exchanges with the person tell you more than any of it. When the prior and the person disagree, drop the prior.'
+  },
+  {
+    name: 'Read the situation, not only the person',
+    body: 'The same colleague is direct with a peer and careful with a skip-level, expansive in their first language and clipped in their fourth, fast in a domain they own and slow in one they are learning. You are always reading a person in a context. Change the context and you have to read again.'
+  },
+  {
+    name: 'Never announce the read',
+    body: '"I know you prefer things in writing" lands as being handled, and it invites the person to perform the category you just put them in. Skip the commentary and send it in writing.'
+  }
+];
+
+const DIALS = [
+  {
+    id: 'directness',
+    nav: 'Directness',
+    poles: ['Direct', 'Indirect'],
+    subject: 'how a "no" reaches you',
+    read: 'At the direct end, disagreement arrives with the word "no" in it, usually in the first line and usually in the channel. At the indirect end it arrives as a question about scope, a mention of a competing priority, a pause before "that could work", or a reply that answers a smaller version of what you asked. The sharpest test is to float an idea you already know is bad: one end kills it, the other asks how you would handle a specific problem with it.',
+    renderings: [
+      { to: 'To the direct end', say: ['Is this plan wrong? Tell me straight - I would rather rework it now than after I have built it.'] },
+      { to: 'To the indirect end', say: ['I want to find the holes in this before I build it.', 'What would you change if it were yours? Here or in a DM, whichever is easier.'] }
+    ],
+    shift: 'Not your position - your venue and your permission. The indirect end will say the same "no", but needs a lower-cost place to put it and an explicit invitation to. Asking "any concerns?" to a group call gets you silence from that end and the real answer in a DM twenty minutes later.',
+    misread: 'Read direct as rude and you will soften your own asks into ambiguity, which is the one thing that end cannot parse. Read indirect as agreement and you will ship something three people knew was broken. The second error is more expensive and far more common.'
+  },
+  {
+    id: 'order',
+    nav: 'Order',
+    poles: ['Answer first', 'Context first'],
+    subject: 'where the conclusion goes',
+    read: 'Read their own updates. Answer-first people open with the decision and put the reasoning under a fold. Context-first people walk the situation and land on it. The interrupt is the other tell: an answer-first listener asks "so what are we doing?" ninety seconds into your build-up, and a context-first one, handed the conclusion cold, asks three questions that all mean "how did you get here?"',
+    renderings: [
+      { to: 'To the answer-first end', say: ['Recommendation: move the cutover to the 14th.', 'Three reasons below, but that is the ask.'] },
+      { to: 'To the context-first end', say: ['Background first: we found the replication lag on Tuesday, it only shows up under month-end load, and the fix needs a full rebuild.', 'Which is why I want to move the cutover to the 14th.'] }
+    ],
+    shift: 'Only the order. Same facts, same length, same recommendation. This is the cheapest dial on the page and the one most people never touch, because their own preferred order does not feel like a preference - it feels like clarity.',
+    misread: 'Lead with context for an answer-first reader and they conclude you are hedging or hiding the ask. Lead with the conclusion for a context-first reader and they will not argue with it, they will just quietly not act on it, because you skipped the part they use to commit.'
+  },
+  {
+    id: 'medium',
+    nav: 'Medium',
+    poles: ['Written', 'Spoken'],
+    subject: 'where the thinking actually happens',
+    read: 'Compare the same person across both. Some people write carefully and say little; for others it is reversed. Watch for who sends a considered paragraph an hour after the call ended - that is someone who was still thinking while everyone else was talking. Watch also for who says a thing in a meeting sharper than anything they have typed all quarter.',
+    renderings: [
+      { to: 'To the writer', say: ['No need to meet. Doc is linked and comments are open.', 'I will take no comments by Thursday as agreement.'] },
+      { to: 'To the talker', say: ['Fifteen minutes on Wednesday?', 'I will send two lines beforehand so it is not cold, but I would rather work it out with you live than trade comments for a week.'] }
+    ],
+    shift: 'The medium, and where you place the decision inside it. A writer pushed to decide live will agree in the room and re-open it on Friday. A talker sent a document will read it, mean to reply, and not.',
+    misread: 'Treat a quiet meeting as a disengaged person and you will miss the best contributor in it. Some of the strongest colleagues I have worked with said almost nothing live and then wrote the best thing in the thread afterwards.'
+  },
+  {
+    id: 'deciding',
+    nav: 'Deciding',
+    poles: ['Named decider', 'Visible consensus'],
+    subject: 'what makes a decision stick',
+    read: 'Ask about a past decision rather than the live one. "How did we land on X?" One end tells you who called it; the other tells you who was in the room. Then watch which decisions re-open: for one end the durable ones have an owner, for the other they are the ones nobody was surprised by.',
+    renderings: [
+      { to: 'To the named-decider end', say: ['You own this call. Tell me which way and I will write it up either way and we move.'] },
+      { to: 'To the consensus end', say: ['Before this gets decided I want the three people it lands on to have seen it.', 'Can we get their read this week and decide Friday?'] }
+    ],
+    shift: 'How much you do before the decision moment, and who you make visible while you do it. This dial is often about a team’s history rather than a person’s taste: a group that got burned by a unilateral call will want the room, and that is a rational response to evidence, not a preference.',
+    misread: 'Force the moment at the consensus end and you get a yes that unwinds over the following fortnight. Run a consultation at the named-decider end and it reads as you dodging a call you were hired to make.'
+  },
+  {
+    id: 'rank',
+    nav: 'Rank',
+    poles: ['Flat', 'Marked'],
+    subject: 'how much hierarchy shapes the room',
+    read: 'Watch what happens immediately after the most senior person states a view. At the flat end, the next speaker disagrees with it. At the marked end, the next three contributions elaborate it. Watch also who speaks unprompted: if the speaking order maps to the org chart every time, you are on the marked end whatever anybody says about the culture.',
+    renderings: [
+      { to: 'In a flat room', say: ['I think the rollback plan is thin. What am I missing?'] },
+      { to: 'In a marked room', say: ['Can I ask something about the rollback plan - I may be missing context.', 'If the migration fails at step three, what is the path back?'] }
+    ],
+    shift: 'Whether a challenge can go in the open room at all, and whether it needs routing through someone who is allowed to raise it. This is the dial where the adaptation is most often about somebody else’s safety rather than your comfort. A junior person staying quiet in a marked room is not timid, they are pricing the risk correctly.',
+    misread: 'Announcing that your team is flat does not make it flat, and people told a room is safe when it is not will simply stop telling you things. The evidence anyone actually uses is what happened to the last person who disagreed with you in public.'
+  },
+  {
+    id: 'confidence',
+    nav: 'Confidence',
+    poles: ['Stated', 'Hedged'],
+    subject: 'what certainty sounds like',
+    read: 'Calibrate on a case where you already know the answer. Ask them about something they are certain of and something they are guessing at, and listen to the distance between the two. Some people say "probably" at ninety-five per cent; others say "definitely" at sixty. The word is not the signal. The gap between their own two words is.',
+    renderings: [
+      { to: 'To the stated end', say: ['Roughly how confident are you? If this is a six out of ten I will build a fallback.'] },
+      { to: 'To the hedged end', say: ['You said it "should be fine" - is that "I have checked it" fine, or "I would be surprised if it broke" fine?'] }
+    ],
+    shift: 'You stop reading their adjectives and start asking for the number or the evidence underneath. Both ends are perfectly workable once you know which one you are on. The danger is applying your own scale to their words without noticing you have.',
+    misread: 'Take a hedger’s "should be fine" at your own face value and you will not build the fallback. Take a stated-confidence "definitely" as certainty and you will not ask the follow-up that would have caught it. Neither of them lied to you.'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+function labelled(tag, cls, label, text) {
+  const node = el(tag, cls);
+  node.append(el('b', null, label), document.createTextNode(text));
+  return node;
+}
+
+// Clipboard access is denied outright in some contexts rather than throwing on
+// a permission check, so the button reports the failure instead of pretending.
+async function copyScript(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.dataset.state = 'done';
+    button.textContent = 'Copied';
+  } catch (_) {
+    button.dataset.state = 'failed';
+    button.textContent = 'Select it';
+  }
+  setTimeout(() => {
+    delete button.dataset.state;
+    button.textContent = 'Copy';
+  }, 1800);
+}
+
+function renderRendering(rendering, dialName) {
+  const wrap = el('div', 'rendering');
+  wrap.append(el('span', 'rendering-to', rendering.to));
+
+  const script = el('div', 'script');
+  rendering.say.forEach(line => script.append(el('p', null, line)));
+  wrap.append(script);
+
+  const copy = el('button', 'copy', 'Copy');
+  copy.type = 'button';
+  copy.setAttribute('aria-label', 'Copy the ' + dialName + ' script, ' + rendering.to.toLowerCase());
+  copy.addEventListener('click', () => copyScript(copy, rendering.say.join('\n\n')));
+  wrap.append(copy);
+
+  return wrap;
+}
+
+function renderDial(dial, number) {
+  const wrap = el('article', 'dial');
+  wrap.id = dial.id;
+  wrap.append(el('span', 'dial-no', String(number).padStart(2, '0')));
+
+  const poles = el('h3', 'poles');
+  poles.append(el('span', null, dial.poles[0]));
+  poles.append(el('span', 'bar'));
+  poles.append(el('span', null, dial.poles[1]));
+  wrap.append(poles);
+
+  wrap.append(el('p', 'dial-subject', dial.subject));
+  wrap.append(labelled('p', 'dial-read', 'Read', dial.read));
+
+  const renderings = el('div', 'renderings');
+  dial.renderings.forEach(r => renderings.append(renderRendering(r, dial.nav)));
+  wrap.append(renderings);
+
+  wrap.append(labelled('p', 'dial-shift', 'Shift', dial.shift));
+  wrap.append(labelled('p', 'dial-misread', 'Misread', ' ' + dial.misread));
+
+  return wrap;
+}
+
+const main = document.getElementById('main');
+
+const reading = el('section', 'sect');
+reading.id = 'reading';
+const readingHead = el('div', 'sect-head');
+readingHead.append(el('h2', null, 'Reading, without stereotyping'));
+readingHead.append(el('span', 'sect-note', '3 rules'));
+reading.append(readingHead);
+reading.append(el('p', 'sect-lead', 'The dials below are only useful if you place people on them by what they do, not by what they are.'));
+RULES.forEach((rule, i) => {
+  const item = el('div', 'rule-item');
+  item.append(el('span', 'rule-no', String(i + 1).padStart(2, '0')));
+  item.append(el('h3', 'rule-name', rule.name));
+  item.append(el('p', 'rule-body', rule.body));
+  reading.append(item);
+});
+main.append(reading);
+
+const dialSection = el('section', 'sect');
+dialSection.id = 'dials';
+const dialHead = el('div', 'sect-head');
+dialHead.append(el('h2', null, 'The dials'));
+dialHead.append(el('span', 'sect-note', DIALS.length + ' dials'));
+dialSection.append(dialHead);
+dialSection.append(el('p', 'sect-lead', 'Each one carries the same intent written twice. The pair is the argument - read them against each other rather than picking one.'));
+DIALS.forEach((dial, i) => dialSection.append(renderDial(dial, i + 1)));
+main.append(dialSection);
+
+document.getElementById('headMeta').append(
+  el('span', null, DIALS.length + ' dials'),
+  el('span', null, DIALS.length * 2 + ' renderings'),
+  el('span', null, 'no single script')
+);
+
+// Anchors target the dials themselves rather than the two sections, so the nav
+// is a real table of contents instead of two entries.
+const navTarget = document.getElementById('phaseNav');
+const NAV = [{ id: 'reading', nav: 'Reading' }, ...DIALS];
+NAV.forEach(item => {
+  const link = el('a', null, item.nav);
+  link.href = '#' + item.id;
+  navTarget.append(link);
+});
+
+// Scroll spy. rootMargin pins the trigger line just under the sticky nav.
+//
+// The band's top edge has to sit below where an anchor jump lands a heading
+// (`scroll-margin-top`, 60px). Otherwise following a nav link leaves the
+// outgoing block clipping the band by those few pixels, and it wins the
+// document-order tie against the one you actually asked for.
+const SPY_TOP = 72;
+
+const spied = NAV.map(item => document.getElementById(item.id)).filter(Boolean);
+const navLinks = new Map(NAV.map(item => [item.id, navTarget.querySelector('a[href="#' + item.id + '"]')]));
+const visible = new Set();
+
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) visible.add(entry.target.id);
+    else visible.delete(entry.target.id);
+  });
+  const current = NAV.map(item => item.id).find(id => visible.has(id));
+  // Nothing in the band means the tail has scrolled up past it. Holding the
+  // last one reads better there than dropping the highlight entirely.
+  if (!current) return;
+  navLinks.forEach((link, id) => {
+    if (id === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}, { rootMargin: '-' + SPY_TOP + 'px 0px -70% 0px' });
+
+spied.forEach(node => spy.observe(node));
+
+const MODE_KEY = 'tips-detail';
+const modeButtons = document.querySelectorAll('.mode');
+
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  try { localStorage.setItem(MODE_KEY, mode); } catch (_) {}
+}
+
+modeButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+});
+
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved === 'compact') setMode('compact');
+} catch (_) {}
+</script>
+</body>
+</html>

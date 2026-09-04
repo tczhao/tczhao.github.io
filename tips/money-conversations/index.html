@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ask Price</title>
+<meta name="description" content="Seven conversations that set what you are paid, each one carried through to the second move.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+    --script-bg: #f2f5f2;
+    --script-rule: #cfdcd4;
+    /* Their turn is deliberately colder than yours. It is context to read,
+       not an artifact to take away, and it carries no copy button. */
+    --them-bg: transparent;
+    --them-rule: #d8dade;
+
+    --max-w: 840px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.75rem, 3.6vw, 2.75rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+      --script-bg: #151a17;
+      --script-rule: #2d3b34;
+      --them-rule: #33383e;
+    }
+    .standfirst, .ask-before, .ask-cost, .rule-body, .tail p {
+      font-variation-settings: 'opsz' 9;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  a { color: inherit; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ────────────────────────────────────────── */
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── title block ─────────────────────────────────────── */
+
+  .head { padding-block: var(--s5) var(--s4); }
+
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  h1 { font-size: var(--t-display); letter-spacing: -0.015em; margin-bottom: var(--s2); }
+
+  .standfirst { max-width: 64ch; font-size: var(--t-lead); color: var(--fg-mid); }
+  .standfirst + .standfirst { margin-top: var(--s1); }
+  .standfirst a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent);
+  }
+
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--s2);
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  /* ── nav ─────────────────────────────────────────────── */
+
+  .phasenav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-block: var(--s1);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .phasenav-row { display: flex; align-items: center; gap: var(--s2); }
+  .phasenav-inner {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .phasenav-inner::-webkit-scrollbar { display: none; }
+
+  .phasenav a {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .phasenav a:hover { color: var(--fg); }
+  .phasenav a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .modes {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+  }
+  .mode {
+    font: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .mode:hover { color: var(--fg); }
+  .mode[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+  .modes .sep { color: var(--rule); }
+
+  /* ── sections ────────────────────────────────────────── */
+
+  .sect { padding-block: var(--s5) 0; scroll-margin-top: 60px; }
+
+  .sect-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--fg);
+  }
+  .sect-head h2 { font-size: var(--t-sub); }
+  .sect-head .sect-note {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .sect-lead {
+    max-width: 62ch;
+    margin-top: var(--s2);
+    font-size: var(--t-aside);
+    font-style: italic;
+    color: var(--fg-mid);
+  }
+
+  /* ── the three preparations ──────────────────────────── */
+
+  .rule-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-no {
+    grid-row: 1 / span 2;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+  .rule-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .rule-body { margin-top: 6px; max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+
+  /* ── asks ────────────────────────────────────────────── */
+
+  .ask {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule-soft);
+    scroll-margin-top: 60px;
+  }
+  .ask:last-child { border-bottom: none; }
+
+  .ask-no {
+    grid-row: 1 / span 6;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  .ask-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+  }
+
+  .ask-moment {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+  }
+  .ask-moment b {
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: var(--t-micro);
+  }
+
+  .ask-before, .ask-cost {
+    margin-top: var(--s2);
+    max-width: 64ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .ask-before b, .ask-cost b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+  .ask-cost b { color: var(--accent); }
+
+  /* ── the exchange ────────────────────────────────────── */
+  /*
+     Two of your turns with theirs in between. Most advice hands you an opener
+     and leaves you at the reply, which is where the conversation is actually
+     decided, so the second move is a first-class part of every ask here.
+  */
+  .exchange { margin-top: var(--s2); }
+  .turn + .turn { margin-top: var(--s2); }
+
+  .turn-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .turn--you .turn-label { color: var(--accent); }
+  .turn--them .turn-label { color: var(--fg-dim); }
+
+  .turn--them { margin-left: var(--s4); }
+
+  .line {
+    position: relative;
+    padding: var(--s2);
+    border: 1px solid var(--script-rule);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+    background: var(--script-bg);
+  }
+  .turn--them .line {
+    background: var(--them-bg);
+    border: 1px dashed var(--them-rule);
+    color: var(--fg-dim);
+  }
+  .line p {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  .line p + p { margin-top: 0.75em; }
+
+  /* Bracketed slots are yours to fill. Marking them stops the script reading
+     as something you could send verbatim, which it never is. */
+  .slot {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .turn--them .slot { color: inherit; font-weight: 400; }
+
+  .copy {
+    display: block;
+    margin: var(--s1) -7px calc(var(--s1) * -1) auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 1px solid transparent;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--script-rule); }
+  .copy[data-state="done"] { color: var(--accent); }
+
+  body[data-mode="compact"] .ask-before,
+  body[data-mode="compact"] .ask-cost,
+  body[data-mode="compact"] .sect-lead,
+  body[data-mode="compact"] .rule-body { display: none; }
+  body[data-mode="compact"] .ask { padding-block: var(--s3); }
+
+  /* ── tail ────────────────────────────────────────────── */
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s4) var(--s5);
+    border-top: 1px solid var(--fg);
+  }
+  .tail h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+  .tail p { max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+  .tail p + p { margin-top: var(--s2); }
+  .tail a { text-decoration-color: var(--accent); text-underline-offset: 3px; }
+
+  @media (max-width: 599px) {
+    .ask, .rule-item { grid-template-columns: 1fr; }
+    .ask-no, .rule-no { grid-row: auto; margin-bottom: 6px; padding-top: 0; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .turn--them { margin-left: var(--s2); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .phasenav { position: static; }
+  }
+</style>
+</head>
+<body data-mode="full">
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/tips/">Tips</a>
+  <a class="home" href="/tips/">&larr; all tips</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Tip 03 &middot; what you are paid</span>
+  <h1>Ask Price</h1>
+  <p class="standfirst">Seven conversations that set what you are paid, each carried through to the second move - the reply you get, and what you say to it. That is where these are decided and where most advice stops.</p>
+  <p class="standfirst"><a href="/sub/standingorder/dist/">Standing Order</a> argues that what you install beats what you know, and it is right about almost all of personal finance. These are the exceptions: a handful of moments where one sentence moves more than any default can, because there is no default that asks on your behalf.</p>
+  <div class="head-meta" id="headMeta"></div>
+</div>
+
+<nav class="phasenav">
+  <div class="wrap phasenav-row">
+    <div class="phasenav-inner" id="phaseNav"></div>
+    <div class="modes" role="group" aria-label="Detail">
+      <button class="mode" type="button" data-mode="full" aria-pressed="true">Full</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button class="mode" type="button" data-mode="compact" aria-pressed="false">Compact</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="main"></main>
+
+<footer class="tail wrap">
+  <h2>Standing and limit</h2>
+  <p>None of this is evidence. It is craft, and the literature on negotiation is thinner and far more contested than anything in <a href="/sub/tare/dist/">Tare</a>, so nothing above carries a number I would be willing to source. Treat it the way Standing Order treats its own weakest track: worth doing, not worth citing.</p>
+  <p>One thing here is arithmetic rather than a finding, and it is the reason the stakes are higher than a single conversation. A raise applies to the base that every later raise is taken against. Skip one and you have not lost that raise, you have moved the whole path down - the next percentage comes off a smaller number, so does the one after it, and so, usually, does the offer at your next job, because it anchors on what you are on now.</p>
+  <p>The asks are also not equally safe for everyone who might make them. Whether a flat number reads as confidence or as a problem depends on things that are not your delivery, and being told to just ask by someone for whom it was cheap is its own kind of unhelpful. What is portable is the preparation: the number decided before the room, the evidence written in their units, the window picked off a calendar. That part survives a room that is not on your side.</p>
+</footer>
+
+<script>
+const PREP = [
+  {
+    name: 'Two numbers, decided before the room',
+    body: 'The number you would say yes to, and the number at which you walk. Both written down before the conversation, because both are unavailable to you inside it - the room is designed, not deliberately but reliably, to make the number in front of you feel like the only one. If you have not set a walk number you do not have a position, you have a hope.'
+  },
+  {
+    name: 'The evidence, in their units',
+    body: 'One page of what you delivered, converted into what your manager reports upward: money made, money saved, time returned, risk removed, a hire not needed. Not hours, not effort, not how hard the quarter was. The case has to survive being forwarded to someone who has never met you, because that is usually what happens to it.'
+  },
+  {
+    name: 'The window is a date, not a mood',
+    body: 'Pay decisions get made when budgets are set, which is weeks before anyone tells you the cycle has started. Find that date and work backwards from it. Asking when you finally feel brave enough almost guarantees you ask after the money has already been allocated, and then the answer is no for reasons that have nothing to do with you.'
+  }
+];
+
+const ASKS = [
+  {
+    id: 'band',
+    nav: 'Band',
+    name: 'The band question',
+    moment: 'before you name any number, in a hire or a level change',
+    before: 'Have both numbers ready. If the band comes back entirely below your walk number the conversation is over, and you have found that out in one exchange rather than four rounds.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['Before we go further - what is the band for this level, and where in it would someone with my background start?'] },
+      { who: 'them', label: 'Likely back', say: ['"We don’t share bands."', '"It depends on the candidate."'] },
+      { who: 'you', label: 'You again', say: ['Understood. Then I will give you mine and you can tell me if it is outside what is possible: I am looking at [number].'] }
+    ],
+    cost: 'Naming first without knowing the range. You will either anchor below the band, which nobody in the room is obliged to correct, or above it, and spend the rest of the process defending a figure you picked blind.'
+  },
+  {
+    id: 'ask',
+    nav: 'The ask',
+    name: 'The scheduled ask',
+    moment: 'six to eight weeks before budgets are set, not at the review',
+    before: 'The one page, and a specific number. "A raise" is not an ask, it is a mood. A number is something a manager can carry into a room and argue for.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I want to put a pay change on the agenda for this cycle. I am asking for [number].', 'I have written up the case - can I send it now, so you have it before the budget conversation rather than after?'] },
+      { who: 'them', label: 'Likely back', say: ['"Let me see what I can do."', '"It is not really up to me."'] },
+      { who: 'you', label: 'You again', say: ['That is fair. Who does it go to, and what would you need from me to make the case to them?', 'I would rather hand you ammunition than make you carry this on your own.'] }
+    ],
+    cost: 'Asking at the review is asking after the money is allocated. Your manager now has to unwind a decision instead of make one, which is a much larger favour than you think you are requesting.'
+  },
+  {
+    id: 'counter',
+    nav: 'Counter',
+    name: 'The counter',
+    moment: 'an offer has landed and you have not yet said yes',
+    before: 'Decide the number before the call, because this is the moment of maximum leverage and the only one that will feel like it is already too late to use.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I am glad we got here and I want to accept. The number that makes it easy is [X]. If you can do that, I will sign today.'] },
+      { who: 'them', label: 'Likely back', say: ['"That is above what we approved."', '"Let me take it back to the committee."'] },
+      { who: 'you', label: 'You again', say: ['Understood - what would it take? If base is fixed I am open to how we get there.', 'A sign-on, a review at six months in writing, or the next band up. Any of those work.'] }
+    ],
+    cost: 'Accepting on the spot. Every raise you get afterwards is a percentage of the number you agreed to in this conversation, and you will never have this much leverage with this employer again.'
+  },
+  {
+    id: 'scope',
+    nav: 'Scope',
+    name: 'Scope grew, pay did not',
+    moment: 'you have absorbed work that belonged to a bigger title',
+    before: 'Write down what you took on, when, and what it replaced. The strong version names a role rather than a feeling: I have had the on-call rotation and the vendor relationship since [name] left in [month].',
+    exchange: [
+      { who: 'you', label: 'You', say: ['The job I am doing is not the job I was hired into. I have been covering [scope] since [date].', 'I would like to either hand some of it back or have the pay match it. I would prefer the second.'] },
+      { who: 'them', label: 'Likely back', say: ['"Let us revisit at the next cycle."'] },
+      { who: 'you', label: 'You again', say: ['I would rather not wait two more quarters, because it has already been [n] months.', 'Can we agree the number now and time the change to the cycle?'] }
+    ],
+    cost: 'Absorbed scope becomes the baseline. Carry the larger job quietly for a year and you have not built a case, you have demonstrated that the larger job is what your current salary buys.'
+  },
+  {
+    id: 'rate',
+    nav: 'Rate',
+    name: 'The first number',
+    moment: 'someone asks what you charge',
+    before: 'A rate you can say without flinching and a floor you will not go under. Say the number, then stop talking. The silence afterwards is the whole technique and it is unbearable exactly once.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['My rate is [X] a day. For a scope like this I would estimate [n] days, so you are looking at roughly [total].'] },
+      { who: 'them', label: 'Likely back', say: ['silence', '"That is more than we had in mind."'] },
+      { who: 'you', label: 'You again', say: ['What did you have in mind?', 'If the budget is fixed I would rather cut the scope to fit it than the rate. Here is what I would take out.'] }
+    ],
+    cost: 'Discounting the rate instead of the scope. A cut rate is permanent and it travels to every renewal and every referral you get from this client. A cut scope is one project.'
+  },
+  {
+    id: 'title',
+    nav: 'Title',
+    name: 'The title without the money',
+    moment: 'a promotion, a bigger remit, or acting anything',
+    before: 'Check whether a pay change was actually named. If nobody said a number, there is no number, however warmly it was phrased.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['Thank you - I want it. Can we do the pay conversation at the same time rather than after it? What is the change that goes with it?'] },
+      { who: 'them', label: 'Likely back', say: ['"The money follows at the next cycle."'] },
+      { who: 'you', label: 'You again', say: ['Can we write that down, the number and the date?', 'Not because I do not trust you - because you might not be my manager in six months, and I would like it to survive that.'] }
+    ],
+    cost: 'An unpriced promotion is more work at the same rate. It also gets harder to reprice the longer you do it well, because competence at the new level stops being evidence and starts being the expectation.'
+  },
+  {
+    id: 'walk',
+    nav: 'Walk',
+    name: 'The walk-away',
+    moment: 'the answer has been no twice',
+    before: 'Know whether you are actually willing to leave. If you are not, do not imply that you are. The bluff gets called eventually and it costs you the standing to ask again.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I have asked twice and I understand the answer. I want to be straight with you: at this number I am going to start looking.', 'I would rather fix it here than leave, so tell me if there is a version of this that works.'] },
+      { who: 'them', label: 'Likely back', say: ['"Is that a threat?"', 'a counter that arrives suspiciously quickly'] },
+      { who: 'you', label: 'You again', say: ['No - it is me telling you before I do it instead of after.', 'I would rather you heard it from me than from a resignation.'] }
+    ],
+    cost: 'Leaving over a number you never said out loud. People resign over pay they never actually asked for, the employer learns nothing from it, and the next person into the role inherits the same band.'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+function labelled(tag, cls, label, text) {
+  const node = el(tag, cls);
+  node.append(el('b', null, label), document.createTextNode(text));
+  return node;
+}
+
+// Wraps [bracketed] slots so they read as blanks to fill. The copied text is
+// built from the source strings, so the brackets survive the clipboard intact.
+function withSlots(text) {
+  const frag = document.createDocumentFragment();
+  const pattern = /\[[^\]]+\]/g;
+  let last = 0;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > last) frag.append(text.slice(last, match.index));
+    frag.append(el('span', 'slot', match[0]));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) frag.append(text.slice(last));
+  return frag;
+}
+
+// Clipboard access is denied outright in some contexts rather than throwing on
+// a permission check, so the button reports the failure instead of pretending.
+async function copyScript(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.dataset.state = 'done';
+    button.textContent = 'Copied';
+  } catch (_) {
+    button.dataset.state = 'failed';
+    button.textContent = 'Select it';
+  }
+  setTimeout(() => {
+    delete button.dataset.state;
+    button.textContent = 'Copy';
+  }, 1800);
+}
+
+function renderTurn(turn, askName) {
+  const wrap = el('div', 'turn turn--' + turn.who);
+  wrap.append(el('span', 'turn-label', turn.label));
+
+  const line = el('div', 'line');
+  turn.say.forEach(text => {
+    const p = el('p');
+    p.append(withSlots(text));
+    line.append(p);
+  });
+  wrap.append(line);
+
+  // Only your own lines are takeaways. Theirs is context, so it gets no button.
+  if (turn.who === 'you') {
+    const copy = el('button', 'copy', 'Copy');
+    copy.type = 'button';
+    copy.setAttribute('aria-label', 'Copy the ' + askName + ' line, ' + turn.label.toLowerCase());
+    copy.addEventListener('click', () => copyScript(copy, turn.say.join('\n\n')));
+    wrap.append(copy);
+  }
+
+  return wrap;
+}
+
+function renderAsk(ask, number) {
+  const wrap = el('article', 'ask');
+  wrap.id = ask.id;
+
+  wrap.append(el('span', 'ask-no', String(number).padStart(2, '0')));
+  wrap.append(el('h3', 'ask-name', ask.name));
+  wrap.append(labelled('p', 'ask-moment', 'Moment', ' ' + ask.moment));
+  wrap.append(labelled('p', 'ask-before', 'Before', ' ' + ask.before));
+
+  const exchange = el('div', 'exchange');
+  ask.exchange.forEach(turn => exchange.append(renderTurn(turn, ask.nav)));
+  wrap.append(exchange);
+
+  wrap.append(labelled('p', 'ask-cost', 'The cost', ' ' + ask.cost));
+  return wrap;
+}
+
+const main = document.getElementById('main');
+
+const prep = el('section', 'sect');
+prep.id = 'before';
+const prepHead = el('div', 'sect-head');
+prepHead.append(el('h2', null, 'Before any of them'));
+prepHead.append(el('span', 'sect-note', PREP.length + ' preparations'));
+prep.append(prepHead);
+prep.append(el('p', 'sect-lead', 'None of the asks below work improvised. All three of these are done on a different day, in writing, when nothing is at stake.'));
+PREP.forEach((item, i) => {
+  const row = el('div', 'rule-item');
+  row.append(el('span', 'rule-no', String(i + 1).padStart(2, '0')));
+  row.append(el('h3', 'rule-name', item.name));
+  row.append(el('p', 'rule-body', item.body));
+  prep.append(row);
+});
+main.append(prep);
+
+const asks = el('section', 'sect');
+asks.id = 'asks';
+const asksHead = el('div', 'sect-head');
+asksHead.append(el('h2', null, 'The asks'));
+asksHead.append(el('span', 'sect-note', ASKS.length + ' conversations'));
+asks.append(asksHead);
+asks.append(el('p', 'sect-lead', 'Your line, the reply you should expect, and your line after that. Square brackets are yours to fill before any of it gets sent.'));
+ASKS.forEach((ask, i) => asks.append(renderAsk(ask, i + 1)));
+main.append(asks);
+
+const yourTurns = ASKS.reduce((n, ask) => n + ask.exchange.filter(t => t.who === 'you').length, 0);
+document.getElementById('headMeta').append(
+  el('span', null, ASKS.length + ' conversations'),
+  el('span', null, yourTurns + ' lines to send'),
+  el('span', null, 'craft, not evidence')
+);
+
+const navTarget = document.getElementById('phaseNav');
+const NAV = [{ id: 'before', nav: 'Before' }, ...ASKS];
+NAV.forEach(item => {
+  const link = el('a', null, item.nav);
+  link.href = '#' + item.id;
+  navTarget.append(link);
+});
+
+// Scroll spy. rootMargin pins the trigger line just under the sticky nav.
+//
+// The band's top edge has to sit below where an anchor jump lands a heading
+// (`scroll-margin-top`, 60px). Otherwise following a nav link leaves the
+// outgoing block clipping the band by those few pixels, and it wins the
+// document-order tie against the one you actually asked for.
+const SPY_TOP = 72;
+
+const spied = NAV.map(item => document.getElementById(item.id)).filter(Boolean);
+const navLinks = new Map(NAV.map(item => [item.id, navTarget.querySelector('a[href="#' + item.id + '"]')]));
+const visible = new Set();
+
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) visible.add(entry.target.id);
+    else visible.delete(entry.target.id);
+  });
+  const current = NAV.map(item => item.id).find(id => visible.has(id));
+  // Nothing in the band means the tail has scrolled up past it. Holding the
+  // last one reads better there than dropping the highlight entirely.
+  if (!current) return;
+  navLinks.forEach((link, id) => {
+    if (id === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}, { rootMargin: '-' + SPY_TOP + 'px 0px -70% 0px' });
+
+spied.forEach(node => spy.observe(node));
+
+const MODE_KEY = 'tips-detail';
+const modeButtons = document.querySelectorAll('.mode');
+
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  try { localStorage.setItem(MODE_KEY, mode); } catch (_) {}
+}
+
+modeButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+});
+
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved === 'compact') setMode('compact');
+} catch (_) {}
+</script>
+</body>
+</html>
