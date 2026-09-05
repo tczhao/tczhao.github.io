@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserve Price</title>
+<meta name="description" content="Ten moves a professional seller will make on you, why each one works, and the line that answers it.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+    --script-bg: #f2f5f2;
+    --script-rule: #cfdcd4;
+    --them-rule: #d8dade;
+
+    --max-w: 840px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.75rem, 3.6vw, 2.75rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+      --script-bg: #151a17;
+      --script-rule: #2d3b34;
+      --them-rule: #33383e;
+    }
+    .standfirst, .move-why, .move-trap, .rule-body, .tail p {
+      font-variation-settings: 'opsz' 9;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  a { color: inherit; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ────────────────────────────────────────── */
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── title block ─────────────────────────────────────── */
+
+  .head { padding-block: var(--s5) var(--s4); }
+
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  h1 { font-size: var(--t-display); letter-spacing: -0.015em; margin-bottom: var(--s2); }
+
+  .standfirst { max-width: 64ch; font-size: var(--t-lead); color: var(--fg-mid); }
+  .standfirst + .standfirst { margin-top: var(--s1); }
+  .standfirst a, .tail a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent);
+  }
+
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--s2);
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  /* ── nav ─────────────────────────────────────────────── */
+
+  .phasenav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-block: var(--s1);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .phasenav-row { display: flex; align-items: center; gap: var(--s2); }
+  .phasenav-inner {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .phasenav-inner::-webkit-scrollbar { display: none; }
+
+  .phasenav a {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .phasenav a:hover { color: var(--fg); }
+  .phasenav a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .modes {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+  }
+  .mode {
+    font: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .mode:hover { color: var(--fg); }
+  .mode[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+  .modes .sep { color: var(--rule); }
+
+  /* ── sections ────────────────────────────────────────── */
+
+  .sect { padding-block: var(--s5) 0; scroll-margin-top: 60px; }
+
+  .sect-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--fg);
+  }
+  .sect-head h2 { font-size: var(--t-sub); }
+  .sect-head .sect-note {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .sect-lead {
+    max-width: 62ch;
+    margin-top: var(--s2);
+    font-size: var(--t-aside);
+    font-style: italic;
+    color: var(--fg-mid);
+  }
+
+  /* ── the three preparations ──────────────────────────── */
+
+  .rule-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-no {
+    grid-row: 1 / span 2;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+  .rule-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .rule-body { margin-top: 6px; max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+
+  /* ── moves ───────────────────────────────────────────── */
+  /*
+     Their line comes first here, because on this side of the table you are
+     answering rather than opening. The mechanism sits between their move and
+     your counter: knowing why it works is what lets you say the next part
+     pleasantly instead of defensively.
+  */
+  .move {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule-soft);
+    scroll-margin-top: 60px;
+  }
+  .move:last-child { border-bottom: none; }
+
+  .move-no {
+    grid-row: 1 / span 8;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  .move-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+    margin-bottom: var(--s2);
+  }
+
+  .turn-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .turn--you .turn-label { color: var(--accent); }
+  .turn--them .turn-label { color: var(--fg-dim); }
+
+  /* The mechanism paragraph sits between their move and your first counter, so
+     it needs the same separation a turn-to-turn transition gets. */
+  .turn + .turn,
+  .move-why + .turn { margin-top: var(--s2); }
+  .turn--them { margin-left: var(--s4); }
+
+  .line {
+    padding: var(--s2);
+    border: 1px solid var(--script-rule);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+    background: var(--script-bg);
+  }
+  .turn--them .line {
+    background: transparent;
+    border: 1px dashed var(--them-rule);
+    color: var(--fg-dim);
+  }
+  .line p {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  .line p + p { margin-top: 0.75em; }
+
+  .slot { color: var(--accent); font-weight: 500; }
+  .turn--them .slot { color: inherit; font-weight: 400; }
+
+  .copy {
+    display: block;
+    margin: var(--s1) -7px calc(var(--s1) * -1) auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 1px solid transparent;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--script-rule); }
+  .copy[data-state="done"] { color: var(--accent); }
+
+  .move-why, .move-trap {
+    margin-top: var(--s2);
+    max-width: 64ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .move-why b, .move-trap b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+  .move-trap b { color: var(--accent); }
+
+  body[data-mode="compact"] .move-why,
+  body[data-mode="compact"] .move-trap,
+  body[data-mode="compact"] .sect-lead,
+  body[data-mode="compact"] .rule-body { display: none; }
+  body[data-mode="compact"] .move { padding-block: var(--s3); }
+
+  /* ── tail ────────────────────────────────────────────── */
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s4) var(--s5);
+    border-top: 1px solid var(--fg);
+  }
+  .tail h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+  .tail p { max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+  .tail p + p { margin-top: var(--s2); }
+
+  @media (max-width: 599px) {
+    .move, .rule-item { grid-template-columns: 1fr; }
+    .move-no, .rule-no { grid-row: auto; margin-bottom: 6px; padding-top: 0; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .turn--them { margin-left: var(--s2); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .phasenav { position: static; }
+  }
+</style>
+</head>
+<body data-mode="full">
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/tips/">Tips</a>
+  <a class="home" href="/tips/">&larr; all tips</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Tip 04 &middot; buying things</span>
+  <h1>Reserve Price</h1>
+  <p class="standfirst">Ten moves a professional seller will make on you, why each one works, and the line that answers it. Cars, property, trades, quotes - the moves are the same and only the numbers change.</p>
+  <p class="standfirst"><a href="/tips/money-conversations/">Ask Price</a> is the other side of this table, where you are selling your own labour. Here you are buying, the leverage runs the other way, and the difference is that they do this every day and you do it about six times in your life.</p>
+  <div class="head-meta" id="headMeta"></div>
+</div>
+
+<nav class="phasenav">
+  <div class="wrap phasenav-row">
+    <div class="phasenav-inner" id="phaseNav"></div>
+    <div class="modes" role="group" aria-label="Detail">
+      <button class="mode" type="button" data-mode="full" aria-pressed="true">Full</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button class="mode" type="button" data-mode="compact" aria-pressed="false">Compact</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="main"></main>
+
+<footer class="tail wrap">
+  <h2>Standing and limit</h2>
+  <p>Same standing as the rest of this section: craft, not evidence. The literature on negotiation is thin and contested and nothing above carries a number I would be willing to source. What is arithmetic is that on one large purchase the gap between a good afternoon and a bad one is often wider than a year of the fee optimisation <a href="/sub/tare/dist/">Tare</a> spends eight tracks on, and it is the only reason this page earns a place beside that one.</p>
+  <p>None of it works on a seller who genuinely does not need to sell. Try it there and you simply become the buyer they get to last. It also does not belong anywhere near someone who is not doing this professionally: a sole trader pricing a day of their own work is not running the drip on you, they are guessing, and grinding them down mostly buys you the version of the job that matches the price you pushed them to.</p>
+  <p>Every line here is meant to be said pleasantly. The technique is the content, not the tone. Being difficult is not the same as being firm, and it hands the other side a reason to prefer the next buyer.</p>
+</footer>
+
+<script>
+const PREP = [
+  {
+    name: 'A walk number, and the thing you would do instead',
+    body: 'Not just a figure - a specific alternative you are content with. "I keep the current car another year" is an alternative. "I would keep looking" is not, and the difference is audible to someone who listens to buyers all day. The alternative is what makes the number real, and without one you are not negotiating, you are asking.'
+  },
+  {
+    name: 'Decide which number you are comparing',
+    body: 'Drive-away, or all-in, or landed, or total including every fee and every hour. Write it down before you speak to anybody. Almost every move below works by shifting you off that number and onto a different one that is easier for them to make look good.'
+  },
+  {
+    name: 'Be able to leave',
+    body: 'Do not arrive with the trailer hitched, the deposit transferred, the movers booked, or the news already broken to your family. Whoever cannot leave pays more. The person across the desk has spent years learning to spot which one you are, and they are better at it than you are at hiding it.'
+  }
+];
+
+const MOVES = [
+  {
+    id: 'budget',
+    nav: 'Budget',
+    name: 'The budget question',
+    theirs: ['"What is your budget?"', '"What were you hoping to spend?"'],
+    why: 'Whatever number you say becomes a ceiling and never a floor. Say forty and you will be shown things at forty-two and never at thirty-four. It also tells them how much room they have to add fees later without breaking the number you named, which is the number you will remember agreeing to.',
+    counters: [
+      { label: 'You', say: ['I would rather work the other way around. Show me the best you have and what it actually costs, and I will tell you if it is out of range.'] },
+      { label: 'If they push', say: ['I will know when I see the number. What is the price on this one?'] }
+    ],
+    trap: 'Answering with a range. They hear the top of it and nothing else, which makes a range worse than saying nothing at all.'
+  },
+  {
+    id: 'payment',
+    nav: 'Payment',
+    name: 'Payment shifting',
+    theirs: ['"What sort of monthly repayment are you after?"', '"We can get you into it for two-twenty a week."'],
+    why: 'A monthly figure can be reached from almost any price by stretching the term or moving the balloon, so agreeing to a payment agrees to nothing at all. It also buries the total inside an arithmetic problem you are being invited to solve in your head, in a chair, while somebody waits.',
+    counters: [
+      { label: 'You', say: ['Let us do the drive-away total first. I will work out how I pay for it separately.'] },
+      { label: 'If they push', say: ['I am not comparing repayments, I am comparing the total. What is the number with everything in it?'] }
+    ],
+    trap: 'Letting price and finance become one conversation. They are two negotiations, the seller usually earns on both, and running them apart in that order costs you nothing.'
+  },
+  {
+    id: 'anchor',
+    nav: 'Anchor',
+    name: 'Anchor, then discount',
+    theirs: ['"It is listed at sixty-eight, but I can do sixty-one for you today."'],
+    why: 'The first number sets the frame and the second one arrives feeling like a gift, even when sixty-one was the target the whole time. You end up negotiating down from a figure the seller chose rather than up from what the thing is worth.',
+    counters: [
+      { label: 'You', say: ['What have comparable ones actually sold for? I am working from sold prices rather than from the list.'] },
+      { label: 'If they push', say: ['I accept that sixty-one is under the list. My question is whether it is under the market, and I do not think it is.'] }
+    ],
+    trap: 'Feeling grateful. A discount from an invented number is not a discount, and the gratitude is the thing actually being sold to you.'
+  },
+  {
+    id: 'quote',
+    nav: 'Quote',
+    name: 'The single-number quote',
+    theirs: ['"Twenty-six for the whole job."'],
+    why: 'One number cannot be compared, argued with, or reduced in part. Itemised, you can see which line is padded, drop the parts you do not need, and get a second quote on the same basis. Unitemised, the only two moves available to you are yes and no.',
+    counters: [
+      { label: 'You', say: ['Can you break that into labour, materials and anything else? I am getting a second quote and I want to compare like for like.'] }
+    ],
+    trap: 'Assuming the itemised quote is the dearer one. It is usually the same number with the padding made visible, which is exactly why it gets resisted.'
+  },
+  {
+    id: 'deadline',
+    nav: 'Deadline',
+    name: 'The expiring price',
+    theirs: ['"That is the end-of-month price, it goes back up Monday."', '"I can only hold this for you until close today."'],
+    why: 'A deadline converts a decision into a reflex, and a reflex under time pressure is reliably worse than the same decision made on Tuesday. Most of these deadlines are somebody’s internal target rather than a fact about the price.',
+    counters: [
+      { label: 'You', say: ['Then I will miss it. If it is the right thing at the right number I will still want it next week, and if one week costs me the deal it was never the right number.'] }
+    ],
+    trap: 'Believing the deadline is about you. It is usually about a quota, and a quota that expires tonight is leverage pointing in your direction rather than theirs.'
+  },
+  {
+    id: 'rival',
+    nav: 'Rival',
+    name: 'The other buyer',
+    theirs: ['"I have someone else coming to look at four."', '"There is another offer on it."'],
+    why: 'It may well be true. It costs nothing to say and it cannot be checked, which is precisely what makes it useful, and the fear of losing a thing does far more work on most people than the pleasure of getting it.',
+    counters: [
+      { label: 'You', say: ['That is fine. If they take it at that price then they should have it - I am not going above [number] on this one.'] }
+    ],
+    trap: 'Bidding against somebody you cannot see. Your number moves when the thing changes, not when a stranger might exist.'
+  },
+  {
+    id: 'manager',
+    nav: 'Manager',
+    name: 'The absent authority',
+    theirs: ['"Let me take that to my manager and see what I can do for you."'],
+    why: 'The person in front of you gets to stay on your side while somebody unseen does the refusing, which lets them extract concessions without ever saying no to your face. The walk to the back office is frequently just a walk.',
+    counters: [
+      { label: 'You', say: ['Sure. While you are back there - this is my number and it is not moving, so there is no need to return with something in between.'] },
+      { label: 'If they push', say: ['If it needs your manager, can I speak to them directly? I would rather do this once.'] }
+    ],
+    trap: 'Improving your own offer while they are away. Nothing happened in those four minutes, so nothing about your position should have changed.'
+  },
+  {
+    id: 'split',
+    nav: 'Split',
+    name: 'Split the difference',
+    theirs: ['"You are at fifty-two, I am at fifty-eight. Let us meet at fifty-five and be done with it."'],
+    why: 'It sounds like fairness and it is arithmetic. Splitting is only fair when both numbers were equally honest, and one of the two was constructed with this exact move already in mind.',
+    counters: [
+      { label: 'You', say: ['I would rather not split from a number I do not think is real. Tell me what makes it fifty-eight and I will move if the answer moves me.'] }
+    ],
+    trap: 'Opening near where you actually want to land. Against someone who splits, an honest first number gets punished, and that is the genuinely uncomfortable part of this one.'
+  },
+  {
+    id: 'drip',
+    nav: 'Drip',
+    name: 'The drip',
+    theirs: ['"That is the price - plus delivery, dealer admin and the on-roads."', '"Materials are on top of that, obviously."'],
+    why: 'Fees revealed after you have agreed to the headline get counted against a decision you have already made, and re-opening it feels petty by then. That feeling is the whole mechanism, and it is why the reveal is always late rather than early.',
+    counters: [
+      { label: 'You', say: ['I need one number with everything in it before I agree to anything. Send it itemised and I will respond to that.'] },
+      { label: 'If they push', say: ['Then the earlier number was not a price, it was an advertisement. What is the total?'] }
+    ],
+    trap: 'Agreeing to a headline figure at all. Nothing is agreed until it is the all-in number, and saying so in the first five minutes costs you nothing.'
+  },
+  {
+    id: 'callback',
+    nav: 'Callback',
+    name: 'The callback',
+    theirs: ['you left without buying, and two days later the phone rings with a better price'],
+    why: 'The call is proof that the earlier number was soft. It also arrives while you are relieved, and relief is a poor state in which to agree to things - they have a fair idea of roughly when it peaks.',
+    counters: [
+      { label: 'You', say: ['Good to hear from you. I have thought about it since and my number has come down rather than up: [number], all in.'] }
+    ],
+    trap: 'Accepting the callback figure. It is the first number of a new negotiation, not the last number of the old one, and you now have evidence you were never as close to their floor as you were told.'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+function labelled(tag, cls, label, text) {
+  const node = el(tag, cls);
+  node.append(el('b', null, label), document.createTextNode(text));
+  return node;
+}
+
+// Wraps [bracketed] slots so they read as blanks to fill. The copied text is
+// built from the source strings, so the brackets survive the clipboard intact.
+function withSlots(text) {
+  const frag = document.createDocumentFragment();
+  const pattern = /\[[^\]]+\]/g;
+  let last = 0;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > last) frag.append(text.slice(last, match.index));
+    frag.append(el('span', 'slot', match[0]));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) frag.append(text.slice(last));
+  return frag;
+}
+
+// Clipboard access is denied outright in some contexts rather than throwing on
+// a permission check, so the button reports the failure instead of pretending.
+async function copyScript(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.dataset.state = 'done';
+    button.textContent = 'Copied';
+  } catch (_) {
+    button.dataset.state = 'failed';
+    button.textContent = 'Select it';
+  }
+  setTimeout(() => {
+    delete button.dataset.state;
+    button.textContent = 'Copy';
+  }, 1800);
+}
+
+function renderLine(text) {
+  const p = el('p');
+  p.append(withSlots(text));
+  return p;
+}
+
+function renderTurn(who, label, say, moveName) {
+  const wrap = el('div', 'turn turn--' + who);
+  wrap.append(el('span', 'turn-label', label));
+
+  const line = el('div', 'line');
+  say.forEach(text => line.append(renderLine(text)));
+  wrap.append(line);
+
+  // Their move is what you are answering, not something you take away, so it
+  // carries no button. Only your own lines are copyable.
+  if (who === 'you') {
+    const copy = el('button', 'copy', 'Copy');
+    copy.type = 'button';
+    copy.setAttribute('aria-label', 'Copy the ' + moveName + ' counter, ' + label.toLowerCase());
+    copy.addEventListener('click', () => copyScript(copy, say.join('\n\n')));
+    wrap.append(copy);
+  }
+
+  return wrap;
+}
+
+function renderMove(move, number) {
+  const wrap = el('article', 'move');
+  wrap.id = move.id;
+
+  wrap.append(el('span', 'move-no', String(number).padStart(2, '0')));
+  wrap.append(el('h3', 'move-name', move.name));
+  wrap.append(renderTurn('them', 'Their move', move.theirs, move.nav));
+  wrap.append(labelled('p', 'move-why', 'Why it works', ' ' + move.why));
+  move.counters.forEach(counter => wrap.append(renderTurn('you', counter.label, counter.say, move.nav)));
+  wrap.append(labelled('p', 'move-trap', 'The trap', ' ' + move.trap));
+
+  return wrap;
+}
+
+const main = document.getElementById('main');
+
+const prep = el('section', 'sect');
+prep.id = 'before';
+const prepHead = el('div', 'sect-head');
+prepHead.append(el('h2', null, 'Before you enquire'));
+prepHead.append(el('span', 'sect-note', PREP.length + ' preparations'));
+prep.append(prepHead);
+prep.append(el('p', 'sect-lead', 'All three are decided at home, in writing, before anybody knows you are interested. None of the counters below survive being improvised without them.'));
+PREP.forEach((item, i) => {
+  const row = el('div', 'rule-item');
+  row.append(el('span', 'rule-no', String(i + 1).padStart(2, '0')));
+  row.append(el('h3', 'rule-name', item.name));
+  row.append(el('p', 'rule-body', item.body));
+  prep.append(row);
+});
+main.append(prep);
+
+const moves = el('section', 'sect');
+moves.id = 'moves';
+const movesHead = el('div', 'sect-head');
+movesHead.append(el('h2', null, 'The moves'));
+movesHead.append(el('span', 'sect-note', MOVES.length + ' moves'));
+moves.append(movesHead);
+moves.append(el('p', 'sect-lead', 'Their line, the mechanism underneath it, and yours. Square brackets are yours to fill in before any of it gets said out loud.'));
+MOVES.forEach((move, i) => moves.append(renderMove(move, i + 1)));
+main.append(moves);
+
+const counters = MOVES.reduce((n, move) => n + move.counters.length, 0);
+document.getElementById('headMeta').append(
+  el('span', null, MOVES.length + ' moves'),
+  el('span', null, counters + ' counters'),
+  el('span', null, 'craft, not evidence')
+);
+
+const navTarget = document.getElementById('phaseNav');
+const NAV = [{ id: 'before', nav: 'Before' }, ...MOVES];
+NAV.forEach(item => {
+  const link = el('a', null, item.nav);
+  link.href = '#' + item.id;
+  navTarget.append(link);
+});
+
+// Scroll spy. rootMargin pins the trigger line just under the sticky nav.
+//
+// The band's top edge has to sit below where an anchor jump lands a heading
+// (`scroll-margin-top`, 60px). Otherwise following a nav link leaves the
+// outgoing block clipping the band by those few pixels, and it wins the
+// document-order tie against the one you actually asked for.
+const SPY_TOP = 72;
+
+const spied = NAV.map(item => document.getElementById(item.id)).filter(Boolean);
+const navLinks = new Map(NAV.map(item => [item.id, navTarget.querySelector('a[href="#' + item.id + '"]')]));
+const visible = new Set();
+
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) visible.add(entry.target.id);
+    else visible.delete(entry.target.id);
+  });
+  const current = NAV.map(item => item.id).find(id => visible.has(id));
+  // Nothing in the band means the tail has scrolled up past it. Holding the
+  // last one reads better there than dropping the highlight entirely.
+  if (!current) return;
+  navLinks.forEach((link, id) => {
+    if (id === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}, { rootMargin: '-' + SPY_TOP + 'px 0px -70% 0px' });
+
+spied.forEach(node => spy.observe(node));
+
+const MODE_KEY = 'tips-detail';
+const modeButtons = document.querySelectorAll('.mode');
+
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  try { localStorage.setItem(MODE_KEY, mode); } catch (_) {}
+}
+
+modeButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+});
+
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved === 'compact') setMode('compact');
+} catch (_) {}
+</script>
+</body>
+</html>

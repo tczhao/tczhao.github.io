@@ -242,7 +242,8 @@ const FILTERS = [
   { id: 'all',       label: 'Overview' },
   { id: 'practice',  label: 'Practice' },
   { id: 'dashboard', label: 'Dashboards' },
-  { id: 'tool',      label: 'Tools' }
+  { id: 'tool',      label: 'Tools' },
+  { id: 'tip',       label: 'Tips' }
 ];
 
 const VIEWS = [
@@ -253,7 +254,32 @@ const VIEWS = [
 // line: italic tagline, shown in both views.
 // cap:  tile caption for the items that carry no tagline of their own.
 // note: long description, shown in the text view only.
+// img:  tile artwork. Omit it and the tile renders as the bare panel.
 const WORKS = [
+  {
+    href: 'tips/bargaining/', kind: 'tip', ratio: '3 / 2',
+    name: 'Reserve Price', label: 'Tip 04',
+    line: 'the moves a seller makes, and the line that answers each one',
+    note: 'Ten moves a professional seller will make on you when you are buying a car, a house or a day of someone’s labour, why each one works, and the sentence that answers it.'
+  },
+  {
+    href: 'tips/money-conversations/', kind: 'tip', ratio: '4 / 3',
+    name: 'Ask Price', label: 'Tip 03',
+    line: 'the conversations that set what you are paid',
+    note: 'Seven conversations that set what you are paid, each carried through to the second move - the reply you get and what you say to it. The band question, the counter, the scope that grew without pay, the walk-away.'
+  },
+  {
+    href: 'tips/working-across-difference/', kind: 'tip', ratio: '1 / 1',
+    name: 'Impedance Match', label: 'Tip 02',
+    line: 'the same message, written twice',
+    note: 'Six dials people vary on, what to look for, and the same message sent to each end of each one. No wording works on everybody, so what transfers between people is the reading rather than the script.'
+  },
+  {
+    href: 'tips/moving-work-through-peers/', kind: 'tip', ratio: '3 / 2',
+    name: 'Right of Way', label: 'Tip 01',
+    line: 'moving work through people who do not report to you',
+    note: 'Twelve plays for getting work out of people you do not manage, each with the sentence to actually send. They work by making the ask cheap and its state visible, not by being clever.'
+  },
   {
     href: 'sub/nomogram/dist/', kind: 'practice', img: 'nomogram', ratio: '4 / 3',
     name: 'Nomogram', label: 'Alignment chart',
@@ -396,12 +422,16 @@ function renderWork(work, index) {
     const tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.setProperty('--ratio', work.ratio);
-    const img = document.createElement('img');
-    img.src = 'img/tiles/' + work.img + '.webp';
-    img.alt = '';
-    img.decoding = 'async';
-    if (index >= 4) img.loading = 'lazy';
-    tile.append(img);
+    // Works without artwork keep the tile's own panel fill rather than a
+    // broken image, so an entry can go up before its tile is drawn.
+    if (work.img) {
+      const img = document.createElement('img');
+      img.src = 'img/tiles/' + work.img + '.webp';
+      img.alt = '';
+      img.decoding = 'async';
+      if (index >= 4) img.loading = 'lazy';
+      tile.append(img);
+    }
     card.append(tile);
   }
 
