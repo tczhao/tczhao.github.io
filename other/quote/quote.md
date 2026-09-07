@@ -71,3 +71,6 @@ Application: Call out the specific assets/IDs, request the exact artifact needed
 
 # me
 tell a story not just stats
+
+# borrowed
+Your success in life will be determined largely by your ability to speak, your ability to write, and the quality of your ideas. In that order. -- Patrick Winston

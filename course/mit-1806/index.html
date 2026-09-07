@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18.06 Linear Algebra</title>
+<meta name="description" content="All 35 lectures of MIT 18.06, one idea each, plus the cheatsheet the course collapses into.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<style>
+  /* Palette, ladder and faces are shared with /course/ so the section reads as
+     one property. Change them in both or in neither. */
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+
+    --max-w: 880px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-unit:  clamp(1.5rem, 3vw, 2rem);
+    --t-display: clamp(2rem, 5vw, 3.5rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+    }
+    .lede, .lec-idea, .unit-blurb { font-variation-settings: 'opsz' 9; }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 6px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── masthead of the course itself ───────────────────── */
+
+  .head { padding-block: var(--s5) var(--s3); }
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-bottom: var(--s2);
+  }
+  .head h1 {
+    font-size: var(--t-display);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--s2);
+  }
+  .lede {
+    max-width: 60ch;
+    font-size: var(--t-lead);
+    color: var(--fg-mid);
+  }
+  .lede + .lede { margin-top: var(--s1); }
+
+  .credit {
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+    max-width: 60ch;
+  }
+  .credit a { color: var(--fg-mid); text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  .credit a:hover { color: var(--accent); }
+
+  /* ── the Notes / Cheatsheet switch ───────────────────── */
+
+  .switch {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-block: var(--s2);
+    margin-bottom: var(--s4);
+    background: var(--bg);
+    border-bottom: 1px solid var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .switch .group { display: flex; align-items: baseline; gap: var(--s1); margin-left: auto; }
+  .switch .sep { color: var(--rule); }
+  .view-item {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    padding: 0 0 2px;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .view-item:hover { color: var(--fg); }
+  .view-item[aria-pressed="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+
+  /* ── units ───────────────────────────────────────────── */
+
+  .unit { padding-top: var(--s5); }
+  .unit:first-of-type { padding-top: 0; }
+  .unit-head {
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: var(--s2);
+  }
+  .unit-label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s1);
+  }
+  .unit-label .range { margin-left: auto; color: var(--fg-dim); }
+  .unit-head h2 { font-size: var(--t-unit); letter-spacing: -0.015em; }
+  .unit-blurb {
+    max-width: 62ch;
+    margin-top: var(--s1);
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+
+  /* ── one lecture ─────────────────────────────────────── */
+
+  .lec {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s3);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+    scroll-margin-top: 4.5rem;
+  }
+  .lec-no {
+    grid-row: 1 / span 5;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 5px;
+  }
+  .lec--review .lec-no { color: var(--accent); }
+
+  .lec-title {
+    font-size: var(--t-lead);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .lec-idea {
+    max-width: 62ch;
+    margin-top: var(--s1);
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+
+  /* Display math sits in a tinted well so a reader scanning for a formula can
+     find one without reading the prose around it. */
+  .lec-math {
+    margin-top: var(--s2);
+    padding: var(--s2) var(--s3);
+    background: var(--panel);
+    border-left: 2px solid var(--rule);
+    overflow-x: auto;
+  }
+  .lec-math .row + .row { margin-top: var(--s1); }
+  .lec-math .gloss {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.04em;
+    color: var(--fg-dim);
+  }
+
+  /* The trap is the reason these notes exist, so it gets the accent rule and
+     nothing else on the page does. */
+  .lec-trap {
+    max-width: 62ch;
+    margin-top: var(--s2);
+    padding-left: var(--s2);
+    border-left: 2px solid var(--accent);
+    font-size: var(--t-aside);
+    color: var(--fg-mid);
+  }
+  .lec-trap b {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+  }
+
+  /* ── cheatsheet ──────────────────────────────────────── */
+
+  .sheet-card {
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule);
+  }
+  .sheet-card:last-child { border-bottom: none; }
+  .sheet-card h2 {
+    font-size: var(--t-sub);
+    letter-spacing: -0.005em;
+    margin-bottom: var(--s1);
+  }
+  .sheet-note {
+    max-width: 62ch;
+    margin-bottom: var(--s2);
+    font-size: var(--t-aside);
+    color: var(--fg-mid);
+  }
+
+  .sheet-rows {
+    display: grid;
+    grid-template-columns: minmax(7rem, 12rem) 1fr;
+    gap: var(--s1) var(--s3);
+    align-items: baseline;
+    border-top: 1px solid var(--rule-soft);
+    padding-top: var(--s2);
+  }
+  .sheet-rows dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+  .sheet-rows dd { font-size: var(--t-read); overflow-x: auto; }
+  .sheet-rows dd .say {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--t-aside);
+    color: var(--fg-mid);
+  }
+
+  /* ── KaTeX ───────────────────────────────────────────── */
+
+  /* KaTeX inherits colour, so dark mode needs nothing. These two rules stop a
+     wide decomposition from scrolling the whole page sideways. */
+  .katex { font-size: 1.02em; }
+  .katex-display { margin: 0; overflow-x: auto; overflow-y: hidden; padding-block: 2px; }
+  .katex-display > .katex { text-align: left; }
+
+  /* Until KaTeX has run, the raw dollar-sign source is worse than nothing.
+     `ready` is set on <html> in every outcome, including CDN failure, so this
+     can never strand the page blank. */
+  html:not(.ready) main { visibility: hidden; }
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s3) var(--s5);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s1) var(--s3);
+  }
+  .tail a { color: var(--fg-dim); }
+  .tail a:hover { color: var(--accent); }
+
+  @media (max-width: 599px) {
+    .lec { grid-template-columns: 1fr; }
+    .lec-no { grid-row: auto; padding-top: 0; margin-bottom: 2px; }
+    .sheet-rows { grid-template-columns: 1fr; gap: 2px; }
+    .sheet-rows dd { margin-bottom: var(--s2); }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .unit-label { flex-wrap: wrap; }
+    .unit-label .range { margin-left: 0; flex-basis: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+
+  @media print {
+    .switch, .masthead, .credit { display: none; }
+    .lec-math, .lec-trap { break-inside: avoid; }
+    .sheet-card { break-inside: avoid; border-bottom: 1px solid #ccc; }
+    html:not(.ready) main { visibility: visible; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/course/">Courses</a>
+  <a class="home" href="/course/">&larr; all courses</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Course 01 &middot; MIT &middot; Gilbert Strang</span>
+  <h1>18.06 Linear Algebra</h1>
+  <p class="lede">All 35 lectures, one idea each: the result the lecture is actually carrying, the formula worth keeping, and the thing that catches people the first time.</p>
+  <p class="lede">The argument runs elimination &rarr; the four subspaces &rarr; orthogonality &rarr; eigenvalues &rarr; the SVD. On the way back down, almost every question is answered by the rank.</p>
+  <p class="credit">Lecture numbering and titles follow the OCW <a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" target="_blank" rel="noopener noreferrer">18.06 Spring 2010</a> video series. The notes are mine; the course is Strang’s.</p>
+</div>
+
+<div class="switch wrap">
+  <span id="switchLabel"></span>
+  <span class="group" id="views"></span>
+</div>
+
+<main class="wrap" id="main"></main>
+
+<footer class="tail wrap">
+  <span id="copyright"></span>
+  <span><a href="/course/">All courses</a></span>
+  <span><a href="/">tianchuzhao.com</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+const VIEW_KEY = 'course-1806-view';
+
+const VIEWS = [
+  { id: 'notes', label: 'Notes' },
+  { id: 'sheet', label: 'Cheatsheet' }
+];
+
+const UNITS = [
+  {
+    id: 'i',
+    label: 'Unit I',
+    title: 'Ax = b and the four subspaces',
+    range: 'Lectures 1–13',
+    blurb: 'Elimination, and then the discovery that elimination was a factorization all along. Ends with the four subspaces, which is the frame the rest of the course hangs on.'
+  },
+  {
+    id: 'ii',
+    label: 'Unit II',
+    title: 'Orthogonality, determinants, eigenvalues',
+    range: 'Lectures 14–24b',
+    blurb: 'Two machines and a bridge. Projection solves the equations that have no solution; eigenvalues solve the ones that repeat. Determinants sit between them and pay for both.'
+  },
+  {
+    id: 'iii',
+    label: 'Unit III',
+    title: 'Symmetry, positive definiteness, the SVD',
+    range: 'Lectures 25–34',
+    blurb: 'What symmetry buys you, and then the factorization that survives without it. The SVD is the end of the argument: every matrix, any shape, any rank.'
+  }
+];
+
+// One entry per OCW video. `math` rows are rendered as display KaTeX; `idea`
+// and `trap` carry inline math between single dollars.
+//
+// The trap field is the point of the exercise. If a lecture has no trap worth
+// recording, it is a lecture I have not understood yet.
+const LECTURES = [
+  {
+    no: '01', unit: 'i',
+    title: 'The geometry of linear equations',
+    idea: 'One system, three pictures. Rows are planes that intersect; columns are vectors you combine; the matrix form is the same statement written once. The column picture is the one that survives into higher dimensions.',
+    math: [
+      { tex: 'Ax \\;=\\; x_1\\mathbf{a}_1 + x_2\\mathbf{a}_2 + \\cdots + x_n\\mathbf{a}_n', gloss: 'Ax is a linear combination of the columns of A' }
+    ],
+    trap: 'Solvability is not “do the planes meet”. It is “is $b$ in the span of the columns”. You cannot picture nine planes meeting in $\\mathbb{R}^9$, but you can always ask the span question.'
+  },
+  {
+    no: '02', unit: 'i',
+    title: 'Elimination with matrices',
+    idea: 'Subtract multiples of pivot rows until $A$ is upper triangular. Every step is a left multiplication by an elementary matrix, which is what lets you talk about elimination algebraically instead of procedurally.',
+    math: [
+      { tex: 'E_{32}\\,E_{31}\\,E_{21}\\,A \\;=\\; U', gloss: 'each E clears one entry below a pivot' }
+    ],
+    trap: 'A zero in the pivot position is not the same as a singular matrix. If a row exchange produces a pivot, $A$ is still invertible. Only when no exchange can produce one has elimination actually failed.'
+  },
+  {
+    no: '03', unit: 'i',
+    title: 'Multiplication and inverse matrices',
+    idea: 'Five readings of $AB$: entry by dot product, one column at a time, one row at a time, as a sum of rank-one pieces, and by blocks. The rank-one reading is the one that comes back in the SVD. Invert by running Gauss-Jordan on $[\\,A\\mid I\\,]$.',
+    math: [
+      { tex: 'AB \\;=\\; \\sum_{k=1}^{n} (\\text{col }k\\text{ of } A)(\\text{row }k\\text{ of } B)', gloss: 'a sum of n rank-one matrices' },
+      { tex: '(AB)^{-1} = B^{-1}A^{-1}, \\qquad (AB)^{\\mathsf{T}} = B^{\\mathsf{T}}A^{\\mathsf{T}}' }
+    ],
+    trap: 'Order reverses for both the inverse and the transpose of a product. And a one-sided inverse is only automatically two-sided when the matrix is square — the rectangular case is Lecture 33.'
+  },
+  {
+    no: '04', unit: 'i',
+    title: 'Factorization into A = LU',
+    idea: 'Elimination is not a procedure, it is a factorization. Everything you did on the way to $U$ is recorded in $L$, which means you can reuse the work for a new right-hand side without redoing it.',
+    math: [
+      { tex: 'A = LU, \\qquad PA = LU \\;\\text{ with row exchanges}', gloss: 'L unit lower triangular, U the elimination result' },
+      { tex: '\\text{cost} \\;\\approx\\; \\tfrac{1}{3}n^3 \\text{ operations}' }
+    ],
+    trap: '$L$ holds the multipliers with no sign flip. You subtracted $2\\times$row 1, so $\\ell_{21} = +2$, not $-2$. The signs cancel because $L$ is the inverse of the elimination matrices.'
+  },
+  {
+    no: '05', unit: 'i',
+    title: 'Transposes, permutations, spaces Rⁿ',
+    idea: 'Permutation matrices are the row exchanges, and there are $n!$ of them. Then the definition that the rest of the course runs on: a vector space is closed under addition and scalar multiplication.',
+    math: [
+      { tex: 'P^{-1} = P^{\\mathsf{T}}, \\qquad A^{\\mathsf{T}}A \\text{ is always symmetric}' },
+      { tex: '(A^{\\mathsf{T}}A)^{\\mathsf{T}} = A^{\\mathsf{T}}(A^{\\mathsf{T}})^{\\mathsf{T}} = A^{\\mathsf{T}}A', gloss: 'why the normal equations are symmetric' }
+    ],
+    trap: 'A subspace is not any old subset. Closure under scalar multiplication forces $0\\cdot v = \\mathbf{0}$ to be in it, so a line in $\\mathbb{R}^2$ is a subspace only if it passes through the origin.'
+  },
+  {
+    no: '06', unit: 'i',
+    title: 'Column space and nullspace',
+    idea: 'Two subspaces, asked from opposite ends. $C(A)$ is every $b$ for which $Ax=b$ has a solution. $N(A)$ is every $x$ that $A$ sends to zero. Both are genuinely subspaces, which needs checking rather than assuming.',
+    math: [
+      { tex: 'C(A) = \\{Ax : x \\in \\mathbb{R}^n\\} \\subseteq \\mathbb{R}^m' },
+      { tex: 'N(A) = \\{x : Ax = \\mathbf{0}\\} \\subseteq \\mathbb{R}^n' }
+    ],
+    trap: 'The solution set of $Ax=b$ for $b \\neq \\mathbf{0}$ is not a subspace — it does not contain the zero vector. It is the nullspace shifted off the origin, which is why the complete solution has the shape it does.'
+  },
+  {
+    no: '07', unit: 'i',
+    title: 'Solving Ax = 0: pivot variables, special solutions',
+    idea: 'Eliminate to $R$. The pivot count is the rank $r$; the other $n-r$ columns are free. Set one free variable to 1 and the rest to 0, once per free column, and you have a basis for the nullspace.',
+    math: [
+      { tex: '\\dim N(A) = n - r', gloss: 'one special solution per free variable' },
+      { tex: 'R = \\begin{bmatrix} I & F \\\\ 0 & 0 \\end{bmatrix} \\;\\Longrightarrow\\; N = \\begin{bmatrix} -F \\\\ I \\end{bmatrix}', gloss: 'nullspace matrix, columns are the special solutions' }
+    ],
+    trap: 'Rank is the number of pivots, not the number of rows that look nonzero. Do the elimination. And the minus sign on $F$ is not decoration — it is the whole content of $Ix_{\\text{pivot}} = -Fx_{\\text{free}}$.'
+  },
+  {
+    no: '08', unit: 'i',
+    title: 'Solving Ax = b: row reduced form R',
+    idea: 'The complete solution is one particular solution plus the entire nullspace. Get $x_p$ by setting all free variables to zero; the nullspace supplies everything else.',
+    math: [
+      { tex: 'x \\;=\\; x_p + x_n, \\qquad x_n \\in N(A)' },
+      { tex: 'Ax=b \\text{ solvable} \\iff b \\perp N(A^{\\mathsf{T}})', gloss: 'b must lie in the column space' }
+    ],
+    trap: '$x_p$ is not unique but $x_p + N(A)$ is. Two people can hand in different particular solutions and both be right, which is why the answer is a set and not a vector.'
+  },
+  {
+    no: '09', unit: 'i',
+    title: 'Independence, basis, and dimension',
+    idea: 'Independent means only the zero combination gives zero. A basis is independent and spanning. Dimension is the number of vectors in any basis, and the fact that this number is the same for every basis is the theorem doing the work.',
+    math: [
+      { tex: 'c_1v_1 + \\cdots + c_nv_n = \\mathbf{0} \\;\\Longrightarrow\\; \\text{all } c_i = 0' },
+      { tex: '\\operatorname{rank}(A) = \\#\\text{pivot columns} = \\dim C(A)' }
+    ],
+    trap: 'Independence belongs to a set of vectors; dimension belongs to a space. Do not say “the dimension of these vectors”. And any $n$ vectors in $\\mathbb{R}^m$ with $m < n$ are dependent, no calculation required.'
+  },
+  {
+    no: '10', unit: 'i',
+    title: 'The four fundamental subspaces',
+    idea: 'The whole of Unit I in one picture. Two subspaces live in $\\mathbb{R}^n$ and two in $\\mathbb{R}^m$, the dimensions are fixed by $r$, $m$ and $n$ alone, and the pairs are orthogonal complements.',
+    math: [
+      { tex: '\\begin{array}{llc} C(A) & \\text{column space} & \\dim r \\text{ in } \\mathbb{R}^m \\\\ N(A) & \\text{nullspace} & \\dim n-r \\text{ in } \\mathbb{R}^n \\\\ C(A^{\\mathsf{T}}) & \\text{row space} & \\dim r \\text{ in } \\mathbb{R}^n \\\\ N(A^{\\mathsf{T}}) & \\text{left nullspace} & \\dim m-r \\text{ in } \\mathbb{R}^m \\end{array}' }
+    ],
+    trap: 'Row operations preserve the row space but change the column space. So a basis for $C(A)$ is the pivot columns of the original $A$, never the pivot columns of $R$. This is the single most common lost mark in the course.'
+  },
+  {
+    no: '11', unit: 'i',
+    title: 'Matrix spaces; rank 1; small world graphs',
+    idea: 'Matrices form vector spaces too, and so do solution sets of differential equations. Rank-one matrices are the atoms: every $A$ of rank $r$ is a sum of $r$ of them.',
+    math: [
+      { tex: 'A = uv^{\\mathsf{T}} \\iff \\operatorname{rank}(A) = 1' },
+      { tex: '\\dim(\\text{all } 3\\times3) = 9,\\quad \\dim(\\text{symmetric}) = 6,\\quad \\dim(\\text{upper tri}) = 6' }
+    ],
+    trap: 'The rank-one matrices are not a subspace. Add two of them and you generally get rank 2, so the set is not closed under addition. They span the whole matrix space without being a subspace of it.'
+  },
+  {
+    no: '12', unit: 'i',
+    title: 'Graphs, networks, incidence matrices',
+    idea: 'Where the abstraction earns its keep. The incidence matrix of a graph turns each subspace into something physical: the nullspace is constant potentials, the left nullspace is loop currents, and Kirchhoff’s laws are statements about $A$ and $A^{\\mathsf{T}}$.',
+    math: [
+      { tex: '\\dim N(A^{\\mathsf{T}}) = m - r = \\#\\text{independent loops}' },
+      { tex: '\\#\\text{nodes} - \\#\\text{edges} + \\#\\text{loops} = 1', gloss: 'Euler, falling straight out of the dimension count' }
+    ],
+    trap: 'For a connected graph the rank is $\\#\\text{nodes} - 1$, not $\\#\\text{nodes}$. The all-ones vector is always in the nullspace, because potential is only ever defined up to a constant.'
+  },
+  {
+    no: '13', unit: 'i', review: true,
+    title: 'Quiz 1 review',
+    idea: 'Almost every Unit I question is answered by $r$, $m$ and $n$. Given those three numbers you can state all four dimensions, say whether $Ax=b$ is always/sometimes/never solvable, and say whether the solution is unique.',
+    math: [
+      { tex: '\\begin{array}{lcl} r=m=n & \\to & \\text{one solution always} \\\\ r=n<m & \\to & \\text{zero or one} \\\\ r=m<n & \\to & \\text{infinitely many, always} \\\\ r<m,\\; r<n & \\to & \\text{zero or infinitely many} \\end{array}' }
+    ],
+    trap: 'Read which space the question is asking about before computing anything. $C(A)$ versus $C(R)$, and $N(A)$ versus $N(A^{\\mathsf{T}})$, are where the marks go.'
+  },
+  {
+    no: '14', unit: 'ii',
+    title: 'Orthogonal vectors and subspaces',
+    idea: 'The four subspaces are not just four sets of the right dimensions — they come in perpendicular pairs, and each pair splits its whole space. Row space and nullspace are orthogonal complements in $\\mathbb{R}^n$; column space and left nullspace are orthogonal complements in $\\mathbb{R}^m$.',
+    math: [
+      { tex: 'x^{\\mathsf{T}}y = 0 \\quad\\Longleftrightarrow\\quad x \\perp y' },
+      { tex: 'N(A) = C(A^{\\mathsf{T}})^{\\perp}, \\qquad N(A^{\\mathsf{T}}) = C(A)^{\\perp}' },
+      { tex: 'Ax = \\mathbf{0} \\text{ says every row of } A \\text{ is orthogonal to } x', gloss: 'the whole theorem, read straight off the definition' }
+    ],
+    trap: 'Orthogonal is weaker than complementary. Two lines in $\\mathbb{R}^3$ can be perpendicular without spanning it. Complements must also have dimensions adding to $n$, which is exactly what the rank theorem supplies.'
+  },
+  {
+    no: '15', unit: 'ii',
+    title: 'Projections onto subspaces',
+    idea: 'When $b$ is not in the column space, take the closest thing that is. Split $b$ into $p$ in $C(A)$ and an error $e = b - p$ perpendicular to it. Requiring $A^{\\mathsf{T}}e = \\mathbf{0}$ is what produces the formula.',
+    math: [
+      { tex: 'p = A(A^{\\mathsf{T}}A)^{-1}A^{\\mathsf{T}}b, \\qquad P = A(A^{\\mathsf{T}}A)^{-1}A^{\\mathsf{T}}' },
+      { tex: 'P^2 = P, \\qquad P^{\\mathsf{T}} = P', gloss: 'projecting twice is projecting once' },
+      { tex: 'p = \\frac{a^{\\mathsf{T}}b}{a^{\\mathsf{T}}a}\\,a \\quad \\text{(onto a single line)}' }
+    ],
+    trap: 'Do not "simplify" $(A^{\\mathsf{T}}A)^{-1}$ to $A^{-1}(A^{\\mathsf{T}})^{-1}$. $A$ is rectangular in every case where you need this formula, so it has no inverse and the split is meaningless. The whole point is that $A^{\\mathsf{T}}A$ is square when $A$ is not.'
+  },
+  {
+    no: '16', unit: 'ii',
+    title: 'Projection matrices and least squares',
+    idea: 'Fitting a line to data is projection wearing different clothes. There is no exact solution to $Ax=b$, so solve the projected system instead. The normal equations are what you get by demanding the error be orthogonal to the column space.',
+    math: [
+      { tex: 'A^{\\mathsf{T}}A\\,\\hat{x} = A^{\\mathsf{T}}b', gloss: 'the normal equations' },
+      { tex: '\\min_x \\lVert Ax - b \\rVert^2 \\quad\\text{is attained at}\\quad \\hat{x}' }
+    ],
+    trap: '$A^{\\mathsf{T}}A$ is invertible exactly when $A$ has independent columns, and it inherits $N(A^{\\mathsf{T}}A) = N(A)$. Duplicate or collinear predictors are not a numerical annoyance, they make the system genuinely unsolvable.'
+  },
+  {
+    no: '17', unit: 'ii',
+    title: 'Orthogonal matrices and Gram-Schmidt',
+    idea: 'Orthonormal columns collapse the expensive part of every formula above, because $Q^{\\mathsf{T}}Q = I$ removes the inverse. Gram-Schmidt manufactures such columns by subtracting off the projections you already have.',
+    math: [
+      { tex: 'Q^{\\mathsf{T}}Q = I, \\qquad P = QQ^{\\mathsf{T}}, \\qquad \\hat{x} = Q^{\\mathsf{T}}b' },
+      { tex: 'A = QR', gloss: 'R upper triangular, holding the Gram-Schmidt bookkeeping' },
+      { tex: 'q_k = a_k - \\sum_{j<k} (q_j^{\\mathsf{T}}a_k)\\,q_j \\quad\\text{then normalise}' }
+    ],
+    trap: '$Q^{\\mathsf{T}}Q = I$ always; $QQ^{\\mathsf{T}} = I$ only when $Q$ is square. For a tall $Q$ the product $QQ^{\\mathsf{T}}$ is the projection matrix onto its column space, which is a very different object.'
+  },
+  {
+    no: '18', unit: 'ii',
+    title: 'Properties of determinants',
+    idea: 'Three properties define the determinant completely, and the other seven are consequences rather than extra assumptions. Everything you want — singularity, products, transposes — is derived, not declared.',
+    math: [
+      { tex: '\\det I = 1, \\qquad \\text{row exchange flips the sign}, \\qquad \\text{linear in each row separately}' },
+      { tex: '\\det A = 0 \\iff A \\text{ singular}, \\qquad \\det(AB) = \\det A \\, \\det B, \\qquad \\det A^{\\mathsf{T}} = \\det A' },
+      { tex: '\\det A = \\text{product of the pivots}', gloss: 'which is how you would actually compute one' }
+    ],
+    trap: 'Linear in each row separately is not linear in the matrix. $\\det(A+B) \\neq \\det A + \\det B$, and $\\det(2A) = 2^n \\det A$ rather than $2\\det A$, because you scaled all $n$ rows.'
+  },
+  {
+    no: '19', unit: 'ii',
+    title: 'Determinant formulas and cofactors',
+    idea: 'The big formula has $n!$ terms, one entry from each row and each column, with a sign given by the permutation. Cofactors are that formula regrouped by a chosen row.',
+    math: [
+      { tex: '\\det A = \\sum_{j=1}^{n} a_{1j} C_{1j}, \\qquad C_{ij} = (-1)^{i+j} M_{ij}' },
+      { tex: '\\det A = \\sum_{\\sigma} \\operatorname{sgn}(\\sigma) \\prod_{i=1}^{n} a_{i\\sigma(i)}', gloss: 'n! terms, which is why nobody computes it this way' }
+    ],
+    trap: 'The $(-1)^{i+j}$ belongs to the cofactor $C_{ij}$, not the minor $M_{ij}$. Keep them as separate names or the signs will drift, especially in the $A^{-1}$ formula next lecture where the matrix is also transposed.'
+  },
+  {
+    no: '20', unit: 'ii',
+    title: 'Cramer’s rule, inverse matrix, and volume',
+    idea: 'Three payoffs at once: an explicit inverse, an explicit solution, and the geometric meaning. $|\\det A|$ is the volume of the box spanned by the rows, which is why a zero determinant means the box has collapsed.',
+    math: [
+      { tex: 'A^{-1} = \\frac{1}{\\det A} C^{\\mathsf{T}}', gloss: 'C the cofactor matrix — note the transpose' },
+      { tex: 'x_i = \\frac{\\det B_i}{\\det A}', gloss: 'B_i is A with column i replaced by b' },
+      { tex: '\\lvert \\det A \\rvert = \\text{volume of the parallelepiped from the rows of } A' }
+    ],
+    trap: 'Cramer’s rule is a proof, not an algorithm. It costs $n{+}1$ determinants where elimination costs $n^3/3$ operations total. Use it to see why the answer depends on $\\det A$, never to compute one.'
+  },
+  {
+    no: '21', unit: 'ii',
+    title: 'Eigenvalues and eigenvectors',
+    idea: 'Ask which directions the matrix does not turn. Those directions make the matrix behave like a number, and the whole of the rest of the course is the attempt to write matrices in terms of them.',
+    math: [
+      { tex: 'Ax = \\lambda x \\quad\\Longleftrightarrow\\quad (A - \\lambda I)x = \\mathbf{0} \\quad\\Longleftrightarrow\\quad \\det(A - \\lambda I) = 0' },
+      { tex: '\\sum_{i=1}^{n} \\lambda_i = \\operatorname{trace}(A), \\qquad \\prod_{i=1}^{n} \\lambda_i = \\det A', gloss: 'two free checks on any eigenvalue you compute' }
+    ],
+    trap: 'Eigenvalues do not add. The eigenvalues of $A+B$ are not the eigenvalues of $A$ plus those of $B$, because the eigenvectors differ. And a real matrix can have complex eigenvalues — a rotation has no real invariant direction, and the algebra says so.'
+  },
+  {
+    no: '22', unit: 'ii',
+    title: 'Diagonalization and powers of A',
+    idea: 'With $n$ independent eigenvectors you can change to the basis where $A$ is diagonal. Then powers are free, and the long-run behaviour of a repeated process is decided by the largest $|\\lambda|$.',
+    math: [
+      { tex: 'A = S\\Lambda S^{-1}, \\qquad A^k = S\\Lambda^k S^{-1}' },
+      { tex: 'u_k = A^k u_0 = \\sum_{i=1}^{n} c_i \\lambda_i^{k} x_i', gloss: 'expand u₀ in eigenvectors, then each piece evolves alone' },
+      { tex: 'A^k \\to 0 \\iff \\lvert \\lambda_i \\rvert < 1 \\text{ for all } i' }
+    ],
+    trap: 'Diagonalizable requires $n$ independent eigenvectors, which is not the same as $n$ distinct eigenvalues. Distinct implies independent, but the converse fails in both directions: $I$ has one repeated eigenvalue and a full set of eigenvectors.'
+  },
+  {
+    no: '23', unit: 'ii',
+    title: 'Differential equations and exp(At)',
+    idea: 'The continuous twin of the last lecture. Expand the initial condition in eigenvectors, let each piece run as $e^{\\lambda t}$, and add them up. The matrix exponential is that statement made basis-free.',
+    math: [
+      { tex: '\\frac{du}{dt} = Au \\quad\\Longrightarrow\\quad u(t) = e^{At}u(0) = Se^{\\Lambda t}S^{-1}u(0)' },
+      { tex: 'e^{At} = I + At + \\frac{(At)^2}{2!} + \\cdots' },
+      { tex: '\\text{stable} \\iff \\operatorname{Re}\\lambda_i < 0 \\text{ for all } i' }
+    ],
+    trap: 'Two different stability tests, one lecture apart. Differential equations need $\\operatorname{Re}\\lambda < 0$; powers and difference equations need $\\lvert\\lambda\\rvert < 1$. Applying the wrong one is the standard way to lose this question.'
+  },
+  {
+    no: '24', unit: 'ii',
+    title: 'Markov matrices; Fourier series',
+    idea: 'Two applications of eigenvectors and orthonormal bases. A Markov matrix always has $\\lambda = 1$ with a steady state attached. A Fourier series is the projection formula from Lecture 15 applied to an infinite orthonormal basis of functions.',
+    math: [
+      { tex: '\\text{columns of } A \\text{ sum to } 1 \\Longrightarrow \\text{columns of } A - I \\text{ sum to } 0 \\Longrightarrow \\lambda = 1' },
+      { tex: 'f(x) = a_0 + \\sum_{k\\ge1} \\bigl(a_k\\cos kx + b_k\\sin kx\\bigr)' },
+      { tex: 'a_k = \\frac{1}{\\pi}\\int_0^{2\\pi} f(x)\\cos kx \\, dx', gloss: 'the projection formula, with an integral for the dot product' }
+    ],
+    trap: 'A steady state needs $\\lambda = 1$ to be the only eigenvalue on the unit circle. A chain that alternates has $\\lambda = -1$ as well, satisfies $\\lvert\\lambda\\rvert \\le 1$ everywhere, and still never settles.'
+  },
+  {
+    no: '24b', unit: 'ii', review: true,
+    title: 'Quiz 2 review',
+    idea: 'Unit II is two machines with a bridge. Projection handles equations with no solution; eigenvalues handle processes that repeat. Determinants pay for the eigenvalue machine and supply the volume interpretation.',
+    math: [
+      { tex: '\\begin{array}{ll} \\text{no solution} & \\to A^{\\mathsf{T}}A\\hat{x} = A^{\\mathsf{T}}b \\\\ \\text{repeated action} & \\to A = S\\Lambda S^{-1} \\\\ \\text{singular?} & \\to \\det A = 0 \\end{array}' }
+    ],
+    trap: 'Decide which machine the question wants before computing. A projection matrix, an eigenvalue and a determinant are all one-number-per-matrix answers, and reaching for the wrong one costs the whole question rather than a mark.'
+  },
+  {
+    no: '25', unit: 'iii',
+    title: 'Symmetric matrices and positive definiteness',
+    idea: 'The best-behaved matrices in the course. Symmetry forces the eigenvalues to be real and lets you choose the eigenvectors orthonormal, so $S^{-1}$ becomes $Q^{\\mathsf{T}}$ and diagonalization costs nothing.',
+    math: [
+      { tex: 'A = A^{\\mathsf{T}} \\quad\\Longrightarrow\\quad A = Q\\Lambda Q^{\\mathsf{T}}', gloss: 'the spectral theorem' },
+      { tex: 'A = \\sum_{i=1}^{n} \\lambda_i\\, q_i q_i^{\\mathsf{T}}', gloss: 'every symmetric matrix is a combination of projections' },
+      { tex: '\\#\\{\\text{positive pivots}\\} = \\#\\{\\text{positive eigenvalues}\\}' }
+    ],
+    trap: 'The pivots and the eigenvalues match in sign count, not in value. That is the useful part: pivots come out of elimination you were doing anyway, so you can read off the signs without ever solving the characteristic equation.'
+  },
+  {
+    no: '26', unit: 'iii',
+    title: 'Complex matrices; fast Fourier transform',
+    idea: 'Move to $\\mathbb{C}$ and every real definition gains a conjugate. Transpose becomes conjugate transpose, symmetric becomes Hermitian, orthogonal becomes unitary — and the theorems survive unchanged. The Fourier matrix then factors, and the factorisation is the FFT.',
+    math: [
+      { tex: 'A^{\\mathsf{H}} = \\overline{A}^{\\mathsf{T}}, \\qquad \\lVert x \\rVert^2 = x^{\\mathsf{H}}x = \\sum \\lvert x_i \\rvert^2' },
+      { tex: '(F_n)_{jk} = w^{jk}, \\qquad w = e^{2\\pi i/n}, \\qquad w^n = 1' },
+      { tex: 'n^2 \\longrightarrow \\tfrac{n}{2}\\log_2 n', gloss: 'recursive halving: F₁₀₂₄ from two F₅₁₂' }
+    ],
+    trap: 'Length is $x^{\\mathsf{H}}x$, never $x^{\\mathsf{T}}x$. For $x = (1, i)$ the plain $x^{\\mathsf{T}}x$ is zero, which would make a nonzero vector have no length. The conjugate is what keeps the dot product an inner product.'
+  },
+  {
+    no: '27', unit: 'iii',
+    title: 'Positive definite matrices and minima',
+    idea: 'Five equivalent tests for the same property, and the reason to care: $x^{\\mathsf{T}}Ax$ is a bowl rather than a saddle, so a critical point is a genuine minimum. This is the matrix version of the second derivative being positive.',
+    math: [
+      { tex: 'x^{\\mathsf{T}}Ax > 0 \\text{ for all } x \\neq \\mathbf{0}' },
+      { tex: '\\text{all } \\lambda_i > 0 \\iff \\text{all pivots} > 0 \\iff \\text{all leading minors} > 0 \\iff A = R^{\\mathsf{T}}R \\text{ with } R \\text{ of full column rank}' },
+      { tex: 'A \\text{ positive definite} \\Longrightarrow \\text{the surface } x^{\\mathsf{T}}Ax = 1 \\text{ is an ellipsoid}' }
+    ],
+    trap: 'Every test assumes $A$ is symmetric first — drop that and they all fail. And positive diagonal entries are necessary but nowhere near sufficient: the diagonal only tells you about $x = e_i$, and the definition quantifies over every $x$.'
+  },
+  {
+    no: '28', unit: 'iii',
+    title: 'Similar matrices and Jordan form',
+    idea: 'Similar matrices are the same transformation seen in different bases, so they share eigenvalues, trace, determinant and rank. When eigenvectors run short, the simplest form you can reach is not diagonal but Jordan.',
+    math: [
+      { tex: 'B = M^{-1}AM \\quad\\text{for some invertible } M', gloss: 'same eigenvalues, different eigenvectors' },
+      { tex: 'J = \\begin{bmatrix} J_1 & & \\\\ & \\ddots & \\\\ & & J_d \\end{bmatrix}, \\qquad J_i = \\begin{bmatrix} \\lambda & 1 & \\\\ & \\lambda & \\ddots \\\\ & & \\lambda \\end{bmatrix}' },
+      { tex: '\\#\\text{Jordan blocks} = \\#\\text{independent eigenvectors}' }
+    ],
+    trap: 'Identical eigenvalues do not make matrices similar. The $2\\times2$ matrices $\\lambda I$ and $\\begin{bmatrix}\\lambda & 1\\\\ 0 & \\lambda\\end{bmatrix}$ have the same eigenvalues, trace and determinant, and are not similar — the first has two eigenvectors and the second has one.'
+  },
+  {
+    no: '29', unit: 'iii',
+    title: 'Singular value decomposition',
+    idea: 'The end of the argument. Every matrix — any shape, any rank, symmetric or not — has an orthonormal basis of the row space that $A$ sends to an orthonormal basis of the column space, stretched by non-negative factors.',
+    math: [
+      { tex: 'A = U\\Sigma V^{\\mathsf{T}}, \\qquad Av_i = \\sigma_i u_i' },
+      { tex: 'A^{\\mathsf{T}}A = V\\Sigma^{\\mathsf{T}}\\Sigma V^{\\mathsf{T}}, \\qquad AA^{\\mathsf{T}} = U\\Sigma\\Sigma^{\\mathsf{T}}U^{\\mathsf{T}}', gloss: 'v from one, u from the other, σ² the shared eigenvalues' },
+      { tex: 'A = \\sum_{i=1}^{r} \\sigma_i u_i v_i^{\\mathsf{T}}', gloss: 'r rank-one pieces, largest σ first' }
+    ],
+    trap: 'The $\\sigma_i$ are square roots of eigenvalues of $A^{\\mathsf{T}}A$ and are always $\\ge 0$ — they are not eigenvalues of $A$. And get each $u_i$ from $Av_i = \\sigma_i u_i$ rather than by solving the $AA^{\\mathsf{T}}$ problem separately, or the signs will not match and $U\\Sigma V^{\\mathsf{T}}$ will not reassemble into $A$.'
+  },
+  {
+    no: '30', unit: 'iii',
+    title: 'Linear transformations and their matrices',
+    idea: 'The transformation is the real object; the matrix is what appears once you commit to bases. A map is linear if it respects addition and scaling, and that alone forces it to be a matrix.',
+    math: [
+      { tex: 'T(cv + dw) = cT(v) + dT(w)', gloss: 'and therefore T(0) = 0' },
+      { tex: '\\text{column } j \\text{ of } A = \\text{coordinates of } T(v_j) \\text{ in the output basis}' }
+    ],
+    trap: 'There is no such thing as "the" matrix of a transformation. Change either basis and the matrix changes, while the transformation does not. That is exactly the freedom the next lecture spends.'
+  },
+  {
+    no: '31', unit: 'iii',
+    title: 'Change of basis; image compression',
+    idea: 'Choosing a basis is choosing what will be easy. Compression works because in a good basis most coordinates are near zero and can be discarded, while the picture survives.',
+    math: [
+      { tex: 'A\' = M^{-1}AM', gloss: 'same transformation, new basis — a similarity' },
+      { tex: 'x_{\\text{new}} = M^{-1}x_{\\text{old}}' },
+      { tex: '\\text{JPEG: } 8\\times8 \\text{ blocks in the discrete cosine basis}' }
+    ],
+    trap: 'Compression does not throw away small parts of the image, it throws away small coefficients in a chosen basis. In the pixel basis nothing is small, which is the entire reason for changing basis before you compress.'
+  },
+  {
+    no: '32', unit: 'iii', review: true,
+    title: 'Quiz 3 review',
+    idea: 'Unit III is symmetry and what it buys, then what remains when you give it up. Symmetric gives $Q\\Lambda Q^{\\mathsf{T}}$; diagonalizable-but-not-symmetric gives $S\\Lambda S^{-1}$; not diagonalizable gives Jordan; nothing at all still gives the SVD.',
+    math: [
+      { tex: '\\begin{array}{ll} A = A^{\\mathsf{T}} & \\to Q\\Lambda Q^{\\mathsf{T}} \\\\ n \\text{ eigenvectors} & \\to S\\Lambda S^{-1} \\\\ \\text{fewer} & \\to M J M^{-1} \\\\ \\text{any matrix at all} & \\to U\\Sigma V^{\\mathsf{T}} \\end{array}' }
+    ],
+    trap: 'Check symmetry before reaching for orthogonal eigenvectors. A non-symmetric matrix can have perfectly good eigenvectors that are not perpendicular, and assuming $S^{-1} = S^{\\mathsf{T}}$ there is silently wrong.'
+  },
+  {
+    no: '33', unit: 'iii',
+    title: 'Left and right inverses; pseudoinverse',
+    idea: 'Full rank one way gives you half an inverse; the pseudoinverse gives you the rest. $A^{+}$ inverts $A$ exactly where inverting is possible — between the row space and the column space — and sends both nullspaces to zero.',
+    math: [
+      { tex: 'r = n:\\quad A^{+}_{\\text{left}} = (A^{\\mathsf{T}}A)^{-1}A^{\\mathsf{T}}, \\qquad r = m:\\quad A^{+}_{\\text{right}} = A^{\\mathsf{T}}(AA^{\\mathsf{T}})^{-1}' },
+      { tex: 'A^{+} = V\\Sigma^{+}U^{\\mathsf{T}}, \\qquad \\Sigma^{+}_{ii} = \\begin{cases} 1/\\sigma_i & \\sigma_i > 0 \\\\ 0 & \\sigma_i = 0 \\end{cases}' },
+      { tex: 'A^{+}A = \\text{projection onto } C(A^{\\mathsf{T}}), \\qquad AA^{+} = \\text{projection onto } C(A)' }
+    ],
+    trap: '$A^{+}A \\neq I$ unless $A$ has full column rank. Inverting the zero singular values is exactly the step you must not take — you set them to zero instead, which is why $A^{+}$ exists for every matrix while $A^{-1}$ does not.'
+  },
+  {
+    no: '34', unit: 'iii', review: true,
+    title: 'Final course review',
+    idea: 'The course is two questions asked repeatedly. Which of the four subspaces is this vector in, and which basis makes this matrix simple? Elimination, projection, eigenvectors and the SVD are four answers to the second one, in increasing order of generality.',
+    math: [
+      { tex: '\\begin{array}{lll} LU & \\text{elimination} & \\text{solve } Ax = b \\\\ QR & \\text{orthonormalise} & \\text{least squares} \\\\ S\\Lambda S^{-1} & \\text{eigenvectors} & \\text{powers, } e^{At} \\\\ Q\\Lambda Q^{\\mathsf{T}} & \\text{symmetric} & \\text{definiteness} \\\\ U\\Sigma V^{\\mathsf{T}} & \\text{any matrix} & \\text{rank, } A^{+}, \\text{ compression} \\end{array}' }
+    ],
+    trap: 'Almost every question reduces to the rank. Before computing anything, work out $r$, $m$ and $n$ — the four dimensions, the solvability of $Ax=b$ and the uniqueness of the solution all follow from those three numbers alone.'
+  }
+];
+
+// The cheatsheet is not a summary of the notes above - it is the thing you
+// want open next to a problem set. Ordered by how often you reach for it,
+// not by the order the course teaches it.
+const SHEET = [
+  {
+    id: 'rank',
+    title: 'Rank decides everything',
+    note: 'Given r, m and n you can answer almost any structural question without touching the matrix again. Start here.',
+    rows: [
+      { term: 'Dimensions', tex: '\\dim C(A) = \\dim C(A^{\\mathsf{T}}) = r, \\quad \\dim N(A) = n-r, \\quad \\dim N(A^{\\mathsf{T}}) = m-r' },
+      { term: 'r = m = n', tex: 'A \\text{ invertible}', say: 'Exactly one solution, for every b.' },
+      { term: 'r = n < m', tex: '\\text{full column rank}', say: 'Zero or one solution. Independent columns, so nothing in the nullspace. This is the least-squares case.' },
+      { term: 'r = m < n', tex: '\\text{full row rank}', say: 'Infinitely many solutions, always. Ax = b is solvable for every b.' },
+      { term: 'r < m, r < n', tex: '\\text{neither}', say: 'Zero or infinitely many, depending on b.' }
+    ]
+  },
+  {
+    id: 'subspaces',
+    title: 'The four subspaces',
+    note: 'Two live in Rⁿ, two in Rᵐ, and each pair is an orthogonal complement.',
+    rows: [
+      { term: 'Column space', tex: 'C(A) \\subseteq \\mathbb{R}^m, \\quad \\dim r', say: 'Basis: the pivot columns of the original A, not of R.' },
+      { term: 'Nullspace', tex: 'N(A) \\subseteq \\mathbb{R}^n, \\quad \\dim n-r', say: 'Basis: the special solutions, one per free variable.' },
+      { term: 'Row space', tex: 'C(A^{\\mathsf{T}}) \\subseteq \\mathbb{R}^n, \\quad \\dim r', say: 'Basis: the nonzero rows of R. Row operations preserve it.' },
+      { term: 'Left nullspace', tex: 'N(A^{\\mathsf{T}}) \\subseteq \\mathbb{R}^m, \\quad \\dim m-r', say: 'Basis: the rows of E in EA = R that hit zero rows.' },
+      { term: 'Orthogonality', tex: 'N(A) \\perp C(A^{\\mathsf{T}}), \\qquad N(A^{\\mathsf{T}}) \\perp C(A)' }
+    ]
+  },
+  {
+    id: 'solving',
+    title: 'Solving Ax = b',
+    rows: [
+      { term: 'Complete solution', tex: 'x = x_p + x_n, \\quad x_n \\in N(A)', say: 'Get x_p by setting every free variable to zero.' },
+      { term: 'Solvable when', tex: 'b \\in C(A) \\iff b \\perp N(A^{\\mathsf{T}})' },
+      { term: 'Nullspace matrix', tex: 'R = \\begin{bmatrix} I & F \\\\ 0 & 0 \\end{bmatrix} \\Longrightarrow N = \\begin{bmatrix} -F \\\\ I \\end{bmatrix}' },
+      { term: 'No solution', tex: 'A^{\\mathsf{T}}A\\hat{x} = A^{\\mathsf{T}}b', say: 'Least squares: project b onto C(A) and solve that instead.' },
+      { term: 'Many solutions', tex: 'x^{+} = A^{+}b', say: 'The pseudoinverse picks the minimum-norm one.' }
+    ]
+  },
+  {
+    id: 'factorizations',
+    title: 'The factorizations',
+    note: 'Each one says: change basis so the matrix becomes simple. They are listed in increasing order of what they demand of A.',
+    rows: [
+      { term: 'A = LU', tex: 'A = LU \\quad\\text{or}\\quad PA = LU', say: 'Elimination. Needs nothing but squareness for the P version. Cost n³/3.' },
+      { term: 'A = QR', tex: 'A = QR, \\quad Q^{\\mathsf{T}}Q = I', say: 'Gram-Schmidt. Needs independent columns.' },
+      { term: 'A = SΛS⁻¹', tex: 'A = S\\Lambda S^{-1}', say: 'Needs n independent eigenvectors. Gives powers for free.' },
+      { term: 'A = QΛQᵀ', tex: 'A = Q\\Lambda Q^{\\mathsf{T}}', say: 'Needs symmetry. Real λ, orthonormal eigenvectors.' },
+      { term: 'A = MJM⁻¹', tex: 'A = MJM^{-1}', say: 'Jordan. What you get when the eigenvectors run out.' },
+      { term: 'A = UΣVᵀ', tex: 'A = U\\Sigma V^{\\mathsf{T}}', say: 'The SVD. Needs nothing at all. Any shape, any rank.' }
+    ]
+  },
+  {
+    id: 'projection',
+    title: 'Projection and least squares',
+    rows: [
+      { term: 'Onto a line', tex: 'p = \\frac{a^{\\mathsf{T}}b}{a^{\\mathsf{T}}a}\\,a, \\qquad P = \\frac{aa^{\\mathsf{T}}}{a^{\\mathsf{T}}a}' },
+      { term: 'Onto C(A)', tex: 'P = A(A^{\\mathsf{T}}A)^{-1}A^{\\mathsf{T}}' },
+      { term: 'With orthonormal Q', tex: 'P = QQ^{\\mathsf{T}}, \\qquad \\hat{x} = Q^{\\mathsf{T}}b', say: 'The inverse disappears. This is the whole reason for Gram-Schmidt.' },
+      { term: 'Properties', tex: 'P^2 = P, \\qquad P^{\\mathsf{T}} = P, \\qquad \\lambda(P) \\in \\{0, 1\\}' },
+      { term: 'Error', tex: 'e = b - p \\in N(A^{\\mathsf{T}}), \\qquad e \\perp C(A)' },
+      { term: 'AᵀA invertible', tex: '\\iff A \\text{ has independent columns}', say: 'And N(AᵀA) = N(A) always.' }
+    ]
+  },
+  {
+    id: 'determinants',
+    title: 'Determinants',
+    rows: [
+      { term: 'Defining three', tex: '\\det I = 1, \\quad \\text{exchange flips sign}, \\quad \\text{linear in each row}' },
+      { term: 'Products', tex: '\\det(AB) = \\det A \\det B, \\quad \\det A^{-1} = 1/\\det A, \\quad \\det A^{\\mathsf{T}} = \\det A' },
+      { term: 'Scaling', tex: '\\det(cA) = c^{n}\\det A', say: 'Not c·det A. You scaled all n rows.' },
+      { term: 'Compute by', tex: '\\det A = \\text{product of the pivots}' },
+      { term: 'Cofactors', tex: '\\det A = \\sum_j a_{ij}C_{ij}, \\qquad C_{ij} = (-1)^{i+j}M_{ij}' },
+      { term: 'Inverse', tex: 'A^{-1} = \\frac{1}{\\det A}C^{\\mathsf{T}}', say: 'Note the transpose on the cofactor matrix.' },
+      { term: 'Geometry', tex: '\\lvert\\det A\\rvert = \\text{volume of the box spanned by the rows}' }
+    ]
+  },
+  {
+    id: 'eigen',
+    title: 'Eigenvalues',
+    rows: [
+      { term: 'Definition', tex: 'Ax = \\lambda x, \\qquad \\det(A - \\lambda I) = 0' },
+      { term: 'Free checks', tex: '\\textstyle\\sum \\lambda_i = \\operatorname{trace} A, \\qquad \\prod \\lambda_i = \\det A', say: 'Always verify with these before going on.' },
+      { term: 'Powers', tex: 'A^k = S\\Lambda^k S^{-1}, \\qquad u_k = \\textstyle\\sum c_i\\lambda_i^k x_i' },
+      { term: 'Stability, powers', tex: 'A^k \\to 0 \\iff \\lvert\\lambda_i\\rvert < 1' },
+      { term: 'Stability, ODEs', tex: 'u(t) \\to 0 \\iff \\operatorname{Re}\\lambda_i < 0', say: 'Different test from the line above. Do not mix them.' },
+      { term: 'Shifts', tex: '\\lambda(A + cI) = \\lambda(A) + c', say: 'Same eigenvectors. But λ(A+B) is not λ(A)+λ(B) in general.' },
+      { term: 'Diagonalizable', tex: '\\iff n \\text{ independent eigenvectors}', say: 'Distinct λ is sufficient, not necessary.' }
+    ]
+  },
+  {
+    id: 'special',
+    title: 'Eigenvalues you should recognise',
+    note: 'Worth memorising — these turn up in quiz questions where computing the characteristic polynomial is a trap.',
+    rows: [
+      { term: 'Triangular', tex: '\\lambda = \\text{the diagonal entries}' },
+      { term: 'Projection P', tex: '\\lambda = 1 \\text{ (on the subspace)}, \\quad 0 \\text{ (off it)}' },
+      { term: 'Reflection', tex: '\\lambda = 1 \\text{ and } -1' },
+      { term: 'Orthogonal Q', tex: '\\lvert\\lambda\\rvert = 1', say: 'Possibly complex. A rotation has no real eigenvector.' },
+      { term: 'Rotation by θ', tex: '\\lambda = e^{\\pm i\\theta}' },
+      { term: 'Markov', tex: '\\lambda = 1 \\text{ is present}, \\quad \\lvert\\lambda_i\\rvert \\le 1' },
+      { term: 'Rank one', tex: 'A = uv^{\\mathsf{T}} \\Rightarrow \\lambda = v^{\\mathsf{T}}u \\text{ and } 0 \\text{ (}n-1\\text{ times)}' },
+      { term: 'Singular', tex: '\\lambda = 0 \\text{ is present}' },
+      { term: 'Symmetric', tex: '\\lambda \\in \\mathbb{R}, \\quad \\text{eigenvectors orthogonal}' }
+    ]
+  },
+  {
+    id: 'posdef',
+    title: 'Positive definite',
+    note: 'All five tests assume A is symmetric. Without that they say nothing.',
+    rows: [
+      { term: 'Definition', tex: 'x^{\\mathsf{T}}Ax > 0 \\text{ for all } x \\neq \\mathbf{0}' },
+      { term: 'Test 1', tex: '\\text{all eigenvalues } \\lambda_i > 0' },
+      { term: 'Test 2', tex: '\\text{all pivots} > 0', say: 'Cheapest test — you get pivots from elimination anyway.' },
+      { term: 'Test 3', tex: '\\text{all leading minors} > 0' },
+      { term: 'Test 4', tex: 'A = R^{\\mathsf{T}}R \\text{ with independent columns in } R' },
+      { term: 'Consequences', tex: 'A^{-1} \\text{ positive definite}, \\quad A + B \\text{ positive definite}, \\quad x^{\\mathsf{T}}Ax = 1 \\text{ an ellipsoid}' },
+      { term: 'Semidefinite', tex: 'x^{\\mathsf{T}}Ax \\ge 0 \\iff \\lambda_i \\ge 0', say: 'AᵀA is always at least semidefinite.' }
+    ]
+  },
+  {
+    id: 'svd',
+    title: 'SVD and pseudoinverse',
+    rows: [
+      { term: 'The factorization', tex: 'A = U\\Sigma V^{\\mathsf{T}}, \\qquad Av_i = \\sigma_i u_i' },
+      { term: 'Where they come from', tex: 'v_i \\text{ from } A^{\\mathsf{T}}A, \\quad u_i \\text{ from } Av_i/\\sigma_i, \\quad \\sigma_i = \\sqrt{\\lambda_i(A^{\\mathsf{T}}A)}' },
+      { term: 'Bases', tex: 'v_1..v_r \\text{ span } C(A^{\\mathsf{T}}), \\quad u_1..u_r \\text{ span } C(A)', say: 'The remaining columns span the two nullspaces.' },
+      { term: 'Rank-one sum', tex: 'A = \\textstyle\\sum_{i=1}^{r} \\sigma_i u_i v_i^{\\mathsf{T}}', say: 'Truncate after k terms for the best rank-k approximation.' },
+      { term: 'Pseudoinverse', tex: 'A^{+} = V\\Sigma^{+}U^{\\mathsf{T}}', say: 'Invert the nonzero σ, leave the zeros at zero.' },
+      { term: 'What A⁺ does', tex: 'A^{+}A = P_{C(A^{\\mathsf{T}})}, \\qquad AA^{+} = P_{C(A)}' }
+    ]
+  }
+];
+
+// ── rendering ──────────────────────────────────────────────
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+// Prose carries inline math between single dollars; `tex` fields are display
+// math and get wrapped here rather than in the data.
+const display = tex => '$$' + tex + '$$';
+
+function renderLecture(lec) {
+  const item = el('article', 'lec' + (lec.review ? ' lec--review' : ''));
+  item.id = 'lec-' + lec.no;
+
+  item.append(el('span', 'lec-no', lec.no));
+  item.append(el('h3', 'lec-title', lec.title));
+  item.append(el('p', 'lec-idea', lec.idea));
+
+  if (lec.math && lec.math.length) {
+    const well = el('div', 'lec-math');
+    lec.math.forEach(row => {
+      const line = el('div', 'row', display(row.tex));
+      if (row.gloss) line.append(el('span', 'gloss', row.gloss));
+      well.append(line);
+    });
+    item.append(well);
+  }
+
+  const trap = el('p', 'lec-trap');
+  trap.append(el('b', null, 'The trap'), document.createTextNode(lec.trap));
+  item.append(trap);
+
+  return item;
+}
+
+function renderNotes() {
+  return UNITS.map(unit => {
+    const section = el('section', 'unit');
+    section.id = 'unit-' + unit.id;
+
+    const head = el('div', 'unit-head');
+    const label = el('div', 'unit-label');
+    label.append(el('span', null, unit.label), el('span', 'range', unit.range));
+    head.append(label, el('h2', null, unit.title), el('p', 'unit-blurb', unit.blurb));
+    section.append(head);
+
+    LECTURES.filter(lec => lec.unit === unit.id).forEach(lec => section.append(renderLecture(lec)));
+    return section;
+  });
+}
+
+function renderSheet() {
+  return SHEET.map(card => {
+    const section = el('section', 'sheet-card');
+    section.id = 'sheet-' + card.id;
+    section.append(el('h2', null, card.title));
+    if (card.note) section.append(el('p', 'sheet-note', card.note));
+
+    const rows = el('dl', 'sheet-rows');
+    card.rows.forEach(row => {
+      rows.append(el('dt', null, row.term));
+      const dd = el('dd', null, row.tex ? display(row.tex) : '');
+      if (row.say) dd.append(el('span', 'say', row.say));
+      rows.append(dd);
+    });
+    section.append(rows);
+    return section;
+  });
+}
+
+// ── the switch ─────────────────────────────────────────────
+
+const main = document.getElementById('main');
+
+const KATEX_OPTS = {
+  delimiters: [
+    { left: '$$', right: '$$', display: true },
+    { left: '$',  right: '$',  display: false }
+  ],
+  throwOnError: false,
+  errorColor: '#b00020'
+};
+
+// If the CDN is blocked, renderMathInElement is simply absent. The page then
+// shows dollar-delimited source, which is ugly but readable - better than a
+// blank main, which is why `ready` is set unconditionally below.
+function typeset(node) {
+  if (typeof renderMathInElement === 'function') renderMathInElement(node, KATEX_OPTS);
+}
+
+let currentView = 'notes';
+
+function render() {
+  main.replaceChildren(...(currentView === 'notes' ? renderNotes() : renderSheet()));
+  typeset(main);
+  document.getElementById('switchLabel').textContent =
+    currentView === 'notes' ? LECTURES.length + ' lectures' : 'the course on one page';
+}
+
+function renderViews(target) {
+  VIEWS.forEach((view, i) => {
+    if (i > 0) {
+      const sep = el('span', 'sep', '/');
+      sep.setAttribute('aria-hidden', 'true');
+      target.append(sep);
+    }
+    const button = el('button', 'view-item', view.label);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', String(view.id === currentView));
+    button.addEventListener('click', () => {
+      currentView = view.id;
+      target.querySelectorAll('.view-item').forEach(item => {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      try { localStorage.setItem(VIEW_KEY, view.id); } catch (_) {}
+      render();
+    });
+    target.append(button);
+  });
+}
+
+// Decide which view the page opens on.
+//
+//   saved - 'notes' | 'sheet' | null : what this reader last chose here
+//   hash  - location.hash, e.g. '#lec-29', '#sheet-svd', or ''
+//
+// A deep link outranks the saved preference, because the alternative is a link
+// that silently does nothing: each anchor exists in only one of the two views,
+// so opening the other one means the jump lands nowhere. Anything the hash
+// does not settle falls back to the reader's last choice.
+function resolveInitialView(saved, hash) {
+  const id = hash.replace(/^#/, '');
+  if (id.startsWith('sheet-')) return 'sheet';
+  if (id.startsWith('lec-') || id.startsWith('unit-')) return 'notes';
+  return saved || 'notes';
+}
+
+function boot() {
+  try {
+    let saved = null;
+    try { saved = localStorage.getItem(VIEW_KEY); } catch (_) {}
+    if (saved !== 'notes' && saved !== 'sheet') saved = null;
+
+    currentView = resolveInitialView(saved, location.hash) === 'sheet' ? 'sheet' : 'notes';
+
+    renderViews(document.getElementById('views'));
+    render();
+
+    if (location.hash) {
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (target) target.scrollIntoView();
+    }
+
+    document.getElementById('copyright').textContent = '© ' + new Date().getFullYear() + ' Tianchu Zhao';
+  } finally {
+    document.documentElement.classList.add('ready');
+  }
+}
+
+boot();
+</script>
+<script>
+// Failsafe in its own element: a parse error in the script above cannot then
+// leave main permanently hidden behind html:not(.ready).
+setTimeout(function () { document.documentElement.classList.add('ready'); }, 2000);
+</script>
+</body>
+</html>

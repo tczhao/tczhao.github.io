@@ -255,9 +255,9 @@
      drives both the face and the measure. A three-word note wants to be huge;
      a forty-five word paragraph cannot be, so it steps down instead of
      overflowing. Same machinery serves the card and focus mode. */
-  #card .e-line, #card .e-note, #card .e-script p,
-  .focus-body .e-line, .focus-body .e-note, .focus-body .e-script p,
-  .reel .entry .e-line, .reel .entry .e-note, .reel .entry .e-script p {
+  #card .e-line, #card .e-note, #card .e-quote, #card .e-script p,
+  .focus-body .e-line, .focus-body .e-note, .focus-body .e-quote, .focus-body .e-script p,
+  .reel .entry .e-line, .reel .entry .e-note, .reel .entry .e-quote, .reel .entry .e-script p {
     font-size: inherit;
     line-height: inherit;
     letter-spacing: inherit;
@@ -294,6 +294,14 @@
     font-size: var(--t-display);
   }
   #card .e-kind, .focus-body .e-kind { font-size: var(--t-micro); }
+
+  /* The attribution never scales with the quote. At s-xl a matching source line
+     would be a second headline, and it is a footnote. */
+  #card .e-source, .focus-body .e-source, .reel .entry .e-source {
+    font-size: var(--t-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
 
   /* ── track nav ──────────────────────────────────────── */
 
@@ -481,6 +489,26 @@
     color: var(--fg);
   }
   .e-script .e-kind { color: var(--accent); }
+
+  /* A borrowed line sets exactly like one of mine - the attribution beneath is
+     what marks it, so nothing else needs to. The gap is in em on the quote
+     rather than px on the source, so it opens up with the display sizes instead
+     of staying a hairline under seventy-pixel type. */
+  .e-quote {
+    font-size: var(--t-read);
+    line-height: 1.7;
+    margin-bottom: 0.42em;
+  }
+
+  .e-source {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    letter-spacing: 0.02em;
+    /* tracks the quote's measure, so at display size it sits under the text
+       block rather than out at the far edge of the container */
+    max-width: var(--measure, 30ch);
+  }
 
   .e-stub {
     border: 1px dashed var(--rule);
@@ -853,14 +881,14 @@
   <span><b>f</b>focus</span>
   <span><b>&larr; &rarr;</b>move</span>
   <span><b>esc</b>close</span>
-  <span><b>1&ndash;7</b>tracks</span>
+  <span><b>1&ndash;8</b>tracks</span>
   <span><b>v</b>view</span>
 </div>
 
 <footer class="tail wrap">
   <div>
     <h2>What this is</h2>
-    <p>A commonplace book, which is the old name for exactly this: a place you copy the lines worth keeping so you meet them again. Everything here is transcribed from my own notes rather than sourced, so treat it as what I concluded, not as what is true.</p>
+    <p>A commonplace book, which is the old name for exactly this: a place you copy the lines worth keeping so you meet them again. Everything but Borrowed is transcribed from my own notes rather than sourced, so treat it as what I concluded, not as what is true. Borrowed is the other kind, and each line there carries the name of whoever said it.</p>
     <p>Two entries are marked unwritten. They were headings I never filled in, and they stay visible so they keep asking.</p>
   </div>
   <div>
@@ -889,13 +917,16 @@
 
 <script>
 // Notes transcribed from other/quote/quote.md. Wording is the source wording; the
-// only edits are two spelling fixes. Entries carry a type because the material is
+// only edits are two spelling fixes. One track holds words that are not mine;
+// the `quote` type exists so the attribution travels with the line and cannot be
+// separated from it by a copy-paste. Entries carry a type because the material is
 // not uniform - a sentence you say out loud wants different treatment from a
 // four-step procedure, and both want different treatment from a three-word note.
 //
 //   note    terse shorthand, complete as written
 //   line    an aphorism, kept verbatim
 //   script  a sentence to actually say in the room
+//   quote   someone else's line, kept with its attribution
 //   seq     an ordered sequence of plain steps
 //   play    a named framework whose steps carry labelled fields
 //   stub    a heading with nothing under it yet
@@ -906,7 +937,8 @@ const TRACKS = [
   { id: 'objection', nav: 'Objection', head: 'Objection' },
   { id: 'wrong',     nav: 'Wrong',     head: 'Telling someone they are wrong' },
   { id: 'align',     nav: 'Align',     head: 'Defend and align' },
-  { id: 'me',        nav: 'Me',        head: 'Me' }
+  { id: 'me',        nav: 'Me',        head: 'Me' },
+  { id: 'borrowed',  nav: 'Borrowed',  head: 'Borrowed' }
 ];
 
 const ENTRIES = [
@@ -991,7 +1023,11 @@ const ENTRIES = [
     ] }
   ] },
 
-  { track: 'me', type: 'line', text: 'tell a story not just stats' }
+  { track: 'me', type: 'line', text: 'tell a story not just stats' },
+
+  { track: 'borrowed', type: 'quote',
+    text: 'Your success in life will be determined largely by your ability to speak, your ability to write, and the quality of your ideas. In that order.',
+    source: 'Patrick Winston' }
 ];
 
 // Only the kinds whose label carries something the form does not already
@@ -1029,7 +1065,7 @@ const BEARING = {
 };
 
 function optical(container) {
-  const node = container.querySelector('.e-line, .e-note, .e-script p');
+  const node = container.querySelector('.e-line, .e-note, .e-quote, .e-script p');
   if (!node) return;
   const shift = BEARING[node.textContent.trim()[0]];
   node.style.textIndent = shift ? shift + 'em' : '';
@@ -1063,6 +1099,11 @@ function renderEntry(entry) {
     const quote = el('div', 'e-script');
     quote.append(el('p', null, typeset(entry.text)));
     wrap.append(quote);
+  } else if (entry.type === 'quote') {
+    wrap.append(el('p', 'e-quote', typeset(entry.text)));
+    // The dash is setting, not data, so it is added here and the source stays a
+    // bare name - the same split the smart quotes above are on.
+    wrap.append(el('p', 'e-source', '\u2014 ' + typeset(entry.source)));
   } else if (entry.type === 'stub') {
     const stub = el('div', 'e-stub');
     stub.append(el('p', 'e-title', typeset(entry.title)));

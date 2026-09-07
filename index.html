@@ -243,7 +243,8 @@ const FILTERS = [
   { id: 'practice',  label: 'Practice' },
   { id: 'dashboard', label: 'Dashboards' },
   { id: 'tool',      label: 'Tools' },
-  { id: 'tip',       label: 'Tips' }
+  { id: 'tip',       label: 'Tips' },
+  { id: 'course',    label: 'Courses' }
 ];
 
 const VIEWS = [
@@ -256,6 +257,12 @@ const VIEWS = [
 // note: long description, shown in the text view only.
 // img:  tile artwork. Omit it and the tile renders as the bare panel.
 const WORKS = [
+  {
+    href: 'course/mit-1806/', kind: 'course', ratio: '4 / 3',
+    name: 'Linear Algebra', label: 'Course 01',
+    line: 'all 35 lectures of MIT 18.06, one idea each',
+    note: 'Gilbert Strang’s 18.06 cut down to the result each lecture is actually carrying, the formula worth keeping, and the thing that catches people the first time. Plus the cheatsheet the whole course collapses into.'
+  },
   {
     href: 'tips/bargaining/', kind: 'tip', ratio: '3 / 2',
     name: 'Reserve Price', label: 'Tip 04',
