@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burden of Proof</title>
+<meta name="description" content="Ten conversations on the way from running a team to running the people who run teams, each carried through to the reply and what you say to it.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #131416;
+    --fg-mid: #4b4f55;
+    --fg-dim: #7c828b;
+    --rule: #e0e2e5;
+    --rule-soft: #ebedef;
+    --panel: #f1f2f4;
+    --accent: #1f6f4a;
+    --script-bg: #f2f5f2;
+    --script-rule: #cfdcd4;
+    /* Their turn is deliberately colder than yours. It is context to read,
+       not an artifact to take away, and it carries no copy button. */
+    --them-bg: transparent;
+    --them-rule: #d8dade;
+
+    --max-w: 840px;
+    --pad: 4vw;
+
+    --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --t-micro: 0.6875rem;
+    --t-meta:  0.8125rem;
+    --t-aside: 0.9375rem;
+    --t-read:  1rem;
+    --t-lead:  1.125rem;
+    --t-sub:   1.375rem;
+    --t-display: clamp(1.75rem, 3.6vw, 2.75rem);
+
+    --s1: clamp(8px,  0.8vw, 12px);
+    --s2: clamp(14px, 1.4vw, 20px);
+    --s3: clamp(22px, 2.2vw, 32px);
+    --s4: clamp(34px, 3.4vw, 50px);
+    --s5: clamp(52px, 5.2vw, 78px);
+    --s6: clamp(80px, 8.0vw, 120px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101214;
+      --fg: #e9ebee;
+      --fg-mid: #a5abb4;
+      --fg-dim: #757b84;
+      --rule: #2a2e33;
+      --rule-soft: #1f2226;
+      --panel: #191c1f;
+      --accent: #5fc48d;
+      --script-bg: #151a17;
+      --script-rule: #2d3b34;
+      --them-rule: #33373d;
+    }
+    /* Source Serif 4 is a variable face: at the same nominal weight it reads
+       thinner on a dark ground, so the optical size axis compensates. */
+    .standfirst, .conv-before, .conv-cost, .phase-lead, .rule-body, .tail p {
+      font-variation-settings: 'opsz' 9;
+    }
+  }
+
+  @media (max-width: 767px) { :root { --pad: 6vw; } }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    hyphens: none;
+  }
+
+  p { text-wrap: pretty; }
+  h1, h2, h3 { font-family: var(--font-text); font-weight: 600; line-height: 1.15; }
+  a { color: inherit; }
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+  .wrap {
+    width: min(var(--max-w), calc(100% - var(--pad) * 2));
+    margin-inline: auto;
+  }
+
+  /* ── masthead ────────────────────────────────────────── */
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .home {
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .home:hover { color: var(--fg); }
+
+  /* ── title block ─────────────────────────────────────── */
+
+  .head { padding-block: var(--s5) var(--s4); }
+
+  .head-no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s2);
+  }
+
+  .standfirst {
+    max-width: 62ch;
+    font-size: var(--t-lead);
+    color: var(--fg-mid);
+  }
+  .standfirst + .standfirst { margin-top: var(--s1); }
+  .standfirst a, .tail a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent);
+  }
+
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--s2);
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  /* ── phase nav ───────────────────────────────────────── */
+  /*
+     Sticky because the conversations are long enough that you lose your place,
+     and the nav doubles as the table of contents this page otherwise has
+     nowhere to put.
+  */
+  .phasenav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-block: var(--s1);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .phasenav-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+  }
+  .phasenav-inner {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .phasenav-inner::-webkit-scrollbar { display: none; }
+
+  .phasenav a {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .phasenav a:hover { color: var(--fg); }
+  .phasenav a[aria-current="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .modes {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+  }
+  .mode {
+    font: inherit;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    color: var(--fg-dim);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .mode:hover { color: var(--fg); }
+  .mode[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+  .modes .sep { color: var(--rule); }
+
+  /* ── phases ──────────────────────────────────────────── */
+
+  .phase { padding-block: var(--s5) 0; scroll-margin-top: 60px; }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--fg);
+  }
+  .phase-head h2 { font-size: var(--t-sub); }
+  .phase-head .phase-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .phase-lead {
+    max-width: 60ch;
+    margin-top: var(--s2);
+    font-size: var(--t-aside);
+    font-style: italic;
+    color: var(--fg-mid);
+  }
+
+  /* ── the three facts about the decision ──────────────── */
+
+  .rule-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s3);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-no {
+    grid-row: 1 / span 2;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+  .rule-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .rule-body { margin-top: 6px; max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+
+  /* ── conversations ───────────────────────────────────── */
+
+  .conv {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 var(--s2);
+    padding-block: var(--s4);
+    border-bottom: 1px solid var(--rule-soft);
+    scroll-margin-top: 60px;
+  }
+  .phase .conv:last-child { border-bottom: none; }
+
+  .conv-no {
+    grid-row: 1 / span 6;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    color: var(--fg-dim);
+    padding-top: 3px;
+  }
+
+  .conv-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-read);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+  }
+
+  .conv-moment {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    color: var(--fg-dim);
+  }
+  .conv-moment b {
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: var(--t-micro);
+  }
+
+  .conv-before, .conv-cost {
+    margin-top: var(--s2);
+    max-width: 64ch;
+    font-size: var(--t-read);
+    color: var(--fg-mid);
+  }
+  .conv-before b, .conv-cost b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--t-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    margin-right: 8px;
+  }
+  .conv-cost b { color: var(--accent); }
+
+  /* ── the exchange ────────────────────────────────────── */
+  /*
+     Two of your turns with theirs in between. Most advice hands you an opener
+     and leaves you at the reply, which is where the conversation is actually
+     decided, so the second move is a first-class part of every one here.
+  */
+  .exchange { margin-top: var(--s2); }
+  .turn + .turn { margin-top: var(--s2); }
+
+  .turn-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .turn--you .turn-label { color: var(--accent); }
+  .turn--them .turn-label { color: var(--fg-dim); }
+
+  .turn--them { margin-left: var(--s4); }
+
+  .line {
+    position: relative;
+    padding: var(--s2);
+    border: 1px solid var(--script-rule);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+    background: var(--script-bg);
+  }
+  .turn--them .line {
+    background: var(--them-bg);
+    border: 1px dashed var(--them-rule);
+    color: var(--fg-dim);
+  }
+  .line p {
+    font-family: var(--font-mono);
+    font-size: var(--t-aside);
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  .line p + p { margin-top: 0.75em; }
+
+  /* Bracketed slots are yours to fill. Marking them stops the script reading
+     as something you could send verbatim, which it never is. */
+  .slot {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .turn--them .slot { color: inherit; font-weight: 400; }
+
+  .copy {
+    display: block;
+    margin: var(--s1) -7px calc(var(--s1) * -1) auto;
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: none;
+    border: 1px solid transparent;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--script-rule); }
+  .copy[data-state="done"] { color: var(--accent); }
+  .copy[data-state="failed"] { color: var(--fg); border-color: var(--script-rule); }
+
+  /* Compact drops everything that is argument and keeps everything that is
+     artifact, for the reader who already knows the shape and wants the line. */
+  body[data-mode="compact"] .conv-before,
+  body[data-mode="compact"] .conv-cost,
+  body[data-mode="compact"] .phase-lead,
+  body[data-mode="compact"] .rule-body { display: none; }
+  body[data-mode="compact"] .conv { padding-block: var(--s3); }
+
+  /* ── tail ────────────────────────────────────────────── */
+
+  .tail {
+    margin-top: var(--s6);
+    padding-block: var(--s4) var(--s5);
+    border-top: 1px solid var(--fg);
+  }
+  .tail h2 {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+  .tail p { max-width: 64ch; font-size: var(--t-read); color: var(--fg-mid); }
+  .tail p + p { margin-top: var(--s2); }
+
+  @media (max-width: 599px) {
+    .conv, .rule-item { grid-template-columns: 1fr; }
+    .conv-no, .rule-no { grid-row: auto; margin-bottom: 6px; padding-top: 0; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: var(--s1); }
+    .turn--them { margin-left: var(--s2); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .phasenav { position: static; }
+  }
+</style>
+</head>
+<body data-mode="full">
+
+<header class="masthead wrap">
+  <a class="wordmark" href="/tips/">Tips</a>
+  <a class="home" href="/tips/">&larr; all tips</a>
+</header>
+
+<div class="head wrap">
+  <span class="head-no">Tip 05 &middot; getting promoted</span>
+  <h1>Burden of Proof</h1>
+  <p class="standfirst">Ten conversations on the way from running a team to running the people who run teams, each carried through to the reply you will get and what you say to it. Director is decided as a case, the standard is that you are already doing the job, and the case is heard by people who have not watched you work.</p>
+  <p class="standfirst">That last part is what makes it unlike every promotion before it. Up to here, doing the work well and being seen to was enough. From here the burden is on you to make it legible in a room you are not in, to people whose main question is what it would be like to have you at the table. <a href="/sub/practicum/dist/">Practicum</a> has the daily practice for the level itself. This is the year before it.</p>
+  <div class="head-meta" id="headMeta"></div>
+</div>
+
+<nav class="phasenav">
+  <div class="wrap phasenav-row">
+    <div class="phasenav-inner" id="phaseNav"></div>
+    <div class="modes" role="group" aria-label="Detail">
+      <button class="mode" type="button" data-mode="full" aria-pressed="true">Full</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button class="mode" type="button" data-mode="compact" aria-pressed="false">Compact</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="main"></main>
+
+<footer class="tail wrap">
+  <h2>Standing and limit</h2>
+  <p>Same standing as the rest of this section: craft, not evidence. There is a literature on promotion and it mostly studies who gets promoted rather than what to say, so nothing above carries a number I would be willing to put next to a sentence. Treat it the way the section treats everything: worth doing, not worth citing.</p>
+  <p>The standard - already doing the job - is also not applied evenly. Who gets handed the ownerless problem, whose escalation reads as judgement and whose reads as pushiness, whose four sentences a sponsor repeats without being asked: none of that is about your delivery, and being told to just take scope by someone for whom it was cheap is its own kind of unhelpful. What is portable is the same as in <a href="/tips/money-conversations/">Ask Price</a>: the target named as a date, the case written in their units, the three answers decided before the room. That part survives a room that is not on your side. So does the pay conversation that goes with a yes, which Ask Price has and this page does not repeat.</p>
+  <p>None of it works if what you want is the title rather than the job. Director is further from the work, most of the week is spent in rooms deciding things you will never touch, and the people you are responsible for are ones you did not hire and will rarely see. For a fair share of excellent managers the right answer is not to go, and nothing on this page can tell you which share you are in. It is worth spending part of the year finding out, because the conversations above are hard to unsay.</p>
+</footer>
+
+<script>
+// Phases run in the order the year does: what the decision is, the year before
+// it, the shift of your week upward and outward, the room itself, and after.
+const PHASES = [
+  {
+    id: 'decided',
+    nav: 'What is decided',
+    title: 'What is actually being decided',
+    lead: 'Three things about this decision that are not true of any promotion below it. Every conversation on the page is shaped by one of them.'
+  },
+  {
+    id: 'year',
+    nav: 'The year before',
+    title: 'The year before',
+    lead: 'The promotion is settled about a year before anyone says the word. This is that year, and it starts with your manager.'
+  },
+  {
+    id: 'out',
+    nav: 'Up and out',
+    title: 'Up and out',
+    lead: 'A director’s week is spent with people who are not on their team. Start spending yours that way before anybody asks you to.'
+  },
+  {
+    id: 'room',
+    nav: 'The room',
+    title: 'The room',
+    lead: 'You will not be in it. Everything you want said there has to be handed to someone who will be.'
+  },
+  {
+    id: 'after',
+    nav: 'After the answer',
+    title: 'After the answer',
+    lead: 'A no at this level is one of three things, and they need three different responses.'
+  }
+];
+
+const RULES = [
+  {
+    name: 'It is a confirmation, not a bet',
+    body: 'Nobody is made a director on potential. A bad appointment at that level costs an organisation rather than a team, so the people approving it want the job already being done, visibly, for long enough that it does not look like a good quarter. The question the room asks is not whether you are ready. It is whether you are already doing it, and since when.'
+  },
+  {
+    name: 'It is decided by people who have not watched you work',
+    body: 'Your manager proposes. A vice-president and a row of directors dispose, and most of them know your work as a line in somebody else’s update. Whatever you are relying on has to survive being repeated by someone who was not there, in a room you are not in, to people whose main question is what it would be like to have you at the table.'
+  },
+  {
+    name: 'It is a seat as much as a level',
+    body: 'Below director, promotion recognises the work you are already doing and the org chart does not move. At director, something has to exist for you to run - a set of teams, a function, a problem large enough to need one - and no amount of readiness creates it. A good share of the people waiting for director are ready and waiting for a seat, and the sooner you know which kind of waiting you are doing, the less of it you will do.'
+  }
+];
+
+const CONVERSATIONS = [
+  {
+    phase: 'year',
+    id: 'gap',
+    nav: 'The gap',
+    name: 'The gap, named',
+    moment: 'the first time you say the word out loud, two cycles before you want it',
+    before: 'Pick the cycle and say it. "Eventually" is not a target, it cannot be missed, and that is why it never arrives.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I want to be put up for director in [cycle]. I am not asking whether I am ready. I am asking what you would need to see to write the case, specifically enough that we would both know when it had happened.'] },
+      { who: 'them', label: 'Likely back', say: ['"Keep doing what you are doing."', '"I need to see more visibility."', '"More strategic."'] },
+      { who: 'you', label: 'You again', say: ['Those are the words I would have used too, and I cannot act on any of them. Give me one thing - a problem, a scope, a result - that if it existed in [n] months you would write it up.', 'I will write down what I heard and send it to you tonight, so we are working from the same list and not from two memories of this meeting.'] }
+    ],
+    cost: 'Vague feedback feels like encouragement and functions as a stall. Eighteen months of "keep going" produces a case with no shape, and the manager who gave it will be the first to say, quite honestly, that they never promised anything.'
+  },
+  {
+    phase: 'year',
+    id: 'scope',
+    nav: 'The scope',
+    name: 'The problem nobody owns',
+    moment: 'the gap has been named and it is bigger than your team',
+    before: 'Look for the problem that falls between three teams and gets mentioned in every retro. Director scope is not inside anyone’s lane, including yours. It is lying around in the gaps, and it goes to whoever picks it up first.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['[Problem] has come up in the last four planning cycles and nobody owns it. I want it. It crosses [team] and [team], and that is the point - I cannot show the level from inside my own lane.'] },
+      { who: 'them', label: 'Likely back', say: ['"That is not really your area."', '"Your team has enough on."'] },
+      { who: 'you', label: 'You again', say: ['It is nobody’s area, which is why it is still there. The team is covered - [name] is running the day-to-day, and I would rather you tested that now than after a promotion.', 'Give me a quarter on it and judge the result. If it does not move, that is useful for both of us to know.'] }
+    ],
+    cost: 'Waiting to be handed director scope is waiting for something that is never handed out. It exists as a gap, not as an offer, and the person who notices the gap first becomes the case for the seat you were waiting for.'
+  },
+  {
+    phase: 'year',
+    id: 'successor',
+    nav: 'Successor',
+    name: 'The successor',
+    moment: 'as soon as the target is set, not when the promotion is offered',
+    before: 'Name, at least to yourself, who runs your team when you are not on it and what they are missing. If nobody comes to mind, that is the gap, and it is yours rather than theirs.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['If I move up, [name] runs this team. I want to start handing them the parts of the job only I do now - the planning cycle, the vendor, the hard performance conversation - so that by [cycle] it is a fact rather than a plan.'] },
+      { who: 'them', label: 'Likely back', say: ['"We cannot afford to lose you from that team."', '"They are not ready for that."'] },
+      { who: 'you', label: 'You again', say: ['Then that is the thing standing between me and the seat, and I would rather work on it than wait for it to fix itself.', 'Which part worries you most? I will start there, and you will see it working before you have to rely on it.'] }
+    ],
+    cost: 'The best manager of a team is the hardest person to promote out of it, and "we cannot afford to lose you" is a compliment that keeps you exactly where you are. Being indispensable at your current level is not the case for the next one. It is the case against it.'
+  },
+  {
+    phase: 'out',
+    id: 'skip',
+    nav: 'The skip',
+    name: 'The skip’s problem',
+    moment: 'a skip-level one-to-one, or the fifteen minutes after a review',
+    before: 'Read what they have written down about the year - the plan, the deck, the objectives. You are looking for the line with no name next to it.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['What is the thing in your remit that you do not have anyone on? Not the biggest thing - the one you would hand off tomorrow if there were someone to hand it to.'] },
+      { who: 'them', label: 'Likely back', say: ['a real answer, or', '"Nothing you need to worry about."', '"Talk to your manager about priorities."'] },
+      { who: 'you', label: 'You again', say: ['I will. I am asking you because I would rather be useful on something you actually need than impressive on something you do not.', 'Give me one and I will send you a page on it by Friday. You can bin it.'] }
+    ],
+    cost: 'Waiting for your skip to notice you is waiting for someone with forty reports to develop an interest in one of them. They notice you when you take something off their desk. Nothing else registers at that distance.'
+  },
+  {
+    phase: 'out',
+    id: 'escalation',
+    nav: 'Escalation',
+    name: 'Options, not problems',
+    moment: 'any time you carry something upward, which is to say weekly',
+    before: 'Write the three options and pick one before you open the door. If you cannot pick, you are not escalating a decision. You are escalating your discomfort, and it reads that way.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['We have a problem with [x]. There are three ways through it - [a], [b] and [c]. I would do [b], because [reason].', 'The one thing I need from you is a yes on [the part only they can give]. Everything else is so you are not surprised, not so you decide it.'] },
+      { who: 'them', label: 'Likely back', say: ['"Why not [a]?"', '"Do you actually need me for this?"'] },
+      { who: 'you', label: 'You again', say: ['[a] is cheaper and I would take it if [constraint] were not true. On whether you are needed - only for [the part]. If you are happy for me to own that too, say so and I will.'] }
+    ],
+    cost: 'A manager brings the problem. A director brings the decision with the problem attached. Every escalation is a short audition for which of those you are, and the audience is the person who will sign the case.'
+  },
+  {
+    phase: 'out',
+    id: 'neighbours',
+    nav: 'Neighbours',
+    name: 'The cost you impose',
+    moment: 'any point in the year, with the people who will one day be your peers',
+    before: 'Find out who is in the room where the decision gets made. They are your future peers, and each of them will be asked, in some form, whether they want you in their meeting.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['What does my team do that costs your team the most? I am asking because I would like to fix it, and because you know better than I do.'] },
+      { who: 'them', label: 'Likely back', say: ['something small and specific, said carefully, or', '"Nothing, it is fine."'] },
+      { who: 'you', label: 'You again', say: ['Good. I am going to fix [that] this quarter and come back to ask you whether it worked. If it did not, I would rather hear it from you than from the room.', 'And if it really is nothing today, tell me the day it stops being nothing.'] }
+    ],
+    cost: 'Peer directors do not vote on your work. They vote on what it has been like to have you next door. A year of being easy to work with weighs more in that room than a year of being impressive, and it is much rarer.'
+  },
+  {
+    phase: 'room',
+    id: 'sponsor',
+    nav: 'Sponsor',
+    name: 'The sentence, handed over',
+    moment: 'a month before the calibration, with someone senior who has seen your work and will be in the room',
+    before: 'Write the paragraph. Scope, since when, and results in the units the room uses. Not what you did - the case for the job. If it does not fit in four sentences it is not yet a case.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I am being put up for director this cycle. If my name comes up in the room, I would rather you had the short version from me than had to reconstruct it. Here it is - four sentences.', 'If there is a sentence you would not say, tell me which one.'] },
+      { who: 'them', label: 'Likely back', say: ['"I will do what I can."', '"You know I cannot promise anything."'] },
+      { who: 'you', label: 'You again', say: ['I am not asking for a promise. I am asking that if you are asked, you have something to say - and that if you have a doubt, I hear it now, while there is still time to do something about it.'] }
+    ],
+    cost: 'Nobody speaks for you by accident. A sponsor with no sentence to hand says "they seem strong", which in that room is a way of saying nothing. Handing over the paragraph is not presumptuous. It is the only way the paragraph gets into the room.'
+  },
+  {
+    phase: 'room',
+    id: 'case',
+    nav: 'The case',
+    name: 'The case, not the list',
+    moment: 'your manager says "write up what you did this year"',
+    before: 'Two lists. What you did, and separately what changed in the organisation because of it - in money, time, risk or headcount. Only the second list goes in.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I would rather write it as the case for the seat than as the list of what I did. The first line is: already operating at director scope since [date] - owns [x] across [n] teams, [result], [result]. Everything under it is evidence for that sentence.', 'Does that framing hold, or would you write the first line differently?'] },
+      { who: 'them', label: 'Likely back', say: ['"Just include everything and I will edit it down."', '"The committee wants to see breadth."'] },
+      { who: 'you', label: 'You again', say: ['Everything is what I want to avoid - it reads as a manager’s year. I will send the one-page version and the long one and you pick.', 'But I want the first line to be a claim about the job, not a summary of the year. If the claim is wrong, I would rather find out from you.'] }
+    ],
+    cost: 'A list of accomplishments is the case for a bigger bonus. The case for director is a claim about the job you are already doing, with the year as evidence. Committees read a great many of the first kind and remember the second, because they are rare.'
+  },
+  {
+    phase: 'after',
+    id: 'which-no',
+    nav: 'Which no',
+    name: 'Which no it is',
+    moment: 'the answer has come back and it is not yes',
+    before: 'Decide before the meeting what you will do with each of the three answers. You will not be able to think clearly inside it, and you will not get to have it twice.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I want to understand which no this is. Not yet - there is a gap and you can name it. No seat - I am ready and there is nothing to run. Or not me - this is not a role you see me in here.', 'I can work with any of the three. I cannot work with not knowing which.'] },
+      { who: 'them', label: 'Likely back', say: ['"It is not the right time."', '"The bar was very high this cycle."'] },
+      { who: 'you', label: 'You again', say: ['"Not the right time" is a seat answer, so let me ask the seat question. Is there a director role in this org in the next twelve months, and if there is, am I the plan for it?', 'If the answer is no, or you do not know, I would rather hear that today than in a year.'] }
+    ],
+    cost: 'Most people told "not yet" are being told "no seat" by someone too kind to say it, and they spend two more years closing gaps that were never the problem. The three answers sound identical from where you sit and they are not. Only one of them is fixed by working harder.'
+  },
+  {
+    phase: 'after',
+    id: 'door',
+    nav: 'The door',
+    name: 'The outside route',
+    moment: 'the no was a seat answer and the date is more than a year out',
+    before: 'Know that directors are hired from outside all the time, and that the bar for an external director is usually "has done the job" rather than "has done it here, visibly, for two years". The place that knew you as a manager is the hardest place to be seen as anything else.',
+    exchange: [
+      { who: 'you', label: 'You', say: ['I hear that there is no seat here inside the next year. I am going to look at director roles elsewhere, and I would rather tell you than have you find out.', 'If a seat does open here first, I would like to still be in that conversation.'] },
+      { who: 'them', label: 'Likely back', say: ['"Is that a threat?"', '"Give it six more months."', 'an offer that arrives quickly and is not the seat'] },
+      { who: 'you', label: 'You again', say: ['It is not a threat, it is a plan, and I am telling you so that you can plan too.', 'Six months is fine if there is a seat at the end of it. Is there?'] }
+    ],
+    cost: 'The person who told you to wait will hire a director from outside within a quarter of you leaving, and will not experience that as a contradiction. Sometimes the shortest route to the title is a door, and the people who take it are not the impatient ones. They are the ones who asked the seat question and believed the answer.'
+  }
+];
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+
+// The label is set in markup rather than by class so the copied text and the
+// visible text never drift apart.
+function labelled(tag, cls, label, text) {
+  const node = el(tag, cls);
+  node.append(el('b', null, label), document.createTextNode(text));
+  return node;
+}
+
+// Wraps [bracketed] slots so they read as blanks to fill. The copied text is
+// built from the source strings, so the brackets survive the clipboard intact.
+function withSlots(text) {
+  const frag = document.createDocumentFragment();
+  const pattern = /\[[^\]]+\]/g;
+  let last = 0;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > last) frag.append(text.slice(last, match.index));
+    frag.append(el('span', 'slot', match[0]));
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) frag.append(text.slice(last));
+  return frag;
+}
+
+// Clipboard access is denied outright in some contexts rather than throwing on
+// a permission check, so the button reports the failure instead of pretending.
+async function copyScript(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    button.dataset.state = 'done';
+    button.textContent = 'Copied';
+  } catch (_) {
+    button.dataset.state = 'failed';
+    button.textContent = 'Select it';
+  }
+  setTimeout(() => {
+    delete button.dataset.state;
+    button.textContent = 'Copy';
+  }, 1800);
+}
+
+function renderTurn(turn, convName) {
+  const wrap = el('div', 'turn turn--' + turn.who);
+  wrap.append(el('span', 'turn-label', turn.label));
+
+  const line = el('div', 'line');
+  turn.say.forEach(text => {
+    const p = el('p');
+    p.append(withSlots(text));
+    line.append(p);
+  });
+  wrap.append(line);
+
+  // Only your own lines are takeaways. Theirs is context, so it gets no button.
+  if (turn.who === 'you') {
+    const copy = el('button', 'copy', 'Copy');
+    copy.type = 'button';
+    copy.setAttribute('aria-label', 'Copy the ' + convName + ' line, ' + turn.label.toLowerCase());
+    copy.addEventListener('click', () => copyScript(copy, turn.say.join('\n\n')));
+    wrap.append(copy);
+  }
+
+  return wrap;
+}
+
+function renderConversation(conv, number) {
+  const wrap = el('article', 'conv');
+  wrap.id = conv.id;
+
+  wrap.append(el('span', 'conv-no', String(number).padStart(2, '0')));
+  wrap.append(el('h3', 'conv-name', conv.name));
+  wrap.append(labelled('p', 'conv-moment', 'Moment', ' ' + conv.moment));
+  wrap.append(labelled('p', 'conv-before', 'Before', ' ' + conv.before));
+
+  const exchange = el('div', 'exchange');
+  conv.exchange.forEach(turn => exchange.append(renderTurn(turn, conv.nav)));
+  wrap.append(exchange);
+
+  wrap.append(labelled('p', 'conv-cost', 'The cost', ' ' + conv.cost));
+  return wrap;
+}
+
+function renderRule(rule, number) {
+  const row = el('div', 'rule-item');
+  row.append(el('span', 'rule-no', String(number).padStart(2, '0')));
+  row.append(el('h3', 'rule-name', rule.name));
+  row.append(el('p', 'rule-body', rule.body));
+  return row;
+}
+
+function renderPhase(phase, items, count) {
+  const section = el('section', 'phase');
+  section.id = phase.id;
+
+  const head = el('div', 'phase-head');
+  head.append(el('h2', null, phase.title));
+  head.append(el('span', 'phase-count', count));
+  section.append(head);
+  section.append(el('p', 'phase-lead', phase.lead));
+  section.append(...items);
+  return section;
+}
+
+// The first phase holds the three facts and no scripts. The rest hold the
+// conversations, numbered continuously so a deep link means the same thing
+// whichever phase it lands in.
+const main = document.getElementById('main');
+let counter = 1;
+const sections = PHASES.map(phase => {
+  if (phase.id === 'decided') {
+    const rules = RULES.map((rule, i) => renderRule(rule, i + 1));
+    return renderPhase(phase, rules, RULES.length + ' facts');
+  }
+  const convs = CONVERSATIONS.filter(conv => conv.phase === phase.id);
+  const items = convs.map((conv, i) => renderConversation(conv, counter + i));
+  counter += convs.length;
+  return renderPhase(phase, items, convs.length + (convs.length === 1 ? ' conversation' : ' conversations'));
+});
+main.append(...sections);
+
+const yourTurns = CONVERSATIONS.reduce((n, conv) => n + conv.exchange.filter(t => t.who === 'you').length, 0);
+document.getElementById('headMeta').append(
+  el('span', null, CONVERSATIONS.length + ' conversations'),
+  el('span', null, yourTurns + ' lines to send'),
+  el('span', null, 'craft, not evidence')
+);
+
+const navTarget = document.getElementById('phaseNav');
+PHASES.forEach(phase => {
+  const link = el('a', null, phase.nav);
+  link.href = '#' + phase.id;
+  navTarget.append(link);
+});
+
+// Scroll spy. rootMargin pins the trigger line just under the sticky nav, so a
+// phase becomes current when its heading reaches the nav rather than when the
+// section happens to occupy the most pixels.
+//
+// The band's top edge has to sit *below* where an anchor jump lands a heading
+// (`scroll-margin-top` on .phase, 60px). Otherwise following a nav link leaves
+// the outgoing section clipping the band by those few pixels, and it wins the
+// document-order tie against the section you actually asked for.
+const SPY_TOP = 72;
+
+const navLinks = new Map(PHASES.map(phase => [phase.id, navTarget.querySelector('a[href="#' + phase.id + '"]')]));
+const visible = new Set();
+
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) visible.add(entry.target.id);
+    else visible.delete(entry.target.id);
+  });
+  const current = PHASES.map(phase => phase.id).find(id => visible.has(id));
+  // Nothing in the band means the tail has scrolled up past it. Holding the
+  // last phase reads better there than dropping the highlight entirely.
+  if (!current) return;
+  navLinks.forEach((link, id) => {
+    if (id === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  });
+}, { rootMargin: '-' + SPY_TOP + 'px 0px -70% 0px' });
+
+sections.forEach(section => spy.observe(section));
+
+const MODE_KEY = 'tips-detail';
+const modeButtons = document.querySelectorAll('.mode');
+
+function setMode(mode) {
+  document.body.dataset.mode = mode;
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
+  try { localStorage.setItem(MODE_KEY, mode); } catch (_) {}
+}
+
+modeButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+});
+
+try {
+  const saved = localStorage.getItem(MODE_KEY);
+  if (saved === 'compact') setMode('compact');
+} catch (_) {}
+</script>
+</body>
+</html>
