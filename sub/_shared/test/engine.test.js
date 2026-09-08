@@ -601,6 +601,86 @@ check('pressing Library while reading an entry goes back to the list', () => {
     'pressing Library from inside an entry must return to the list');
 });
 
+/* --- The URL ------------------------------------------------------------- */
+
+check('the open entry is written into the URL hash and leaves it when closed', () => {
+  const env = boot(FULL, T0);
+  assert.strictEqual(env.window.location.hash, '', 'booting must not touch the URL');
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  assert.strictEqual(env.window.location.hash, '#library');
+
+  env.fire('click', target({ act: 'lib-open', id: 'beta-two' }));
+  assert.strictEqual(env.window.location.hash, '#library/beta-two');
+
+  env.fire('click', target({ act: 'lib-close' }));
+  assert.strictEqual(env.window.location.hash, '#library');
+
+  env.fire('click', target({ view: 'journal' }, true));
+  assert.strictEqual(env.window.location.hash, '#journal');
+});
+
+check('a page loaded on an entry hash opens that entry', () => {
+  const env = boot(FULL, T0, null, e => { e.window.location.hash = '#library/beta-two'; });
+  assert.strictEqual(env.els['view-library'].hidden, false);
+  assert.strictEqual(env.els['view-today'].hidden, true);
+  const html = env.els['view-library'].innerHTML;
+  assert.ok(html.includes('Beta two'), 'the named entry should be open');
+  assert.ok(!html.includes('shelf__row'), 'the entry, not the list');
+  assert.strictEqual(env.els['nav-library'].attrs['aria-current'], 'page', 'the tab should light up');
+});
+
+check('Back and Forward follow the hash', () => {
+  const env = boot(FULL, T0);
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: 'beta-two' }));
+
+  env.navigate('#library');
+  assert.ok(env.els['view-library'].innerHTML.includes('shelf__row'), 'Back from an entry lands on the list');
+
+  env.navigate('#library/gamma-one');
+  assert.ok(env.els['view-library'].innerHTML.includes('Gamma one'), 'Forward reopens the entry');
+
+  env.navigate('#today');
+  assert.strictEqual(env.els['view-today'].hidden, false);
+  assert.strictEqual(env.els['view-library'].hidden, true);
+});
+
+check('a hash the page does not recognise is left alone', () => {
+  const env = boot(FULL, T0);
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: 'beta-two' }));
+
+  env.navigate('#field');                                   // the skip link
+  assert.ok(env.els['view-library'].innerHTML.includes('Beta two'), 'the skip link must not navigate');
+
+  env.navigate('#library/no-such-entry');                   // a stale bookmark
+  assert.ok(env.els['view-library'].innerHTML.includes('shelf__row'), 'an unknown entry falls back to the list');
+  assert.strictEqual(env.window.location.hash, '#library/no-such-entry',
+    'the listener never rewrites the hash - rewriting on every Back would trap the button');
+});
+
+check('a hash for a tab the site does not have falls back to today', () => {
+  const env = boot(PLAIN, T0, null, e => { e.window.location.hash = '#review'; });
+  assert.strictEqual(env.els['view-today'].hidden, false);
+});
+
+check("the browser echoing the page's own hash write does not disturb the view", () => {
+  /* Assigning location.hash fires hashchange back at the page a tick later. Acted
+   * on mid-review, that echo would rebuild the queue and turn a revealed card
+   * face down again. */
+  const first = boot(FULL, T0);
+  logToday(first);
+  const env = boot(FULL, T0 + DAY, { ...first.store });
+
+  env.fire('click', target({ act: 'go', view: 'review' }));
+  env.fire('click', target({ act: 'reveal' }));
+  assert.ok(env.els['view-review'].innerHTML.includes('data-act="grade"'), 'the card is turned');
+
+  env.fire('hashchange');
+  assert.ok(env.els['view-review'].innerHTML.includes('data-act="grade"'), 'the echo must not turn it back');
+});
+
 /* --- The library pager --------------------------------------------------- */
 
 /* Which entry each half of the pager points at. Read off the markup rather
@@ -694,8 +774,8 @@ check('an entry opened from outside the filter still has neighbours', () => {
 });
 
 check('following a cheatsheet row still opens the entry, not the list', () => {
-  /* cheat-open routes through go('library'), which now clears the open entry,
-   * so it depends on setting libOpen after that call rather than before. */
+  /* go() clears the open entry unless it is handed one, so the row's id has to
+   * travel with the call rather than be set after it. */
   const env = boot(EVIDENCE, T0);
   const first = env.window.LESSONS[0];
   env.fire('click', target({ act: 'cheat-open', id: first.id }));

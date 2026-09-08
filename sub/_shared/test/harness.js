@@ -89,7 +89,11 @@ function makeEnv(nowMs, storageKey) {
   const window = {
     LESSONS: [], SITE: null,
     matchMedia: () => ({ matches: false }),
-    addEventListener() {},
+    addEventListener: (t, fn) => { (handlers[t] = handlers[t] || []).push(fn); },
+    /* A plain object, so assigning to hash records the write and nothing more.
+     * A browser would also fire hashchange a tick later; here that echo is
+     * fire('hashchange'), and navigate() below is the Back button. */
+    location: { hash: '' },
     /* Present and online by default, which is what a browser reports unless it
      * is certain otherwise. A test that wants the offline path sets onLine. */
     navigator: { onLine: true },
@@ -106,6 +110,7 @@ function makeEnv(nowMs, storageKey) {
   return {
     els, window, document, localStorage, store, handlers, fields, spoken,
     fire(type, target) { (handlers[type] || []).forEach(fn => fn({ target })); },
+    navigate(hash) { window.location.hash = hash; (handlers.hashchange || []).forEach(fn => fn({})); },
     setAttemptField(id, text) {
       const e = makeEl('attempt-' + id);
       e.value = text;

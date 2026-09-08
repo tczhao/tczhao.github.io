@@ -4921,6 +4921,7 @@ window.SITE = {
     libOpen = nb.next.id;
     renderLibrary();
     el('field').scrollIntoView({ block: 'start', behavior: 'auto' });
+    syncHash();
 
     var btn = el('view-library').querySelector('[data-act="speak"]');
     if (btn) startReading(btn);
@@ -5659,19 +5660,51 @@ window.SITE = {
     else renderProgress();
   }
 
-  function go(v) {
-    if (VIEWS.indexOf(v) === -1) return;
+  /* --- The URL ------------------------------------------------------------
+     The hash names the open tab and, in the library, the open entry: #journal,
+     #library, #library/beta-two. A fragment rather than a path because the
+     built page is one static file on GitHub Pages, and a real subpath would
+     404 on reload with no server to rewrite it.
+
+     Navigating in the page writes the hash, which pushes a history entry, so
+     Back walks out of an entry to the list and out of the list to the tab
+     before it. The hashchange listener only reads - it is how Back, Forward
+     and a hand-edited URL reach the page. It never writes: a listener that
+     corrected a hash it disliked would push again on every Back and trap the
+     button. */
+  function route() {
+    return view === 'library' && libOpen ? 'library/' + libOpen : view;
+  }
+
+  function parseRoute(hash) {
+    var parts = String(hash).replace(/^#/, '').split('/');
+    if (VIEWS.indexOf(parts[0]) === -1) return null;
+    return { view: parts[0], id: parts[0] === 'library' && parts[1] || null };
+  }
+
+  function applyRoute(v, id) {
     view = v;
     if (v === 'review') { reviewQueue = dueList(); reviewIdx = 0; revealed = false; }
-    /* Unconditionally, including when v is already the library. Clearing only on
-       the way out left the open entry in place, so pressing Library while
-       reading one re-rendered that entry and the tab looked dead - the one way
-       back to the list was the entry's own close button. Going to a view means
-       the top of it. Anything that wants an entry open sets libOpen after the
-       call, which is what cheat-open does. */
-    libOpen = null;
+    /* Cleared unless an entry is named, including when v is already the
+       library. Clearing only on the way out left the open entry in place, so
+       pressing Library while reading one re-rendered that entry and the tab
+       looked dead - the one way back to the list was the entry's own close
+       button. Going to a view means the top of it. A stale bookmark can name
+       an entry the corpus no longer has, and the list is where that lands. */
+    libOpen = id && BY_ID[id] ? id : null;
+  }
+
+  function syncHash() {
+    var h = '#' + route();
+    if (window.location.hash !== h) window.location.hash = h;
+  }
+
+  function go(v, id) {
+    if (VIEWS.indexOf(v) === -1) return;
+    applyRoute(v, id);
     render();
     el('field').scrollIntoView({ block: 'start', behavior: 'auto' });
+    syncHash();
   }
 
   /* ==========================================================================
@@ -5819,16 +5852,15 @@ window.SITE = {
       return;
     }
 
-    if (act === 'lib-open') { libOpen = id; renderLibrary(); el('field').scrollIntoView({ block: 'start' }); return; }
-    if (act === 'lib-close') { libOpen = null; renderLibrary(); return; }
+    if (act === 'lib-open') { libOpen = id; renderLibrary(); el('field').scrollIntoView({ block: 'start' }); syncHash(); return; }
+    if (act === 'lib-close') { libOpen = null; renderLibrary(); syncHash(); return; }
     if (act === 'lib-track') { libFilter.track = b.dataset.track || null; renderLibrary(); return; }
     if (act === 'lib-level') { libFilter.level = b.dataset.level || null; renderLibrary(); return; }
     if (act === 'lib-lapsed') { libFilter.lapsed = !libFilter.lapsed; renderLibrary(); return; }
 
     /* A cheatsheet row is a summary of an entry, so following one hands you the
-       entry itself rather than a second, longer summary. go() clears libOpen, so
-       it is set after the switch rather than before. */
-    if (act === 'cheat-open') { go('library'); libOpen = id; renderLibrary(); return; }
+       entry itself rather than a second, longer summary. */
+    if (act === 'cheat-open') { go('library', id); return; }
 
     if (act === 'export') {
       var json = JSON.stringify(state, null, 2);
@@ -5907,6 +5939,16 @@ window.SITE = {
     }, 500);
   });
 
+  /* Back, Forward and a hand-edited URL. The page's own hash writes echo here
+     too, a tick later, and must find nothing to do. */
+  window.addEventListener('hashchange', function () {
+    var r = parseRoute(window.location.hash);
+    if (!r || (r.view === view && r.id === libOpen)) return;
+    applyRoute(r.view, r.id);
+    render();
+    el('field').scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
+
   /* ==========================================================================
      Boot
      ========================================================================== */
@@ -5927,6 +5969,8 @@ window.SITE = {
   if (!LESSONS.length) {
     el('view-today').innerHTML = '<p class="empty">No entries loaded. The content files did not run.</p>';
   } else {
+    var landing = parseRoute(window.location.hash);
+    if (landing) applyRoute(landing.view, landing.id);
     render();
   }
 
