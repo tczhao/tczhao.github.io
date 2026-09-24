@@ -4,3 +4,5 @@ Disallow: /
 
 User-agent: archive.org_bot
 Disallow: /
+
+Sitemap: https://tianchuzhao.com/sitemap.xml
