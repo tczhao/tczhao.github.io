@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture One's look, inside a Lumix S9</title>
+<link rel="canonical" href="https://tianchuzhao.com/article/lumix-s9-capture-one-lut/">
+<meta name="description" content="Turning a Cobalt profile for Capture One into a LUT a Lumix S9 can shoot with took seven rounds and four test photos. What worked came from measuring Capture One rather than decoding it.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The LUT was perfect. The picture was grey.">
+<meta property="og:description" content="Turning a Cobalt profile for Capture One into a LUT a Lumix S9 can shoot with took seven rounds and four test photos. What worked came from measuring Capture One rather than decoding it.">
+<meta property="og:url" content="https://tianchuzhao.com/article/lumix-s9-capture-one-lut/">
+<meta property="og:image" content="https://tianchuzhao.com/article/lumix-s9-capture-one-lut/image/p2-round7.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"The LUT was perfect. The picture was grey.","description":"Turning a Cobalt profile for Capture One into a LUT a Lumix S9 can shoot with took seven rounds and four test photos. What worked came from measuring Capture One rather than decoding it.","datePublished":"2026-09-28","author":{"@type":"Person","name":"Tianchu Zhao"},"image":"https://tianchuzhao.com/article/lumix-s9-capture-one-lut/image/p2-round7.jpg","mainEntityOfPage":"https://tianchuzhao.com/article/lumix-s9-capture-one-lut/"}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.16/dist/plot.umd.min.js"></script>
+<style>
+/* Chrome is strictly neutral (R = G = B) so the only colour on the page is the photographs and the data. */
+:root {
+  color-scheme: light;
+  --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --surface: #fafafa;
+  --ink: #171717;
+  --ink-2: #555555;
+  --muted: #8a8a8a;
+  --grid: #e0e0e0;
+  --axis: #c4c4c4;
+  --rule: rgba(0, 0, 0, 0.1);
+  --frame: #1f1f1f;
+  --frame-ink: #bdbdbd;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1b1b1b;
+    --ink: #f0f0f0;
+    --ink-2: #b3b3b3;
+    --muted: #8a8a8a;
+    --grid: #2e2e2e;
+    --axis: #3d3d3d;
+    --rule: rgba(255, 255, 255, 0.1);
+    --frame: #0b0b0b;
+    --frame-ink: #9e9e9e;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1b1b1b;
+  --ink: #f0f0f0;
+  --ink-2: #b3b3b3;
+  --muted: #8a8a8a;
+  --grid: #2e2e2e;
+  --axis: #3d3d3d;
+  --rule: rgba(255, 255, 255, 0.1);
+  --frame: #0b0b0b;
+  --frame-ink: #9e9e9e;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+}
+
+* { box-sizing: border-box; }
+html {
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--font);
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+body { margin: 0; padding-top: var(--bar-height, 58px); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* Fixed, not sticky: sticky breaks when a viewer wraps the page in its own scroll container. */
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.bar-row { display: flex; align-items: center; gap: 28px; padding: 10px 28px; }
+.brand { font-weight: 650; font-stretch: 112%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-decoration: none; }
+.bar nav { display: flex; gap: 16px; overflow-x: auto; flex: 1 1 0; min-width: 0; scrollbar-width: none; }
+.bar nav a { text-decoration: none; color: var(--ink-2); font-size: 14px; white-space: nowrap; }
+.bar nav a:hover { color: var(--ink); }
+.theme { display: flex; border: 1px solid var(--rule); border-radius: 999px; padding: 2px; }
+.theme button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.theme button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+main { max-width: 1180px; margin: 0 auto; padding: 0 28px 96px; }
+/* Anchor jumps land each heading 24px below the header, allowing for the section's top padding. */
+section { padding-top: 104px; scroll-margin-top: calc(var(--bar-height, 58px) - 80px); }
+h1, h2, h3 { margin: 0; font-weight: 620; letter-spacing: -0.01em; }
+h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.08; font-stretch: 118%; margin-bottom: 22px; max-width: 24ch; text-wrap: balance; }
+h3 { font-size: 16px; font-stretch: 106%; font-weight: 600; margin-bottom: 10px; }
+p { margin: 0 0 14px; max-width: 68ch; }
+.prose p { font-size: 17px; line-height: 1.65; max-width: 66ch; }
+.prose p + p { margin-top: 2px; }
+code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+figure { margin: 0; min-width: 0; }
+.figure { margin: 38px 0 46px; }
+.caption { font-size: 13px; line-height: 1.5; color: var(--ink-2); margin-top: 12px; max-width: 72ch; }
+
+.hero { padding-top: 60px; scroll-margin-top: calc(var(--bar-height, 58px) - 24px); }
+.hero h1 {
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 0.98;
+  font-weight: 640;
+  font-stretch: 125%;
+  letter-spacing: -0.028em;
+  max-width: 13ch;
+  text-wrap: balance;
+}
+.lede { font-size: clamp(18px, 1.9vw, 21px); line-height: 1.5; color: var(--ink-2); margin-top: 26px; max-width: 56ch; }
+.hero .figure { margin-top: 44px; }
+
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 40px; margin: 34px 0 0; }
+.facts div { border-top: 1px solid var(--rule); padding-top: 12px; }
+.facts dt { font-size: 13px; color: var(--ink-2); }
+.facts dd { margin: 4px 0 0; font-size: clamp(24px, 2.6vw, 32px); font-weight: 620; font-stretch: 112%; line-height: 1.15; }
+.facts .note { display: block; font-size: 13px; font-weight: 400; font-stretch: 100%; line-height: 1.45; color: var(--ink-2); margin-top: 4px; }
+
+/* A photograph in a dark mount, as it would sit on a contact sheet. */
+.mount { position: relative; background: var(--frame); border-radius: 14px; padding: clamp(8px, 1.1vw, 14px); }
+.mount img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.badge {
+  position: absolute;
+  top: calc(clamp(8px, 1.1vw, 14px) + 12px);
+  left: calc(clamp(8px, 1.1vw, 14px) + 12px);
+  display: grid;
+  gap: 1px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(14, 14, 14, 0.62);
+  backdrop-filter: blur(6px);
+  color: #f2f2f2;
+  font-size: 13px;
+  line-height: 1.3;
+  pointer-events: none;
+}
+.badge b { font-weight: 650; font-size: 15px; font-stretch: 112%; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.triptych { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+
+/* Drag-to-compare. The range input covers the frame, so keyboard and screen readers get a real slider. */
+.compare { position: relative; aspect-ratio: 1600 / 1066; border-radius: 6px; overflow: hidden; background: #000; touch-action: pan-y; }
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
+.compare .over { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos, 50%)) 0 0); }
+.compare .handle { position: absolute; top: 0; bottom: 0; left: var(--pos, 50%); width: 2px; margin-left: -1px; background: rgba(255, 255, 255, 0.92); pointer-events: none; }
+.compare .knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(14, 14, 14, 0.55);
+  backdrop-filter: blur(6px);
+  border: 2px solid rgba(255, 255, 255, 0.92);
+}
+.compare .knob svg { width: 20px; height: 20px; }
+.compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.compare:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 4px; }
+.tag {
+  position: absolute;
+  bottom: 12px;
+  max-width: 45%;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(14, 14, 14, 0.62);
+  backdrop-filter: blur(6px);
+  color: #f2f2f2;
+  font-size: 13px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+.tag.left { left: 12px; }
+.tag.right { right: 12px; text-align: right; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px 44px; align-items: center; }
+.oneway svg { display: block; width: 100%; height: auto; }
+.oneway text { font-family: var(--font); }
+.anatomy { display: grid; grid-template-columns: 7.5rem 1fr; gap: 9px 18px; margin: 0; font-size: 14.5px; }
+.anatomy dt { color: var(--ink-2); }
+.anatomy dd { margin: 0; }
+
+.legend-row { display: flex; gap: 10px 26px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-bottom: 14px; }
+.key { display: inline-flex; align-items: center; gap: 8px; }
+.keyline { display: inline-block; width: 18px; height: 2px; border-radius: 1px; flex: none; }
+.keybox { display: inline-block; width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.keydot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+.pipeline { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 14px 0; }
+.step {
+  position: relative;
+  flex: 1 1 6.2rem;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  margin-right: 24px;
+  padding: 12px 14px 13px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  border-top: 3px solid var(--c);
+}
+.step::after {
+  content: "";
+  position: absolute;
+  right: -17px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid var(--muted);
+  border-right: 2px solid var(--muted);
+  transform: translateY(-50%) rotate(45deg);
+}
+.step:last-child { margin-right: 0; }
+.step:last-child::after { display: none; }
+.step b { font-weight: 620; font-size: 15px; font-stretch: 108%; line-height: 1.25; }
+.step span { font-size: 13px; line-height: 1.4; color: var(--ink-2); }
+
+.bytes { display: flex; gap: 2px; height: 34px; margin: 6px 0 16px; }
+.bytes span { flex: var(--n) 1 0; min-width: 3px; background: var(--c); }
+.bytes span:first-child { border-radius: 4px 0 0 4px; }
+.bytes span:last-child { border-radius: 0 4px 4px 0; }
+.bytes-key { display: flex; flex-wrap: wrap; gap: 8px 26px; list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--ink-2); }
+.bytes-key li { display: inline-flex; align-items: center; gap: 8px; }
+.bytes-key b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.readings { border-collapse: collapse; width: 100%; font-size: 14px; }
+.readings th, .readings td { text-align: left; padding: 10px 16px 10px 0; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+.readings th { font-weight: 600; color: var(--ink-2); font-size: 13px; }
+.readings td.g { width: 17%; }
+.swatch { display: block; width: 100%; max-width: 96px; aspect-ratio: 1.7; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--rule); }
+.readings .v { display: block; margin-top: 5px; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.readings tr.plain td { color: var(--ink-2); }
+
+.chart { min-height: 40px; }
+details.numbers { margin-top: 14px; font-size: 13px; }
+details.numbers summary { cursor: pointer; color: var(--ink-2); width: max-content; }
+details.numbers table { margin-top: 10px; font-size: 12.5px; border-collapse: collapse; }
+details.numbers th, details.numbers td { text-align: left; padding: 4px 16px 4px 0; border-bottom: 1px solid var(--grid); }
+details.numbers td.num, details.numbers th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+svg[class^="plot-"] { --plot-background: var(--surface); }
+
+.sheet { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; margin-top: 12px; padding: 10px; background: var(--frame); border-radius: 14px; }
+.shot {
+  font: inherit;
+  text-align: left;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--frame-ink);
+  cursor: pointer;
+}
+.shot img { display: block; width: 100%; aspect-ratio: 1600 / 1066; object-fit: cover; border-radius: 4px; }
+.shot:hover { background: rgba(255, 255, 255, 0.05); }
+.shot[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); color: #f5f5f5; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.72); }
+.shot:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+.shot .name { font-size: 12.5px; line-height: 1.3; min-height: 2.6em; }
+.shot .de { font-size: 12px; font-variant-numeric: tabular-nums; }
+.meter { display: block; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.meter i { display: block; height: 100%; width: calc(var(--v) / 18 * 100%); background: #e6e6e6; border-radius: 2px; }
+.judge-line { font-size: 15px; margin-top: 14px; }
+.judge-line b { font-weight: 620; }
+
+.lessons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 48px; margin-top: 8px; }
+.lesson { border-top: 2px solid var(--ink); padding-top: 16px; }
+.lesson h3 { font-size: clamp(19px, 1.8vw, 22px); font-stretch: 112%; line-height: 1.2; margin-bottom: 10px; }
+.lesson p { font-size: 15.5px; line-height: 1.6; color: var(--ink-2); max-width: 46ch; }
+
+.notice { border: 1px solid var(--rule); border-radius: 10px; padding: 12px 16px; margin-top: 16px; color: var(--ink-2); font-size: 14px; }
+[hidden] { display: none !important; }
+
+footer { max-width: 1180px; margin: 0 auto; padding: 28px 28px 56px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); }
+footer h2 { font-size: 16px; font-stretch: 106%; margin: 0 0 10px; color: var(--ink); }
+footer p { max-width: 90ch; }
+footer ul { margin: 0 0 14px; padding-left: 18px; }
+
+@media (max-width: 860px) {
+  .bar-row { gap: 12px; padding: 8px 16px; }
+  .bar nav { display: none; }
+  .brand { flex: 1; font-size: 15px; }
+  .theme button { padding: 7px 10px; min-height: 40px; }
+  main { padding: 0 16px 72px; }
+  section { padding-top: 80px; }
+  .facts { grid-template-columns: 1fr; gap: 18px; }
+  .split, .pair, .triptych, .lessons { grid-template-columns: 1fr; }
+  .pipeline { flex-direction: column; gap: 22px; }
+  .step { flex: none; margin-right: 0; }
+  .step::after { right: auto; left: 24px; top: auto; bottom: -16px; transform: rotate(135deg); }
+  .sheet { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .shot .name { min-height: 3.9em; }
+  .readings td.g { width: 22%; }
+  .badge { font-size: 12px; padding: 6px 10px; }
+  .badge b { font-size: 13.5px; }
+  details.numbers summary { padding: 11px 0; }
+  footer { padding: 24px 16px 48px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-row">
+    <a class="brand" href="#overview">Capture One's look, inside a Lumix S9</a>
+    <nav aria-label="Sections">
+      <a href="#profile">Profile</a>
+      <a href="#vlog">V-Log</a>
+      <a href="#contrast">Contrast</a>
+      <a href="#curve-file">Curve file</a>
+      <a href="#measuring">Measuring</a>
+      <a href="#whites">Whites</a>
+      <a href="#second-photo">Second photo</a>
+      <a href="#daylight">Daylight</a>
+      <a href="#result">Result</a>
+      <a href="#lessons">Lessons</a>
+    </nav>
+    <div class="theme" role="group" aria-label="Colour theme">
+      <button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
+      <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="overview" class="hero">
+    <h1>The LUT was perfect. The picture was grey.</h1>
+    <p class="lede">We wanted a Lumix S9 to shoot, straight out of the camera, the colour we get from Capture One and a Cobalt profile. Turning that profile into a LUT took seven rounds and four test photos. What worked came from measuring Capture One rather than decoding it.</p>
+    <figure class="figure">
+      <div class="mount">
+        <div class="compare" data-compare>
+          <img src="image/p2-round7.jpg" alt="The test photo after the final LUT: a crocheted corgi asleep on a crocheted sofa, with pink, purple and orange crocheted flowers behind it." width="1600" height="1066">
+          <div class="over"><img src="image/p2-vlog.jpg" alt="The same photo as the camera records it in V-Log: flat and pale." width="1600" height="1066"></div>
+          <span class="tag left">V-Log, as the camera records it</span>
+          <span class="tag right">After the final LUT</span>
+          <span class="handle" aria-hidden="true"><span class="knob"><svg viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5 2 10l5 5M13 5l5 5-5 5"/></svg></span></span>
+          <input type="range" min="0" max="100" value="50" step="0.5" aria-label="Drag to compare the V-Log original with the final LUT">
+        </div>
+      </div>
+      <figcaption class="caption">One frame from a Lumix S9, shot in V-Log at ISO 640. Drag across it to compare what the camera records with what the final LUT makes of it.</figcaption>
+    </figure>
+    <dl class="facts">
+      <div><dt>Distance from Capture One's render</dt><dd>17.1 to 1.6<span class="note">average ΔE00 across this photo's colours, first LUT to last</span></dd></div>
+      <div><dt>LUT grid</dt><dd>33 × 33 × 33<span class="note">the finest a Lumix accepts</span></dd></div>
+      <div><dt>Measured from</dt><dd>Four photos<span class="note">two indoors and two in daylight, each rendered by the camera and by Capture One</span></dd></div>
+    </dl>
+  </section>
+
+  <section id="profile">
+    <h2>A camera profile is not a look</h2>
+    <div class="prose">
+      <p>Cobalt Image makes camera profiles for Capture One. They are ICC files, and ours are Cobalt Neutral and Cobalt Standard for the Lumix S5II. Capture One renders our S9's raw files through them, and we like the result.</p>
+      <p>A Lumix can do something similar on its own. Under a Photo Style called REAL TIME LUT it applies a LUT to every photo and video as it records, and it takes <code>.cube</code> files with up to 33 points per channel. So the plan looked simple: sample the profile on a 33 × 33 × 33 grid and write the samples out.</p>
+      <p>That first LUT reproduced the profile to within 0.06 ΔE00 on average. ΔE00 is the standard score for how different two colours look, and 1 is about the smallest difference a trained eye picks out side by side. On the camera the LUT was useless. It turned black into a grey of 0.17 on a scale of 0 to 1, and squeezed everything from black to white paper into 0.17 to 0.65. Against Capture One's render of the same frame it was 17.1 ΔE00 away.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <img src="image/p2-round1.jpg" alt="The test photo through the first LUT: washed out, with grey where the blacks should be." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 1</b>17.1 ΔE00 from Capture One</span>
+      </div>
+      <figcaption class="caption">The profile baked straight into a LUT, then given what the camera actually sends. Nothing is broken in the maths. The LUT expects different numbers.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>The profile answers a different question. It holds a single table, from the camera's raw sensor values to colour, and nothing that goes back the other way. Its input is what Capture One has made of the raw file by the time the profile runs: demosaiced, white balanced and encoded with a gamma of 1.8. Greys show it. Feed the profile a raw value of 0.5 and out comes L* 60.50, where a plain 1.8 gamma predicts 60.53. The profile carries almost no contrast of its own.</p>
+      <p>No camera setting produces that input. A Lumix hands its LUTs V-Log, so a LUT built straight from the profile expects numbers the camera never sends.</p>
+    </div>
+    <figure class="figure split">
+      <div class="oneway">
+        <svg viewBox="0 0 520 190" role="img" aria-label="Diagram: the profile maps raw camera RGB to colour in one direction only; there is no table going back.">
+          <rect x="6" y="46" width="170" height="70" rx="12" fill="none" stroke="var(--axis)" stroke-width="1.5"/>
+          <text x="91" y="76" text-anchor="middle" font-size="16" font-weight="620" fill="var(--ink)">Raw camera RGB</text>
+          <text x="91" y="98" text-anchor="middle" font-size="12.5" fill="var(--ink-2)">demosaiced, gamma 1.8</text>
+          <rect x="344" y="46" width="170" height="70" rx="12" fill="none" stroke="var(--axis)" stroke-width="1.5"/>
+          <text x="429" y="76" text-anchor="middle" font-size="16" font-weight="620" fill="var(--ink)">Colour (Lab)</text>
+          <text x="429" y="98" text-anchor="middle" font-size="12.5" fill="var(--ink-2)">then to sRGB</text>
+          <line x1="186" y1="70" x2="330" y2="70" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M322 63 332 70 322 77" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="258" y="58" text-anchor="middle" font-size="13" fill="var(--ink-2)">the one table</text>
+          <line x1="334" y1="96" x2="190" y2="96" stroke="var(--axis)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M198 89 188 96 198 103" fill="none" stroke="var(--axis)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M250 88 266 104M266 88 250 104" stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round"/>
+          <text x="258" y="126" text-anchor="middle" font-size="13" fill="var(--ink-2)">no way back</text>
+          <text x="6" y="170" font-size="13" fill="var(--ink-2)">A Lumix hands its LUT V-Log, which is neither box.</text>
+        </svg>
+      </div>
+      <dl class="anatomy">
+        <dt>Type</dt><dd>Input profile, for a camera</dd>
+        <dt>Direction</dt><dd>Raw camera RGB to Lab, one way</dd>
+        <dt>Table</dt><dd>33 × 33 × 33 points</dd>
+        <dt>Table back</dt><dd>None</dd>
+        <dt>Greys</dt><dd>Gamma 1.8, almost no contrast</dd>
+      </dl>
+      <figcaption class="caption" style="grid-column: 1 / -1">What the Cobalt profile holds. With one table and no way back, every rendering intent uses the same numbers.</figcaption>
+    </figure>
+  </section>
+
+  <section id="vlog">
+    <h2>Rebuilding raw data from V-Log</h2>
+    <div class="prose">
+      <p>If the camera speaks V-Log and the profile speaks raw, the LUT has to translate. V-Log is published down to its constants, so undoing it is exact, and it gives back the scene's brightness in Panasonic's V-Gamut colours. What isn't published is how the sensor itself sees colour, and that is what the profile needs.</p>
+      <p>Adobe measures that for each camera it supports, as a matrix from standard colour to the sensor's own red, green and blue, and the open-source LibRaw library carries the numbers. With it, the LUT runs V-Log backwards to raw camera values, then through Cobalt's profile, then out to sRGB.</p>
+    </div>
+    <figure class="figure">
+      <div class="legend-row">
+        <span class="key"><i class="keybox" style="background: var(--series-1)"></i>Panasonic's published V-Log</span>
+        <span class="key"><i class="keybox" style="background: var(--series-2)"></i>Adobe's sensor matrix, via LibRaw</span>
+        <span class="key"><i class="keybox" style="background: var(--series-3)"></i>Capture One, measured</span>
+        <span class="key"><i class="keybox" style="background: var(--series-4)"></i>Cobalt's profile</span>
+        <span class="key"><i class="keybox" style="background: var(--muted)"></i>Standard</span>
+      </div>
+      <ol class="pipeline">
+        <li class="step" style="--c: var(--series-1)"><b>V-Log</b><span>what the camera hands the LUT</span></li>
+        <li class="step" style="--c: var(--series-1)"><b>Scene light</b><span>undo the log curve, in V-Gamut</span></li>
+        <li class="step" style="--c: var(--series-2)"><b>Raw camera RGB</b><span>sensor matrix, white balanced</span></li>
+        <li class="step" style="--c: var(--series-3)"><b>White balance</b><span>a small cut to blue, from round 7</span></li>
+        <li class="step" style="--c: var(--series-3)"><b>Colour correction</b><span>fitted to four photos, rounds 6 and 7</span></li>
+        <li class="step" style="--c: var(--series-3)"><b>Tone curve</b><span>Capture One's, from round 4</span></li>
+        <li class="step" style="--c: var(--series-3)"><b>Gamma 1.8</b><span>how Capture One feeds a profile</span></li>
+        <li class="step" style="--c: var(--series-4)"><b>Cobalt profile</b><span>raw camera RGB to colour</span></li>
+        <li class="step" style="--c: var(--muted)"><b>sRGB</b><span>what the photo is saved in</span></li>
+      </ol>
+      <figcaption class="caption">The chain inside the final LUT, coloured by where each step comes from. In round 2 the tone curve was a neutral stand-in and there was no colour correction.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>We checked the chain before trusting it. Pushed through the matrix and Cobalt Neutral, a synthetic ColorChecker's colour patches land 1.8 ΔE00 from the chart's true colours on average, and five of its six grey patches within 0.2 L*. The colour was right. The picture was still grey.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <img src="image/p2-round2.jpg" alt="The test photo through the second LUT: believable colours, but flat, with milky shadows." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 2</b>9.8 ΔE00 from Capture One</span>
+      </div>
+      <figcaption class="caption">Right colours, wrong tone. Shadows sit well above black and nothing has any snap.</figcaption>
+    </figure>
+  </section>
+
+  <section id="contrast">
+    <h2>Accurate is not pleasing</h2>
+    <div class="prose">
+      <p>Cobalt's profile carries no contrast, so the punch in a Capture One render comes from Capture One's own film curve, applied outside the profile. Our second LUT had a neutral curve in its place, and brightness that is true to the scene looks flat on a screen. Pleasing pictures add contrast on purpose. Our neutral curve put a surface five stops under middle grey at 0.076, where Panasonic's own V-Log conversion puts it at 0.020.</p>
+      <p>So we borrowed contrast, two ways. One LUT copies the greys of Panasonic's V-Log to V-709 conversion exactly, from the file Panasonic publishes. The other uses a generic film curve: middle grey left where it was, blacks deeper, whites brighter. We expected the film curve to land closer to Capture One. It was the other way round, 5.6 ΔE00 for Panasonic's curve and 8.5 for ours.</p>
+    </div>
+    <figure class="figure pair">
+      <div class="mount">
+        <img src="image/p2-round3-panasonic.jpg" alt="The test photo with Panasonic's V-709 contrast and Cobalt's colour." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 3</b>Panasonic's contrast, 5.6 ΔE00</span>
+      </div>
+      <div class="mount">
+        <img src="image/p2-round3-film.jpg" alt="The test photo with a generic film curve and Cobalt's colour: brighter and more saturated." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 3</b>A film curve, 8.5 ΔE00</span>
+      </div>
+      <figcaption class="caption" style="grid-column: 1 / -1">Two borrowed curves on the same frame. Both look like photographs now, and neither looks like Capture One.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>Both were guesses about a curve we had never seen.</p>
+    </div>
+  </section>
+
+  <section id="curve-file">
+    <h2>The file that wouldn't say</h2>
+    <div class="prose">
+      <p>Capture One keeps its tone curves in <code>.fcrv</code> files, one per camera. The S5II's Auto curve is 353 bytes. The format is binary, but people on the Luminous Landscape forum worked out how its points are stored, and the whole file decodes: a name, Film standard, a one-line description, three curves of 10, 10 and 8 points, and a few numbers that aren't documented anywhere we could find.</p>
+    </div>
+    <figure class="figure">
+      <div class="bytes" role="img" aria-label="The 353 bytes of the file: 236 bytes of curve points, 87 bytes of name and description, 24 bytes of undocumented numbers and a 6-byte header.">
+        <span style="--n: 6; --c: var(--axis)" title="Header, 6 bytes"></span>
+        <span style="--n: 84; --c: var(--series-1)" title="Curve 1, 10 points, 84 bytes"></span>
+        <span style="--n: 4; --c: var(--series-2)" title="Undocumented number, 4 bytes"></span>
+        <span style="--n: 70; --c: var(--muted)" title="Description, 70 bytes"></span>
+        <span style="--n: 17; --c: var(--muted)" title="Name, 17 bytes"></span>
+        <span style="--n: 20; --c: var(--series-2)" title="Five undocumented numbers, 20 bytes"></span>
+        <span style="--n: 84; --c: var(--series-1)" title="Curve 2, 10 points, 84 bytes"></span>
+        <span style="--n: 68; --c: var(--series-1)" title="Curve 3, 8 points, 68 bytes"></span>
+      </div>
+      <ul class="bytes-key">
+        <li><i class="keybox" style="background: var(--series-1)"></i>Curve points <b>236 bytes</b></li>
+        <li><i class="keybox" style="background: var(--muted)"></i>Name and description <b>87</b></li>
+        <li><i class="keybox" style="background: var(--series-2)"></i>Undocumented numbers <b>24</b></li>
+        <li><i class="keybox" style="background: var(--axis)"></i>Header <b>6</b></li>
+      </ul>
+      <figcaption class="caption">Where the 353 bytes of the S5II's Auto curve go, in file order.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>What the file doesn't say is which curve Capture One uses, or what its axes are: raw values, gamma-encoded values or something else. Every x position lands exactly on a grid of 1/228 steps, so these are points someone placed in a curve editor, and a point means nothing without its axes. Read four plausible ways, the file puts middle grey anywhere from 0.43 to 0.74.</p>
+    </div>
+    <figure class="figure">
+      <div class="table-wrap">
+        <table class="readings">
+          <thead><tr><th>Reading of the file</th><th>3 stops under</th><th>Middle grey</th><th>2 stops over</th></tr></thead>
+          <tbody>
+            <tr><td>Curve 1, on raw values</td><td class="g"><i class="swatch" style="background: rgb(8 8 8)"></i><span class="v">0.030</span></td><td class="g"><i class="swatch" style="background: rgb(116 116 116)"></i><span class="v">0.456</span></td><td class="g"><i class="swatch" style="background: rgb(241 241 241)"></i><span class="v">0.947</span></td></tr>
+            <tr><td>Curve 2, on raw values</td><td class="g"><i class="swatch" style="background: rgb(15 15 15)"></i><span class="v">0.058</span></td><td class="g"><i class="swatch" style="background: rgb(109 109 109)"></i><span class="v">0.429</span></td><td class="g"><i class="swatch" style="background: rgb(238 238 238)"></i><span class="v">0.934</span></td></tr>
+            <tr><td>Curve 3, on gamma-encoded values</td><td class="g"><i class="swatch" style="background: rgb(39 39 39)"></i><span class="v">0.151</span></td><td class="g"><i class="swatch" style="background: rgb(125 125 125)"></i><span class="v">0.489</span></td><td class="g"><i class="swatch" style="background: rgb(227 227 227)"></i><span class="v">0.891</span></td></tr>
+            <tr><td>Curve 1, on gamma-encoded values</td><td class="g"><i class="swatch" style="background: rgb(82 82 82)"></i><span class="v">0.323</span></td><td class="g"><i class="swatch" style="background: rgb(188 188 188)"></i><span class="v">0.739</span></td><td class="g"><i class="swatch" style="background: rgb(248 248 248)"></i><span class="v">0.974</span></td></tr>
+            <tr class="plain"><td>No curve at all</td><td class="g"><i class="swatch" style="background: rgb(43 43 43)"></i><span class="v">0.170</span></td><td class="g"><i class="swatch" style="background: rgb(118 118 118)"></i><span class="v">0.461</span></td><td class="g"><i class="swatch" style="background: rgb(221 221 221)"></i><span class="v">0.868</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figcaption class="caption">The same three greys through Cobalt Neutral, under each reading of the file. Swatches show the resulting sRGB value, 0 to 1.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>None of the four matched Capture One when we later checked against a real render.</p>
+    </div>
+  </section>
+
+  <section id="measuring">
+    <h2>Measure the whole chain</h2>
+    <div class="prose">
+      <p>So we stopped decoding and measured. One shutter press on the S9, in V-Log with RAW+JPEG, records the same instant twice. The V-Log JPEG is exactly what a LUT receives, and the raw file is what Capture One renders. Export that raw from Capture One with the Cobalt profile, and every pixel pairs a LUT input with the output we want from it.</p>
+      <p>Two things got in the way. The raw file opens about 2.7 stops too dark in any raw converter, because V-Log's base ISO is 640 rather than 100: the camera lets in less light and counts on V-Log to lift it. We exported at +2.7 EV to put it back. The two versions also don't line up. The camera and Capture One correct lens distortion slightly differently, and the camera's frame comes out 1.7% larger. Matching 628 patches of detail found the offset. The two lens corrections differ a little too, not just in scale, and allowing for that the pair lines up to within about three pixels.</p>
+    </div>
+    <figure class="figure">
+      <div class="chart" id="quiver-chart" role="img" aria-label="Arrows from each matched patch in the camera JPEG to the same patch in Capture One's export. All point towards the centre of the frame."></div>
+      <figcaption class="caption">Each arrow, for every fourth matched patch, runs from a patch in the camera's JPEG to the same patch in Capture One's export, drawn 14 times longer. They all point at the centre: mostly a change of scale, with a slight difference in lens correction on top.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="quiver-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>Then the measurement itself, on our first test photo: a desk at ISO 4000 under indoor light. Over 135,000 flat, neutral blocks of 8 × 8 pixels, the pair traces what Capture One's Film Standard curve does to every grey in the scene, from V-Log black to three and a half stops above middle grey. Where it clips couldn't be measured here, because only a handful of blocks reach white; a daylight photo later put it at about four and a half stops. Most of the pictures in this article come from a second photo, shot later, which gets its own section below.</p>
+    </div>
+    <figure class="figure">
+      <div class="legend-row" aria-hidden="true">
+        <span class="key"><i class="keyline" style="background: var(--series-1)"></i>Capture One, measured</span>
+        <span class="key"><i class="keyline" style="background: var(--series-2)"></i>Panasonic V-709</span>
+        <span class="key"><i class="keyline" style="background: var(--series-3)"></i>Film curve, guessed</span>
+        <span class="key"><i class="keyline" style="background: var(--series-4)"></i>Neutral, first try</span>
+      </div>
+      <div class="chart" id="tone-chart" role="img" aria-label="Line chart of on-screen brightness against stops from middle grey for four tone curves. Capture One's measured curve is the darkest below middle grey."></div>
+      <figcaption class="caption">Brightness on screen for each grey, from six stops under middle grey to five over, with Capture One's curve as refined in round 7. The shaded strip is brighter than any grey we could measure, so the curve there is extrapolated.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="tone-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>Capture One's curve is darker than both guesses below middle grey. It puts middle grey itself at 0.37, and a surface five stops down at 0.008, less than half of what Panasonic's curve gives.</p>
+      <p>The curve alone still wasn't the look. Applied to each colour channel separately, the way a Curves tool works, it made colours 20% more saturated than Capture One's, because a contrasty curve stretches the gaps between channels along with everything else. Capture One keeps saturation nearly constant. A blend matched it: a quarter of the curve applied per channel, and the rest applied to brightness alone so each colour keeps its channel ratios. That lands within about 1% of Capture One's saturation.</p>
+    </div>
+    <figure class="figure">
+      <div class="chart" id="blend-chart" role="img" aria-label="Line chart: saturation relative to Capture One rises from 0.92 to 1.20 times as more of the curve is applied per channel, passing 0.99 at 25 percent."></div>
+      <figcaption class="caption">Saturation of the LUT's colours against Capture One's, as more of the curve is applied channel by channel. Measured over 110,000 blocks of colour in the first photo.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="blend-table"></div></details>
+    </figure>
+    <figure class="figure">
+      <div class="mount">
+        <img src="image/p2-round4.jpg" alt="The test photo through round 4's LUT: deep blacks and rich colour." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 4</b>2.8 ΔE00 from Capture One</span>
+      </div>
+      <figcaption class="caption">The measured curve, applied the way Capture One applies it.</figcaption>
+    </figure>
+  </section>
+
+  <section id="whites">
+    <h2>The whites weren't white</h2>
+    <div class="prose">
+      <p>Round 4's whites looked slightly dull and slightly blue. Measured against Capture One on the first photo, they were 1.3 L* darker and 1.5 b* bluer, with 1.6 times Capture One's tint.</p>
+      <p>Capture One's own near-greys held the answer. In its render the brightest greys lose most of their blue, which is what applying a curve to each channel separately does near white: the curve's shoulder squeezes the gaps between channels. Round 4 kept each colour's channel ratios for three quarters of the curve, so its whites kept their tint. Round 5 hands the curve over to the channels as tones climb, from a quarter of it at middle grey to all of it two stops up.</p>
+    </div>
+    <figure class="figure">
+      <div class="legend-row" aria-hidden="true">
+        <span class="key"><i class="keyline" style="background: var(--series-1)"></i>Capture One</span>
+        <span class="key"><i class="keyline" style="background: var(--series-2)"></i>Round 4</span>
+        <span class="key"><i class="keyline" style="background: var(--series-3)"></i>Round 5</span>
+      </div>
+      <div class="chart" id="tint-chart" role="img" aria-label="Line chart of the blue tint of near-grey surfaces against brightness in the first photo. Round 4 is bluer than Capture One at most levels; above two stops, round 5 closes most of that gap."></div>
+      <figcaption class="caption">The blue tint of near-grey surfaces in the first photo, from middle grey to its brightest greys. Each point averages different surfaces, so the lines wander. Round 4 is bluer than Capture One at most levels. Above two stops, where round 5 applies the whole curve per channel, it closes most of that gap.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="tint-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>Two smaller fixes rode along. Our measured curve was coarse near white, so we refitted the top with finer steps. And applied pixel by pixel, the LUT came out up to 0.016 darker than the curve we had fitted to block averages. We never pinned down why, so we measured that gap through the real file and added it back, which leaves it within 0.004.</p>
+      <p>On the first photo, round 5's whites land 0.9 ΔE00 from Capture One's, down from 2.1, and colours and greys improved with them, to 2.2 and 1.2.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <img src="image/p2-round5.jpg" alt="The test photo through round 5's LUT: the white card reads clean white." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 5</b>whites 0.6 ΔE00 from Capture One's</span>
+      </div>
+      <figcaption class="caption">The whites fix: per-channel contrast near white, a finer fit at the top, and the pixel-level gap added back. On this photo, round 4's whites were 1.8 ΔE00 from Capture One's.</figcaption>
+    </figure>
+  </section>
+
+  <section id="second-photo">
+    <h2>A second photo</h2>
+    <div class="prose">
+      <p>One photo can fit a story that isn't true, so we shot another: at base ISO this time, 640, under an LED light with the camera's white balance set to the light's colour temperature. Crocheted flowers brought colours the first photo didn't have. It is the photo in most of this article's pictures.</p>
+    </div>
+    <div class="prose">
+      <p>It confirmed two things and showed a third. The whites fix held on a scene it had never seen: round 5's whites land 0.6 ΔE00 from Capture One's, where round 4's were 1.8. The brightness correction held at base ISO, so the gap it closes wasn't noise from the first photo's ISO 4000. And even with the Kelvin matched, the LUT's greys leaned slightly blue, so that lean was the LUT's own, not the first photo's light. Round 7 takes it out.</p>
+      <p>Its colours showed something new. Round 5 put the pink-red flowers 8.0 ΔE00 from Capture One and turned them 16° towards red. It pushed oranges towards red too, and left yellows short of Capture One's saturation. The first photo's reds had leaned the same way, by less. The same lean in two scenes under two lights points at the bridge from V-Log: Adobe's sensor matrix only approximates what the camera does when it writes V-Log.</p>
+    </div>
+    <figure class="figure">
+      <div class="legend-row" aria-hidden="true">
+        <span class="key"><i class="keydot" style="background: var(--series-3)"></i>Round 5</span>
+        <span class="key"><i class="keydot" style="background: var(--series-4)"></i>Round 6</span>
+      </div>
+      <div class="chart" id="hue-chart" role="img" aria-label="Dot chart of distance from Capture One by hue on the second photo. Pink-reds fall from 8.1 to 1.7 ΔE00, and every hue lands between 1.5 and 2.7 in round 6."></div>
+      <figcaption class="caption">Average distance from Capture One by hue, across the second photo's colours, in round 5 and in round 6 with the colour correction described below.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="hue-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>So we fitted a small correction: a 3 × 3 matrix on the camera values, with each row summing to 1 so greys can't move. That leaves six numbers to fit. At full strength it undid some of the whites fix, taking the second photo's whites from 0.6 to 0.9 ΔE00, because a matrix moves every colour off the grey axis in proportion, faint tints included. So round 6 fades the correction in with saturation: off for whites and greys, fully on for strong colours.</p>
+      <p>The test that matters is whether it holds on photos it wasn't fitted to. Two daylight photos, below, gave it that test.</p>
+    </div>
+    <div class="prose">
+      <p>Applied through the finished LUT file, round 6 keeps the second photo's whites at 0.7 ΔE00 while its saturated colours fall from 4.5 to 1.6.</p>
+    </div>
+    <figure class="figure triptych">
+      <div class="mount">
+        <img src="image/p2-crop-capture-one.jpg" alt="Close-up of a pink crocheted flower as Capture One renders it." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Capture One</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p2-crop-round5.jpg" alt="The same flower through round 5's LUT, pushed towards red." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Round 5</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p2-crop-round6.jpg" alt="The same flower through round 6's LUT, pink again." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Round 6</b></span>
+      </div>
+      <figcaption class="caption" style="grid-column: 1 / -1">The pink flower at full size. Round 5 pushes it towards red, and round 6 brings back Capture One's pink.</figcaption>
+    </figure>
+  </section>
+
+  <section id="daylight">
+    <h2>Two photos in daylight</h2>
+    <div class="prose">
+      <p>Every photo so far was taken indoors, so we took two more in daylight, at base ISO with auto white balance: a street under a blue sky, and a flower bed in full sun. They brought what the indoor photos didn't have: sky, foliage and real highlights.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <div class="compare" data-compare id="judge3">
+          <img src="image/p3-capture-one.jpg" alt="Capture One's render of the top of the street photo: blue sky, white clouds and a treetop." width="1600" height="1066" loading="lazy">
+          <div class="over"><img src="image/p3-round7.jpg" alt="The chosen round's LUT applied to the street photo's V-Log JPEG." width="1600" height="1066" loading="lazy"></div>
+          <span class="tag left" id="judge3-left">Round 7</span>
+          <span class="tag right">Capture One</span>
+          <span class="handle" aria-hidden="true"><span class="knob"><svg viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5 2 10l5 5M13 5l5 5-5 5"/></svg></span></span>
+          <input type="range" min="0" max="100" value="50" step="0.5" aria-label="Drag to compare the chosen round with Capture One on the street photo">
+        </div>
+        <div class="sheet" role="group" aria-label="Choose what to compare with Capture One on the street photo" data-judge="judge3" data-left="judge3-left" data-line="judge3-line">
+          <button type="button" class="shot" data-src="image/p3-vlog.jpg" data-label="V-Log, as recorded" data-summary="The street photo in V-Log, as the camera records it." aria-pressed="false"><img src="image/p3-vlog.jpg" alt="" loading="lazy"><span class="name">V-Log, as recorded</span><span class="de">no LUT</span></button>
+          <button type="button" class="shot" data-src="image/p3-round6.jpg" data-label="Round 6" data-summary="Round 6 on the street photo: 2.4 ΔE00 from Capture One on colours, 2.1 on greys, 2.0 on whites." aria-pressed="false"><img src="image/p3-round6.jpg" alt="" loading="lazy"><span class="name">Round 6, colour correction</span><span class="meter"><i style="--v: 2.43"></i></span><span class="de">2.4 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p3-round7.jpg" data-label="Round 7" data-summary="Round 7 on the street photo: 2.1 ΔE00 from Capture One on colours, 1.9 on greys, 1.8 on whites." aria-pressed="true"><img src="image/p3-round7.jpg" alt="" loading="lazy"><span class="name">Round 7, four photos</span><span class="meter"><i style="--v: 2.09"></i></span><span class="de">2.1 ΔE00</span></button>
+        </div>
+      </div>
+      <p class="judge-line" id="judge3-line" aria-live="polite">Round 7 on the street photo: 2.1 ΔE00 from Capture One on colours, 1.9 on greys, 1.8 on whites.</p>
+      <figcaption class="caption">The top of the street photo, zoomed in to sky and treetops. The scores are for the whole frame.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>Round 6 held up outdoors. Against no correction at all, it more than halved the error on saturated colours in both photos. But it overshot. Fitted indoors, it had never seen a blue sky, and it turned the sky about 6° and made it about a quarter more saturated than Capture One's.</p>
+    </div>
+    <figure class="figure triptych">
+      <div class="mount">
+        <img src="image/p3-crop-sky-capture-one.jpg" alt="Close-up of the sky and clouds as Capture One renders them: a soft blue." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Capture One</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p3-crop-sky-round6.jpg" alt="The same sky through round 6's LUT: a deeper, more violet blue." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Round 6</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p3-crop-sky-round7.jpg" alt="The same sky through round 7's LUT: closer to Capture One's blue." width="1400" height="600" loading="lazy">
+        <span class="badge"><b>Round 7</b></span>
+      </div>
+      <figcaption class="caption" style="grid-column: 1 / -1">The sky at full size. Round 6 makes it a deeper, more violet blue than Capture One's. Round 7 is closer, but still a little richer.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>So we refitted the correction on all four photos. The first attempt came out worse on every one of them, which a fit shouldn't do on its own data. It had been minimising plain distance in Lab, which weighs a saturated sky's chroma far more heavily than the eye does. Refitted on ΔE00, the score we judge by, it improved on every photo, and each photo kept its score when the correction was fitted without it.</p>
+    </div>
+    <figure class="figure">
+      <div class="legend-row" aria-hidden="true">
+        <span class="key"><i class="keybox" style="background: var(--muted)"></i>No correction</span>
+        <span class="key"><i class="keybox" style="background: var(--series-1)"></i>Fitted on the other three</span>
+        <span class="key"><i class="keybox" style="background: var(--series-4)"></i>Fitted on all four</span>
+      </div>
+      <div class="chart" id="crossval-chart" role="img" aria-label="Bar chart of saturated colours' distance from Capture One on four photos. Fitted without a photo, the correction cuts that photo's error from 4.70 to 1.83, 4.70 to 1.57, 4.56 to 2.18 and 3.44 to 1.63."></div>
+      <figcaption class="caption">Error on saturated colours with no correction, with the correction fitted only on the other three photos, and with it fitted on all four. Computed with the model behind the LUT.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="crossval-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>Fitted on the daylight photos alone, the correction failed indoors: a street and a flower bed don't hold enough different colours to pin it down. The indoor photos carry the fit. One matrix is still a compromise between the two kinds of light, and the sky stays about a fifth more saturated than Capture One's.</p>
+      <p>The flower bed held the first real highlights. Its brightest greys reach white in Capture One at around V-Log 0.74, not the 0.72 we had estimated, and Capture One's shoulder is softer than ours was. Our LUT ran up to 0.008 bright near white and clipped about half a stop early. Three passes of measuring the gap and correcting the top of the grey table fixed it, and white now sits about four and a half stops above middle grey.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <img src="image/p4-round7.jpg" alt="Part of a flower bed in full sun through round 7's LUT: red and magenta flowers, yellow clusters and white daisies among rocks." width="1600" height="1066" loading="lazy">
+        <span class="badge"><b>Round 7</b>1.7 ΔE00 from Capture One</span>
+      </div>
+      <figcaption class="caption">Part of the flower bed through round 7. Its white daisies and sunlit greys gave the first measurements of where Capture One turns white. The score is for the whole frame.</figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="legend-row" aria-hidden="true">
+        <span class="key"><i class="keydot" style="background: var(--series-1)"></i>Capture One</span>
+        <span class="key"><i class="keyline" style="background: var(--series-4)"></i>Round 6</span>
+        <span class="key"><i class="keyline" style="background: var(--series-3)"></i>Round 7</span>
+      </div>
+      <div class="chart" id="highlight-chart" role="img" aria-label="Line chart of the flower bed's brightest greys. Round 6 runs above Capture One from about three and a half stops up; round 7 follows Capture One to within 0.002 from three stops up."></div>
+      <figcaption class="caption">The flower bed's brightest greys, in steps of 0.01 in V-Log. Round 6 runs above Capture One from about three and a half stops up. Round 7 follows it to within 0.002 from three stops up.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="highlight-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>The street photo also showed a flaw in how we had been lining the photos up. The camera and Capture One correct the lens slightly differently, not only in scale, and at 18 mm it shows. Allowing for it brought every photo, the indoor ones too, into line to within about three pixels. Every score in this article is measured that way.</p>
+      <p>Last, the LUT's greys leaned slightly blue on every photo, including the one shot with the Kelvin set, so the lean was ours. Cutting the camera's blue channel by under 1% took most of it out. Photos shot with auto white balance keep a slight magenta lean, which changes from shot to shot, so a fixed LUT can't follow it.</p>
+    </div>
+  </section>
+
+  <section id="result">
+    <h2>Where it landed</h2>
+    <div class="prose">
+      <p>Applied to the camera's own V-Log JPEG, the final LUT lands 1.6 ΔE00 from Capture One across this photo's colours and 1.0 on its greys, and 1.7 and 1.1 on the first photo. The first LUT was 17.1 away. Round 7 barely moves this photo; its gains are in whites and outdoors. Pick any round below and drag across the frame to set it against Capture One's render.</p>
+    </div>
+    <figure class="figure">
+      <div class="mount">
+        <div class="compare" data-compare id="judge">
+          <img src="image/p2-capture-one.jpg" alt="Capture One's render of the photo's raw file with Cobalt Standard and Film Standard." width="1600" height="1066" loading="lazy">
+          <div class="over"><img src="image/p2-round7.jpg" alt="The chosen round's LUT applied to the photo's V-Log JPEG." width="1600" height="1066" loading="lazy"></div>
+          <span class="tag left" id="judge-left">Round 7</span>
+          <span class="tag right">Capture One</span>
+          <span class="handle" aria-hidden="true"><span class="knob"><svg viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5 2 10l5 5M13 5l5 5-5 5"/></svg></span></span>
+          <input type="range" min="0" max="100" value="50" step="0.5" aria-label="Drag to compare the chosen round with Capture One">
+        </div>
+        <div class="sheet" role="group" aria-label="Choose what to compare with Capture One" data-judge="judge" data-left="judge-left" data-line="judge-line">
+          <button type="button" class="shot" data-src="image/p2-vlog.jpg" data-label="V-Log, as recorded" data-summary="V-Log as the camera records it, before any LUT." aria-pressed="false"><img src="image/p2-vlog.jpg" alt="" loading="lazy"><span class="name">V-Log, as recorded</span><span class="de">no LUT</span></button>
+          <button type="button" class="shot" data-src="image/p2-round1.jpg" data-label="Round 1" data-summary="Round 1: 17.1 ΔE00 from Capture One on colours, 13.8 on greys." aria-pressed="false"><img src="image/p2-round1.jpg" alt="" loading="lazy"><span class="name">Round 1, profile as is</span><span class="meter"><i style="--v: 17.14"></i></span><span class="de">17.1 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round2.jpg" data-label="Round 2" data-summary="Round 2: 9.8 ΔE00 from Capture One on colours, 6.1 on greys." aria-pressed="false"><img src="image/p2-round2.jpg" alt="" loading="lazy"><span class="name">Round 2, neutral curve</span><span class="meter"><i style="--v: 9.75"></i></span><span class="de">9.8 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round3-panasonic.jpg" data-label="Round 3, Panasonic's contrast" data-summary="Round 3 with Panasonic's contrast: 5.6 ΔE00 from Capture One on colours, 4.5 on greys." aria-pressed="false"><img src="image/p2-round3-panasonic.jpg" alt="" loading="lazy"><span class="name">Round 3, Panasonic curve</span><span class="meter"><i style="--v: 5.64"></i></span><span class="de">5.6 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round3-film.jpg" data-label="Round 3, film curve" data-summary="Round 3 with a film curve: 8.5 ΔE00 from Capture One on colours, 5.9 on greys." aria-pressed="false"><img src="image/p2-round3-film.jpg" alt="" loading="lazy"><span class="name">Round 3, film curve</span><span class="meter"><i style="--v: 8.49"></i></span><span class="de">8.5 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round4.jpg" data-label="Round 4" data-summary="Round 4: 2.8 ΔE00 from Capture One on colours, 1.6 on greys, 1.8 on whites." aria-pressed="false"><img src="image/p2-round4.jpg" alt="" loading="lazy"><span class="name">Round 4, measured curve</span><span class="meter"><i style="--v: 2.80"></i></span><span class="de">2.8 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round5.jpg" data-label="Round 5" data-summary="Round 5: 2.7 ΔE00 from Capture One on colours, 1.0 on greys, 0.6 on whites." aria-pressed="false"><img src="image/p2-round5.jpg" alt="" loading="lazy"><span class="name">Round 5, whites fix</span><span class="meter"><i style="--v: 2.70"></i></span><span class="de">2.7 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round6.jpg" data-label="Round 6" data-summary="Round 6: 1.6 ΔE00 from Capture One on colours, 1.0 on greys, 0.7 on whites." aria-pressed="false"><img src="image/p2-round6.jpg" alt="" loading="lazy"><span class="name">Round 6, colour correction</span><span class="meter"><i style="--v: 1.58"></i></span><span class="de">1.6 ΔE00</span></button>
+          <button type="button" class="shot" data-src="image/p2-round7.jpg" data-label="Round 7" data-summary="Round 7: 1.6 ΔE00 from Capture One on colours, 1.0 on greys, 0.7 on whites." aria-pressed="true"><img src="image/p2-round7.jpg" alt="" loading="lazy"><span class="name">Round 7, four photos</span><span class="meter"><i style="--v: 1.56"></i></span><span class="de">1.6 ΔE00</span></button>
+        </div>
+      </div>
+      <p class="judge-line" id="judge-line" aria-live="polite">Round 7: 1.6 ΔE00 from Capture One on colours, 1.0 on greys, 0.7 on whites.</p>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="rounds-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>What's left is small. On the second photo every hue now lands between 1.0 and 1.9 ΔE00 from Capture One, and yellows still sit about a tenth under its saturation. In daylight the sky stays about a fifth more saturated than Capture One's, and warm colours turn up to 8° towards yellow. Photos shot with auto white balance keep a slight magenta lean. And white itself, above the brightest greys we could measure, is extrapolated.</p>
+    </div>
+    <figure class="figure triptych">
+      <div class="mount">
+        <img src="image/p2-crop-corgi-capture-one.jpg" alt="Close-up of the crocheted corgi as Capture One renders it: golden yellow." width="1400" height="660" loading="lazy">
+        <span class="badge"><b>Capture One</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p2-crop-corgi-round4.jpg" alt="The same corgi through round 4's LUT: orange." width="1400" height="660" loading="lazy">
+        <span class="badge"><b>Round 4</b></span>
+      </div>
+      <div class="mount">
+        <img src="image/p2-crop-corgi-round7.jpg" alt="The same corgi through round 7's LUT: golden yellow again." width="1400" height="660" loading="lazy">
+        <span class="badge"><b>Round 7</b></span>
+      </div>
+      <figcaption class="caption" style="grid-column: 1 / -1">The corgi at full size. Round 4 turns its yellow towards orange, and round 7 brings back Capture One's yellow.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>One detail we nearly missed: Cobalt makes these profiles for the S5II, and we shoot an S9. LibRaw lists slightly different sensor matrices for the two. Capture One applies the S5II profile to S9 files unchanged, so the LUT does too, but the step back from V-Log has to use the S9's own matrix. On the first photo, in round 4, the switch moved the result only from 2.45 to 2.42. Across every colour a V-Log file can hold, the two versions differ by 1.0 ΔE00 on average and by up to 10.5 on saturated colours that scene doesn't contain.</p>
+    </div>
+  </section>
+
+  <section id="lessons">
+    <h2>What we'd tell you</h2>
+    <div class="lessons">
+      <div class="lesson">
+        <h3>A camera profile is not a look</h3>
+        <p>It is a one-way map from raw sensor values. Bake it on its own and the LUT expects numbers no camera sends.</p>
+      </div>
+      <div class="lesson">
+        <h3>Accurate is not pleasing</h3>
+        <p>Scene-accurate tone looks grey on a screen. The look lives in the curve, and Capture One keeps its curve outside the profile.</p>
+      </div>
+      <div class="lesson">
+        <h3>Measure the chain, don't decode the parts</h3>
+        <p>One photo rendered twice captured the curve, the exposure offset and the shadow handling at once. A 353-byte file couldn't.</p>
+      </div>
+      <div class="lesson">
+        <h3>How a curve is applied matters as much as its shape</h3>
+        <p>Per-channel contrast adds saturation in the mid-tones and takes the tint out of whites. Capture One renders as if it uses a little in the mid-tones and all of it near white, and a list of curve points can't show that.</p>
+      </div>
+      <div class="lesson">
+        <h3>Test the fix on a photo it hasn't seen</h3>
+        <p>A second photo ruled out one theory, explained one colour cast and proved one correction. Fitting on one photo and scoring on the other is what separates a fix from a coincidence.</p>
+      </div>
+      <div class="lesson">
+        <h3>Fit on the score you judge by</h3>
+        <p>A refit that minimised plain distance in Lab came out worse on every photo, because Lab weighs a saturated sky's chroma far more than the eye does. Fitted on ΔE00, it improved on all of them.</p>
+      </div>
+    </div>
+    <div class="notice" id="offline" hidden>Charts need their libraries from jsDelivr. Connect to the internet and reload this page to see them.</div>
+  </section>
+</main>
+
+<footer>
+  <h2>How we measured</h2>
+  <p>Test photos, all RAW+JPEG in V-Log on a Lumix S9. The first: ISO 4000, 1/50 s, f/8, indoor light, auto white balance. The second: ISO 640, 1/125 s, f/6.3, an LED light, white balance set to its colour temperature. The third and fourth: ISO 640, f/6.3, 1/2500 s and 1/1300 s, daylight, auto white balance. Capture One exports: 16-bit sRGB TIFFs with the Film Standard and Linear Response curves at +2.7 EV, with Cobalt Neutral and Cobalt Standard for the first photo and Cobalt Standard for the others. Each export is resampled into the camera's frame, allowing for scale, shift and a slight difference in lens correction. Comparisons use 8 × 8-pixel block averages in flat areas, and ΔE00 is CIEDE2000. The ColorChecker check uses X-Rite's published D50 values.</p>
+  <p>The LUTs are 33-point <code>.cube</code> files, V-Log in and full-range sRGB out. We built them with LittleCMS 2.17 and checked them by applying them with ffmpeg. The colour correction is a 3 × 3 matrix whose rows sum to 1, fitted in ΔE00 to all four photos and faded in over camera-RGB saturation from 0.12 to 0.40; before it, camera blue is scaled by 0.9924.</p>
+  <p>Sources:</p>
+  <ul>
+    <li><a href="https://eww.pavc.panasonic.co.jp/dscoi/DC-S5M2/html/DC-S5M2_DVQP2839_eng/0071.html">Panasonic S5II operating instructions: LUT Library</a> and <a href="https://eww.pavc.panasonic.co.jp/dscoi/DC-S5M2/html/DC-S5M2_DVQP2839_eng/0069.html">Photo Style</a></li>
+    <li><a href="https://av.jpn.support.panasonic.com/support/global/cs/dsc/download/lut/index.html">Panasonic's V-Log to V-709 LUT</a></li>
+    <li><a href="https://github.com/LibRaw/LibRaw/blob/master/src/tables/colordata.cpp">LibRaw's camera colour table</a></li>
+    <li><a href="https://torger.se/anders/dcamprof.html">DCamProf documentation, on how Capture One applies its curves</a></li>
+    <li><a href="https://forum.luminous-landscape.com/index.php?topic=103238.0">Luminous Landscape: Capture One film curves (FCRV)</a></li>
+  </ul>
+</footer>
+
+<script id="data" type="application/json">{"tone":[{"stop":-6.0,"Capture One, measured":0.0054,"Panasonic V-709":0.0099,"Film curve, guessed":0.0196,"Neutral, first try":0.0381},{"stop":-5.95,"Capture One, measured":0.0055,"Panasonic V-709":0.0102,"Film curve, guessed":0.0203,"Neutral, first try":0.0394},{"stop":-5.9,"Capture One, measured":0.0055,"Panasonic V-709":0.0106,"Film curve, guessed":0.021,"Neutral, first try":0.0408},{"stop":-5.85,"Capture One, measured":0.0056,"Panasonic V-709":0.011,"Film curve, guessed":0.0218,"Neutral, first try":0.0423},{"stop":-5.8,"Capture One, measured":0.0057,"Panasonic V-709":0.0113,"Film curve, guessed":0.0225,"Neutral, first try":0.0438},{"stop":-5.75,"Capture One, measured":0.0057,"Panasonic V-709":0.0117,"Film curve, guessed":0.0233,"Neutral, first try":0.0453},{"stop":-5.7,"Capture One, measured":0.0058,"Panasonic V-709":0.0122,"Film curve, guessed":0.0242,"Neutral, first try":0.0469},{"stop":-5.65,"Capture One, measured":0.0059,"Panasonic V-709":0.0126,"Film curve, guessed":0.025,"Neutral, first try":0.0486},{"stop":-5.6,"Capture One, measured":0.006,"Panasonic V-709":0.013,"Film curve, guessed":0.0259,"Neutral, first try":0.0503},{"stop":-5.55,"Capture One, measured":0.0061,"Panasonic V-709":0.0135,"Film curve, guessed":0.0268,"Neutral, first try":0.052},{"stop":-5.5,"Capture One, measured":0.0062,"Panasonic V-709":0.014,"Film curve, guessed":0.0278,"Neutral, first try":0.0539},{"stop":-5.45,"Capture One, measured":0.0063,"Panasonic V-709":0.0145,"Film curve, guessed":0.0287,"Neutral, first try":0.0558},{"stop":-5.4,"Capture One, measured":0.0064,"Panasonic V-709":0.015,"Film curve, guessed":0.0298,"Neutral, first try":0.0577},{"stop":-5.35,"Capture One, measured":0.0066,"Panasonic V-709":0.0155,"Film curve, guessed":0.0308,"Neutral, first try":0.0598},{"stop":-5.3,"Capture One, measured":0.0068,"Panasonic V-709":0.016,"Film curve, guessed":0.0319,"Neutral, first try":0.0619},{"stop":-5.25,"Capture One, measured":0.007,"Panasonic V-709":0.0166,"Film curve, guessed":0.033,"Neutral, first try":0.0641},{"stop":-5.2,"Capture One, measured":0.0072,"Panasonic V-709":0.0172,"Film curve, guessed":0.0342,"Neutral, first try":0.0663},{"stop":-5.15,"Capture One, measured":0.0075,"Panasonic V-709":0.0178,"Film curve, guessed":0.0354,"Neutral, first try":0.0687},{"stop":-5.1,"Capture One, measured":0.0077,"Panasonic V-709":0.0184,"Film curve, guessed":0.0366,"Neutral, first try":0.0711},{"stop":-5.05,"Capture One, measured":0.0079,"Panasonic V-709":0.0191,"Film curve, guessed":0.0379,"Neutral, first try":0.0736},{"stop":-5.0,"Capture One, measured":0.0082,"Panasonic V-709":0.0198,"Film curve, guessed":0.0392,"Neutral, first try":0.0759},{"stop":-4.95,"Capture One, measured":0.0085,"Panasonic V-709":0.0207,"Film curve, guessed":0.0405,"Neutral, first try":0.0773},{"stop":-4.9,"Capture One, measured":0.0087,"Panasonic V-709":0.0217,"Film curve, guessed":0.0419,"Neutral, first try":0.0788},{"stop":-4.85,"Capture One, measured":0.009,"Panasonic V-709":0.0227,"Film curve, guessed":0.0433,"Neutral, first try":0.0803},{"stop":-4.8,"Capture One, measured":0.0093,"Panasonic V-709":0.0237,"Film curve, guessed":0.0447,"Neutral, first try":0.0818},{"stop":-4.75,"Capture One, measured":0.0096,"Panasonic V-709":0.0248,"Film curve, guessed":0.0462,"Neutral, first try":0.0835},{"stop":-4.7,"Capture One, measured":0.0099,"Panasonic V-709":0.0259,"Film curve, guessed":0.0478,"Neutral, first try":0.0851},{"stop":-4.65,"Capture One, measured":0.0103,"Panasonic V-709":0.027,"Film curve, guessed":0.0494,"Neutral, first try":0.0869},{"stop":-4.6,"Capture One, measured":0.0107,"Panasonic V-709":0.0282,"Film curve, guessed":0.0511,"Neutral, first try":0.0887},{"stop":-4.55,"Capture One, measured":0.011,"Panasonic V-709":0.0294,"Film curve, guessed":0.0528,"Neutral, first try":0.0905},{"stop":-4.5,"Capture One, measured":0.0114,"Panasonic V-709":0.0306,"Film curve, guessed":0.0546,"Neutral, first try":0.0925},{"stop":-4.45,"Capture One, measured":0.0119,"Panasonic V-709":0.0319,"Film curve, guessed":0.0564,"Neutral, first try":0.0945},{"stop":-4.4,"Capture One, measured":0.0123,"Panasonic V-709":0.0333,"Film curve, guessed":0.0583,"Neutral, first try":0.0965},{"stop":-4.35,"Capture One, measured":0.0128,"Panasonic V-709":0.0347,"Film curve, guessed":0.0603,"Neutral, first try":0.0987},{"stop":-4.3,"Capture One, measured":0.0132,"Panasonic V-709":0.0361,"Film curve, guessed":0.0624,"Neutral, first try":0.1009},{"stop":-4.25,"Capture One, measured":0.0138,"Panasonic V-709":0.0376,"Film curve, guessed":0.0645,"Neutral, first try":0.1032},{"stop":-4.2,"Capture One, measured":0.0144,"Panasonic V-709":0.0392,"Film curve, guessed":0.0667,"Neutral, first try":0.1056},{"stop":-4.15,"Capture One, measured":0.0151,"Panasonic V-709":0.0408,"Film curve, guessed":0.0689,"Neutral, first try":0.108},{"stop":-4.1,"Capture One, measured":0.0158,"Panasonic V-709":0.0424,"Film curve, guessed":0.0713,"Neutral, first try":0.1105},{"stop":-4.05,"Capture One, measured":0.0166,"Panasonic V-709":0.0441,"Film curve, guessed":0.0736,"Neutral, first try":0.1131},{"stop":-4.0,"Capture One, measured":0.0173,"Panasonic V-709":0.0458,"Film curve, guessed":0.076,"Neutral, first try":0.1156},{"stop":-3.95,"Capture One, measured":0.018,"Panasonic V-709":0.0479,"Film curve, guessed":0.0782,"Neutral, first try":0.118},{"stop":-3.9,"Capture One, measured":0.0188,"Panasonic V-709":0.05,"Film curve, guessed":0.0804,"Neutral, first try":0.1203},{"stop":-3.85,"Capture One, measured":0.0195,"Panasonic V-709":0.0522,"Film curve, guessed":0.0827,"Neutral, first try":0.1228},{"stop":-3.8,"Capture One, measured":0.0207,"Panasonic V-709":0.0544,"Film curve, guessed":0.0851,"Neutral, first try":0.1252},{"stop":-3.75,"Capture One, measured":0.0221,"Panasonic V-709":0.0566,"Film curve, guessed":0.0874,"Neutral, first try":0.1277},{"stop":-3.7,"Capture One, measured":0.0236,"Panasonic V-709":0.0588,"Film curve, guessed":0.0898,"Neutral, first try":0.1303},{"stop":-3.65,"Capture One, measured":0.0251,"Panasonic V-709":0.0611,"Film curve, guessed":0.0922,"Neutral, first try":0.1328},{"stop":-3.6,"Capture One, measured":0.0266,"Panasonic V-709":0.0634,"Film curve, guessed":0.0947,"Neutral, first try":0.1354},{"stop":-3.55,"Capture One, measured":0.0281,"Panasonic V-709":0.0657,"Film curve, guessed":0.0972,"Neutral, first try":0.1381},{"stop":-3.5,"Capture One, measured":0.0297,"Panasonic V-709":0.0681,"Film curve, guessed":0.0997,"Neutral, first try":0.1407},{"stop":-3.45,"Capture One, measured":0.0313,"Panasonic V-709":0.0705,"Film curve, guessed":0.1022,"Neutral, first try":0.1434},{"stop":-3.4,"Capture One, measured":0.0329,"Panasonic V-709":0.0729,"Film curve, guessed":0.1048,"Neutral, first try":0.1461},{"stop":-3.35,"Capture One, measured":0.0346,"Panasonic V-709":0.0754,"Film curve, guessed":0.1074,"Neutral, first try":0.1489},{"stop":-3.3,"Capture One, measured":0.0368,"Panasonic V-709":0.078,"Film curve, guessed":0.1101,"Neutral, first try":0.1517},{"stop":-3.25,"Capture One, measured":0.0391,"Panasonic V-709":0.0809,"Film curve, guessed":0.1131,"Neutral, first try":0.1547},{"stop":-3.2,"Capture One, measured":0.0413,"Panasonic V-709":0.0839,"Film curve, guessed":0.116,"Neutral, first try":0.1576},{"stop":-3.15,"Capture One, measured":0.0436,"Panasonic V-709":0.087,"Film curve, guessed":0.119,"Neutral, first try":0.1606},{"stop":-3.1,"Capture One, measured":0.0459,"Panasonic V-709":0.0901,"Film curve, guessed":0.1221,"Neutral, first try":0.1636},{"stop":-3.05,"Capture One, measured":0.0484,"Panasonic V-709":0.0932,"Film curve, guessed":0.1251,"Neutral, first try":0.1667},{"stop":-3.0,"Capture One, measured":0.0512,"Panasonic V-709":0.0963,"Film curve, guessed":0.1282,"Neutral, first try":0.1697},{"stop":-2.95,"Capture One, measured":0.054,"Panasonic V-709":0.0995,"Film curve, guessed":0.1313,"Neutral, first try":0.1729},{"stop":-2.9,"Capture One, measured":0.0568,"Panasonic V-709":0.1027,"Film curve, guessed":0.1345,"Neutral, first try":0.176},{"stop":-2.85,"Capture One, measured":0.0597,"Panasonic V-709":0.1059,"Film curve, guessed":0.1377,"Neutral, first try":0.1792},{"stop":-2.8,"Capture One, measured":0.0626,"Panasonic V-709":0.1092,"Film curve, guessed":0.1409,"Neutral, first try":0.1824},{"stop":-2.75,"Capture One, measured":0.0658,"Panasonic V-709":0.1125,"Film curve, guessed":0.1441,"Neutral, first try":0.1856},{"stop":-2.7,"Capture One, measured":0.0691,"Panasonic V-709":0.1159,"Film curve, guessed":0.1475,"Neutral, first try":0.1889},{"stop":-2.65,"Capture One, measured":0.0725,"Panasonic V-709":0.1198,"Film curve, guessed":0.1512,"Neutral, first try":0.1924},{"stop":-2.6,"Capture One, measured":0.0759,"Panasonic V-709":0.1238,"Film curve, guessed":0.1549,"Neutral, first try":0.1959},{"stop":-2.55,"Capture One, measured":0.0796,"Panasonic V-709":0.1277,"Film curve, guessed":0.1586,"Neutral, first try":0.1994},{"stop":-2.5,"Capture One, measured":0.0835,"Panasonic V-709":0.1317,"Film curve, guessed":0.1624,"Neutral, first try":0.2029},{"stop":-2.45,"Capture One, measured":0.0873,"Panasonic V-709":0.1357,"Film curve, guessed":0.1662,"Neutral, first try":0.2065},{"stop":-2.4,"Capture One, measured":0.0912,"Panasonic V-709":0.1398,"Film curve, guessed":0.17,"Neutral, first try":0.2101},{"stop":-2.35,"Capture One, measured":0.0951,"Panasonic V-709":0.1439,"Film curve, guessed":0.1739,"Neutral, first try":0.2137},{"stop":-2.3,"Capture One, measured":0.099,"Panasonic V-709":0.148,"Film curve, guessed":0.1778,"Neutral, first try":0.2174},{"stop":-2.25,"Capture One, measured":0.103,"Panasonic V-709":0.1521,"Film curve, guessed":0.1817,"Neutral, first try":0.2211},{"stop":-2.2,"Capture One, measured":0.1069,"Panasonic V-709":0.1563,"Film curve, guessed":0.1856,"Neutral, first try":0.2248},{"stop":-2.15,"Capture One, measured":0.1104,"Panasonic V-709":0.1607,"Film curve, guessed":0.1898,"Neutral, first try":0.2286},{"stop":-2.1,"Capture One, measured":0.1139,"Panasonic V-709":0.1655,"Film curve, guessed":0.1942,"Neutral, first try":0.2326},{"stop":-2.05,"Capture One, measured":0.1176,"Panasonic V-709":0.1702,"Film curve, guessed":0.1987,"Neutral, first try":0.2367},{"stop":-2.0,"Capture One, measured":0.1216,"Panasonic V-709":0.1751,"Film curve, guessed":0.2032,"Neutral, first try":0.2408},{"stop":-1.95,"Capture One, measured":0.1256,"Panasonic V-709":0.1799,"Film curve, guessed":0.2077,"Neutral, first try":0.2449},{"stop":-1.9,"Capture One, measured":0.13,"Panasonic V-709":0.1848,"Film curve, guessed":0.2122,"Neutral, first try":0.249},{"stop":-1.85,"Capture One, measured":0.1344,"Panasonic V-709":0.1897,"Film curve, guessed":0.2168,"Neutral, first try":0.2531},{"stop":-1.8,"Capture One, measured":0.1393,"Panasonic V-709":0.1946,"Film curve, guessed":0.2214,"Neutral, first try":0.2573},{"stop":-1.75,"Capture One, measured":0.1442,"Panasonic V-709":0.1996,"Film curve, guessed":0.226,"Neutral, first try":0.2615},{"stop":-1.7,"Capture One, measured":0.1492,"Panasonic V-709":0.2045,"Film curve, guessed":0.2306,"Neutral, first try":0.2657},{"stop":-1.65,"Capture One, measured":0.1541,"Panasonic V-709":0.2096,"Film curve, guessed":0.2354,"Neutral, first try":0.27},{"stop":-1.6,"Capture One, measured":0.159,"Panasonic V-709":0.2152,"Film curve, guessed":0.2406,"Neutral, first try":0.2746},{"stop":-1.55,"Capture One, measured":0.1639,"Panasonic V-709":0.2208,"Film curve, guessed":0.2459,"Neutral, first try":0.2793},{"stop":-1.5,"Capture One, measured":0.1688,"Panasonic V-709":0.2263,"Film curve, guessed":0.2511,"Neutral, first try":0.284},{"stop":-1.45,"Capture One, measured":0.1738,"Panasonic V-709":0.232,"Film curve, guessed":0.2564,"Neutral, first try":0.2887},{"stop":-1.4,"Capture One, measured":0.1787,"Panasonic V-709":0.2376,"Film curve, guessed":0.2618,"Neutral, first try":0.2934},{"stop":-1.35,"Capture One, measured":0.1843,"Panasonic V-709":0.2432,"Film curve, guessed":0.2671,"Neutral, first try":0.2982},{"stop":-1.3,"Capture One, measured":0.19,"Panasonic V-709":0.2489,"Film curve, guessed":0.2724,"Neutral, first try":0.303},{"stop":-1.25,"Capture One, measured":0.1958,"Panasonic V-709":0.2546,"Film curve, guessed":0.2778,"Neutral, first try":0.3078},{"stop":-1.2,"Capture One, measured":0.2022,"Panasonic V-709":0.2603,"Film curve, guessed":0.2832,"Neutral, first try":0.3126},{"stop":-1.15,"Capture One, measured":0.2086,"Panasonic V-709":0.2663,"Film curve, guessed":0.2891,"Neutral, first try":0.3177},{"stop":-1.1,"Capture One, measured":0.215,"Panasonic V-709":0.2726,"Film curve, guessed":0.2954,"Neutral, first try":0.3232},{"stop":-1.05,"Capture One, measured":0.2213,"Panasonic V-709":0.2789,"Film curve, guessed":0.3017,"Neutral, first try":0.3287},{"stop":-1.0,"Capture One, measured":0.2277,"Panasonic V-709":0.2852,"Film curve, guessed":0.308,"Neutral, first try":0.3342},{"stop":-0.95,"Capture One, measured":0.2341,"Panasonic V-709":0.2915,"Film curve, guessed":0.3144,"Neutral, first try":0.3397},{"stop":-0.9,"Capture One, measured":0.2404,"Panasonic V-709":0.2979,"Film curve, guessed":0.3208,"Neutral, first try":0.3453},{"stop":-0.85,"Capture One, measured":0.2467,"Panasonic V-709":0.3042,"Film curve, guessed":0.3272,"Neutral, first try":0.3508},{"stop":-0.8,"Capture One, measured":0.2531,"Panasonic V-709":0.3106,"Film curve, guessed":0.3336,"Neutral, first try":0.3564},{"stop":-0.75,"Capture One, measured":0.2596,"Panasonic V-709":0.317,"Film curve, guessed":0.34,"Neutral, first try":0.362},{"stop":-0.7,"Capture One, measured":0.2663,"Panasonic V-709":0.3235,"Film curve, guessed":0.3466,"Neutral, first try":0.3677},{"stop":-0.65,"Capture One, measured":0.273,"Panasonic V-709":0.3303,"Film curve, guessed":0.3541,"Neutral, first try":0.374},{"stop":-0.6,"Capture One, measured":0.2797,"Panasonic V-709":0.3372,"Film curve, guessed":0.3617,"Neutral, first try":0.3804},{"stop":-0.55,"Capture One, measured":0.2867,"Panasonic V-709":0.344,"Film curve, guessed":0.3692,"Neutral, first try":0.3868},{"stop":-0.5,"Capture One, measured":0.294,"Panasonic V-709":0.3509,"Film curve, guessed":0.3768,"Neutral, first try":0.3931},{"stop":-0.45,"Capture One, measured":0.3014,"Panasonic V-709":0.3578,"Film curve, guessed":0.3844,"Neutral, first try":0.3995},{"stop":-0.4,"Capture One, measured":0.3087,"Panasonic V-709":0.3647,"Film curve, guessed":0.392,"Neutral, first try":0.406},{"stop":-0.35,"Capture One, measured":0.3161,"Panasonic V-709":0.3717,"Film curve, guessed":0.3996,"Neutral, first try":0.4124},{"stop":-0.3,"Capture One, measured":0.3237,"Panasonic V-709":0.3786,"Film curve, guessed":0.4072,"Neutral, first try":0.4188},{"stop":-0.25,"Capture One, measured":0.3313,"Panasonic V-709":0.3856,"Film curve, guessed":0.4148,"Neutral, first try":0.4253},{"stop":-0.2,"Capture One, measured":0.3389,"Panasonic V-709":0.3928,"Film curve, guessed":0.4236,"Neutral, first try":0.4326},{"stop":-0.15,"Capture One, measured":0.3466,"Panasonic V-709":0.4001,"Film curve, guessed":0.4324,"Neutral, first try":0.4399},{"stop":-0.1,"Capture One, measured":0.3543,"Panasonic V-709":0.4074,"Film curve, guessed":0.4412,"Neutral, first try":0.4472},{"stop":-0.05,"Capture One, measured":0.362,"Panasonic V-709":0.4147,"Film curve, guessed":0.45,"Neutral, first try":0.4546},{"stop":-0.0,"Capture One, measured":0.3697,"Panasonic V-709":0.4221,"Film curve, guessed":0.4589,"Neutral, first try":0.462},{"stop":0.05,"Capture One, measured":0.3775,"Panasonic V-709":0.4294,"Film curve, guessed":0.4678,"Neutral, first try":0.4694},{"stop":0.1,"Capture One, measured":0.3855,"Panasonic V-709":0.4368,"Film curve, guessed":0.4766,"Neutral, first try":0.4768},{"stop":0.15,"Capture One, measured":0.3943,"Panasonic V-709":0.4441,"Film curve, guessed":0.4855,"Neutral, first try":0.4842},{"stop":0.2,"Capture One, measured":0.4031,"Panasonic V-709":0.4515,"Film curve, guessed":0.4944,"Neutral, first try":0.4916},{"stop":0.25,"Capture One, measured":0.4119,"Panasonic V-709":0.4591,"Film curve, guessed":0.5044,"Neutral, first try":0.4999},{"stop":0.3,"Capture One, measured":0.4207,"Panasonic V-709":0.4667,"Film curve, guessed":0.5144,"Neutral, first try":0.5084},{"stop":0.35,"Capture One, measured":0.4292,"Panasonic V-709":0.4743,"Film curve, guessed":0.5244,"Neutral, first try":0.5168},{"stop":0.4,"Capture One, measured":0.4383,"Panasonic V-709":0.4819,"Film curve, guessed":0.5344,"Neutral, first try":0.5253},{"stop":0.45,"Capture One, measured":0.448,"Panasonic V-709":0.4895,"Film curve, guessed":0.5445,"Neutral, first try":0.5337},{"stop":0.5,"Capture One, measured":0.4581,"Panasonic V-709":0.4971,"Film curve, guessed":0.5545,"Neutral, first try":0.5422},{"stop":0.55,"Capture One, measured":0.4692,"Panasonic V-709":0.5048,"Film curve, guessed":0.5646,"Neutral, first try":0.5507},{"stop":0.6,"Capture One, measured":0.4803,"Panasonic V-709":0.5124,"Film curve, guessed":0.5747,"Neutral, first try":0.5592},{"stop":0.65,"Capture One, measured":0.4906,"Panasonic V-709":0.5201,"Film curve, guessed":0.5848,"Neutral, first try":0.5677},{"stop":0.7,"Capture One, measured":0.4995,"Panasonic V-709":0.5278,"Film curve, guessed":0.5956,"Neutral, first try":0.5773},{"stop":0.75,"Capture One, measured":0.5084,"Panasonic V-709":0.5355,"Film curve, guessed":0.6065,"Neutral, first try":0.5869},{"stop":0.8,"Capture One, measured":0.5176,"Panasonic V-709":0.5433,"Film curve, guessed":0.6173,"Neutral, first try":0.5966},{"stop":0.85,"Capture One, measured":0.5274,"Panasonic V-709":0.551,"Film curve, guessed":0.6282,"Neutral, first try":0.6062},{"stop":0.9,"Capture One, measured":0.5372,"Panasonic V-709":0.5588,"Film curve, guessed":0.639,"Neutral, first try":0.6159},{"stop":0.95,"Capture One, measured":0.5471,"Panasonic V-709":0.5665,"Film curve, guessed":0.6499,"Neutral, first try":0.6256},{"stop":1.0,"Capture One, measured":0.5569,"Panasonic V-709":0.5743,"Film curve, guessed":0.6608,"Neutral, first try":0.6353},{"stop":1.05,"Capture One, measured":0.5681,"Panasonic V-709":0.5821,"Film curve, guessed":0.6717,"Neutral, first try":0.6449},{"stop":1.1,"Capture One, measured":0.5793,"Panasonic V-709":0.5898,"Film curve, guessed":0.6826,"Neutral, first try":0.6549},{"stop":1.15,"Capture One, measured":0.5905,"Panasonic V-709":0.5975,"Film curve, guessed":0.6934,"Neutral, first try":0.6658},{"stop":1.2,"Capture One, measured":0.6017,"Panasonic V-709":0.6052,"Film curve, guessed":0.7042,"Neutral, first try":0.6768},{"stop":1.25,"Capture One, measured":0.6129,"Panasonic V-709":0.6129,"Film curve, guessed":0.715,"Neutral, first try":0.6877},{"stop":1.3,"Capture One, measured":0.6242,"Panasonic V-709":0.6206,"Film curve, guessed":0.7259,"Neutral, first try":0.6987},{"stop":1.35,"Capture One, measured":0.6348,"Panasonic V-709":0.6283,"Film curve, guessed":0.7367,"Neutral, first try":0.7097},{"stop":1.4,"Capture One, measured":0.6455,"Panasonic V-709":0.636,"Film curve, guessed":0.7475,"Neutral, first try":0.7207},{"stop":1.45,"Capture One, measured":0.6562,"Panasonic V-709":0.6438,"Film curve, guessed":0.7584,"Neutral, first try":0.7317},{"stop":1.5,"Capture One, measured":0.6669,"Panasonic V-709":0.6515,"Film curve, guessed":0.7693,"Neutral, first try":0.7427},{"stop":1.55,"Capture One, measured":0.6776,"Panasonic V-709":0.6591,"Film curve, guessed":0.7795,"Neutral, first try":0.7538},{"stop":1.6,"Capture One, measured":0.6884,"Panasonic V-709":0.6667,"Film curve, guessed":0.789,"Neutral, first try":0.765},{"stop":1.65,"Capture One, measured":0.6991,"Panasonic V-709":0.6742,"Film curve, guessed":0.7985,"Neutral, first try":0.7762},{"stop":1.7,"Capture One, measured":0.7098,"Panasonic V-709":0.6818,"Film curve, guessed":0.8081,"Neutral, first try":0.7874},{"stop":1.75,"Capture One, measured":0.7208,"Panasonic V-709":0.6893,"Film curve, guessed":0.8176,"Neutral, first try":0.7986},{"stop":1.8,"Capture One, measured":0.7318,"Panasonic V-709":0.6969,"Film curve, guessed":0.8271,"Neutral, first try":0.8099},{"stop":1.85,"Capture One, measured":0.7429,"Panasonic V-709":0.7044,"Film curve, guessed":0.8366,"Neutral, first try":0.8211},{"stop":1.9,"Capture One, measured":0.7538,"Panasonic V-709":0.712,"Film curve, guessed":0.8461,"Neutral, first try":0.8323},{"stop":1.95,"Capture One, measured":0.7646,"Panasonic V-709":0.7196,"Film curve, guessed":0.8557,"Neutral, first try":0.8436},{"stop":2.0,"Capture One, measured":0.7755,"Panasonic V-709":0.7269,"Film curve, guessed":0.8634,"Neutral, first try":0.8514},{"stop":2.05,"Capture One, measured":0.786,"Panasonic V-709":0.7341,"Film curve, guessed":0.8704,"Neutral, first try":0.8577},{"stop":2.1,"Capture One, measured":0.7964,"Panasonic V-709":0.7414,"Film curve, guessed":0.8774,"Neutral, first try":0.8641},{"stop":2.15,"Capture One, measured":0.8068,"Panasonic V-709":0.7486,"Film curve, guessed":0.8844,"Neutral, first try":0.8704},{"stop":2.2,"Capture One, measured":0.8165,"Panasonic V-709":0.7559,"Film curve, guessed":0.8914,"Neutral, first try":0.8768},{"stop":2.25,"Capture One, measured":0.8262,"Panasonic V-709":0.7631,"Film curve, guessed":0.8983,"Neutral, first try":0.8832},{"stop":2.3,"Capture One, measured":0.8358,"Panasonic V-709":0.7704,"Film curve, guessed":0.9053,"Neutral, first try":0.8895},{"stop":2.35,"Capture One, measured":0.8434,"Panasonic V-709":0.7777,"Film curve, guessed":0.9123,"Neutral, first try":0.8959},{"stop":2.4,"Capture One, measured":0.8511,"Panasonic V-709":0.7849,"Film curve, guessed":0.9193,"Neutral, first try":0.9022},{"stop":2.45,"Capture One, measured":0.8618,"Panasonic V-709":0.7915,"Film curve, guessed":0.9237,"Neutral, first try":0.9059},{"stop":2.5,"Capture One, measured":0.8728,"Panasonic V-709":0.7982,"Film curve, guessed":0.9281,"Neutral, first try":0.9096},{"stop":2.55,"Capture One, measured":0.8838,"Panasonic V-709":0.8048,"Film curve, guessed":0.9325,"Neutral, first try":0.9132},{"stop":2.6,"Capture One, measured":0.8907,"Panasonic V-709":0.8115,"Film curve, guessed":0.9369,"Neutral, first try":0.9169},{"stop":2.65,"Capture One, measured":0.897,"Panasonic V-709":0.8181,"Film curve, guessed":0.9413,"Neutral, first try":0.9206},{"stop":2.7,"Capture One, measured":0.9039,"Panasonic V-709":0.8248,"Film curve, guessed":0.9457,"Neutral, first try":0.9243},{"stop":2.75,"Capture One, measured":0.911,"Panasonic V-709":0.8314,"Film curve, guessed":0.9501,"Neutral, first try":0.9279},{"stop":2.8,"Capture One, measured":0.9181,"Panasonic V-709":0.8381,"Film curve, guessed":0.9545,"Neutral, first try":0.9316},{"stop":2.85,"Capture One, measured":0.9247,"Panasonic V-709":0.8446,"Film curve, guessed":0.9582,"Neutral, first try":0.9348},{"stop":2.9,"Capture One, measured":0.9307,"Panasonic V-709":0.8508,"Film curve, guessed":0.9607,"Neutral, first try":0.9372},{"stop":2.95,"Capture One, measured":0.9368,"Panasonic V-709":0.8569,"Film curve, guessed":0.9631,"Neutral, first try":0.9395},{"stop":3.0,"Capture One, measured":0.9421,"Panasonic V-709":0.8631,"Film curve, guessed":0.9656,"Neutral, first try":0.9418},{"stop":3.05,"Capture One, measured":0.9468,"Panasonic V-709":0.8693,"Film curve, guessed":0.968,"Neutral, first try":0.9441},{"stop":3.1,"Capture One, measured":0.9509,"Panasonic V-709":0.8755,"Film curve, guessed":0.9705,"Neutral, first try":0.9465},{"stop":3.15,"Capture One, measured":0.9532,"Panasonic V-709":0.8817,"Film curve, guessed":0.973,"Neutral, first try":0.9488},{"stop":3.2,"Capture One, measured":0.9555,"Panasonic V-709":0.8879,"Film curve, guessed":0.9754,"Neutral, first try":0.9511},{"stop":3.25,"Capture One, measured":0.9579,"Panasonic V-709":0.8941,"Film curve, guessed":0.9779,"Neutral, first try":0.9534},{"stop":3.3,"Capture One, measured":0.9598,"Panasonic V-709":0.8999,"Film curve, guessed":0.9795,"Neutral, first try":0.9552},{"stop":3.35,"Capture One, measured":0.9615,"Panasonic V-709":0.9055,"Film curve, guessed":0.9808,"Neutral, first try":0.9568},{"stop":3.4,"Capture One, measured":0.9633,"Panasonic V-709":0.9112,"Film curve, guessed":0.9821,"Neutral, first try":0.9583},{"stop":3.45,"Capture One, measured":0.9655,"Panasonic V-709":0.9169,"Film curve, guessed":0.9833,"Neutral, first try":0.9599},{"stop":3.5,"Capture One, measured":0.9675,"Panasonic V-709":0.9225,"Film curve, guessed":0.9846,"Neutral, first try":0.9614},{"stop":3.55,"Capture One, measured":0.9695,"Panasonic V-709":0.9282,"Film curve, guessed":0.9859,"Neutral, first try":0.963},{"stop":3.6,"Capture One, measured":0.9714,"Panasonic V-709":0.9338,"Film curve, guessed":0.9871,"Neutral, first try":0.9645},{"stop":3.65,"Capture One, measured":0.9734,"Panasonic V-709":0.9395,"Film curve, guessed":0.9884,"Neutral, first try":0.9661},{"stop":3.7,"Capture One, measured":0.9759,"Panasonic V-709":0.9451,"Film curve, guessed":0.9896,"Neutral, first try":0.9676},{"stop":3.75,"Capture One, measured":0.9785,"Panasonic V-709":0.9498,"Film curve, guessed":0.9903,"Neutral, first try":0.9686},{"stop":3.8,"Capture One, measured":0.9809,"Panasonic V-709":0.9546,"Film curve, guessed":0.9909,"Neutral, first try":0.9697},{"stop":3.85,"Capture One, measured":0.9823,"Panasonic V-709":0.9594,"Film curve, guessed":0.9915,"Neutral, first try":0.9708},{"stop":3.9,"Capture One, measured":0.9836,"Panasonic V-709":0.9641,"Film curve, guessed":0.9921,"Neutral, first try":0.9718},{"stop":3.95,"Capture One, measured":0.9848,"Panasonic V-709":0.9689,"Film curve, guessed":0.9928,"Neutral, first try":0.9729},{"stop":4.0,"Capture One, measured":0.9857,"Panasonic V-709":0.9736,"Film curve, guessed":0.9934,"Neutral, first try":0.974},{"stop":4.05,"Capture One, measured":0.9866,"Panasonic V-709":0.9784,"Film curve, guessed":0.994,"Neutral, first try":0.975},{"stop":4.1,"Capture One, measured":0.9875,"Panasonic V-709":0.9832,"Film curve, guessed":0.9946,"Neutral, first try":0.9761},{"stop":4.15,"Capture One, measured":0.9886,"Panasonic V-709":0.9866,"Film curve, guessed":0.9951,"Neutral, first try":0.977},{"stop":4.2,"Capture One, measured":0.9896,"Panasonic V-709":0.9882,"Film curve, guessed":0.9954,"Neutral, first try":0.9778},{"stop":4.25,"Capture One, measured":0.9908,"Panasonic V-709":0.9898,"Film curve, guessed":0.9957,"Neutral, first try":0.9785},{"stop":4.3,"Capture One, measured":0.992,"Panasonic V-709":0.9915,"Film curve, guessed":0.996,"Neutral, first try":0.9792},{"stop":4.35,"Capture One, measured":0.9932,"Panasonic V-709":0.9931,"Film curve, guessed":0.9963,"Neutral, first try":0.98},{"stop":4.4,"Capture One, measured":0.9944,"Panasonic V-709":0.9948,"Film curve, guessed":0.9966,"Neutral, first try":0.9807},{"stop":4.45,"Capture One, measured":0.9956,"Panasonic V-709":0.9964,"Film curve, guessed":0.997,"Neutral, first try":0.9815},{"stop":4.5,"Capture One, measured":0.9967,"Panasonic V-709":0.9981,"Film curve, guessed":0.9973,"Neutral, first try":0.9822},{"stop":4.55,"Capture One, measured":0.9979,"Panasonic V-709":0.9997,"Film curve, guessed":0.9976,"Neutral, first try":0.983},{"stop":4.6,"Capture One, measured":0.9991,"Panasonic V-709":1.0,"Film curve, guessed":0.9977,"Neutral, first try":0.9835},{"stop":4.65,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9979,"Neutral, first try":0.9841},{"stop":4.7,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.998,"Neutral, first try":0.9846},{"stop":4.75,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9982,"Neutral, first try":0.9851},{"stop":4.8,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9983,"Neutral, first try":0.9856},{"stop":4.85,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9985,"Neutral, first try":0.9862},{"stop":4.9,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9986,"Neutral, first try":0.9867},{"stop":4.95,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9988,"Neutral, first try":0.9872},{"stop":5.0,"Capture One, measured":1.0,"Panasonic V-709":1.0,"Film curve, guessed":0.9989,"Neutral, first try":0.9877}],"measuredTopStop":4.21,"whiteStop":4.64,"blend":[{"perChannel":0.0,"chroma":0.916,"de":2.54,"n":111638},{"perChannel":0.25,"chroma":0.987,"de":2.42,"n":111638},{"perChannel":0.5,"chroma":1.054,"de":2.45,"n":111638},{"perChannel":0.75,"chroma":1.123,"de":2.63,"n":111638},{"perChannel":1.0,"chroma":1.2,"de":2.89,"n":111638}],"quiver":[{"x":52.5,"y":32.5,"dx":3.398,"dy":1.456},{"x":72.5,"y":32.5,"dx":2.953,"dy":2.002},{"x":92.5,"y":32.5,"dx":2.855,"dy":2.646},{"x":112.5,"y":32.5,"dx":3.211,"dy":3.0},{"x":132.5,"y":32.5,"dx":3.323,"dy":3.141},{"x":152.5,"y":32.5,"dx":3.15,"dy":3.264},{"x":172.5,"y":32.5,"dx":3.289,"dy":3.595},{"x":192.5,"y":32.5,"dx":2.966,"dy":3.777},{"x":212.5,"y":32.5,"dx":2.819,"dy":3.998},{"x":232.5,"y":32.5,"dx":2.527,"dy":4.252},{"x":252.5,"y":32.5,"dx":2.281,"dy":4.129},{"x":272.5,"y":32.5,"dx":1.999,"dy":4.261},{"x":292.5,"y":32.5,"dx":1.693,"dy":4.307},{"x":312.5,"y":32.5,"dx":1.293,"dy":4.291},{"x":332.5,"y":32.5,"dx":1.029,"dy":4.369},{"x":352.5,"y":32.5,"dx":0.509,"dy":4.873},{"x":372.5,"y":32.5,"dx":0.163,"dy":4.379},{"x":392.5,"y":32.5,"dx":-0.336,"dy":4.235},{"x":432.5,"y":32.5,"dx":-0.637,"dy":4.125},{"x":452.5,"y":32.5,"dx":-1.778,"dy":4.155},{"x":472.5,"y":32.5,"dx":-1.828,"dy":4.16},{"x":492.5,"y":32.5,"dx":-2.498,"dy":4.324},{"x":512.5,"y":32.5,"dx":-2.803,"dy":4.175},{"x":532.5,"y":32.5,"dx":-2.861,"dy":4.117},{"x":552.5,"y":32.5,"dx":-3.306,"dy":3.907},{"x":572.5,"y":32.5,"dx":-3.869,"dy":3.841},{"x":592.5,"y":32.5,"dx":-3.868,"dy":3.813},{"x":612.5,"y":32.5,"dx":-3.302,"dy":2.882},{"x":632.5,"y":32.5,"dx":-2.873,"dy":2.817},{"x":652.5,"y":32.5,"dx":-2.934,"dy":2.621},{"x":672.5,"y":32.5,"dx":-2.961,"dy":2.273},{"x":692.5,"y":32.5,"dx":-2.566,"dy":2.053},{"x":712.5,"y":32.5,"dx":-2.604,"dy":1.82},{"x":32.5,"y":52.5,"dx":2.869,"dy":1.525},{"x":52.5,"y":52.5,"dx":2.924,"dy":1.845},{"x":72.5,"y":52.5,"dx":3.635,"dy":1.98},{"x":92.5,"y":52.5,"dx":4.092,"dy":2.095},{"x":112.5,"y":52.5,"dx":3.728,"dy":2.684},{"x":132.5,"y":52.5,"dx":3.822,"dy":3.126},{"x":152.5,"y":52.5,"dx":3.72,"dy":3.309},{"x":172.5,"y":52.5,"dx":3.913,"dy":3.447},{"x":192.5,"y":52.5,"dx":3.862,"dy":3.619},{"x":212.5,"y":52.5,"dx":3.402,"dy":3.704},{"x":232.5,"y":52.5,"dx":2.744,"dy":3.783},{"x":252.5,"y":52.5,"dx":2.442,"dy":3.689},{"x":272.5,"y":52.5,"dx":2.019,"dy":4.185},{"x":292.5,"y":52.5,"dx":1.703,"dy":4.227},{"x":312.5,"y":52.5,"dx":1.322,"dy":4.217},{"x":332.5,"y":52.5,"dx":1.083,"dy":4.263},{"x":352.5,"y":52.5,"dx":0.633,"dy":3.741},{"x":372.5,"y":52.5,"dx":0.001,"dy":4.085},{"x":392.5,"y":52.5,"dx":-0.145,"dy":4.073},{"x":412.5,"y":52.5,"dx":-0.571,"dy":4.095},{"x":432.5,"y":52.5,"dx":-1.207,"dy":4.076},{"x":452.5,"y":52.5,"dx":-1.536,"dy":4.104},{"x":472.5,"y":52.5,"dx":-1.842,"dy":4.106},{"x":492.5,"y":52.5,"dx":-2.552,"dy":3.821},{"x":512.5,"y":52.5,"dx":-2.823,"dy":3.595},{"x":532.5,"y":52.5,"dx":-2.997,"dy":3.532},{"x":552.5,"y":52.5,"dx":-3.225,"dy":3.283},{"x":572.5,"y":52.5,"dx":-4.088,"dy":3.639},{"x":592.5,"y":52.5,"dx":-4.08,"dy":3.622},{"x":612.5,"y":52.5,"dx":-4.063,"dy":3.743},{"x":652.5,"y":52.5,"dx":-3.858,"dy":2.324},{"x":672.5,"y":52.5,"dx":-3.538,"dy":2.107},{"x":692.5,"y":52.5,"dx":-2.884,"dy":2.013},{"x":712.5,"y":52.5,"dx":-2.545,"dy":1.841},{"x":32.5,"y":72.5,"dx":3.159,"dy":1.465},{"x":52.5,"y":72.5,"dx":3.657,"dy":1.939},{"x":72.5,"y":72.5,"dx":3.998,"dy":2.046},{"x":92.5,"y":72.5,"dx":4.049,"dy":2.169},{"x":112.5,"y":72.5,"dx":4.018,"dy":2.698},{"x":132.5,"y":72.5,"dx":4.003,"dy":2.974},{"x":152.5,"y":72.5,"dx":4.013,"dy":3.085},{"x":192.5,"y":72.5,"dx":4.11,"dy":3.477},{"x":212.5,"y":72.5,"dx":3.302,"dy":3.591},{"x":232.5,"y":72.5,"dx":2.89,"dy":3.626},{"x":252.5,"y":72.5,"dx":2.787,"dy":3.714},{"x":272.5,"y":72.5,"dx":2.176,"dy":3.582},{"x":332.5,"y":72.5,"dx":1.045,"dy":3.677},{"x":372.5,"y":72.5,"dx":-0.046,"dy":3.966},{"x":392.5,"y":72.5,"dx":-0.28,"dy":3.972},{"x":412.5,"y":72.5,"dx":-0.754,"dy":3.985},{"x":432.5,"y":72.5,"dx":-1.154,"dy":3.934},{"x":452.5,"y":72.5,"dx":-1.537,"dy":3.87},{"x":472.5,"y":72.5,"dx":-1.997,"dy":3.636},{"x":492.5,"y":72.5,"dx":-2.797,"dy":3.496},{"x":512.5,"y":72.5,"dx":-2.936,"dy":3.401},{"x":532.5,"y":72.5,"dx":-3.077,"dy":3.371},{"x":552.5,"y":72.5,"dx":-3.236,"dy":3.225},{"x":572.5,"y":72.5,"dx":-3.504,"dy":3.35},{"x":592.5,"y":72.5,"dx":-3.581,"dy":3.338},{"x":612.5,"y":72.5,"dx":-3.788,"dy":3.275},{"x":692.5,"y":72.5,"dx":-3.221,"dy":1.556},{"x":712.5,"y":72.5,"dx":-3.369,"dy":1.29},{"x":52.5,"y":92.5,"dx":3.863,"dy":1.973},{"x":72.5,"y":92.5,"dx":4.034,"dy":2.046},{"x":92.5,"y":92.5,"dx":4.04,"dy":2.107},{"x":112.5,"y":92.5,"dx":4.073,"dy":2.248},{"x":132.5,"y":92.5,"dx":4.18,"dy":2.773},{"x":152.5,"y":92.5,"dx":4.215,"dy":2.819},{"x":192.5,"y":92.5,"dx":3.917,"dy":2.984},{"x":212.5,"y":92.5,"dx":2.77,"dy":3.312},{"x":232.5,"y":92.5,"dx":2.708,"dy":3.393},{"x":252.5,"y":92.5,"dx":2.866,"dy":3.517},{"x":272.5,"y":92.5,"dx":1.942,"dy":3.354},{"x":332.5,"y":92.5,"dx":1.119,"dy":3.22},{"x":372.5,"y":92.5,"dx":0.017,"dy":3.192},{"x":392.5,"y":92.5,"dx":-0.225,"dy":3.279},{"x":412.5,"y":92.5,"dx":-0.797,"dy":3.372},{"x":432.5,"y":92.5,"dx":-0.997,"dy":3.48},{"x":452.5,"y":92.5,"dx":-1.88,"dy":3.326},{"x":472.5,"y":92.5,"dx":-2.119,"dy":3.222},{"x":492.5,"y":92.5,"dx":-2.515,"dy":3.381},{"x":512.5,"y":92.5,"dx":-2.911,"dy":3.303},{"x":532.5,"y":92.5,"dx":-3.202,"dy":3.294},{"x":552.5,"y":92.5,"dx":-3.335,"dy":3.229},{"x":572.5,"y":92.5,"dx":-3.561,"dy":3.206},{"x":592.5,"y":92.5,"dx":-3.795,"dy":3.156},{"x":612.5,"y":92.5,"dx":-4.013,"dy":3.005},{"x":32.5,"y":112.5,"dx":3.885,"dy":1.227},{"x":52.5,"y":112.5,"dx":4.023,"dy":1.852},{"x":72.5,"y":112.5,"dx":4.079,"dy":1.906},{"x":92.5,"y":112.5,"dx":4.089,"dy":1.963},{"x":112.5,"y":112.5,"dx":4.29,"dy":2.145},{"x":132.5,"y":112.5,"dx":4.114,"dy":2.467},{"x":152.5,"y":112.5,"dx":4.313,"dy":2.53},{"x":172.5,"y":112.5,"dx":4.459,"dy":2.663},{"x":192.5,"y":112.5,"dx":3.801,"dy":2.761},{"x":212.5,"y":112.5,"dx":3.162,"dy":2.963},{"x":232.5,"y":112.5,"dx":2.998,"dy":3.033},{"x":252.5,"y":112.5,"dx":2.765,"dy":3.09},{"x":272.5,"y":112.5,"dx":2.201,"dy":2.849},{"x":332.5,"y":112.5,"dx":1.072,"dy":2.957},{"x":352.5,"y":112.5,"dx":0.74,"dy":2.868},{"x":372.5,"y":112.5,"dx":0.093,"dy":3.04},{"x":392.5,"y":112.5,"dx":-0.171,"dy":3.012},{"x":412.5,"y":112.5,"dx":-0.625,"dy":2.813},{"x":432.5,"y":112.5,"dx":-0.964,"dy":2.934},{"x":452.5,"y":112.5,"dx":-1.681,"dy":3.121},{"x":472.5,"y":112.5,"dx":-2.084,"dy":3.168},{"x":492.5,"y":112.5,"dx":-2.355,"dy":3.214},{"x":512.5,"y":112.5,"dx":-2.827,"dy":3.25},{"x":532.5,"y":112.5,"dx":-3.347,"dy":3.211},{"x":552.5,"y":112.5,"dx":-3.563,"dy":3.028},{"x":572.5,"y":112.5,"dx":-3.871,"dy":2.896},{"x":592.5,"y":112.5,"dx":-4.049,"dy":2.687},{"x":612.5,"y":112.5,"dx":-4.51,"dy":2.248},{"x":652.5,"y":112.5,"dx":-4.977,"dy":1.996},{"x":672.5,"y":112.5,"dx":-4.772,"dy":1.924},{"x":712.5,"y":112.5,"dx":-3.26,"dy":1.093},{"x":32.5,"y":132.5,"dx":4.093,"dy":1.157},{"x":52.5,"y":132.5,"dx":4.207,"dy":1.596},{"x":72.5,"y":132.5,"dx":4.061,"dy":1.767},{"x":92.5,"y":132.5,"dx":4.29,"dy":1.839},{"x":112.5,"y":132.5,"dx":4.573,"dy":2.189},{"x":132.5,"y":132.5,"dx":4.424,"dy":2.074},{"x":152.5,"y":132.5,"dx":4.379,"dy":2.172},{"x":172.5,"y":132.5,"dx":4.196,"dy":2.35},{"x":192.5,"y":132.5,"dx":4.046,"dy":2.471},{"x":212.5,"y":132.5,"dx":3.186,"dy":2.577},{"x":232.5,"y":132.5,"dx":2.899,"dy":2.429},{"x":252.5,"y":132.5,"dx":2.667,"dy":2.47},{"x":272.5,"y":132.5,"dx":2.106,"dy":2.374},{"x":352.5,"y":132.5,"dx":0.858,"dy":2.487},{"x":372.5,"y":132.5,"dx":0.098,"dy":2.802},{"x":392.5,"y":132.5,"dx":-0.117,"dy":2.879},{"x":412.5,"y":132.5,"dx":-0.513,"dy":2.62},{"x":432.5,"y":132.5,"dx":-0.886,"dy":2.676},{"x":452.5,"y":132.5,"dx":-1.467,"dy":2.45},{"x":472.5,"y":132.5,"dx":-2.16,"dy":2.531},{"x":492.5,"y":132.5,"dx":-2.048,"dy":2.493},{"x":512.5,"y":132.5,"dx":-3.181,"dy":2.602},{"x":532.5,"y":132.5,"dx":-3.347,"dy":2.431},{"x":552.5,"y":132.5,"dx":-3.585,"dy":2.591},{"x":572.5,"y":132.5,"dx":-3.771,"dy":2.397},{"x":592.5,"y":132.5,"dx":-4.792,"dy":2.259},{"x":612.5,"y":132.5,"dx":-4.937,"dy":2.125},{"x":632.5,"y":132.5,"dx":-4.918,"dy":2.029},{"x":652.5,"y":132.5,"dx":-4.655,"dy":1.876},{"x":672.5,"y":132.5,"dx":-4.645,"dy":1.666},{"x":692.5,"y":132.5,"dx":-4.702,"dy":1.696},{"x":712.5,"y":132.5,"dx":-3.37,"dy":1.063},{"x":32.5,"y":152.5,"dx":4.125,"dy":1.216},{"x":52.5,"y":152.5,"dx":4.309,"dy":1.45},{"x":72.5,"y":152.5,"dx":3.952,"dy":1.527},{"x":92.5,"y":152.5,"dx":4.336,"dy":1.821},{"x":112.5,"y":152.5,"dx":4.552,"dy":1.872},{"x":132.5,"y":152.5,"dx":4.538,"dy":2.034},{"x":172.5,"y":152.5,"dx":4.293,"dy":2.064},{"x":192.5,"y":152.5,"dx":3.888,"dy":2.005},{"x":212.5,"y":152.5,"dx":3.146,"dy":2.098},{"x":232.5,"y":152.5,"dx":2.949,"dy":2.179},{"x":252.5,"y":152.5,"dx":2.806,"dy":2.286},{"x":332.5,"y":152.5,"dx":1.014,"dy":2.166},{"x":352.5,"y":152.5,"dx":0.779,"dy":2.064},{"x":372.5,"y":152.5,"dx":-0.081,"dy":2.357},{"x":392.5,"y":152.5,"dx":-0.58,"dy":2.044},{"x":412.5,"y":152.5,"dx":-0.996,"dy":1.997},{"x":432.5,"y":152.5,"dx":-1.318,"dy":2.039},{"x":452.5,"y":152.5,"dx":-1.515,"dy":2.064},{"x":472.5,"y":152.5,"dx":-1.977,"dy":2.092},{"x":492.5,"y":152.5,"dx":-2.143,"dy":2.036},{"x":512.5,"y":152.5,"dx":-3.006,"dy":2.176},{"x":532.5,"y":152.5,"dx":-3.428,"dy":2.112},{"x":552.5,"y":152.5,"dx":-3.735,"dy":2.13},{"x":572.5,"y":152.5,"dx":-4.193,"dy":2.17},{"x":592.5,"y":152.5,"dx":-4.488,"dy":2.203},{"x":612.5,"y":152.5,"dx":-4.61,"dy":1.93},{"x":632.5,"y":152.5,"dx":-4.494,"dy":1.965},{"x":652.5,"y":152.5,"dx":-4.534,"dy":1.691},{"x":672.5,"y":152.5,"dx":-4.427,"dy":1.583},{"x":692.5,"y":152.5,"dx":-4.287,"dy":1.416},{"x":712.5,"y":152.5,"dx":-3.945,"dy":1.181},{"x":32.5,"y":172.5,"dx":3.977,"dy":0.849},{"x":52.5,"y":172.5,"dx":4.384,"dy":1.02},{"x":72.5,"y":172.5,"dx":5.158,"dy":0.95},{"x":92.5,"y":172.5,"dx":4.913,"dy":0.953},{"x":112.5,"y":172.5,"dx":4.532,"dy":1.489},{"x":132.5,"y":172.5,"dx":4.612,"dy":1.921},{"x":152.5,"y":172.5,"dx":4.664,"dy":1.872},{"x":232.5,"y":172.5,"dx":3.021,"dy":1.915},{"x":252.5,"y":172.5,"dx":2.982,"dy":1.837},{"x":292.5,"y":172.5,"dx":1.624,"dy":1.933},{"x":312.5,"y":172.5,"dx":1.235,"dy":1.983},{"x":332.5,"y":172.5,"dx":0.931,"dy":1.991},{"x":352.5,"y":172.5,"dx":0.709,"dy":1.935},{"x":372.5,"y":172.5,"dx":-0.011,"dy":1.917},{"x":392.5,"y":172.5,"dx":-0.486,"dy":1.716},{"x":412.5,"y":172.5,"dx":-0.995,"dy":1.772},{"x":432.5,"y":172.5,"dx":-1.315,"dy":1.845},{"x":452.5,"y":172.5,"dx":-1.559,"dy":1.963},{"x":472.5,"y":172.5,"dx":-1.877,"dy":2.05},{"x":492.5,"y":172.5,"dx":-2.075,"dy":2.044},{"x":512.5,"y":172.5,"dx":-3.184,"dy":1.929},{"x":532.5,"y":172.5,"dx":-3.791,"dy":1.298},{"x":552.5,"y":172.5,"dx":-3.27,"dy":1.791},{"x":572.5,"y":172.5,"dx":-3.387,"dy":1.799},{"x":592.5,"y":172.5,"dx":-3.951,"dy":1.632},{"x":612.5,"y":172.5,"dx":-4.963,"dy":1.435},{"x":632.5,"y":172.5,"dx":-4.992,"dy":1.455},{"x":652.5,"y":172.5,"dx":-4.957,"dy":1.445},{"x":672.5,"y":172.5,"dx":-4.935,"dy":1.385},{"x":692.5,"y":172.5,"dx":-5.114,"dy":1.238},{"x":712.5,"y":172.5,"dx":-4.642,"dy":0.964},{"x":32.5,"y":192.5,"dx":3.783,"dy":0.578},{"x":52.5,"y":192.5,"dx":5.127,"dy":0.613},{"x":72.5,"y":192.5,"dx":5.217,"dy":0.716},{"x":92.5,"y":192.5,"dx":5.167,"dy":0.829},{"x":112.5,"y":192.5,"dx":4.976,"dy":0.988},{"x":132.5,"y":192.5,"dx":4.676,"dy":1.2},{"x":152.5,"y":192.5,"dx":4.406,"dy":1.07},{"x":252.5,"y":192.5,"dx":2.946,"dy":1.278},{"x":272.5,"y":192.5,"dx":2.483,"dy":1.086},{"x":292.5,"y":192.5,"dx":1.804,"dy":1.393},{"x":332.5,"y":192.5,"dx":0.905,"dy":1.747},{"x":352.5,"y":192.5,"dx":0.477,"dy":1.778},{"x":372.5,"y":192.5,"dx":0.019,"dy":1.607},{"x":392.5,"y":192.5,"dx":-0.561,"dy":1.861},{"x":412.5,"y":192.5,"dx":-1.125,"dy":1.775},{"x":452.5,"y":192.5,"dx":-1.805,"dy":1.158},{"x":472.5,"y":192.5,"dx":-2.12,"dy":0.958},{"x":492.5,"y":192.5,"dx":-2.375,"dy":0.774},{"x":512.5,"y":192.5,"dx":-3.13,"dy":1.027},{"x":532.5,"y":192.5,"dx":-3.866,"dy":1.193},{"x":552.5,"y":192.5,"dx":-3.945,"dy":1.238},{"x":572.5,"y":192.5,"dx":-4.046,"dy":1.231},{"x":592.5,"y":192.5,"dx":-4.659,"dy":1.018},{"x":612.5,"y":192.5,"dx":-5.117,"dy":1.197},{"x":632.5,"y":192.5,"dx":-4.97,"dy":1.218},{"x":652.5,"y":192.5,"dx":-4.903,"dy":1.134},{"x":672.5,"y":192.5,"dx":-4.832,"dy":0.962},{"x":692.5,"y":192.5,"dx":-4.726,"dy":0.928},{"x":712.5,"y":192.5,"dx":-4.442,"dy":1.009},{"x":32.5,"y":212.5,"dx":4.492,"dy":0.378},{"x":52.5,"y":212.5,"dx":4.444,"dy":0.62},{"x":72.5,"y":212.5,"dx":5.148,"dy":0.656},{"x":92.5,"y":212.5,"dx":5.109,"dy":0.702},{"x":112.5,"y":212.5,"dx":5.012,"dy":0.653},{"x":132.5,"y":212.5,"dx":4.831,"dy":0.683},{"x":152.5,"y":212.5,"dx":4.631,"dy":0.963},{"x":172.5,"y":212.5,"dx":4.36,"dy":0.982},{"x":192.5,"y":212.5,"dx":3.994,"dy":1.006},{"x":232.5,"y":212.5,"dx":2.998,"dy":0.681},{"x":252.5,"y":212.5,"dx":2.813,"dy":0.863},{"x":272.5,"y":212.5,"dx":2.332,"dy":0.796},{"x":292.5,"y":212.5,"dx":2.078,"dy":0.708},{"x":312.5,"y":212.5,"dx":1.586,"dy":0.363},{"x":332.5,"y":212.5,"dx":1.172,"dy":0.253},{"x":352.5,"y":212.5,"dx":0.239,"dy":0.795},{"x":372.5,"y":212.5,"dx":0.094,"dy":0.857},{"x":392.5,"y":212.5,"dx":-0.039,"dy":0.82},{"x":412.5,"y":212.5,"dx":-0.995,"dy":1.027},{"x":432.5,"y":212.5,"dx":-1.268,"dy":0.995},{"x":452.5,"y":212.5,"dx":-1.988,"dy":0.935},{"x":472.5,"y":212.5,"dx":-2.31,"dy":0.707},{"x":492.5,"y":212.5,"dx":-2.933,"dy":0.869},{"x":512.5,"y":212.5,"dx":-3.34,"dy":0.668},{"x":532.5,"y":212.5,"dx":-3.913,"dy":1.142},{"x":552.5,"y":212.5,"dx":-4.071,"dy":1.121},{"x":572.5,"y":212.5,"dx":-4.138,"dy":1.152},{"x":592.5,"y":212.5,"dx":-4.192,"dy":1.137},{"x":612.5,"y":212.5,"dx":-4.605,"dy":0.638},{"x":632.5,"y":212.5,"dx":-5.031,"dy":0.556},{"x":652.5,"y":212.5,"dx":-4.653,"dy":0.482},{"x":672.5,"y":212.5,"dx":-4.626,"dy":0.417},{"x":692.5,"y":212.5,"dx":-4.648,"dy":0.364},{"x":712.5,"y":212.5,"dx":-4.456,"dy":0.277},{"x":32.5,"y":232.5,"dx":4.247,"dy":0.227},{"x":52.5,"y":232.5,"dx":4.78,"dy":0.209},{"x":72.5,"y":232.5,"dx":4.908,"dy":0.241},{"x":92.5,"y":232.5,"dx":4.962,"dy":0.24},{"x":112.5,"y":232.5,"dx":4.904,"dy":0.466},{"x":132.5,"y":232.5,"dx":4.623,"dy":0.498},{"x":152.5,"y":232.5,"dx":4.727,"dy":0.656},{"x":192.5,"y":232.5,"dx":3.971,"dy":0.343},{"x":212.5,"y":232.5,"dx":3.542,"dy":0.117},{"x":232.5,"y":232.5,"dx":2.969,"dy":0.033},{"x":252.5,"y":232.5,"dx":2.781,"dy":0.123},{"x":272.5,"y":232.5,"dx":2.334,"dy":0.308},{"x":292.5,"y":232.5,"dx":1.957,"dy":0.185},{"x":312.5,"y":232.5,"dx":1.719,"dy":0.084},{"x":332.5,"y":232.5,"dx":1.236,"dy":0.123},{"x":352.5,"y":232.5,"dx":0.624,"dy":0.101},{"x":372.5,"y":232.5,"dx":0.246,"dy":0.422},{"x":392.5,"y":232.5,"dx":-0.394,"dy":0.283},{"x":412.5,"y":232.5,"dx":-0.71,"dy":-0.073},{"x":432.5,"y":232.5,"dx":-1.698,"dy":0.184},{"x":452.5,"y":232.5,"dx":-1.796,"dy":0.333},{"x":472.5,"y":232.5,"dx":-1.977,"dy":0.181},{"x":492.5,"y":232.5,"dx":-3.024,"dy":0.704},{"x":512.5,"y":232.5,"dx":-3.226,"dy":0.536},{"x":532.5,"y":232.5,"dx":-2.798,"dy":0.479},{"x":552.5,"y":232.5,"dx":-4.258,"dy":0.867},{"x":572.5,"y":232.5,"dx":-4.094,"dy":0.914},{"x":592.5,"y":232.5,"dx":-4.05,"dy":0.866},{"x":612.5,"y":232.5,"dx":-4.922,"dy":0.12},{"x":632.5,"y":232.5,"dx":-4.903,"dy":0.088},{"x":652.5,"y":232.5,"dx":-4.913,"dy":0.162},{"x":672.5,"y":232.5,"dx":-4.889,"dy":0.156},{"x":692.5,"y":232.5,"dx":-4.815,"dy":0.123},{"x":712.5,"y":232.5,"dx":-4.584,"dy":0.004},{"x":32.5,"y":252.5,"dx":4.166,"dy":0.044},{"x":52.5,"y":252.5,"dx":4.726,"dy":-0.16},{"x":72.5,"y":252.5,"dx":4.916,"dy":-0.09},{"x":92.5,"y":252.5,"dx":4.963,"dy":-0.08},{"x":112.5,"y":252.5,"dx":4.856,"dy":-0.062},{"x":132.5,"y":252.5,"dx":4.632,"dy":-0.027},{"x":152.5,"y":252.5,"dx":4.351,"dy":-0.076},{"x":172.5,"y":252.5,"dx":4.175,"dy":-0.095},{"x":192.5,"y":252.5,"dx":4.026,"dy":-0.141},{"x":212.5,"y":252.5,"dx":3.565,"dy":-0.206},{"x":232.5,"y":252.5,"dx":3.107,"dy":-0.19},{"x":252.5,"y":252.5,"dx":2.751,"dy":-0.098},{"x":272.5,"y":252.5,"dx":2.355,"dy":0.012},{"x":292.5,"y":252.5,"dx":1.929,"dy":-0.291},{"x":312.5,"y":252.5,"dx":1.045,"dy":-0.359},{"x":352.5,"y":252.5,"dx":0.355,"dy":-0.335},{"x":372.5,"y":252.5,"dx":0.175,"dy":-0.276},{"x":392.5,"y":252.5,"dx":-0.106,"dy":0.091},{"x":412.5,"y":252.5,"dx":-1.145,"dy":-0.286},{"x":432.5,"y":252.5,"dx":-1.611,"dy":0.115},{"x":452.5,"y":252.5,"dx":-1.709,"dy":0.126},{"x":472.5,"y":252.5,"dx":-1.993,"dy":-0.141},{"x":492.5,"y":252.5,"dx":-2.647,"dy":0.217},{"x":512.5,"y":252.5,"dx":-2.706,"dy":0.151},{"x":532.5,"y":252.5,"dx":-3.065,"dy":0.044},{"x":552.5,"y":252.5,"dx":-3.997,"dy":0.043},{"x":572.5,"y":252.5,"dx":-4.434,"dy":0.205},{"x":592.5,"y":252.5,"dx":-4.785,"dy":-0.028},{"x":612.5,"y":252.5,"dx":-4.889,"dy":0.04},{"x":632.5,"y":252.5,"dx":-4.877,"dy":0.035},{"x":652.5,"y":252.5,"dx":-4.828,"dy":0.021},{"x":672.5,"y":252.5,"dx":-4.709,"dy":-0.048},{"x":692.5,"y":252.5,"dx":-4.554,"dy":-0.146},{"x":712.5,"y":252.5,"dx":-4.336,"dy":0.025},{"x":32.5,"y":272.5,"dx":4.1,"dy":-0.142},{"x":52.5,"y":272.5,"dx":4.519,"dy":-0.441},{"x":72.5,"y":272.5,"dx":4.804,"dy":-0.294},{"x":92.5,"y":272.5,"dx":4.886,"dy":-0.301},{"x":112.5,"y":272.5,"dx":4.821,"dy":-0.479},{"x":132.5,"y":272.5,"dx":5.03,"dy":-0.563},{"x":152.5,"y":272.5,"dx":4.413,"dy":-0.365},{"x":172.5,"y":272.5,"dx":4.133,"dy":-0.328},{"x":192.5,"y":272.5,"dx":3.938,"dy":-0.288},{"x":212.5,"y":272.5,"dx":3.49,"dy":-0.359},{"x":232.5,"y":272.5,"dx":3.197,"dy":-0.424},{"x":252.5,"y":272.5,"dx":3.064,"dy":-0.588},{"x":272.5,"y":272.5,"dx":2.729,"dy":-0.612},{"x":292.5,"y":272.5,"dx":2.176,"dy":-0.664},{"x":312.5,"y":272.5,"dx":2.127,"dy":-0.7},{"x":352.5,"y":272.5,"dx":0.222,"dy":-0.646},{"x":372.5,"y":272.5,"dx":0.146,"dy":-0.608},{"x":392.5,"y":272.5,"dx":0.177,"dy":-0.401},{"x":412.5,"y":272.5,"dx":-1.107,"dy":-0.542},{"x":432.5,"y":272.5,"dx":-1.404,"dy":-0.47},{"x":452.5,"y":272.5,"dx":-1.572,"dy":-0.573},{"x":472.5,"y":272.5,"dx":-1.909,"dy":-0.73},{"x":492.5,"y":272.5,"dx":-2.539,"dy":-0.543},{"x":512.5,"y":272.5,"dx":-2.689,"dy":-0.142},{"x":532.5,"y":272.5,"dx":-3.513,"dy":-0.106},{"x":552.5,"y":272.5,"dx":-3.946,"dy":-0.437},{"x":572.5,"y":272.5,"dx":-4.179,"dy":-0.583},{"x":592.5,"y":272.5,"dx":-4.858,"dy":-0.478},{"x":612.5,"y":272.5,"dx":-4.897,"dy":-0.408},{"x":632.5,"y":272.5,"dx":-4.831,"dy":-0.282},{"x":652.5,"y":272.5,"dx":-4.672,"dy":-0.21},{"x":672.5,"y":272.5,"dx":-4.551,"dy":-0.226},{"x":692.5,"y":272.5,"dx":-4.244,"dy":0.042},{"x":712.5,"y":272.5,"dx":-3.881,"dy":-0.126},{"x":32.5,"y":292.5,"dx":4.072,"dy":-0.208},{"x":52.5,"y":292.5,"dx":4.951,"dy":-0.789},{"x":72.5,"y":292.5,"dx":5.019,"dy":-0.679},{"x":92.5,"y":292.5,"dx":5.102,"dy":-0.664},{"x":112.5,"y":292.5,"dx":4.991,"dy":-0.779},{"x":132.5,"y":292.5,"dx":4.935,"dy":-0.761},{"x":172.5,"y":292.5,"dx":4.121,"dy":-1.136},{"x":192.5,"y":292.5,"dx":3.803,"dy":-1.22},{"x":212.5,"y":292.5,"dx":3.314,"dy":-0.954},{"x":232.5,"y":292.5,"dx":3.19,"dy":-0.854},{"x":252.5,"y":292.5,"dx":3.003,"dy":-0.862},{"x":272.5,"y":292.5,"dx":2.663,"dy":-0.901},{"x":292.5,"y":292.5,"dx":2.386,"dy":-0.801},{"x":312.5,"y":292.5,"dx":2.218,"dy":-0.791},{"x":352.5,"y":292.5,"dx":0.198,"dy":-0.681},{"x":372.5,"y":292.5,"dx":0.139,"dy":-0.67},{"x":392.5,"y":292.5,"dx":0.108,"dy":-0.706},{"x":412.5,"y":292.5,"dx":-0.935,"dy":-0.9},{"x":432.5,"y":292.5,"dx":-1.09,"dy":-0.668},{"x":452.5,"y":292.5,"dx":-1.328,"dy":-0.581},{"x":472.5,"y":292.5,"dx":-1.948,"dy":-1.106},{"x":492.5,"y":292.5,"dx":-2.069,"dy":-1.155},{"x":512.5,"y":292.5,"dx":-2.249,"dy":-1.245},{"x":532.5,"y":292.5,"dx":-2.88,"dy":-1.377},{"x":552.5,"y":292.5,"dx":-3.987,"dy":-1.346},{"x":572.5,"y":292.5,"dx":-4.407,"dy":-1.294},{"x":592.5,"y":292.5,"dx":-4.695,"dy":-0.992},{"x":612.5,"y":292.5,"dx":-4.936,"dy":-0.825},{"x":632.5,"y":292.5,"dx":-5.033,"dy":-0.744},{"x":652.5,"y":292.5,"dx":-5.246,"dy":-0.716},{"x":672.5,"y":292.5,"dx":-5.346,"dy":-0.734},{"x":712.5,"y":292.5,"dx":-3.644,"dy":-0.242},{"x":172.5,"y":312.5,"dx":3.577,"dy":-1.421},{"x":192.5,"y":312.5,"dx":3.403,"dy":-1.148},{"x":212.5,"y":312.5,"dx":3.016,"dy":-1.265},{"x":232.5,"y":312.5,"dx":2.986,"dy":-1.146},{"x":252.5,"y":312.5,"dx":3.057,"dy":-1.081},{"x":272.5,"y":312.5,"dx":2.041,"dy":-1.061},{"x":292.5,"y":312.5,"dx":1.799,"dy":-1.106},{"x":312.5,"y":312.5,"dx":1.382,"dy":-1.063},{"x":332.5,"y":312.5,"dx":0.637,"dy":-1.064},{"x":352.5,"y":312.5,"dx":0.209,"dy":-1.003},{"x":372.5,"y":312.5,"dx":0.119,"dy":-1.0},{"x":392.5,"y":312.5,"dx":0.217,"dy":-0.949},{"x":412.5,"y":312.5,"dx":-0.92,"dy":-1.294},{"x":432.5,"y":312.5,"dx":-0.904,"dy":-1.286},{"x":452.5,"y":312.5,"dx":-0.926,"dy":-1.154},{"x":492.5,"y":312.5,"dx":-1.907,"dy":-1.169},{"x":512.5,"y":312.5,"dx":-2.224,"dy":-1.278},{"x":532.5,"y":312.5,"dx":-2.894,"dy":-1.462},{"x":552.5,"y":312.5,"dx":-4.029,"dy":-1.451},{"x":572.5,"y":312.5,"dx":-4.353,"dy":-1.376},{"x":632.5,"y":312.5,"dx":-4.95,"dy":-0.833},{"x":652.5,"y":312.5,"dx":-5.082,"dy":-0.888},{"x":672.5,"y":312.5,"dx":-5.045,"dy":-0.956},{"x":692.5,"y":312.5,"dx":-4.828,"dy":-1.043},{"x":712.5,"y":312.5,"dx":-4.668,"dy":-1.127},{"x":132.5,"y":332.5,"dx":4.681,"dy":-2.121},{"x":152.5,"y":332.5,"dx":4.533,"dy":-2.225},{"x":192.5,"y":332.5,"dx":3.223,"dy":-1.177},{"x":232.5,"y":332.5,"dx":2.637,"dy":-1.301},{"x":272.5,"y":332.5,"dx":2.142,"dy":-1.841},{"x":292.5,"y":332.5,"dx":1.834,"dy":-1.811},{"x":312.5,"y":332.5,"dx":1.426,"dy":-1.639},{"x":332.5,"y":332.5,"dx":0.982,"dy":-1.805},{"x":352.5,"y":332.5,"dx":0.76,"dy":-1.815},{"x":372.5,"y":332.5,"dx":0.115,"dy":-1.469},{"x":412.5,"y":332.5,"dx":-0.895,"dy":-1.379},{"x":432.5,"y":332.5,"dx":-0.869,"dy":-1.47},{"x":452.5,"y":332.5,"dx":-1.604,"dy":-2.23},{"x":472.5,"y":332.5,"dx":-1.885,"dy":-2.04},{"x":492.5,"y":332.5,"dx":-2.592,"dy":-2.139},{"x":512.5,"y":332.5,"dx":-3.329,"dy":-1.846},{"x":532.5,"y":332.5,"dx":-3.713,"dy":-1.724},{"x":632.5,"y":332.5,"dx":-4.592,"dy":-1.564},{"x":652.5,"y":332.5,"dx":-4.911,"dy":-1.188},{"x":672.5,"y":332.5,"dx":-4.895,"dy":-1.105},{"x":692.5,"y":332.5,"dx":-4.656,"dy":-1.113},{"x":712.5,"y":332.5,"dx":-4.265,"dy":-0.846},{"x":132.5,"y":352.5,"dx":4.565,"dy":-2.16},{"x":152.5,"y":352.5,"dx":4.475,"dy":-1.684},{"x":172.5,"y":352.5,"dx":4.368,"dy":-1.708},{"x":192.5,"y":352.5,"dx":4.278,"dy":-1.789},{"x":212.5,"y":352.5,"dx":3.203,"dy":-2.786},{"x":232.5,"y":352.5,"dx":3.07,"dy":-2.338},{"x":252.5,"y":352.5,"dx":2.832,"dy":-2.768},{"x":272.5,"y":352.5,"dx":2.132,"dy":-1.972},{"x":292.5,"y":352.5,"dx":1.771,"dy":-1.918},{"x":312.5,"y":352.5,"dx":1.281,"dy":-2.012},{"x":332.5,"y":352.5,"dx":1.131,"dy":-2.06},{"x":352.5,"y":352.5,"dx":0.632,"dy":-2.049},{"x":372.5,"y":352.5,"dx":0.366,"dy":-2.041},{"x":412.5,"y":352.5,"dx":-1.046,"dy":-1.875},{"x":432.5,"y":352.5,"dx":-1.291,"dy":-1.702},{"x":452.5,"y":352.5,"dx":-1.569,"dy":-2.276},{"x":472.5,"y":352.5,"dx":-1.842,"dy":-2.262},{"x":492.5,"y":352.5,"dx":-2.131,"dy":-2.324},{"x":512.5,"y":352.5,"dx":-3.376,"dy":-2.527},{"x":632.5,"y":352.5,"dx":-4.53,"dy":-2.069},{"x":712.5,"y":352.5,"dx":-4.062,"dy":-0.978},{"x":132.5,"y":372.5,"dx":4.418,"dy":-1.886},{"x":152.5,"y":372.5,"dx":4.248,"dy":-2.05},{"x":172.5,"y":372.5,"dx":4.017,"dy":-2.342},{"x":192.5,"y":372.5,"dx":3.933,"dy":-2.446},{"x":212.5,"y":372.5,"dx":3.11,"dy":-2.707},{"x":232.5,"y":372.5,"dx":2.912,"dy":-2.894},{"x":252.5,"y":372.5,"dx":2.773,"dy":-3.092},{"x":272.5,"y":372.5,"dx":2.004,"dy":-2.088},{"x":292.5,"y":372.5,"dx":1.709,"dy":-2.226},{"x":312.5,"y":372.5,"dx":1.293,"dy":-2.166},{"x":332.5,"y":372.5,"dx":1.249,"dy":-2.138},{"x":352.5,"y":372.5,"dx":0.779,"dy":-2.105},{"x":412.5,"y":372.5,"dx":-0.829,"dy":-2.282},{"x":432.5,"y":372.5,"dx":-1.176,"dy":-2.168},{"x":452.5,"y":372.5,"dx":-2.017,"dy":-2.608},{"x":472.5,"y":372.5,"dx":-1.728,"dy":-2.431},{"x":492.5,"y":372.5,"dx":-3.063,"dy":-2.673},{"x":512.5,"y":372.5,"dx":-3.315,"dy":-2.602},{"x":632.5,"y":372.5,"dx":-4.321,"dy":-1.788},{"x":32.5,"y":392.5,"dx":3.103,"dy":-1.246},{"x":52.5,"y":392.5,"dx":3.746,"dy":-1.486},{"x":72.5,"y":392.5,"dx":4.047,"dy":-1.68},{"x":92.5,"y":392.5,"dx":4.212,"dy":-1.889},{"x":112.5,"y":392.5,"dx":4.291,"dy":-2.196},{"x":132.5,"y":392.5,"dx":4.135,"dy":-2.558},{"x":152.5,"y":392.5,"dx":3.982,"dy":-2.743},{"x":172.5,"y":392.5,"dx":3.928,"dy":-2.743},{"x":192.5,"y":392.5,"dx":3.068,"dy":-3.011},{"x":212.5,"y":392.5,"dx":2.755,"dy":-3.084},{"x":232.5,"y":392.5,"dx":2.74,"dy":-3.2},{"x":252.5,"y":392.5,"dx":2.681,"dy":-3.315},{"x":272.5,"y":392.5,"dx":2.605,"dy":-3.472},{"x":412.5,"y":392.5,"dx":-0.728,"dy":-2.363},{"x":432.5,"y":392.5,"dx":-1.35,"dy":-2.584},{"x":452.5,"y":392.5,"dx":-1.656,"dy":-3.249},{"x":472.5,"y":392.5,"dx":-2.256,"dy":-2.85},{"x":492.5,"y":392.5,"dx":-2.689,"dy":-2.937},{"x":512.5,"y":392.5,"dx":-3.054,"dy":-2.87},{"x":532.5,"y":392.5,"dx":-3.42,"dy":-2.897},{"x":632.5,"y":392.5,"dx":-4.19,"dy":-1.832},{"x":652.5,"y":392.5,"dx":-4.228,"dy":-1.544},{"x":672.5,"y":392.5,"dx":-4.02,"dy":-1.931},{"x":692.5,"y":392.5,"dx":-3.755,"dy":-1.713},{"x":712.5,"y":392.5,"dx":-3.554,"dy":-1.193},{"x":32.5,"y":412.5,"dx":3.094,"dy":-1.31},{"x":52.5,"y":412.5,"dx":3.367,"dy":-1.687},{"x":72.5,"y":412.5,"dx":3.89,"dy":-1.942},{"x":92.5,"y":412.5,"dx":4.03,"dy":-2.199},{"x":112.5,"y":412.5,"dx":4.075,"dy":-2.593},{"x":132.5,"y":412.5,"dx":3.961,"dy":-3.102},{"x":152.5,"y":412.5,"dx":3.558,"dy":-3.324},{"x":172.5,"y":412.5,"dx":3.169,"dy":-3.062},{"x":192.5,"y":412.5,"dx":2.951,"dy":-3.114},{"x":212.5,"y":412.5,"dx":2.755,"dy":-3.187},{"x":232.5,"y":412.5,"dx":2.752,"dy":-3.276},{"x":252.5,"y":412.5,"dx":2.742,"dy":-3.348},{"x":272.5,"y":412.5,"dx":2.71,"dy":-3.45},{"x":352.5,"y":412.5,"dx":-0.063,"dy":-3.929},{"x":372.5,"y":412.5,"dx":-0.084,"dy":-3.937},{"x":432.5,"y":412.5,"dx":-1.711,"dy":-3.129},{"x":452.5,"y":412.5,"dx":-2.238,"dy":-3.888},{"x":492.5,"y":412.5,"dx":-1.915,"dy":-3.805},{"x":512.5,"y":412.5,"dx":-3.189,"dy":-3.403},{"x":532.5,"y":412.5,"dx":-3.402,"dy":-3.059},{"x":552.5,"y":412.5,"dx":-3.499,"dy":-3.101},{"x":652.5,"y":412.5,"dx":-4.166,"dy":-2.048},{"x":672.5,"y":412.5,"dx":-3.938,"dy":-1.932},{"x":692.5,"y":412.5,"dx":-3.368,"dy":-1.909},{"x":712.5,"y":412.5,"dx":-2.85,"dy":-1.519},{"x":32.5,"y":432.5,"dx":2.926,"dy":-1.294},{"x":52.5,"y":432.5,"dx":3.168,"dy":-1.656},{"x":72.5,"y":432.5,"dx":3.713,"dy":-1.872},{"x":92.5,"y":432.5,"dx":3.94,"dy":-2.946},{"x":112.5,"y":432.5,"dx":3.895,"dy":-3.077},{"x":132.5,"y":432.5,"dx":3.716,"dy":-3.167},{"x":152.5,"y":432.5,"dx":3.435,"dy":-2.943},{"x":172.5,"y":432.5,"dx":3.137,"dy":-3.037},{"x":192.5,"y":432.5,"dx":2.98,"dy":-3.101},{"x":212.5,"y":432.5,"dx":2.89,"dy":-3.147},{"x":232.5,"y":432.5,"dx":2.848,"dy":-3.657},{"x":252.5,"y":432.5,"dx":2.698,"dy":-3.932},{"x":272.5,"y":432.5,"dx":2.904,"dy":-3.982},{"x":312.5,"y":432.5,"dx":1.798,"dy":-3.969},{"x":352.5,"y":432.5,"dx":1.116,"dy":-4.044},{"x":372.5,"y":432.5,"dx":0.122,"dy":-4.027},{"x":392.5,"y":432.5,"dx":-0.329,"dy":-3.919},{"x":412.5,"y":432.5,"dx":-0.604,"dy":-4.071},{"x":432.5,"y":432.5,"dx":-0.773,"dy":-4.048},{"x":452.5,"y":432.5,"dx":-1.127,"dy":-4.007},{"x":472.5,"y":432.5,"dx":-2.704,"dy":-4.058},{"x":492.5,"y":432.5,"dx":-2.176,"dy":-3.848},{"x":512.5,"y":432.5,"dx":-3.063,"dy":-3.715},{"x":532.5,"y":432.5,"dx":-3.327,"dy":-3.305},{"x":552.5,"y":432.5,"dx":-3.409,"dy":-3.315},{"x":652.5,"y":432.5,"dx":-4.003,"dy":-2.567},{"x":672.5,"y":432.5,"dx":-3.678,"dy":-1.911},{"x":692.5,"y":432.5,"dx":-3.281,"dy":-1.951},{"x":712.5,"y":432.5,"dx":-3.193,"dy":-1.477},{"x":32.5,"y":452.5,"dx":2.682,"dy":-1.756},{"x":52.5,"y":452.5,"dx":2.815,"dy":-2.138},{"x":72.5,"y":452.5,"dx":2.732,"dy":-2.205},{"x":92.5,"y":452.5,"dx":4.336,"dy":-2.753},{"x":112.5,"y":452.5,"dx":4.024,"dy":-2.94},{"x":132.5,"y":452.5,"dx":3.74,"dy":-3.109},{"x":152.5,"y":452.5,"dx":3.486,"dy":-2.869},{"x":172.5,"y":452.5,"dx":3.341,"dy":-2.939},{"x":192.5,"y":452.5,"dx":3.131,"dy":-3.147},{"x":232.5,"y":452.5,"dx":2.615,"dy":-3.876},{"x":252.5,"y":452.5,"dx":2.599,"dy":-3.887},{"x":272.5,"y":452.5,"dx":2.33,"dy":-4.076},{"x":292.5,"y":452.5,"dx":2.365,"dy":-4.077},{"x":492.5,"y":452.5,"dx":-2.27,"dy":-3.991},{"x":512.5,"y":452.5,"dx":-3.104,"dy":-4.246},{"x":532.5,"y":452.5,"dx":-3.103,"dy":-4.119},{"x":552.5,"y":452.5,"dx":-3.211,"dy":-4.067},{"x":652.5,"y":452.5,"dx":-3.175,"dy":-2.814},{"x":672.5,"y":452.5,"dx":-2.808,"dy":-2.364},{"x":692.5,"y":452.5,"dx":-3.091,"dy":-2.138}],"quiverSize":[750,500],"alignment":{"tiles":628,"scaleX":0.984,"scaleY":0.9824,"rmsPx":2.9},"crossval":[{"photo":"First photo","fit":"No correction","saturated":4.7},{"photo":"First photo","fit":"Fitted on the other three","saturated":1.83},{"photo":"First photo","fit":"Fitted on all four","saturated":1.8},{"photo":"Second photo","fit":"No correction","saturated":4.7},{"photo":"Second photo","fit":"Fitted on the other three","saturated":1.57},{"photo":"Second photo","fit":"Fitted on all four","saturated":1.47},{"photo":"Street","fit":"No correction","saturated":4.56},{"photo":"Street","fit":"Fitted on the other three","saturated":2.18},{"photo":"Street","fit":"Fitted on all four","saturated":1.99},{"photo":"Flower bed","fit":"No correction","saturated":3.44},{"photo":"Flower bed","fit":"Fitted on the other three","saturated":1.63},{"photo":"Flower bed","fit":"Fitted on all four","saturated":1.51}],"highlights":[{"stop":2.704,"n":62,"Capture One":0.8967,"Round 6":0.8935,"Round 7":0.8931},{"stop":2.848,"n":65,"Capture One":0.9146,"Round 6":0.9128,"Round 7":0.9123},{"stop":2.983,"n":118,"Capture One":0.929,"Round 6":0.9276,"Round 7":0.9272},{"stop":3.112,"n":167,"Capture One":0.9386,"Round 6":0.9378,"Round 7":0.9377},{"stop":3.256,"n":229,"Capture One":0.9479,"Round 6":0.9479,"Round 7":0.9478},{"stop":3.39,"n":305,"Capture One":0.9557,"Round 6":0.9562,"Round 7":0.9556},{"stop":3.516,"n":270,"Capture One":0.9621,"Round 6":0.9624,"Round 7":0.9612},{"stop":3.665,"n":226,"Capture One":0.9675,"Round 6":0.969,"Round 7":0.9671},{"stop":3.801,"n":226,"Capture One":0.9727,"Round 6":0.9756,"Round 7":0.9721},{"stop":3.94,"n":197,"Capture One":0.9763,"Round 6":0.9819,"Round 7":0.9763},{"stop":4.073,"n":174,"Capture One":0.9795,"Round 6":0.9869,"Round 7":0.9799},{"stop":4.207,"n":116,"Capture One":0.9827,"Round 6":0.9906,"Round 7":0.9831},{"stop":4.336,"n":60,"Capture One":0.9847,"Round 6":0.9922,"Round 7":0.9867}],"rounds":[{"name":"Round 1, the profile as it is","second":[17.14,13.75],"first":[14.81,14.15]},{"name":"Round 2, neutral curve","second":[9.75,6.08],"first":[8.45,6.44]},{"name":"Round 3, Panasonic's contrast","second":[5.64,4.5],"first":[4.52,3.47]},{"name":"Round 3, film curve","second":[8.49,5.93],"first":[7.51,5.44]},{"name":"Round 4, measured curve","second":[2.8,1.55],"first":[2.42,1.39]},{"name":"Round 5, whites fix","second":[2.7,0.98],"first":[2.18,1.16]},{"name":"Round 6, colour correction","second":[1.58,1.03],"first":[1.76,1.24]},{"name":"Round 7, four photos","second":[1.56,0.96],"first":[1.71,1.12]}],"tint":[{"vlog":0.41,"Capture One":-1.32,"Round 4":-1.99,"Round 5":-1.99,"stop":-0.19},{"vlog":0.431,"Capture One":-1.5,"Round 4":-2.16,"Round 5":-2.2,"stop":0.11},{"vlog":0.45,"Capture One":-1.4,"Round 4":-2.05,"Round 5":-2.09,"stop":0.38},{"vlog":0.47,"Capture One":-0.98,"Round 4":-0.95,"Round 5":-1.11,"stop":0.67},{"vlog":0.49,"Capture One":-1.5,"Round 4":-2.2,"Round 5":-2.3,"stop":0.95},{"vlog":0.509,"Capture One":-1.16,"Round 4":-1.09,"Round 5":-1.07,"stop":1.22},{"vlog":0.529,"Capture One":-1.67,"Round 4":-2.95,"Round 5":-3.18,"stop":1.5},{"vlog":0.552,"Capture One":-2.43,"Round 4":-4.18,"Round 5":-4.03,"stop":1.82},{"vlog":0.572,"Capture One":-2.92,"Round 4":-4.56,"Round 5":-3.73,"stop":2.1},{"vlog":0.591,"Capture One":-3.02,"Round 4":-4.55,"Round 5":-3.3,"stop":2.36},{"vlog":0.607,"Capture One":-2.65,"Round 4":-4.53,"Round 5":-3.0,"stop":2.58},{"vlog":0.628,"Capture One":-0.83,"Round 4":-2.39,"Round 5":-0.98,"stop":2.87},{"vlog":0.654,"Capture One":-0.71,"Round 4":-1.65,"Round 5":-1.0,"stop":3.23},{"vlog":0.666,"Capture One":-0.62,"Round 4":-1.43,"Round 5":-0.74,"stop":3.4}],"hues":[{"name":"Purple","before":3.16,"after":1.22,"shiftBefore":5.7,"shiftAfter":1.1,"swatch":"lab(55 35.4 -35.4)"},{"name":"Magenta","before":4.43,"after":1.3,"shiftBefore":10.3,"shiftAfter":-2.3,"swatch":"lab(55 48.3 -12.9)"},{"name":"Pink-red","before":7.97,"after":1.56,"shiftBefore":15.8,"shiftAfter":1.9,"swatch":"lab(55 48.3 12.9)"},{"name":"Red","before":3.41,"after":1.94,"shiftBefore":-4.4,"shiftAfter":-0.2,"swatch":"lab(60 35.4 35.4)"},{"name":"Orange","before":3.07,"after":1.87,"shiftBefore":-8.2,"shiftAfter":0.8,"swatch":"lab(70 12.9 48.3)"},{"name":"Yellow","before":3.5,"after":1.55,"shiftBefore":-3.1,"shiftAfter":1.8,"swatch":"lab(82 -12.9 48.3)"},{"name":"Yellow-green","before":3.96,"after":1.44,"shiftBefore":11.3,"shiftAfter":-1.3,"swatch":"lab(75 -35.4 35.4)"}]}</script>
+<script>
+const root = document.documentElement;
+const data = JSON.parse(document.getElementById("data").textContent);
+const css = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+const fmt = (v, d = 3) => v.toFixed(d);
+const signed = (s) => (s > 0 ? `+${s}` : `${s}`);
+
+for (const box of document.querySelectorAll("[data-compare]")) {
+  const range = box.querySelector("input");
+  const set = () => box.style.setProperty("--pos", `${range.value}%`);
+  range.addEventListener("input", set);
+  set();
+}
+
+for (const sheet of document.querySelectorAll(".sheet")) {
+  const judge = document.getElementById(sheet.dataset.judge);
+  sheet.addEventListener("click", (event) => {
+    const shot = event.target.closest(".shot");
+    if (!shot) return;
+    for (const other of sheet.querySelectorAll(".shot")) other.setAttribute("aria-pressed", String(other === shot));
+    judge.querySelector(".over img").src = shot.dataset.src;
+    document.getElementById(sheet.dataset.left).textContent = shot.dataset.label;
+    document.getElementById(sheet.dataset.line).textContent = shot.dataset.summary;
+  });
+}
+
+function table(container, head, rows) {
+  const t = document.createElement("table");
+  const tr = t.createTHead().insertRow();
+  head.forEach(([label, numeric]) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    if (numeric) th.className = "num";
+    tr.append(th);
+  });
+  const body = t.createTBody();
+  rows.forEach((row) => {
+    const r = body.insertRow();
+    row.forEach((cell, i) => {
+      const td = r.insertCell();
+      td.textContent = cell;
+      if (head[i][1]) td.className = "num";
+    });
+  });
+  container.replaceChildren(t);
+}
+
+const names = ["Capture One, measured", "Panasonic V-709", "Film curve, guessed", "Neutral, first try"];
+const tintNames = ["Capture One", "Round 4", "Round 5"];
+const fits = ["No correction", "Fitted on the other three", "Fitted on all four"];
+table(document.getElementById("tone-table"), [["Stops from middle grey", false], ...names.map((n) => [n, true])],
+  data.tone.filter((r) => Number.isInteger(r.stop)).map((r) => [signed(r.stop), ...names.map((n) => fmt(r[n]))]));
+table(document.getElementById("blend-table"),
+  [["Curve applied per channel", false], ["Saturation vs Capture One", true], ["ΔE00 from Capture One", true]],
+  data.blend.map((d) => [`${d.perChannel * 100}%`, `${fmt(d.chroma, 2)}×`, fmt(d.de, 2)]));
+table(document.getElementById("rounds-table"),
+  [["LUT", false], ["Colours, second photo", true], ["Greys, second photo", true], ["Colours, first photo", true], ["Greys, first photo", true]],
+  data.rounds.map((d) => [d.name, ...[...d.second, ...d.first].map((v) => fmt(v, 2))]));
+table(document.getElementById("quiver-table"), [["Fit", false], ["Value", true]], [
+  ["Horizontal scale, Capture One to camera", fmt(data.alignment.scaleX, 4)],
+  ["Vertical scale, Capture One to camera", fmt(data.alignment.scaleY, 4)],
+  ["Patches matched", String(data.alignment.tiles)],
+  ["Remaining misalignment, allowing for the lens", `${data.alignment.rmsPx} px`],
+]);
+table(document.getElementById("tint-table"), [["Stops from middle grey", false], ...tintNames.map((n) => [`${n}, b*`, true])],
+  data.tint.map((r) => [signed(fmt(r.stop, 1)), ...tintNames.map((n) => fmt(r[n], 2))]));
+table(document.getElementById("hue-table"),
+  [["Hue", false], ["Round 5, ΔE00", true], ["Round 6, ΔE00", true], ["Round 5 hue shift", true], ["Round 6 hue shift", true]],
+  data.hues.map((d) => [d.name, fmt(d.before, 2), fmt(d.after, 2), `${signed(d.shiftBefore)}°`, `${signed(d.shiftAfter)}°`]));
+table(document.getElementById("crossval-table"), [["Photo", false], ["Correction", false], ["Saturated colours, ΔE00", true]],
+  data.crossval.map((d) => [d.photo, d.fit, fmt(d.saturated, 2)]));
+table(document.getElementById("highlight-table"),
+  [["Stops from middle grey", false], ["Blocks", true], ["Capture One", true], ["Round 6", true], ["Round 7", true]],
+  data.highlights.map((d) => [signed(fmt(d.stop, 2)), String(d.n), fmt(d["Capture One"], 4), fmt(d["Round 6"], 4), fmt(d["Round 7"], 4)]));
+
+function plotStyle() {
+  return { background: "transparent", color: css("--ink-2"), fontFamily: css("--font"), fontSize: "12px", overflow: "visible" };
+}
+
+function toneChart() {
+  const el = document.getElementById("tone-chart");
+  const width = el.clientWidth;
+  const colours = ["--series-1", "--series-2", "--series-3", "--series-4"].map(css);
+  const long = data.tone.flatMap((r) => names.map((n) => ({ stop: r.stop, series: n, value: r[n] })));
+  el.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(Math.min(470, Math.max(300, width * 0.5))),
+    marginLeft: 44,
+    marginRight: 12,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [-6, 5], ticks: 11, tickFormat: signed, label: "Stops from middle grey", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: [0, 1], ticks: 5, label: "Brightness on screen, sRGB", labelArrow: "none" },
+    color: { domain: names, range: colours },
+    marks: [
+      Plot.rect([0], { x1: data.measuredTopStop, x2: 5, y1: 0, y2: 1, fill: css("--ink"), fillOpacity: 0.04 }),
+      Plot.gridY({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY([0], { stroke: css("--axis") }),
+      Plot.line(long, { x: "stop", y: "value", z: "series", stroke: "series", strokeWidth: 2, strokeLinejoin: "round", strokeLinecap: "round" }),
+      Plot.ruleX(data.tone, Plot.pointerX({ x: "stop", stroke: css("--ink-2"), strokeWidth: 1 })),
+      Plot.tip(data.tone, Plot.pointerX({
+        x: "stop",
+        y: (d) => d[names[0]],
+        title: (d) => [`${signed(d.stop)} stops from middle grey`, ...names.map((n) => `${fmt(d[n])}  ${n}`)].join("\n"),
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function blendChart() {
+  const el = document.getElementById("blend-chart");
+  const width = el.clientWidth;
+  const pts = data.blend.map((d) => ({ ...d, pct: d.perChannel * 100 }));
+  const chosen = pts.filter((d) => d.perChannel === 0.25);
+  el.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(Math.min(360, Math.max(250, width * 0.4))),
+    marginLeft: 50,
+    marginRight: 16,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [0, 100], ticks: [0, 25, 50, 75, 100], tickFormat: (d) => `${d}%`, label: "Share of the curve applied to each channel", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: [0.9, 1.25], ticks: [0.9, 1, 1.1, 1.2], tickFormat: (d) => `${d.toFixed(2)}×`, label: "Saturation, times Capture One's", labelArrow: "none" },
+    marks: [
+      Plot.gridY({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY([1], { stroke: css("--ink-2") }),
+      Plot.text([1], { x: 100, y: 1, text: () => "Capture One", textAnchor: "end", dy: -9, fill: css("--ink-2") }),
+      Plot.line(pts, { x: "pct", y: "chroma", stroke: css("--series-1"), strokeWidth: 2 }),
+      Plot.dot(pts, { x: "pct", y: "chroma", r: 4.5, fill: css("--series-1"), stroke: css("--surface"), strokeWidth: 2 }),
+      Plot.dot(chosen, { x: "pct", y: "chroma", r: 7, fill: css("--series-1"), stroke: css("--surface"), strokeWidth: 2 }),
+      Plot.text(chosen, { x: "pct", y: "chroma", text: (d) => `25%: ${fmt(d.chroma, 2)}×, ${fmt(d.de, 2)} ΔE00`, textAnchor: "start", dx: 12, dy: 16, fill: css("--ink"), fontWeight: 600 }),
+      Plot.tip(pts, Plot.pointer({
+        x: "pct",
+        y: "chroma",
+        title: (d) => `${fmt(d.chroma, 2)}× saturation\n${fmt(d.de, 2)} ΔE00 from Capture One\n${d.pct}% of the curve per channel`,
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function quiverChart() {
+  const el = document.getElementById("quiver-chart");
+  const width = el.clientWidth;
+  const [w, h] = data.quiverSize;
+  const k = 14;
+  const arrows = data.quiver.filter((d) => Math.round((d.x - 32.5) / 20) % 2 === 0 && Math.round((d.y - 32.5) / 20) % 2 === 0);
+  el.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(width * h / w),
+    margin: 2,
+    style: plotStyle(),
+    x: { domain: [0, w], axis: null },
+    y: { domain: [h, 0], axis: null },
+    marks: [
+      Plot.frame({ stroke: css("--axis"), rx: 8 }),
+      Plot.arrow(arrows, { x1: "x", y1: "y", x2: (d) => d.x + d.dx * k, y2: (d) => d.y + d.dy * k, stroke: css("--ink-2"), strokeWidth: 1.5, headLength: 6 }),
+      Plot.dot([[w / 2, h / 2]], { r: 3, fill: css("--ink") }),
+      Plot.tip(arrows, Plot.pointer({
+        x: "x",
+        y: "y",
+        title: (d) => `${fmt(Math.hypot(d.dx, d.dy) * 8, 0)} px apart`,
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function tintChart() {
+  const el = document.getElementById("tint-chart");
+  const width = el.clientWidth;
+  const colours = ["--series-1", "--series-2", "--series-3"].map(css);
+  const long = data.tint.flatMap((r) => tintNames.map((n) => ({ stop: r.stop, series: n, value: r[n] })));
+  el.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(Math.min(400, Math.max(280, width * 0.42))),
+    marginLeft: 44,
+    marginRight: 12,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [-0.5, 3.5], ticks: [0, 1, 2, 3], tickFormat: signed, label: "Stops from middle grey", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: [-5, 0.5], ticks: [-5, -4, -3, -2, -1, 0], label: "Tint, b* (below 0 is blue)", labelArrow: "none" },
+    color: { domain: tintNames, range: colours },
+    marks: [
+      Plot.gridY({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY([0], { stroke: css("--ink-2") }),
+      Plot.text([0], { x: 3.5, y: 0, text: () => "neutral", textAnchor: "end", dy: -8, fill: css("--ink-2") }),
+      Plot.line(long, { x: "stop", y: "value", z: "series", stroke: "series", strokeWidth: 2, strokeLinejoin: "round", strokeLinecap: "round" }),
+      Plot.dot(long, { x: "stop", y: "value", fill: "series", r: 4, stroke: css("--surface"), strokeWidth: 1.5 }),
+      Plot.ruleX(data.tint, Plot.pointerX({ x: "stop", stroke: css("--ink-2"), strokeWidth: 1 })),
+      Plot.tip(data.tint, Plot.pointerX({
+        x: "stop",
+        y: (d) => d[tintNames[0]],
+        title: (d) => [`${signed(fmt(d.stop, 1))} stops from middle grey`, ...tintNames.map((n) => `${fmt(d[n], 2)}  ${n}`)].join("\n"),
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function hueChart() {
+  const el = document.getElementById("hue-chart");
+  const width = el.clientWidth;
+  const rows = data.hues;
+  el.replaceChildren(Plot.plot({
+    width,
+    height: 52 + rows.length * 40,
+    marginLeft: 120,
+    marginRight: 20,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [0, 9], ticks: 9, label: "ΔE00 from Capture One", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: rows.map((d) => d.name), label: null, tickSize: 0, tickPadding: 26 },
+    color: { type: "identity" },
+    marks: [
+      Plot.gridX({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.link(rows, { x1: "after", x2: "before", y1: "name", y2: "name", stroke: css("--axis"), strokeWidth: 2 }),
+      Plot.dot(rows, { x: "before", y: "name", r: 5.5, fill: css("--series-3"), stroke: css("--surface"), strokeWidth: 2 }),
+      Plot.dot(rows, { x: "after", y: "name", r: 5.5, fill: css("--series-4"), stroke: css("--surface"), strokeWidth: 2 }),
+      Plot.dot(rows, { x: 0, y: "name", dx: -12, r: 6.5, fill: "swatch", stroke: css("--rule") }),
+      Plot.tip(rows, Plot.pointerY({
+        x: "before",
+        y: "name",
+        title: (d) => `${d.name}\n${fmt(d.before, 2)} ΔE00 in round 5, hue ${signed(d.shiftBefore)}°\n${fmt(d.after, 2)} ΔE00 in round 6, hue ${signed(d.shiftAfter)}°`,
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function crossvalChart() {
+  const el = document.getElementById("crossval-chart");
+  const width = el.clientWidth;
+  const colours = ["--muted", "--series-1", "--series-4"].map(css);
+  el.replaceChildren(Plot.plot({
+    width,
+    height: 470,
+    marginLeft: 108,
+    marginRight: 96,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [0, 6], ticks: 6, label: "Saturated colours, ΔE00 from Capture One", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: fits, label: null, padding: 0.2 },
+    fy: { domain: [...new Set(data.crossval.map((d) => d.photo))], label: null, padding: 0.16 },
+    color: { domain: fits, range: colours },
+    marks: [
+      Plot.gridX({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.axisY({ tickSize: 0, lineWidth: 9, label: null }),
+      Plot.axisFy({ anchor: "right", tickSize: 0, label: null, fill: css("--ink"), fontWeight: 600 }),
+      Plot.barX(data.crossval, { fy: "photo", y: "fit", x: "saturated", fill: "fit" }),
+      Plot.text(data.crossval, { fy: "photo", y: "fit", x: "saturated", text: (d) => fmt(d.saturated, 2), dx: 6, textAnchor: "start", fill: css("--ink") }),
+      Plot.tip(data.crossval, Plot.pointerY({
+        fy: "photo",
+        y: "fit",
+        x: "saturated",
+        title: (d) => `${d.photo}, ${d.fit.toLowerCase()}\n${fmt(d.saturated, 2)} ΔE00 on saturated colours`,
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function highlightChart() {
+  const el = document.getElementById("highlight-chart");
+  const width = el.clientWidth;
+  const rows = data.highlights;
+  const lines = ["Round 6", "Round 7"].flatMap((n) => rows.map((d) => ({ stop: d.stop, series: n, value: d[n] })));
+  el.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(Math.min(380, Math.max(260, width * 0.4))),
+    marginLeft: 50,
+    marginRight: 16,
+    marginBottom: 42,
+    style: plotStyle(),
+    x: { domain: [2.6, 4.5], ticks: [3, 3.5, 4, 4.5], tickFormat: signed, label: "Stops from middle grey", labelAnchor: "center", labelArrow: "none" },
+    y: { domain: [0.88, 1.004], ticks: [0.88, 0.92, 0.96, 1], tickFormat: (d) => d.toFixed(2), label: "Brightness on screen, sRGB", labelArrow: "none" },
+    color: { domain: ["Round 6", "Round 7"], range: ["--series-4", "--series-3"].map(css) },
+    marks: [
+      Plot.gridY({ stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY([1], { stroke: css("--ink-2") }),
+      Plot.text([1], { x: 4.5, y: 1, text: () => "white", textAnchor: "end", dy: -8, fill: css("--ink-2") }),
+      Plot.line(lines, { x: "stop", y: "value", z: "series", stroke: "series", strokeWidth: 2, strokeLinejoin: "round", strokeLinecap: "round" }),
+      Plot.dot(rows, { x: "stop", y: "Capture One", r: 4.5, fill: css("--series-1"), stroke: css("--surface"), strokeWidth: 1.5 }),
+      Plot.ruleX(rows, Plot.pointerX({ x: "stop", stroke: css("--ink-2"), strokeWidth: 1 })),
+      Plot.tip(rows, Plot.pointerX({
+        x: "stop",
+        y: "Capture One",
+        title: (d) => [`${signed(fmt(d.stop, 2))} stops, ${d.n} blocks`, ...["Capture One", "Round 6", "Round 7"].map((n) => `${fmt(d[n], 4)}  ${n}`)].join("\n"),
+        fill: css("--surface"),
+        stroke: css("--rule"),
+        fontSize: 12,
+      })),
+    ],
+  }));
+}
+
+function renderCharts() {
+  const ready = typeof Plot !== "undefined";
+  document.getElementById("offline").hidden = ready;
+  if (!ready) return;
+  toneChart();
+  blendChart();
+  quiverChart();
+  tintChart();
+  hueChart();
+  crossvalChart();
+  highlightChart();
+}
+
+function setTheme(choice) {
+  if (choice === "system") delete root.dataset.theme;
+  else root.dataset.theme = choice;
+  document.querySelectorAll("[data-theme-choice]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choice)));
+  try { localStorage.setItem("icc-report-theme", choice); } catch {}
+  renderCharts();
+}
+
+let saved = "system";
+try { saved = localStorage.getItem("icc-report-theme") ?? "system"; } catch {}
+if (saved !== "system") root.dataset.theme = saved;
+document.querySelectorAll("[data-theme-choice]").forEach((b) => {
+  b.setAttribute("aria-pressed", String(b.dataset.themeChoice === saved));
+  b.addEventListener("click", () => setTheme(b.dataset.themeChoice));
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!root.dataset.theme) renderCharts(); });
+
+const bar = document.querySelector(".bar");
+new ResizeObserver(() => root.style.setProperty("--bar-height", `${bar.offsetHeight}px`)).observe(bar);
+
+renderCharts();
+let lastWidth = innerWidth;
+let resizeTimer;
+addEventListener("resize", () => {
+  if (innerWidth === lastWidth) return;  // mobile toolbars change only the height
+  lastWidth = innerWidth;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderCharts, 150);
+});
+</script>
+</body>
+</html>
