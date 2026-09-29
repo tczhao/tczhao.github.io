@@ -152,6 +152,59 @@
     justify-content: center;
   }
 
+  /* Lumix LUT article: neutral like the article, so the only colour in the
+     row is the photograph */
+  .row--lumixlut {
+    --ac: #bdbdbd;
+    color: #f0f0f0;
+    background: linear-gradient(180deg, #1f1f1f 0%, #0b0b0b 100%);
+  }
+  .row--lumixlut .desc { color: #b3b3b3; }
+  .row--lumixlut .row-title {
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-weight: 650;
+    font-stretch: 112%;
+  }
+  .frame {
+    position: relative;
+    display: block;
+    width: 260px;
+    padding: 9px;
+    border-radius: 6px;
+    background: #0b0b0b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1), 0 16px 34px -18px rgba(0,0,0,0.7);
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+  }
+  /* The article's second test photo, split like its sliders: V-Log as the
+     camera records it on the left, the final LUT on the right. Hovering
+     wipes the LUT across the whole frame. */
+  .frame .graded {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    width: calc(100% - 18px);
+    clip-path: inset(0 0 0 50%);
+    transition: clip-path 0.9s var(--ease-row);
+  }
+  .frame::after {
+    content: '';
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+    background: rgba(255,255,255,0.85);
+    transition: left 0.9s var(--ease-row), opacity 0.9s ease;
+  }
+  .row--lumixlut:is(:hover,:focus-visible) .frame .graded { clip-path: inset(0); }
+  .row--lumixlut:is(:hover,:focus-visible) .frame::after { left: 10px; opacity: 0; }
+
   /* Z8 ICC report: strictly neutral like the report itself, so the only
      colour in the row is measured colour */
   .row--z8icc {
@@ -301,7 +354,22 @@
 </header>
 
 <main>
-  <a class="row row--z8icc" href="article/nikon-z8-capture-one-vs-cobalt/" style="--i:0">
+  <a class="row row--lumixlut" href="article/lumix-s9-capture-one-lut/" style="--i:0">
+    <span class="copy">
+      <span class="eyebrow">article &middot; lumix s9 &middot; capture one in camera</span>
+      <span class="row-title">The LUT was perfect. The picture was grey.</span>
+      <span class="desc">We turned a Cobalt profile for Capture One into a LUT a Lumix S9 can shoot with. Baked in as it was, the profile gave a grey picture. It took seven rounds and four test photos, and what worked came from measuring Capture One rather than decoding it.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span>
+    <span class="scene">
+      <span class="frame">
+        <img src="article/lumix-s9-capture-one-lut/image/thumb-vlog.jpg" alt="" width="520" height="347">
+        <img class="graded" src="article/lumix-s9-capture-one-lut/image/thumb-final.jpg" alt="" width="520" height="347">
+      </span>
+    </span>
+  </a>
+
+  <a class="row row--z8icc" href="article/nikon-z8-capture-one-vs-cobalt/" style="--i:1">
     <span class="copy">
       <span class="eyebrow">article &middot; nikon z8 &middot; three camera profiles</span>
       <span class="row-title">CaptureOne vs Cobalt: same greys, new greens</span>
@@ -338,7 +406,7 @@
     </span>
   </a>
 
-  <a class="row row--practicum" href="sub/practicum/dist/" style="--i:1">
+  <a class="row row--practicum" href="sub/practicum/dist/" style="--i:2">
     <span class="copy">
       <span class="eyebrow">logbook &middot; management practice &middot; one day at a time</span>
       <span class="row-title">Practicum</span>
