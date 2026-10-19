@@ -176,6 +176,16 @@
   }
   [data-theme="light"] .theme-toggle .toggle-thumb { transform: translateX(25px); background: var(--accent-amber); }
 
+  .filter-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 24px; color-scheme: dark; }
+  [data-theme="light"] .filter-bar { color-scheme: light; }
+  .filter-bar select, .filter-bar label {
+    max-width: 100%; padding: 8px 14px; border-radius: 8px;
+    border: 1px solid var(--border-hover); background: var(--bg-card);
+    color: var(--text-primary); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+  }
+  .filter-bar label { display: inline-flex; align-items: center; gap: 8px; }
+  .filter-bar input { accent-color: var(--primary); }
+
   .hero-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 28px; }
   .stat-card {
     background: var(--bg-card); border: 1px solid var(--border);
@@ -278,6 +288,10 @@
   </div>
 
   <div id="dashboard">
+    <div class="filter-bar">
+      <select id="tripFilter" aria-label="Trip"></select>
+      <label><input type="checkbox" id="excludeShopping"> Exclude shopping</label>
+    </div>
     <div class="hero-stats" id="heroStats"></div>
 
     <div class="charts-grid">
@@ -373,8 +387,45 @@ function parseCost(s) {
 }
 
 let allCharts = [];
+let allItems = [];
 
 function buildDashboard(rows) {
+  allItems = rows.map(r => ({
+    trip: r.Trip || 'Untitled',
+    date: r.Date,
+    cost: parseCost(r.Cost),
+    people: parseInt(r.People) || 1,
+    activity: r.Activity || '',
+    type: (r['Activity Type'] || 'other').toLowerCase().trim(),
+    location: (r.Location || '').trim(),
+    tripCost: parseCost(r['Trip Cost']),
+    ts: r.Date ? new Date(r.Date).getTime() : 0,
+  })).filter(r => r.date);
+
+  if (allItems.length === 0) throw new Error('no rows with a Date column');
+
+  const tripNames = [...new Set(allItems.map(r => r.trip))];
+  document.getElementById('tripFilter').replaceChildren(
+    new Option('All trips', ''),
+    ...tripNames.map(t => new Option(t, t)),
+  );
+
+  renderDashboard();
+
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  document.getElementById('reloadBtn').classList.add('show');
+}
+
+// items drive Days, Locations and Photos; spendItems drive every A$ figure.
+// trip is '' for all trips. Photo rows never count as spend.
+function applyFilters(allItems, { trip, excludeShopping }) {
+  const items = trip ? allItems.filter(r => r.trip === trip) : allItems;
+  const spendItems = items.filter(r => r.type !== 'photo' && !(excludeShopping && r.type === 'shopping'));
+  return { items, spendItems };
+}
+
+function renderDashboard() {
   allCharts.forEach(c => c.destroy());
   allCharts = [];
 
@@ -389,19 +440,11 @@ function buildDashboard(rows) {
 
   applyChartDefaults();
 
-  const items = rows.map(r => ({
-    trip: r.Trip || 'Untitled',
-    date: r.Date,
-    cost: parseCost(r.Cost),
-    people: parseInt(r.People) || 1,
-    activity: r.Activity || '',
-    type: (r['Activity Type'] || 'other').toLowerCase().trim(),
-    location: (r.Location || '').trim(),
-    tripCost: parseCost(r['Trip Cost']),
-    ts: r.Date ? new Date(r.Date).getTime() : 0,
-  })).filter(r => r.date);
-
-  if (items.length === 0) throw new Error('no rows with a Date column');
+  const selectedTrip = document.getElementById('tripFilter').value;
+  const { items, spendItems } = applyFilters(allItems, {
+    trip: selectedTrip,
+    excludeShopping: document.getElementById('excludeShopping').checked,
+  });
 
   // Photos: parse "X pictures" / "X picures" / "X pics" from Activity field on photo-typed rows
   const photoRe = /(\d+)\s*(pictures?|picures?|pics?|photos?)/i;
@@ -411,8 +454,6 @@ function buildDashboard(rows) {
     return s + (m ? parseInt(m[1]) : 0);
   }, 0);
 
-  // Spending excludes photo entries
-  const spendItems = items.filter(r => r.type !== 'photo');
   const totalSpend = spendItems.reduce((s, r) => s + r.cost, 0);
 
   const trips = [...new Set(items.map(r => r.trip))];
@@ -427,8 +468,8 @@ function buildDashboard(rows) {
   const fmtAUD = n => 'A$' + Math.round(n).toLocaleString();
 
   const stats = [
-    { label: 'Total Spend', value: fmtAUD(totalSpend), sub: 'all trips combined', accent: 'var(--accent-purple)' },
-    { label: 'Trips', value: trips.length, sub: trips.length === 1 ? 'so far' : `${trips.length} adventures`, accent: 'var(--accent-pink)' },
+    { label: 'Total Spend', value: fmtAUD(totalSpend), sub: selectedTrip ? 'this trip' : 'all trips combined', accent: 'var(--accent-purple)' },
+    { label: 'Trips', value: trips.length, sub: selectedTrip ? 'selected' : trips.length === 1 ? 'so far' : `${trips.length} adventures`, accent: 'var(--accent-pink)' },
     { label: 'Days', value: days, sub: `avg ${fmtAUD(avgPerDay)}/day`, accent: 'var(--accent-amber)' },
     { label: 'Locations', value: locations.length, sub: locations.slice(0, 2).join(', ') + (locations.length > 2 ? '…' : ''), accent: 'var(--accent-cyan)' },
     { label: 'Photos', value: totalPhotos.toLocaleString(), sub: totalPhotos ? `${(totalPhotos/Math.max(days,1)).toFixed(0)}/day` : 'none counted', accent: 'var(--accent-emerald)' },
@@ -449,7 +490,7 @@ function buildDashboard(rows) {
   allCharts.push(new Chart(document.getElementById('chartCategory'), {
     type: 'doughnut',
     data: {
-      labels: catEntries.map(c => c[0]),
+      labels: catEntries.map(([type, spend]) => `${type} · ${fmtAUD(spend)}`),
       datasets: [{
         data: catEntries.map(c => c[1]),
         backgroundColor: catEntries.map((_, i) => chartColors[i % chartColors.length]),
@@ -466,7 +507,7 @@ function buildDashboard(rows) {
             label: ctx => {
               const v = ctx.parsed;
               const pct = (v / totalSpend * 100).toFixed(1);
-              return `${ctx.label}: ${fmtAUD(v)} (${pct}%)`;
+              return `${ctx.label} (${pct}%)`;
             },
           },
         },
@@ -534,7 +575,7 @@ function buildDashboard(rows) {
   const tripCardsHtml = trips.map(t => {
     const tripItems = items.filter(r => r.trip === t);
     const tripDates = [...new Set(tripItems.map(r => r.date))].sort();
-    const tripSpend = tripItems.filter(r => r.type !== 'photo').reduce((s, r) => s + r.cost, 0);
+    const tripSpend = spendItems.filter(r => r.trip === t).reduce((s, r) => s + r.cost, 0);
     const tripPhotos = tripItems.filter(r => r.type === 'photo' || photoRe.test(r.activity))
       .reduce((s, r) => { const m = r.activity.match(photoRe); return s + (m ? parseInt(m[1]) : 0); }, 0);
     const tripLocs = [...new Set(tripItems.map(r => r.location).filter(Boolean))];
@@ -551,10 +592,6 @@ function buildDashboard(rows) {
       </div>`;
   }).join('');
   document.getElementById('tripCards').innerHTML = tripCardsHtml;
-
-  document.getElementById('uploadZone').style.display = 'none';
-  document.getElementById('dashboard').classList.add('show');
-  document.getElementById('reloadBtn').classList.add('show');
 }
 
 function loadCSVText(text) {
@@ -655,6 +692,9 @@ document.getElementById('reloadBtn').addEventListener('click', () => {
   fileInput.value = '';
   pasteInput.value = '';
 });
+
+document.getElementById('tripFilter').addEventListener('change', renderDashboard);
+document.getElementById('excludeShopping').addEventListener('change', renderDashboard);
 
 function updateChartsForTheme() {
   applyChartDefaults();
