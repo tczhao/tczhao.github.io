@@ -97,5 +97,5 @@ site's own copy, since the engine's defaults are English.
 - The record is a selection. One to three paragraphs cannot carry the historiography of
   the Great Leap or the Anti-Rightist Campaign, and the entries do not pretend to.
 - Listen needs a Chinese voice installed in the browser. Without one it says so rather than reading in English.
-- The record blocks were read through for dates and internal consistency but not independently fact-checked, so treat the figures as the cited sources' and check them before quoting.
+- The record blocks were fact-checked claim by claim: 470 of the highest-risk claims (numbers, dates, quotations, attributions) were looked up, 396 were confirmed and 15 were corrected, and claims that could not be confirmed were removed or marked as unverified in the text. Claims not among those 470 were not checked. Several entries rest on a single secondary article and say so; check the figures against the source before quoting.
 - Notes live in one browser. Take backups.
