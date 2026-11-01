@@ -135,6 +135,15 @@ function validateConfig(cfg) {
     errs.push(`site.js: unknown review model "${cfg.review}"`);
   }
   if (cfg.gate && !cfg.gate.label) errs.push('site.js: a gate needs a label');
+  /* The tag is written into the page and handed to toLocaleDateString on every
+     render, where a malformed one throws and ships a page with nothing on it.
+     zh_CN is the usual slip: it is how a POSIX locale is spelled, and it is
+     not a BCP 47 tag. */
+  if (cfg.lang !== undefined) {
+    let ok = typeof cfg.lang === 'string';
+    try { if (ok) Intl.getCanonicalLocales(cfg.lang); } catch (e) { ok = false; }
+    if (!ok) errs.push(`site.js: lang "${cfg.lang}" is not a BCP 47 language tag, such as zh-CN`);
+  }
   /* A verdict-filtered cheatsheet reads a field that only the evidence gate
      puts there, so without the gate it builds clean and renders an empty page.
      An opt-in cheatsheet reads no such field and is legal anywhere. */
@@ -303,8 +312,34 @@ function validate(cfg, entries) {
 /* A literal </script> inside inlined JS would close the tag early. */
 const guard = js => js.replace(/<\/script/gi, '<\\/script');
 
+const escapeHTML = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+/* The four strings in the page shell that app.js never touches, so a site in
+ * another language has them replaced here or ships them in English. Each is
+ * matched together with its markup, so the swap lands on that one string.
+ *
+ * A declared language opens the page as the html tag itself, which the parser
+ * makes the root element - where :lang() in the stylesheet and a screen reader
+ * both look for it. A site that declares neither passes through untouched. */
+const SHELL_COPY = [
+  ['skipLink', 'Skip to today\'s entry', s => `<a class="skip" href="#field">${s}</a>`],
+  ['stampLabel', 'Entry', s => `<span class="stamp__label">${s}</span>`],
+  ['navLabel', 'Sections', s => `<nav class="nav" id="nav" aria-label="${s}">`],
+  ['themeToggleLabel', 'Switch colour theme', s => `<button class="ghost" id="theme-toggle" aria-label="${s}">`]
+];
+
+function localiseShell(shell, cfg) {
+  const copy = cfg.copy || {};
+  let html = shell;
+  for (const [key, english, markup] of SHELL_COPY) {
+    if (copy[key]) html = html.replace(markup(english), () => markup(escapeHTML(copy[key])));
+  }
+  return cfg.lang ? `<html lang="${escapeHTML(cfg.lang)}">\n` + html : html;
+}
+
 function assemble(cfg, mode) {
-  const shell = fs.readFileSync(path.join(ENGINE, 'index.html'), 'utf8');
+  const shell = localiseShell(fs.readFileSync(path.join(ENGINE, 'index.html'), 'utf8'), cfg);
   const files = contentFiles();
   const theme = themeCSS(cfg);
 
@@ -386,4 +421,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { build, validate, validateConfig, checkSource, loadSite, loadEntries, ROOT, ENGINE, CONTENT };
+module.exports = { build, validate, validateConfig, checkSource, localiseShell, loadSite, loadEntries, ROOT, ENGINE, CONTENT };

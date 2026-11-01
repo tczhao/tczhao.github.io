@@ -66,30 +66,32 @@
     h += '<p class="block__label">' + esc(COPY.labelEvidence || 'The evidence') + '</p>';
     h += '<p class="evidence__cite" data-speak="evidence">' + esc(l.evidence) + '</p>';
     if (l.interval && typeof l.interval.lo === 'number' && typeof l.interval.hi === 'number') {
-      h += '<p class="evidence__interval">' + esc(l.interval.measure || 'interval') + ' ' +
-        l.interval.lo + ' to ' + l.interval.hi + '</p>';
+      h += '<p class="evidence__interval">' +
+        esc(say('intervalRange', l.interval.measure, l.interval.lo, l.interval.hi)) + '</p>';
     }
     h += '<p class="evidence__meta">';
     h += '<span class="rep-chip">' + esc(REP_LABEL[l.replication] || l.replication) + '</span>';
     if (l.replication === 'statute' && l.asAt) {
-      h += '<span class="evidence__asat">as at ' + esc(shortDate(l.asAt)) + '</span>';
+      h += '<span class="evidence__asat">' + esc(say('evidenceAsAt', shortDate(l.asAt))) + '</span>';
     }
     if (stale(l)) {
-      h += '<span class="evidence__stale">' +
-        esc(COPY.staleNote || 'not re-checked since ' + shortDate(l.verifiedOn)) + '</span>';
+      /* A string staleNote is the undated form of this line, and is shown
+         exactly as written. */
+      h += '<span class="evidence__stale">' + esc(typeof COPY.staleNote === 'string' && COPY.staleNote ||
+        say('staleNote', shortDate(l.verifiedOn))) + '</span>';
     }
     h += '</p></div>';
     return h;
   }
 
   var REP_LABEL = {
-    replicated:  'Replicated',
-    single:      'One study, never repeated',
-    contested:   'Contested',
-    failed:      'Failed to replicate',
-    overclaimed: 'Real, but overclaimed',
-    craft:       'Craft, no trial behind it',
-    statute:     'Statute'
+    replicated:  COPY.repReplicated || 'Replicated',
+    single:      COPY.repSingle || 'One study, never repeated',
+    contested:   COPY.repContested || 'Contested',
+    failed:      COPY.repFailed || 'Failed to replicate',
+    overclaimed: COPY.repOverclaimed || 'Real, but overclaimed',
+    craft:       COPY.repCraft || 'Craft, no trial behind it',
+    statute:     COPY.repStatute || 'Statute'
   };
 
   /* ------------------------------------------------------------------------
@@ -143,11 +145,14 @@
   function daysBetween(a, b) {
     return Math.round((parseKey(b) - parseKey(a)) / 86400000);
   }
+  /* A page that declares its language has its dates written in it. One that
+     does not leaves the choice to the reader's browser. */
+  var LOCALE = SITE.lang || undefined;
   function longDate(k) {
-    return parseKey(k).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    return parseKey(k).toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   }
   function shortDate(k) {
-    return parseKey(k).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    return parseKey(k).toLocaleDateString(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   /* --- Expiry -------------------------------------------------------------
@@ -241,7 +246,7 @@
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
-    catch (e) { toast('Could not save — browser storage is full or blocked'); }
+    catch (e) { toast(COPY.toastSaveFailed || 'Could not save — browser storage is full or blocked'); }
   }
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -465,6 +470,84 @@
     return true;
   }
 
+  /* --- Copy that carries a value ------------------------------------------
+     A string with a count, a date or a name inside it is a function in
+     SITE.copy rather than a string, because where the value sits and what a
+     plural looks like belong to the site's language, not to the engine. Each
+     function here is the engine's own English, used whenever a site supplies
+     no function of its own.
+
+     Two return markup rather than text: computeResult and cheatCount are
+     handed their numbers already escaped and set in bold, and what they return
+     goes into the page as it is. Everything else is escaped where it is used. */
+  var ENGLISH = {
+    // The evidence block, shared with the cheatsheet
+    intervalRange: function (measure, lo, hi) { return (measure || 'interval') + ' ' + lo + ' to ' + hi; },
+    evidenceAsAt: function (date) { return 'as at ' + date; },
+    staleNote: function (date) { return 'not re-checked since ' + date; },
+
+    // Today
+    dueCount: function (n) { return n + ' due'; },
+    dueCards: function (n) { return n + (n === 1 ? ' card is' : ' cards are') + ' due from earlier entries.'; },
+
+    // The entry
+    readTime: function (minutes) { return minutes + ' min'; },
+    lapsedOn: function (date) { return 'lapsed ' + date; },
+    gateCommittedOn: function (date) { return 'Committed ' + date; },
+    computeResult: function (yours, computed) { return 'You wrote ' + yours + '. It computes to ' + computed + '.'; },
+    computeUnder: function (gap) { return gap + ' under.'; },
+    computeOver: function (gap) { return gap + ' over.'; },
+    fcRecorded: function (pct, date) { return 'Recorded at ' + pct + '%, resolves ' + date + '.'; },
+    loggedFor: function (date) { return 'Logged for ' + date; },
+    nextUp: function (date) { return 'In the review deck. Next up ' + date + '.'; },
+
+    // The deep-dive prompt
+    promptEntry: function (title) { return 'ENTRY: ' + title; },
+    promptIdea: function (idea) { return 'IDEA: ' + idea; },
+    promptMechanism: function (why) { return 'MECHANISM: ' + why; },
+    promptFailure: function (failureMode) { return 'FAILURE MODE: ' + failureMode; },
+    promptCommitted: function (date, answer) { return 'WHAT I COMMITTED TO BEFORE READING IT (' + date + '): ' + answer; },
+    promptSituation: function (text) { return 'MY SITUATION: ' + text; },
+
+    // Review, and the meta line on journal and attempt notes
+    reviewNextOn: function (date) { return 'Nothing due. The next card comes back on ' + date + '.'; },
+    deckCleared: function (n) { return 'Deck cleared — ' + n + (n === 1 ? ' card' : ' cards') + ' done. That is the part that compounds.'; },
+    entryMeta: function (number) { return 'Entry ' + number; },
+    cardBox: function (box) { return 'box ' + box; },
+
+    // The library
+    libraryNote: function (n) { return 'All ' + n + ' entries, in the order they will arrive. Read ahead freely — logging stays a daily act.'; },
+    pipReview: function (box) { return 'in review, box ' + box; },
+
+    // The cheatsheet
+    cheatCount: function (shown, total) { return shown + ' of ' + total + ' entries.'; },
+    cheatOther: function (n, reason) { return 'The other ' + n + ' ' + reason; },
+
+    // Forecasts
+    fcBrierOver: function (n) { return 'over ' + n + ' resolved'; },
+    fcReady: function (n) { return n + ' ready to resolve'; },
+    fcHappenedPct: function (pct) { return pct + '% happened'; },
+    calibrationDot: function (lo, hi, hits, n) { return lo + '-' + hi + '%: ' + hits + ' of ' + n + ' happened'; },
+    fcSaidOn: function (pct, date) { return 'You said ' + pct + '% on ' + date; },
+    fcResolvesOn: function (date) { return 'resolves ' + date; },
+    fcSaidOutcome: function (pct, outcome) { return 'Said ' + pct + '%, ' + (outcome ? 'it happened' : 'it did not'); },
+    fcSquaredError: function (error) { return 'squared error ' + error; },
+
+    // Progress, and restoring a backup
+    statStreakUnit: function (n) { return (n === 1 ? 'day' : 'days') + ' running'; },
+    statLoggedUnit: function (total) { return 'of ' + total; },
+    statRecalled: function (pct) { return pct + '% recalled'; },
+    statAttemptsUnit: function (n) { return 'across ' + n + ' entries'; },
+    statDaysUnit: function (date) { return 'since ' + date; },
+    statSums: function (n) { return 'across ' + n + (n === 1 ? ' sum' : ' sums'); },
+    toastImportBad: function (name) { return 'That is not a ' + name + ' backup — check you pasted the whole file'; }
+  };
+
+  function say(key) {
+    var f = typeof COPY[key] === 'function' ? COPY[key] : ENGLISH[key];
+    return f.apply(null, Array.prototype.slice.call(arguments, 1));
+  }
+
   /* --- Small helpers ----------------------------------------------------- */
   function esc(s) {
     return String(s == null ? '' : s)
@@ -478,9 +561,34 @@
     var t = TRACKS.filter(function (x) { return x.id === id; })[0];
     return t ? t.name : id;
   }
+  /* Chinese and Japanese characters, full-width punctuation included. Both are
+     written without spaces between words. Korean is not here: it spaces its
+     words the way English does. */
+  var CJK = /[\u2E80-\u9FFF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]/;
+
+  /* Words where spaces separate them, at 200 a minute, and Chinese or Japanese
+     characters, which have no spaces to count, at 300 a minute; a mixed entry
+     is the sum of both. Cutting the text at each such character leaves the
+     rest to be counted as words, and the number of cuts is the number of
+     characters. */
   function readMinutes(l) {
-    var words = [l.idea, l.why, l.failureMode, l.experiment, l.reflection].join(' ').split(/\s+/).length;
-    return Math.max(3, Math.round(words / 200) + 2);
+    var text = [l.idea, l.why, l.failureMode, l.experiment, l.reflection].join(' ');
+    var rest = text.split(CJK);
+    var words = rest.join(' ').split(/\s+/).length;
+    return Math.max(3, Math.round(words / 200 + (rest.length - 1) / 300) + 2);
+  }
+
+  /* The space the engine sets between two pieces of copy, or none. Chinese and
+     Japanese set no space between characters, so where both sides of a join
+     are theirs, punctuation such as 。《》“” included, a space here would be a
+     gap the text never had. Markup is looked through, because some copy opens
+     or closes with a tag. A join with English on either side keeps its space. */
+  function spaceBetween(left, right) {
+    var ends = [
+      String(left).replace(/<[^>]*>/g, '').slice(-1),
+      String(right).replace(/<[^>]*>/g, '').charAt(0)
+    ];
+    return ends.every(function (c) { return CJK.test(c) || c === '“' || c === '”'; }) ? '' : ' ';
   }
   function el(id) { return document.getElementById(id); }
 
@@ -504,16 +612,17 @@
     var lines = [
       PROMPT.intro || 'I am working through a daily entry and want to apply it to my actual situation.',
       '',
-      'ENTRY: ' + l.title,
-      'IDEA: ' + l.idea,
-      'MECHANISM: ' + l.why,
-      'FAILURE MODE: ' + l.failureMode
+      say('promptEntry', l.title),
+      say('promptIdea', l.idea),
+      say('promptMechanism', l.why),
+      say('promptFailure', l.failureMode)
     ];
     if (GATE && r.gate && r.gate.answer) {
-      lines.push('', 'WHAT I COMMITTED TO BEFORE READING IT (' + shortDate(r.gate.on) + '): ' + r.gate.answer);
+      lines.push('', say('promptCommitted', shortDate(r.gate.on), r.gate.answer));
     }
     lines.push('', l.deepDive, '',
-      'MY SITUATION: ' + (note || '(I have not written this up yet — ask me for it first, one question at a time.)'),
+      say('promptSituation', note || COPY.promptNoNote ||
+        '(I have not written this up yet — ask me for it first, one question at a time.)'),
       '',
       PROMPT.closing || 'Push back on my reasoning rather than agreeing with me. Name the thing I am avoiding. Be concrete and brief.');
     return lines.join('\n');
@@ -531,7 +640,7 @@
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(ta);
-      toast(ok ? okMsg : 'Copy blocked here — select the text below instead');
+      toast(ok ? okMsg : COPY.toastCopyBlocked || 'Copy blocked here — select the text below instead');
       return ok;
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -601,7 +710,8 @@
     var x = function (v) { return PAD + v * (W - PAD - 8); };
     var y = function (v) { return H - PAD - v * (H - PAD - 12); };
 
-    var s = '<svg class="cal" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Calibration: predicted probability against observed frequency">';
+    var s = '<svg class="cal" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
+      esc(COPY.calibrationLabel || 'Calibration: predicted probability against observed frequency') + '">';
     s += '<line class="cal__ref" x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(1) + '" y2="' + y(1) + '"/>';
     s += '<line class="cal__axis" x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(1) + '" y2="' + y(0) + '"/>';
     s += '<line class="cal__axis" x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(0) + '" y2="' + y(1) + '"/>';
@@ -612,12 +722,15 @@
       var obs = bk.hits / bk.n;
       var r = Math.min(9, 3 + Math.sqrt(bk.n) * 1.6);
       s += '<circle class="cal__dot" cx="' + x(mid).toFixed(1) + '" cy="' + y(obs).toFixed(1) +
-        '" r="' + r.toFixed(1) + '"><title>' + Math.round(bk.lo * 100) + '-' + Math.round(bk.hi * 100) +
-        '%: ' + bk.hits + ' of ' + bk.n + ' happened</title></circle>';
+        '" r="' + r.toFixed(1) + '"><title>' +
+        esc(say('calibrationDot', Math.round(bk.lo * 100), Math.round(bk.hi * 100), bk.hits, bk.n)) +
+        '</title></circle>';
     });
 
-    s += '<text class="cal__t" x="' + x(0.5) + '" y="' + (H - 8) + '" text-anchor="middle">you said</text>';
-    s += '<text class="cal__t" x="10" y="' + y(0.5) + '" text-anchor="middle" transform="rotate(-90 10 ' + y(0.5) + ')">it happened</text>';
+    s += '<text class="cal__t" x="' + x(0.5) + '" y="' + (H - 8) + '" text-anchor="middle">' +
+      esc(COPY.calibrationX || 'you said') + '</text>';
+    s += '<text class="cal__t" x="10" y="' + y(0.5) + '" text-anchor="middle" transform="rotate(-90 10 ' + y(0.5) + ')">' +
+      esc(COPY.calibrationY || 'it happened') + '</text>';
     s += '</svg>';
     return s;
   }
@@ -695,7 +808,7 @@
     }
 
     var bT = el('badge-today');
-    if (!completedToday()) { bT.textContent = 'new'; bT.hidden = false; } else { bT.hidden = true; }
+    if (!completedToday()) { bT.textContent = COPY.badgeNew || 'new'; bT.hidden = false; } else { bT.hidden = true; }
 
     if (HAS_FORECAST) {
       var ripe = forecastList().filter(function (f) {
@@ -735,11 +848,13 @@
     h += '<p class="compute__q">' + esc(l.compute.question) + '</p>';
 
     if (r.compute) {
-      h += '<p class="compute__result">You wrote <b>' + esc(num(r.compute.yours)) + esc(unit) +
-        '</b>. It computes to <b>' + esc(num(r.compute.computed)) + esc(unit) + '</b>.</p>';
+      h += '<p class="compute__result">' + say('computeResult',
+        '<b>' + esc(num(r.compute.yours) + unit) + '</b>',
+        '<b>' + esc(num(r.compute.computed) + unit) + '</b>') + '</p>';
+      var amount = num(Math.abs(r.compute.gap)) + unit;
       h += '<p class="compute__gap" data-dir="' + (r.compute.gap < 0 ? 'under' : r.compute.gap > 0 ? 'over' : 'exact') + '">' +
-        (r.compute.gap === 0 ? 'Exact.'
-          : esc(num(Math.abs(r.compute.gap)) + unit) + (r.compute.gap < 0 ? ' under.' : ' over.')) +
+        esc(r.compute.gap === 0 ? COPY.computeExact || 'Exact.'
+          : r.compute.gap < 0 ? say('computeUnder', amount) : say('computeOver', amount)) +
         '</p>';
       return h + '</div>';
     }
@@ -751,11 +866,12 @@
       missing.forEach(function (id) {
         var f = profileField(id);
         h += '<label class="compute__lab" for="prof-' + esc(id) + '">' + esc(f.label) +
-          (f.unit ? ' <span class="compute__unit">' + esc(f.unit) + '</span>' : '') + '</label>';
+          (f.unit ? spaceBetween(f.label, f.unit) + '<span class="compute__unit">' + esc(f.unit) + '</span>' : '') + '</label>';
         h += '<input class="compute__input" id="prof-' + esc(id) + '" type="number" inputmode="decimal">';
       });
       h += '</div>';
-      h += '<button class="btn" data-act="profile-save" data-id="' + esc(l.id) + '">Save and continue</button>';
+      h += '<button class="btn" data-act="profile-save" data-id="' + esc(l.id) + '">' +
+        esc(COPY.profileSave || 'Save and continue') + '</button>';
     } else {
       h += '<div class="compute__row">';
       h += '<input class="compute__input" id="compute-field" type="number" inputmode="decimal" ' +
@@ -781,13 +897,14 @@
     h += '<p class="gate__prompt">' + esc(l.gatePrompt || GATE.prompt) + '</p>';
 
     if (answered) {
-      h += '<div class="gate__locked"><p class="gate__stamp">Committed ' + esc(shortDate(r.gate.on)) + '</p>';
+      h += '<div class="gate__locked"><p class="gate__stamp">' + esc(say('gateCommittedOn', shortDate(r.gate.on))) + '</p>';
       h += '<div class="gate__answer">' + paras(r.gate.answer) + '</div></div>';
     } else {
       if (l.fallback) {
         h += '<details class="gate__fallback"><summary>' + esc(GATE.fallbackLabel || 'Nothing of your own to hand') +
           '</summary><div class="gate__fallbacktext">' + paras(l.fallback) + '</div>' +
-          '<button class="btn btn--quiet" data-act="gate-fallback" data-id="' + esc(l.id) + '">Use this one</button></details>';
+          '<button class="btn btn--quiet" data-act="gate-fallback" data-id="' + esc(l.id) + '">' +
+          esc(COPY.gateUseFallback || 'Use this one') + '</button></details>';
       }
       h += '<textarea class="reflect__field gate__field" id="gate-field" data-id="' + esc(l.id) + '" placeholder="' +
         esc(GATE.placeholder || '') + '"></textarea>';
@@ -810,13 +927,13 @@
     function side(dir, l, end) {
       if (!l) return '<span class="pager__end">' + esc(end) + '</span>';
       return '<button class="pager__btn pager__btn--' + dir + '" data-act="lib-open" data-id="' + esc(l.id) + '">' +
-        '<span class="pager__dir">' + (dir === 'prev' ? 'Previous' : 'Next') + '</span>' +
+        '<span class="pager__dir">' + esc(dir === 'prev' ? COPY.pagerPrev || 'Previous' : COPY.pagerNext || 'Next') + '</span>' +
         '<span class="pager__title">' + esc(l.title) + '</span></button>';
     }
 
-    return '<nav class="pager" aria-label="Nearby entries">' +
-      side('prev', nb.prev, 'First entry') +
-      side('next', nb.next, 'Last entry') +
+    return '<nav class="pager" aria-label="' + esc(COPY.pagerLabel || 'Nearby entries') + '">' +
+      side('prev', nb.prev, COPY.pagerFirst || 'First entry') +
+      side('next', nb.next, COPY.pagerLast || 'Last entry') +
       '</nav>';
   }
 
@@ -971,12 +1088,14 @@
     h += '<div class="tags">';
     h += '<span class="tag">' + esc(trackName(l.track)) + '</span>';
     if (LEVELS[l.level]) h += '<span class="tag tag--level">' + esc(LEVELS[l.level]) + '</span>';
-    h += '<span class="tag tag--time">' + readMinutes(l) + ' min</span>';
-    if (lapsed(l)) h += '<span class="tag tag--lapsed">lapsed ' + esc(shortDate(l.expires)) + '</span>';
+    h += '<span class="tag tag--time">' + esc(say('readTime', readMinutes(l))) + '</span>';
+    if (lapsed(l)) h += '<span class="tag tag--lapsed">' + esc(say('lapsedOn', shortDate(l.expires))) + '</span>';
     h += '</div>';
     h += '<h2 class="entry__title" data-speak="title">' + esc(l.title) + '</h2>';
     h += '<div class="entry__rule"></div>';
-    h += '<p class="entry__source" data-speak="source">' + esc(COPY.sourcePrefix || 'After') + ' <em>' + esc(l.source) + '</em></p>';
+    var prefix = COPY.sourcePrefix || 'After';
+    h += '<p class="entry__source" data-speak="source">' + esc(prefix) + spaceBetween(prefix, l.source) +
+      '<em>' + esc(l.source) + '</em></p>';
     /* Offered only past the gate. Below it the entry is the gate, and a button
        promising to read the entry aloud would be reading out a form. */
     if (SPEECH.available && !locked) h += readerHTML(l, !opts.canComplete);
@@ -1000,7 +1119,8 @@
     }
 
     if (lapsed(l)) {
-      h += '<div class="block block--failure"><p class="block__label">Past its date</p><div class="block__body"><p>' +
+      h += '<div class="block block--failure"><p class="block__label">' + esc(COPY.labelLapsed || 'Past its date') +
+        '</p><div class="block__body"><p>' +
         esc(COPY.lapsedNote || 'This entry carried an expiry and it has passed. Treat it as history rather than as current fact. It has left the sequence and the review deck.') +
         '</p></div></div>';
     }
@@ -1035,12 +1155,16 @@
       h += '<div class="fc-seed"><p class="block__label">' + esc(COPY.labelForecast || 'Put a number on it') + '</p>';
       h += '<p class="fc-seed__q">' + esc(l.forecast.q) + '</p>';
       if (already) {
-        h += '<p class="reflect__state">Recorded at ' + Math.round(already.p * 100) + '%, resolves ' + esc(shortDate(already.resolvesOn)) + '.</p>';
+        h += '<p class="reflect__state">' +
+          esc(say('fcRecorded', Math.round(already.p * 100), shortDate(already.resolvesOn))) + '</p>';
       } else {
         h += '<div class="fc-seed__row">';
-        h += '<label class="fc-seed__lab">Probability <input class="fc-seed__p" id="seed-p" type="number" min="1" max="99" step="1" value="50">%</label>';
-        h += '<label class="fc-seed__lab">Resolves <input class="fc-seed__d" id="seed-d" type="date" value="' + esc(l.forecast.resolvesOn || shift(today(), 30)) + '"></label>';
-        h += '<button class="btn btn--quiet" data-act="seed-forecast" data-id="' + esc(l.id) + '">Record it</button>';
+        h += '<label class="fc-seed__lab">' + esc(COPY.fcProbability || 'Probability') +
+          ' <input class="fc-seed__p" id="seed-p" type="number" min="1" max="99" step="1" value="50">%</label>';
+        h += '<label class="fc-seed__lab">' + esc(COPY.fcResolves || 'Resolves') +
+          ' <input class="fc-seed__d" id="seed-d" type="date" value="' + esc(l.forecast.resolvesOn || shift(today(), 30)) + '"></label>';
+        h += '<button class="btn btn--quiet" data-act="seed-forecast" data-id="' + esc(l.id) + '">' +
+          esc(COPY.recordCta || 'Record it') + '</button>';
         h += '</div>';
       }
       h += '</div>';
@@ -1059,8 +1183,10 @@
     h += '<p class="deepdive__note">' + esc(COPY.deepDiveNote ||
       'Copy this into Claude to work the idea against your real situation. Whatever you logged above travels with it.') + '</p>';
     h += '<div class="actions" style="border-top:0;padding-top:0">';
-    h += '<button class="btn btn--quiet" data-act="copy-prompt" data-id="' + esc(l.id) + '">Copy the prompt</button>';
-    h += '<button class="btn btn--quiet" data-act="show-prompt" data-id="' + esc(l.id) + '">Show it</button>';
+    h += '<button class="btn btn--quiet" data-act="copy-prompt" data-id="' + esc(l.id) + '">' +
+      esc(COPY.promptCopyCta || 'Copy the prompt') + '</button>';
+    h += '<button class="btn btn--quiet" data-act="show-prompt" data-id="' + esc(l.id) + '">' +
+      esc(COPY.promptShowCta || 'Show it') + '</button>';
     h += '</div>';
     h += '<pre class="deepdive__text" id="prompt-text" hidden></pre>';
     h += '</div>';
@@ -1074,14 +1200,15 @@
     h += '<div class="actions">';
     if (opts.canComplete) {
       h += done
-        ? '<button class="btn btn--done" disabled>Logged for ' + esc(shortDate(today())) + '</button>'
+        ? '<button class="btn btn--done" disabled>' + esc(say('loggedFor', shortDate(today()))) + '</button>'
         : '<button class="btn" data-act="complete" data-id="' + esc(l.id) + '">' + esc(COPY.completeCta || 'Log this entry') + '</button>';
       if (done && HAS_REVIEW && state.log[l.id].due) {
-        h += '<span class="reflect__state">In the review deck. Next up ' + esc(shortDate(state.log[l.id].due)) + '.</span>';
+        h += '<span class="reflect__state">' + esc(say('nextUp', shortDate(state.log[l.id].due))) + '</span>';
       }
     } else {
-      h += '<button class="btn btn--quiet" data-act="lib-close">Back to the library</button>';
-      h += '<span class="reflect__state">Reading ahead. Entries are logged on their own day.</span>';
+      h += '<button class="btn btn--quiet" data-act="lib-close">' + esc(COPY.libraryBack || 'Back to the library') + '</button>';
+      h += '<span class="reflect__state">' +
+        esc(COPY.readingAhead || 'Reading ahead. Entries are logged on their own day.') + '</span>';
     }
     h += '</div>';
 
@@ -1095,16 +1222,20 @@
 
     if (!STORAGE_OK) {
       h += '<div class="card" style="border-top-color:var(--action)">';
-      h += '<div class="card__meta"><span>Nothing is being saved</span></div>';
-      h += '<p class="card__q">This browser is blocking local storage.</p>';
-      h += '<p>You can read today\'s entry, but streaks, notes and the schedule ' +
+      h += '<div class="card__meta"><span>' + esc(COPY.storageBlockedMeta || 'Nothing is being saved') + '</span></div>';
+      h += '<p class="card__q">' + esc(COPY.storageBlocked || 'This browser is blocking local storage.') + '</p>';
+      /* esc() wraps the site's copy and not the default: the default is markup
+         already, and escaping it would turn its apostrophe into an entity in
+         the page every English site ships. */
+      h += '<p>' + (esc(COPY.storageBlockedNote) || 'You can read today\'s entry, but streaks, notes and the schedule ' +
         'will not survive a reload. Private browsing is the usual cause. Open the page in a ' +
-        'normal window, or download the file and open it directly.</p>';
+        'normal window, or download the file and open it directly.') + '</p>';
       h += '</div>';
     }
 
     if (!l) {
-      h += '<p class="empty">No live entries. Everything in the corpus has passed its expiry date.</p>';
+      h += '<p class="empty">' +
+        esc(COPY.todayEmpty || 'No live entries. Everything in the corpus has passed its expiry date.') + '</p>';
       el('view-today').innerHTML = h;
       return;
     }
@@ -1112,11 +1243,12 @@
     var due = dueList();
     if (due.length && !completedToday()) {
       h += '<div class="card" style="border-top-color:var(--action)">';
-      h += '<div class="card__meta"><span>Before you read on</span><span>' + due.length + ' due</span></div>';
-      h += '<p class="card__q">' + due.length + (due.length === 1 ? ' card is' : ' cards are') + ' due from earlier entries.</p>';
+      h += '<div class="card__meta"><span>' + esc(COPY.dueMeta || 'Before you read on') + '</span><span>' +
+        esc(say('dueCount', due.length)) + '</span></div>';
+      h += '<p class="card__q">' + esc(say('dueCards', due.length)) + '</p>';
       h += '<p>' + esc(COPY.recallFirst || 'Recall first, then read. Pulling something back out of your head is what moves it.') + '</p>';
       h += '<div class="actions" style="border-top:0;padding-top:0">';
-      h += '<button class="btn" data-act="go" data-view="review">Run the review</button>';
+      h += '<button class="btn" data-act="go" data-view="review">' + esc(COPY.dueCta || 'Run the review') + '</button>';
       h += '</div></div>';
     }
 
@@ -1138,17 +1270,17 @@
         var d = state.log[id].due;
         if (state.log[id].box > 0 && d && (!next || d < next)) next = d;
       });
-      h += '<p class="empty">Nothing due. ' +
-        (next ? 'The next card comes back on ' + esc(shortDate(next)) + '.' : 'Log an entry and cards start arriving tomorrow.') +
-        '</p>';
+      h += '<p class="empty">' + esc(next ? say('reviewNextOn', shortDate(next))
+        : COPY.reviewNoneYet || 'Nothing due. Log an entry and cards start arriving tomorrow.') + '</p>';
       host.innerHTML = h;
       return;
     }
 
     if (reviewIdx >= reviewQueue.length) {
-      h += '<p class="empty">Deck cleared — ' + reviewQueue.length +
-        (reviewQueue.length === 1 ? ' card' : ' cards') + ' done. That is the part that compounds.</p>';
-      h += '<div class="actions"><button class="btn" data-act="go" data-view="today">Read today\'s entry</button></div>';
+      h += '<p class="empty">' + esc(say('deckCleared', reviewQueue.length)) + '</p>';
+      // The default keeps its apostrophe as written, as on the storage card.
+      h += '<div class="actions"><button class="btn" data-act="go" data-view="today">' +
+        (esc(COPY.readToday) || 'Read today\'s entry') + '</button></div>';
       host.innerHTML = h;
       return;
     }
@@ -1159,21 +1291,24 @@
 
     h += '<div class="card">';
     h += '<div class="card__meta">';
-    h += '<span>Entry ' + entryNumber(id) + ' &middot; ' + esc(trackName(l.track)) + '</span>';
-    h += '<span>' + (reviewIdx + 1) + ' / ' + reviewQueue.length + ' &middot; box ' + r.box + '</span>';
+    h += '<span>' + esc(say('entryMeta', entryNumber(id))) + ' &middot; ' + esc(trackName(l.track)) + '</span>';
+    h += '<span>' + (reviewIdx + 1) + ' / ' + reviewQueue.length + ' &middot; ' + esc(say('cardBox', r.box)) + '</span>';
     h += '</div>';
     h += '<p class="card__q">' + esc(l.recall.q) + '</p>';
 
     if (!revealed) {
       h += '<div class="actions" style="border-top:0;padding-top:0">';
-      h += '<button class="btn" data-act="reveal">Turn the card</button>';
+      h += '<button class="btn" data-act="reveal">' + esc(COPY.revealCta || 'Turn the card') + '</button>';
       h += '</div>';
     } else {
       h += '<div class="card__a">' + paras(l.recall.a) + '</div>';
       h += '<div class="grades">';
-      h += '<button class="grade grade--miss" data-act="grade" data-grade="miss" data-id="' + esc(id) + '">Missed it<span class="grade__hint">back to box 1</span></button>';
-      h += '<button class="grade grade--close" data-act="grade" data-grade="close" data-id="' + esc(id) + '">Nearly<span class="grade__hint">hold this box</span></button>';
-      h += '<button class="grade grade--got" data-act="grade" data-grade="got" data-id="' + esc(id) + '">Had it<span class="grade__hint">move up</span></button>';
+      h += '<button class="grade grade--miss" data-act="grade" data-grade="miss" data-id="' + esc(id) + '">' +
+        esc(COPY.gradeMiss || 'Missed it') + '<span class="grade__hint">' + esc(COPY.gradeMissHint || 'back to box 1') + '</span></button>';
+      h += '<button class="grade grade--close" data-act="grade" data-grade="close" data-id="' + esc(id) + '">' +
+        esc(COPY.gradeClose || 'Nearly') + '<span class="grade__hint">' + esc(COPY.gradeCloseHint || 'hold this box') + '</span></button>';
+      h += '<button class="grade grade--got" data-act="grade" data-grade="got" data-id="' + esc(id) + '">' +
+        esc(COPY.gradeGot || 'Had it') + '<span class="grade__hint">' + esc(COPY.gradeGotHint || 'move up') + '</span></button>';
       h += '</div>';
       h += '<p class="reflect__state">' + esc(l.title) + '</p>';
     }
@@ -1199,7 +1334,7 @@
       });
 
     if (!done.length) {
-      h += '<p class="empty">Nothing logged yet.</p>';
+      h += '<p class="empty">' + esc(COPY.attemptsEmpty || 'Nothing logged yet.') + '</p>';
       host.innerHTML = h;
       return;
     }
@@ -1207,7 +1342,7 @@
     done.forEach(function (id) {
       var l = BY_ID[id], r = state.log[id];
       h += '<div class="attempt">';
-      h += '<div class="note__meta"><span>Entry ' + entryNumber(id) + '</span><span>' +
+      h += '<div class="note__meta"><span>' + esc(say('entryMeta', entryNumber(id))) + '</span><span>' +
         esc(shortDate(r.completedOn)) + '</span><span>' + esc(trackName(l.track)) + '</span></div>';
       h += '<p class="note__title">' + esc(l.title) + '</p>';
       (r.attempts || []).forEach(function (a) {
@@ -1216,7 +1351,8 @@
       h += '<div class="attempt__new">';
       h += '<textarea class="reflect__field attempt__field" data-id="' + esc(id) + '" placeholder="' +
         esc(COPY.attemptPlaceholder || 'What happened last time you did this?') + '"></textarea>';
-      h += '<button class="btn btn--quiet" data-act="attempt-add" data-id="' + esc(id) + '">Record it</button>';
+      h += '<button class="btn btn--quiet" data-act="attempt-add" data-id="' + esc(id) + '">' +
+        esc(COPY.recordCta || 'Record it') + '</button>';
       h += '</div>';
       h += '</div>';
     });
@@ -1284,11 +1420,11 @@
     }
 
     var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.library) + '</h2>' +
-      '<p class="section__note">All ' + LESSONS.length + ' entries, in the order they will arrive. ' +
-      'Read ahead freely — logging stays a daily act.</p></div>';
+      '<p class="section__note">' + esc(say('libraryNote', LESSONS.length)) + '</p></div>';
 
     h += '<div class="filters">';
-    h += '<input class="search" id="lib-search" type="search" placeholder="Search entries" value="' + esc(libFilter.q) + '">';
+    h += '<input class="search" id="lib-search" type="search" placeholder="' +
+      esc(COPY.librarySearch || 'Search entries') + '" value="' + esc(libFilter.q) + '">';
     if (Object.keys(LEVELS).length) {
       h += '<button class="chip" data-act="lib-level" data-level="" aria-pressed="' + (!libFilter.level) + '">' +
         esc(COPY.allLevels || 'All levels') + '</button>';
@@ -1298,12 +1434,14 @@
       });
     }
     if (HAS_EXPIRY) {
-      h += '<button class="chip" data-act="lib-lapsed" aria-pressed="' + libFilter.lapsed + '">Lapsed only</button>';
+      h += '<button class="chip" data-act="lib-lapsed" aria-pressed="' + libFilter.lapsed + '">' +
+        esc(COPY.lapsedOnly || 'Lapsed only') + '</button>';
     }
     h += '</div>';
 
     h += '<div class="filters">';
-    h += '<button class="chip" data-act="lib-track" data-track="" aria-pressed="' + (!libFilter.track) + '">All tracks</button>';
+    h += '<button class="chip" data-act="lib-track" data-track="" aria-pressed="' + (!libFilter.track) + '">' +
+      esc(COPY.allTracks || 'All tracks') + '</button>';
     TRACKS.forEach(function (t) {
       h += '<button class="chip" data-act="lib-track" data-track="' + t.id + '" aria-pressed="' +
         (libFilter.track === t.id) + '">' + esc(t.name) + '</button>';
@@ -1313,7 +1451,7 @@
     var rows = libraryRows();
 
     if (!rows.length) {
-      h += '<p class="empty">Nothing matches that.</p>';
+      h += '<p class="empty">' + esc(COPY.libraryEmpty || 'Nothing matches that.') + '</p>';
       host.innerHTML = h;
       return;
     }
@@ -1322,11 +1460,11 @@
     rows.forEach(function (l) {
       var r = state.log[l.id];
       var cls = 'pip';
-      var label = 'not yet served';
-      if (lapsed(l)) { cls += ' pip--lapsed'; label = 'lapsed ' + shortDate(l.expires); }
-      else if (r && HAS_REVIEW && r.box >= 4) { cls += ' pip--solid'; label = 'solid'; }
-      else if (r && HAS_REVIEW && r.box > 0) { cls += ' pip--shaky'; label = 'in review, box ' + r.box; }
-      else if (r && r.completedOn) { cls += ' pip--logged'; label = 'logged'; }
+      var label = COPY.pipUnserved || 'not yet served';
+      if (lapsed(l)) { cls += ' pip--lapsed'; label = say('lapsedOn', shortDate(l.expires)); }
+      else if (r && HAS_REVIEW && r.box >= 4) { cls += ' pip--solid'; label = COPY.pipSolid || 'solid'; }
+      else if (r && HAS_REVIEW && r.box > 0) { cls += ' pip--shaky'; label = say('pipReview', r.box); }
+      else if (r && r.completedOn) { cls += ' pip--logged'; label = COPY.pipLogged || 'logged'; }
       h += '<button class="shelf__row" data-act="lib-open" data-id="' + esc(l.id) + '">';
       h += '<span class="shelf__num">' + entryNumber(l.id) + '</span>';
       h += '<span class="shelf__title"><span class="' + cls + '" title="' + esc(label) + '"></span>' + esc(l.title) + '</span>';
@@ -1352,16 +1490,15 @@
     var solid = pool.filter(onCheatsheet);
 
     var h = '<div class="section__head"><h2 class="section__title">' + esc(VIEW_LABEL.cheatsheet) + '</h2>';
-    h += '<p class="section__note">' + esc(COPY.cheatNote || '') +
-      ' <b>' + solid.length + '</b> of ' + pool.length + ' entries. ';
+    var note = COPY.cheatNote || '';
+    var count = say('cheatCount', '<b>' + solid.length + '</b>', pool.length);
     /* The withheld count is generated and the reason is the site's to write,
        because the reasons differ: a verdict-filtered site withheld what did not
        replicate, an opt-in site withheld what does not compress. Stating the
        count either way stops a short page reading as the whole corpus. */
-    if (COPY.cheatWithheld) {
-      h += 'The other ' + (pool.length - solid.length) + ' ' + esc(COPY.cheatWithheld);
-    }
-    h += '</p></div>';
+    var other = COPY.cheatWithheld ? say('cheatOther', pool.length - solid.length, COPY.cheatWithheld) : '';
+    h += '<p class="section__note">' + esc(note) + spaceBetween(note, count) + count +
+      spaceBetween(count, other) + esc(other) + '</p></div>';
 
     TRACKS.forEach(function (t) {
       var rows = solid.filter(function (l) { return l.track === t.id; });
@@ -1386,16 +1523,19 @@
           /* Both bounds or neither. Half an interval is the single most common
              way a number gets laundered into sounding settled, and a cheatsheet
              is exactly where that happens. */
-          h += '<span class="cheat__interval">' + esc(l.interval.measure || 'interval') + ' ' +
-            l.interval.lo + ' to ' + l.interval.hi + '</span>';
+          h += '<span class="cheat__interval">' +
+            esc(say('intervalRange', l.interval.measure, l.interval.lo, l.interval.hi)) + '</span>';
         }
         h += '<span class="cheat__source">' + esc(l.source) + '</span>';
         // Statute is true as at a date and not before or necessarily after it.
         if (l.replication === 'statute' && l.asAt) {
-          h += '<span class="cheat__stale">as at ' + esc(shortDate(l.asAt)) + '</span>';
+          h += '<span class="cheat__stale">' + esc(say('evidenceAsAt', shortDate(l.asAt))) + '</span>';
         }
+        /* The row states the date a check lapsed, so it takes only the function
+           form of staleNote, which can carry one. A string staleNote is an
+           undated line for the evidence block alone. */
         if (stale(l)) {
-          h += '<span class="cheat__stale">not re-checked since ' + esc(shortDate(l.verifiedOn)) + '</span>';
+          h += '<span class="cheat__stale">' + esc(say('staleNote', shortDate(l.verifiedOn))) + '</span>';
         }
         h += '</span></button>';
       });
@@ -1419,55 +1559,65 @@
         'A number you wrote down before you knew. Brier is mean squared error against the outcome, so lower is better and always saying fifty percent scores 0.25.') + '</p></div>';
 
     h += '<div class="readout">';
-    h += cell('Brier', b ? b.score.toFixed(3) : '—', b ? 'over ' + b.n + ' resolved' : 'nothing resolved yet');
-    h += cell('Open', open.length, ripe.length ? ripe.length + ' ready to resolve' : 'none ready');
-    h += cell('Resolved', closed.length, closed.length ? Math.round(100 * closed.filter(function (f) { return f.outcome === 1; }).length / closed.length) + '% happened' : 'no data yet');
+    h += cell(COPY.fcBrier || 'Brier', b ? b.score.toFixed(3) : '—',
+      b ? say('fcBrierOver', b.n) : COPY.fcBrierNone || 'nothing resolved yet');
+    h += cell(COPY.fcOpen || 'Open', open.length,
+      ripe.length ? say('fcReady', ripe.length) : COPY.fcNoneReady || 'none ready');
+    h += cell(COPY.fcResolved || 'Resolved', closed.length, closed.length
+      ? say('fcHappenedPct', Math.round(100 * closed.filter(function (f) { return f.outcome === 1; }).length / closed.length))
+      : COPY.noDataYet || 'no data yet');
     h += '</div>';
 
     if (b && b.n >= 5) {
-      h += '<div class="calwrap"><p class="block__label">Calibration</p>' + calibrationSVG() +
-        '<p class="deepdive__note">Dots on the diagonal mean the number meant what it said. Above it you are underconfident, below it overconfident. Dot size is how many forecasts landed in that band.</p></div>';
+      h += '<div class="calwrap"><p class="block__label">' + esc(COPY.labelCalibration || 'Calibration') + '</p>' + calibrationSVG() +
+        '<p class="deepdive__note">' + esc(COPY.calibrationNote || 'Dots on the diagonal mean the number meant what it said. Above it you are underconfident, below it overconfident. Dot size is how many forecasts landed in that band.') + '</p></div>';
     }
 
     if (ripe.length) {
-      h += '<div class="fc-group"><p class="block__label">Ready to resolve</p>';
+      h += '<div class="fc-group"><p class="block__label">' + esc(COPY.fcRipe || 'Ready to resolve') + '</p>';
       ripe.forEach(function (f) {
         h += '<div class="fc-row fc-row--ripe">';
         h += '<div class="fc-row__body"><p class="fc-row__q">' + esc(f.q) + '</p>';
-        h += '<p class="fc-row__meta">You said ' + Math.round(f.p * 100) + '% on ' + esc(shortDate(f.made)) + '</p></div>';
+        h += '<p class="fc-row__meta">' + esc(say('fcSaidOn', Math.round(f.p * 100), shortDate(f.made))) + '</p></div>';
         h += '<div class="fc-row__acts">';
-        h += '<button class="btn btn--quiet" data-act="fc-resolve" data-fid="' + esc(f.id) + '" data-outcome="1">It happened</button>';
-        h += '<button class="btn btn--quiet" data-act="fc-resolve" data-fid="' + esc(f.id) + '" data-outcome="0">It did not</button>';
+        h += '<button class="btn btn--quiet" data-act="fc-resolve" data-fid="' + esc(f.id) + '" data-outcome="1">' +
+          esc(COPY.fcHappened || 'It happened') + '</button>';
+        h += '<button class="btn btn--quiet" data-act="fc-resolve" data-fid="' + esc(f.id) + '" data-outcome="0">' +
+          esc(COPY.fcDidNot || 'It did not') + '</button>';
         h += '</div></div>';
       });
       h += '</div>';
     }
 
-    h += '<div class="fc-group"><p class="block__label">New forecast</p>';
-    h += '<textarea class="reflect__field fc-new__q" id="fc-q" placeholder="A question that will have a yes or no answer on a known date"></textarea>';
+    h += '<div class="fc-group"><p class="block__label">' + esc(COPY.fcNew || 'New forecast') + '</p>';
+    h += '<textarea class="reflect__field fc-new__q" id="fc-q" placeholder="' +
+      esc(COPY.fcQuestionPlaceholder || 'A question that will have a yes or no answer on a known date') + '"></textarea>';
     h += '<div class="fc-seed__row">';
-    h += '<label class="fc-seed__lab">Probability <input class="fc-seed__p" id="fc-p" type="number" min="1" max="99" step="1" value="50">%</label>';
-    h += '<label class="fc-seed__lab">Resolves <input class="fc-seed__d" id="fc-d" type="date" value="' + esc(shift(today(), 30)) + '"></label>';
-    h += '<button class="btn" data-act="fc-add">Record it</button>';
+    h += '<label class="fc-seed__lab">' + esc(COPY.fcProbability || 'Probability') +
+      ' <input class="fc-seed__p" id="fc-p" type="number" min="1" max="99" step="1" value="50">%</label>';
+    h += '<label class="fc-seed__lab">' + esc(COPY.fcResolves || 'Resolves') +
+      ' <input class="fc-seed__d" id="fc-d" type="date" value="' + esc(shift(today(), 30)) + '"></label>';
+    h += '<button class="btn" data-act="fc-add">' + esc(COPY.recordCta || 'Record it') + '</button>';
     h += '</div></div>';
 
     if (pending.length) {
-      h += '<div class="fc-group"><p class="block__label">Open</p>';
+      h += '<div class="fc-group"><p class="block__label">' + esc(COPY.fcOpen || 'Open') + '</p>';
       pending.forEach(function (f) {
         h += '<div class="fc-row"><div class="fc-row__body"><p class="fc-row__q">' + esc(f.q) + '</p>';
-        h += '<p class="fc-row__meta">' + Math.round(f.p * 100) + '% &middot; resolves ' + esc(shortDate(f.resolvesOn)) + '</p></div></div>';
+        h += '<p class="fc-row__meta">' + Math.round(f.p * 100) + '% &middot; ' +
+          esc(say('fcResolvesOn', shortDate(f.resolvesOn))) + '</p></div></div>';
       });
       h += '</div>';
     }
 
     if (closed.length) {
-      h += '<div class="fc-group"><p class="block__label">Resolved</p>';
+      h += '<div class="fc-group"><p class="block__label">' + esc(COPY.fcResolved || 'Resolved') + '</p>';
       closed.slice().reverse().forEach(function (f) {
         var err = Math.pow(f.p - f.outcome, 2);
         h += '<div class="fc-row fc-row--' + (err < 0.09 ? 'good' : err > 0.36 ? 'bad' : 'mid') + '">';
         h += '<div class="fc-row__body"><p class="fc-row__q">' + esc(f.q) + '</p>';
-        h += '<p class="fc-row__meta">Said ' + Math.round(f.p * 100) + '%, ' +
-          (f.outcome ? 'it happened' : 'it did not') + ' &middot; squared error ' + err.toFixed(2) + '</p></div></div>';
+        h += '<p class="fc-row__meta">' + esc(say('fcSaidOutcome', Math.round(f.p * 100), f.outcome)) +
+          ' &middot; ' + esc(say('fcSquaredError', err.toFixed(2))) + '</p></div></div>';
       });
       h += '</div>';
     }
@@ -1491,12 +1641,13 @@
         'Everything you have written down. In a year this is the most valuable thing here — it is a record of your own judgement changing.') + '</p></div>';
 
     if (!notes.length) {
-      h += '<p class="empty">Nothing logged yet. The reflection field on any entry writes here.</p>';
+      h += '<p class="empty">' +
+        esc(COPY.journalEmpty || 'Nothing logged yet. The reflection field on any entry writes here.') + '</p>';
     } else {
       notes.forEach(function (id) {
         var l = BY_ID[id], r = state.log[id];
         h += '<div class="note">';
-        h += '<div class="note__meta"><span>Entry ' + entryNumber(id) + '</span>' +
+        h += '<div class="note__meta"><span>' + esc(say('entryMeta', entryNumber(id))) + '</span>' +
           (r.completedOn ? '<span>' + esc(shortDate(r.completedOn)) + '</span>' : '') +
           '<span>' + esc(trackName(l.track)) + '</span></div>';
         h += '<p class="note__title">' + esc(l.title) + '</p>';
@@ -1505,7 +1656,7 @@
           h += '<p class="note__body note__body--gate">' + esc(r.gate.answer) + '</p>';
         }
         if ((r.note || '').trim()) {
-          if (r.gate && r.gate.answer) h += '<p class="note__label">After</p>';
+          if (r.gate && r.gate.answer) h += '<p class="note__label">' + esc(COPY.journalAfter || 'After') + '</p>';
           h += '<p class="note__body">' + esc(r.note) + '</p>';
         }
         h += '</div>';
@@ -1535,23 +1686,26 @@
         'Streaks measure showing up. Retention measures whether it stuck. The second one is the one that matters.') + '</p></div>';
 
     h += '<div class="readout">';
-    h += cell('Streak', state.streak.count || 0, (state.streak.count === 1 ? 'day' : 'days') + ' running');
-    h += cell('Best streak', state.streak.best || 0, 'days');
-    h += cell('Entries logged', logged, 'of ' + LESSONS.length);
+    h += cell(COPY.statStreak || 'Streak', state.streak.count || 0, say('statStreakUnit', state.streak.count || 0));
+    h += cell(COPY.statBest || 'Best streak', state.streak.best || 0, COPY.statBestUnit || 'days');
+    h += cell(COPY.statLogged || 'Entries logged', logged, say('statLoggedUnit', LESSONS.length));
     if (HAS_REVIEW) {
-      h += cell('Cards reviewed', reviews, accuracy === null ? 'no data yet' : accuracy + '% recalled');
-      h += cell('Solid', ids.filter(function (i) { return state.log[i].box >= 4; }).length, 'box 4 or 5');
+      h += cell(COPY.statReviewed || 'Cards reviewed', reviews,
+        accuracy === null ? COPY.noDataYet || 'no data yet' : say('statRecalled', accuracy));
+      h += cell(COPY.statSolid || 'Solid', ids.filter(function (i) { return state.log[i].box >= 4; }).length,
+        COPY.statSolidUnit || 'box 4 or 5');
     } else {
       var attempts = ids.reduce(function (n, i) { return n + (state.log[i].attempts || []).length; }, 0);
-      h += cell('Attempts recorded', attempts, 'across ' + ids.filter(function (i) { return (state.log[i].attempts || []).length; }).length + ' entries');
+      h += cell(COPY.statAttempts || 'Attempts recorded', attempts,
+        say('statAttemptsUnit', ids.filter(function (i) { return (state.log[i].attempts || []).length; }).length));
     }
-    h += cell('Days on the books', daysActive, 'since ' + shortDate(state.startedOn));
+    h += cell(COPY.statDays || 'Days on the books', daysActive, say('statDaysUnit', shortDate(state.startedOn)));
     if (HAS_EXPIRY) {
-      h += cell('Lapsed', LESSONS.filter(lapsed).length, 'out of rotation');
+      h += cell(COPY.statLapsed || 'Lapsed', LESSONS.filter(lapsed).length, COPY.statLapsedUnit || 'out of rotation');
     }
     if (GATE) {
       var gated = ids.filter(function (i) { return state.log[i].gate && state.log[i].gate.answer; }).length;
-      h += cell(GATE.statLabel || 'Committed', gated, 'answers frozen before reading');
+      h += cell(GATE.statLabel || 'Committed', gated, COPY.statCommittedUnit || 'answers frozen before reading');
     }
     /* Two cells rather than one. The median says how far off you are; the
        signed mean says which side you are wrong on, and a reader who is
@@ -1559,16 +1713,17 @@
        direction than from the size. */
     if (PROFILE) {
       var g = gapStats();
-      h += cell('Median gap', g.n ? num(g.medianAbs) : '-',
-        g.n ? 'across ' + g.n + (g.n === 1 ? ' sum' : ' sums') : 'nothing computed yet');
+      h += cell(COPY.statMedianGap || 'Median gap', g.n ? num(g.medianAbs) : '-',
+        g.n ? say('statSums', g.n) : COPY.statNoSums || 'nothing computed yet');
       if (g.n) {
-        h += cell('Typical direction', (g.signedMean > 0 ? '+' : '') + num(g.signedMean),
-          g.signedMean > 0 ? 'you read high' : g.signedMean < 0 ? 'you read low' : 'no lean');
+        h += cell(COPY.statDirection || 'Typical direction', (g.signedMean > 0 ? '+' : '') + num(g.signedMean),
+          g.signedMean > 0 ? COPY.statHigh || 'you read high'
+            : g.signedMean < 0 ? COPY.statLow || 'you read low' : COPY.statNoLean || 'no lean');
       }
     }
     h += '</div>';
 
-    h += '<div class="coverage"><p class="block__label">Coverage by track</p>';
+    h += '<div class="coverage"><p class="block__label">' + esc(COPY.labelCoverage || 'Coverage by track') + '</p>';
     TRACKS.forEach(function (t) {
       var all = LESSONS.filter(function (l) { return l.track === t.id; });
       var done = all.filter(function (l) { return state.log[l.id] && state.log[l.id].completedOn; }).length;
@@ -1582,18 +1737,20 @@
     h += '</div>';
 
     h += '<div class="deepdive">';
-    h += '<p class="block__label">Your record</p>';
-    h += '<p class="deepdive__note">Everything lives in this browser only. Clearing site data wipes it, ' +
-      'so take a copy occasionally — especially the journal.</p>';
+    h += '<p class="block__label">' + esc(COPY.labelRecord || 'Your record') + '</p>';
+    h += '<p class="deepdive__note">' + esc(COPY.recordNote || 'Everything lives in this browser only. Clearing site data wipes it, ' +
+      'so take a copy occasionally — especially the journal.') + '</p>';
     h += '<div class="actions" style="border-top:0;padding-top:0">';
-    h += '<button class="btn btn--quiet" data-act="export">Download a backup</button>';
-    h += '<button class="btn btn--quiet" data-act="export-show">Show as text</button>';
-    h += '<button class="btn btn--quiet" data-act="import-open">Restore from backup</button>';
+    h += '<button class="btn btn--quiet" data-act="export">' + esc(COPY.exportCta || 'Download a backup') + '</button>';
+    h += '<button class="btn btn--quiet" data-act="export-show">' + esc(COPY.exportShowCta || 'Show as text') + '</button>';
+    h += '<button class="btn btn--quiet" data-act="import-open">' + esc(COPY.importOpenCta || 'Restore from backup') + '</button>';
     h += '</div>';
     h += '<pre class="deepdive__text" id="export-text" hidden></pre>';
     h += '<div id="import-box" hidden>';
-    h += '<textarea class="reflect__field" id="import-field" placeholder="Paste a backup here"></textarea>';
-    h += '<div class="actions" style="border-top:0"><button class="btn" data-act="import-run">Restore</button></div>';
+    h += '<textarea class="reflect__field" id="import-field" placeholder="' +
+      esc(COPY.importPlaceholder || 'Paste a backup here') + '"></textarea>';
+    h += '<div class="actions" style="border-top:0"><button class="btn" data-act="import-run">' +
+      esc(COPY.importCta || 'Restore') + '</button></div>';
     h += '</div>';
     h += '</div>';
 
@@ -1681,7 +1838,8 @@
 
     if (act === 'complete') {
       markComplete(id);
-      toast(HAS_REVIEW ? 'Entry logged. It comes back for review tomorrow.' : 'Entry logged.');
+      toast(HAS_REVIEW ? COPY.toastLoggedReview || 'Entry logged. It comes back for review tomorrow.'
+        : COPY.toastLogged || 'Entry logged.');
       render();
       return;
     }
@@ -1711,7 +1869,7 @@
         if (f) vals[n] = f.value;
       });
       if (!saveProfile(vals)) {
-        toast('Put a number in each field first');
+        toast(COPY.toastProfileMissing || 'Put a number in each field first');
         return;
       }
       render();
@@ -1731,7 +1889,7 @@
     if (act === 'attempt-add') {
       var af = document.querySelector('.attempt__field[data-id="' + id + '"]');
       var txt = af ? af.value.trim() : '';
-      if (!txt) { toast('Nothing to record'); return; }
+      if (!txt) { toast(COPY.toastNothingToRecord || 'Nothing to record'); return; }
       record(id).attempts.push({ on: today(), text: txt });
       save();
       renderChrome();
@@ -1743,9 +1901,9 @@
       var sp = el('seed-p'), sd = el('seed-d');
       var lz = BY_ID[id];
       var pv = sp ? Math.max(1, Math.min(99, parseInt(sp.value, 10) || 50)) : 50;
-      if (!sd || !sd.value) { toast('Give it a resolution date'); return; }
+      if (!sd || !sd.value) { toast(COPY.toastNeedDate || 'Give it a resolution date'); return; }
       addForecast(lz.forecast.q, pv / 100, sd.value, id);
-      toast('Recorded. It lands in the forecast book.');
+      toast(COPY.toastForecastSeeded || 'Recorded. It lands in the forecast book.');
       render();
       return;
     }
@@ -1754,8 +1912,8 @@
       var q = el('fc-q').value.trim();
       var p = Math.max(1, Math.min(99, parseInt(el('fc-p').value, 10) || 50));
       var d = el('fc-d').value;
-      if (!q) { toast('Write the question first'); return; }
-      if (!d) { toast('Give it a resolution date'); return; }
+      if (!q) { toast(COPY.toastNeedQuestion || 'Write the question first'); return; }
+      if (!d) { toast(COPY.toastNeedDate || 'Give it a resolution date'); return; }
       addForecast(q, p / 100, d, null);
       renderForecast();
       renderChrome();
@@ -1781,7 +1939,7 @@
     }
 
     if (act === 'copy-prompt') {
-      copyText(deepDivePrompt(BY_ID[id]), 'Prompt copied — paste it into Claude');
+      copyText(deepDivePrompt(BY_ID[id]), COPY.toastPromptCopied || 'Prompt copied — paste it into Claude');
       return;
     }
     if (act === 'show-prompt') {
@@ -1831,11 +1989,11 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast('Backup downloaded');
+        toast(COPY.toastExported || 'Backup downloaded');
       } catch (e) {
         el('export-text').textContent = json;
         el('export-text').hidden = false;
-        toast('Download blocked here — copy the text instead');
+        toast(COPY.toastExportBlocked || 'Download blocked here — copy the text instead');
       }
       return;
     }
@@ -1852,7 +2010,7 @@
     }
     if (act === 'import-run') {
       var txt2 = el('import-field').value.trim();
-      if (!txt2) { toast('Paste a backup first'); return; }
+      if (!txt2) { toast(COPY.toastImportEmpty || 'Paste a backup first'); return; }
       try {
         var next = JSON.parse(txt2);
         if (!next || next.v !== 1 || typeof next.log !== 'object') throw new Error('shape');
@@ -1862,10 +2020,10 @@
         state.forecasts = state.forecasts || {};
         state.streak = state.streak || clone(blank.streak);
         save();
-        toast('Restored');
+        toast(COPY.toastImported || 'Restored');
         go('today');
       } catch (e) {
-        toast('That is not a ' + (SITE.name || 'Daily') + ' backup — check you pasted the whole file');
+        toast(say('toastImportBad', SITE.name || 'Daily'));
       }
       return;
     }
@@ -1887,13 +2045,13 @@
     var nid = ev.target.dataset.id;
     var val = ev.target.value;
     var st = el('note-state');
-    if (st) st.textContent = 'Saving…';
+    if (st) st.textContent = COPY.noteSaving || 'Saving…';
     clearTimeout(noteTimer);
     noteTimer = setTimeout(function () {
       record(nid).note = val;
       save();
       var s = el('note-state');
-      if (s) s.textContent = 'Saved to this browser';
+      if (s) s.textContent = COPY.noteSaved || 'Saved to this browser';
     }, 500);
   });
 
@@ -1925,7 +2083,8 @@
   if (state.theme) document.documentElement.setAttribute('data-theme', state.theme);
 
   if (!LESSONS.length) {
-    el('view-today').innerHTML = '<p class="empty">No entries loaded. The content files did not run.</p>';
+    el('view-today').innerHTML = '<p class="empty">' +
+      esc(COPY.contentMissing || 'No entries loaded. The content files did not run.') + '</p>';
   } else {
     var landing = parseRoute(window.location.hash);
     if (landing) applyRoute(landing.view, landing.id);

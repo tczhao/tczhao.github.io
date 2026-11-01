@@ -43,6 +43,15 @@
      short enough that even the slowest voice finishes one inside the limit. */
   var MAX_CHUNK = 200;
 
+  /* The same budget for Chinese and Japanese, counted in their characters.
+     Mandarin synthesis runs at about four and a half characters a second, so
+     sixty is roughly the thirteen seconds two hundred English letters take.
+     Full-width punctuation is in the count, so a chunk of pure Chinese never
+     runs past sixty characters. Korean is left out: it spaces its words and
+     uses Latin punctuation, which the English rules already split on. */
+  var MAX_CJK = 60;
+  var CJK = /[\u2E80-\u9FFF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]/;
+
   var voice = null;
   var queue = [];
   var at = 0;
@@ -60,7 +69,12 @@
     var out = [];
     if (!clean) return out;
 
-    var re = /[^.!?]+[.!?]*/g;
+    /* Chinese ends a sentence with a full-width mark and leaves no space after
+       it, so those marks are sentence ends too, or a Chinese paragraph reaches
+       the synthesiser as one utterance. The full-width semicolon is among them
+       because Chinese prose strings long runs of clauses on it. None of these
+       occur in English text, so English splits on its own marks alone. */
+    var re = /[^.!?。！？；]+[.!?。！？；]*/g;
     var m;
     while ((m = re.exec(clean)) !== null) {
       var s = m[0].trim();
@@ -72,8 +86,26 @@
   /* A sentence long enough to trip the limit is broken again at its last
      clause boundary. Cutting mid-clause is audible as a stumble, so a sentence
      with nowhere good to break goes over whole: a rare long utterance beats a
-     reliable wrong pause. */
+     reliable wrong pause.
+
+     Chinese and Japanese past MAX_CJK break the same way, at the last
+     full-width comma, semicolon, colon or enumeration comma that fits. A run
+     with none of those is the one thing cut at the budget itself, because a
+     gap between two of these characters is always a gap between syllables,
+     where a cut in English text could land inside a word. */
   function push(out, s) {
+    var over = cjkOver(s);
+    if (over !== -1) {
+      var pause = -1;
+      ['，', '；', '：', '、'].forEach(function (mark) {
+        pause = Math.max(pause, s.lastIndexOf(mark, over - 1));
+      });
+      var end = pause === -1 ? over : pause + 1;
+      out.push(s.slice(0, end).trim());
+      push(out, s.slice(end).trim());
+      return;
+    }
+
     if (s.length <= MAX_CHUNK) { out.push(s); return; }
 
     var cut = -1;
@@ -85,6 +117,16 @@
     if (cut === -1) { out.push(s); return; }
     out.push(s.slice(0, cut).trim());
     push(out, s.slice(cut).trim());
+  }
+
+  /* Where the first Chinese or Japanese character past MAX_CJK sits in s, or
+     -1 when all of s fits. */
+  function cjkOver(s) {
+    var n = 0;
+    for (var i = 0; i < s.length; i++) {
+      if (CJK.test(s.charAt(i)) && ++n > MAX_CJK) return i;
+    }
+    return -1;
   }
 
   /* --- Voice --------------------------------------------------------------
@@ -105,17 +147,43 @@
     /^(google|microsoft)\b/i
   ];
 
+  /* A voice in the wrong language does not read badly, it reads nothing a
+     listener can follow, so the page's language decides which voices are in
+     the running before any tier gets a say. An exact tag wins over a regional
+     sibling: zh-HK is Cantonese, and would read a Mandarin page in the wrong
+     spoken language. Tags compare with - and _ alike and case ignored, because
+     Android reports zh_CN where everything else says zh-CN. A page that
+     declares nothing is read as English.
+
+     Read from SITE directly because the first choice is made as this file
+     loads, before app.js exists to hand anything over. */
+  var DECLARED = (window.SITE && window.SITE.lang) || '';
+  var LANG = norm(DECLARED);
+  var PRIMARY = LANG ? LANG.split('-')[0] : 'en';
+
+  function norm(tag) {
+    return String(tag || '').replace(/_/g, '-').toLowerCase();
+  }
+
+  function inLanguage(voices) {
+    var exact = LANG ? voices.filter(function (v) { return norm(v.lang) === LANG; }) : [];
+    if (exact.length) return exact;
+    return voices.filter(function (v) { return norm(v.lang).split('-')[0] === PRIMARY; });
+  }
+
   function pickVoice() {
     var all = API.getVoices() || [];
     if (!all.length) return;
 
-    var en = all.filter(function (v) { return /^en([-_]|$)/i.test(v.lang); });
     /* A voice that is served over the network cannot work with the network
        down, so it is dropped from the running rather than chosen and then
        failed on. This is what keeps the tiers below from trading away the one
-       property these pages are built on. */
-    if (offline()) en = en.filter(function (v) { return v.localService; });
-    if (!en.length) { voice = null; return; }
+       property these pages are built on. It runs before the language match, so
+       an offline page whose own language is only served over the network can
+       still find a regional sibling installed locally. */
+    if (offline()) all = all.filter(function (v) { return v.localService; });
+    var own = inLanguage(all);
+    if (!own.length) { voice = null; return; }
 
     /* Local wins inside a tier but never across one. A downloaded Premium beats
        a Google voice that needs the network, and a Google voice beats the local
@@ -127,11 +195,11 @@
     }
 
     for (var i = 0; i < TIERS.length; i++) {
-      var tier = en.filter(function (v) { return TIERS[i].test(v.name); });
+      var tier = own.filter(function (v) { return TIERS[i].test(v.name); });
       if (tier.length) { voice = best(tier); return; }
     }
 
-    voice = en.filter(function (v) { return v.default; })[0] || null;
+    voice = own.filter(function (v) { return v.default; })[0] || null;
   }
 
   /* getVoices() is empty until the list loads, and browsers disagree about
@@ -174,6 +242,11 @@
 
     var u = new Utterance(item.text);
     if (voice) { u.voice = voice; u.lang = voice.lang; }
+    /* With no voice chosen the browser picks one. Not every browser weighs the
+       page's language when it does, and its default voice is usually English,
+       so a declared language is named on the utterance itself. A page that
+       declares none leaves the utterance's language unset. */
+    else if (DECLARED) u.lang = DECLARED;
     u.onend = function () {
       if (gen !== mine) return;
       at += 1;

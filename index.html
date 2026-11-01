@@ -152,6 +152,83 @@
     justify-content: center;
   }
 
+  /* Garage article: the article's service record at night. The card is a
+     line from the log: planned one hour, and hovering shows what it took. */
+  .row--hour {
+    --ac: #f0a35e;
+    color: #ece6da;
+    background:
+      linear-gradient(to bottom, rgba(236,230,218,0.045) 0 1px, transparent 1px) 0 0 / 100% 30px,
+      linear-gradient(180deg, #211f1b 0%, #0f0e0c 100%);
+  }
+  .row--hour .desc { color: #b5ad9e; }
+  .row--hour .row-title {
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-weight: 650;
+    font-stretch: 112%;
+  }
+  .record-card {
+    display: block;
+    width: 290px;
+    padding: 14px 16px 16px;
+    border-radius: 4px;
+    background: #f4efe4;
+    color: #1d1b16;
+    font-family: 'Spline Sans Mono', ui-monospace, monospace;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), 0 16px 34px -18px rgba(0,0,0,0.85);
+    transform: rotate(-1.2deg);
+  }
+  .rc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 2px solid #1d1b16;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5b554a;
+  }
+  .rc-stamp {
+    padding: 2px 6px 1px;
+    border: 1.2px solid #b5400f;
+    border-radius: 2px;
+    color: #b5400f;
+    font-weight: 500;
+  }
+  .rc-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 28px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5b554a;
+  }
+  .rc-track {
+    display: flex;
+    gap: 2px;
+    height: 14px;
+    border-radius: 3px;
+    background: rgba(29,27,22,0.06);
+  }
+  .rc-plan { width: 25%; border-radius: 3px; background: #8f877a; }
+  .rc-over { width: 0; border-radius: 3px; background: #e2582a; transition: width 0.9s var(--ease-row); }
+  .rc-val, .rc-note { position: relative; display: block; }
+  .rc-val { text-align: right; color: #1d1b16; font-weight: 500; }
+  .rc-note { margin-top: 12px; font-size: 10px; letter-spacing: 0.04em; }
+  .rc-val .after, .rc-note .after { position: absolute; right: 0; top: 0; opacity: 0; transition: opacity 0.4s ease 0.5s; }
+  .rc-note .after { left: 0; right: auto; color: #b5400f; }
+  .rc-note .before { color: #8f877a; }
+  .rc-val .before, .rc-note .before { transition: opacity 0.3s ease; }
+  .row--hour:is(:hover,:focus-visible) .rc-over { width: calc(75% - 2px); }
+  .row--hour:is(:hover,:focus-visible) :is(.rc-val, .rc-note) .before { opacity: 0; }
+  .row--hour:is(:hover,:focus-visible) :is(.rc-val, .rc-note) .after { opacity: 1; }
+
   /* Lumix LUT article: neutral like the article, so the only colour in the
      row is the photograph */
   .row--lumixlut {
@@ -355,7 +432,24 @@
 </header>
 
 <main>
-  <a class="row row--lumixlut" href="article/lumix-s9-capture-one-lut/" style="--i:0">
+  <a class="row row--hour" href="article/an-hour-on-paper/" style="--i:0">
+    <span class="copy">
+      <span class="eyebrow">article &middot; home garage &middot; from my maintenance log</span>
+      <span class="row-title">An hour, on paper</span>
+      <span class="desc">A CV axle job on the Forester was meant to take an hour and took four. The Tiguan was off the road for 86 days, and was missing two bolts nobody knew about. Why I&rsquo;m swapping deadlines for a timer.</span>
+      <span class="enter">Enter <span class="arrow">&rarr;</span></span>
+    </span>
+    <span class="scene">
+      <span class="record-card" aria-hidden="true">
+        <span class="rc-head"><span class="rc-stamp">Service record</span><span>Forester &middot; CV axle</span></span>
+        <span class="rc-row"><span>Planned</span><span class="rc-track"><span class="rc-plan"></span></span><span class="rc-val">1 h</span></span>
+        <span class="rc-row"><span>Actual</span><span class="rc-track"><span class="rc-plan"></span><span class="rc-over"></span></span><span class="rc-val"><span class="before">1 h</span><span class="after">4 h</span></span></span>
+        <span class="rc-note"><span class="before">On paper</span><span class="after">3 h stuck in the hub</span></span>
+      </span>
+    </span>
+  </a>
+
+  <a class="row row--lumixlut" href="article/lumix-s9-capture-one-lut/" style="--i:1">
     <span class="copy">
       <span class="eyebrow">article &middot; lumix s9 &middot; capture one in camera</span>
       <span class="row-title">The LUT was perfect. The picture was grey.</span>
@@ -370,7 +464,7 @@
     </span>
   </a>
 
-  <a class="row row--z8icc" href="article/nikon-z8-capture-one-vs-cobalt/" style="--i:1">
+  <a class="row row--z8icc" href="article/nikon-z8-capture-one-vs-cobalt/" style="--i:2">
     <span class="copy">
       <span class="eyebrow">article &middot; nikon z8 &middot; three camera profiles</span>
       <span class="row-title">CaptureOne vs Cobalt: same greys, new greens</span>
@@ -407,7 +501,7 @@
     </span>
   </a>
 
-  <a class="row row--practicum" href="sub/practicum/dist/" style="--i:2">
+  <a class="row row--practicum" href="sub/practicum/dist/" style="--i:3">
     <span class="copy">
       <span class="eyebrow">logbook &middot; management practice &middot; one day at a time</span>
       <span class="row-title">Practicum</span>

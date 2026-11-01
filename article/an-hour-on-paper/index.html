@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>An hour, on paper</title>
+<link rel="canonical" href="https://tianchuzhao.com/article/an-hour-on-paper/">
+<meta name="description" content="A one-hour axle job that took four, two bolts nobody knew were missing, and why I'm swapping deadlines for a timer in my home garage.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="An hour, on paper">
+<meta property="og:description" content="A one-hour axle job that took four, two bolts nobody knew were missing, and why I'm swapping deadlines for a timer in my home garage.">
+<meta property="og:url" content="https://tianchuzhao.com/article/an-hour-on-paper/">
+<meta property="og:image" content="https://tianchuzhao.com/article/an-hour-on-paper/image/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"An hour, on paper","description":"A one-hour axle job that took four, two bolts nobody knew were missing, and why I'm swapping deadlines for a timer in my home garage.","datePublished":"2026-11-01","author":{"@type":"Person","name":"Tianchu Zhao"},"image":"https://tianchuzhao.com/article/an-hour-on-paper/image/og.jpg","mainEntityOfPage":"https://tianchuzhao.com/article/an-hour-on-paper/"}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.16/dist/plot.umd.min.js"></script>
+<style>
+/* A workshop service record: warm paper, ruled lines, part numbers in mono. The car colours are the only saturated colour; the highlighter marks what repeats. */
+:root {
+  color-scheme: light;
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --paper: #f4efe4;
+  --paper-2: #ebe4d5;
+  --card: #f9f6ef;
+  --ink: #1d1b16;
+  --ink-2: #5b554a;
+  --muted: #8f877a;
+  --rule: rgba(29, 27, 22, 0.18);
+  --rule-soft: rgba(29, 27, 22, 0.09);
+  --grid: #e0d8c7;
+  --axis: #c6bca8;
+  --stamp: #b5400f;
+  --highlight: rgba(255, 210, 0, 0.5);
+  --tiguan: #2a78d6;
+  --forester: #e2582a;
+  --hiace: #169a6b;
+  --on-fill: #141414;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --paper: #1a1916;
+    --paper-2: #24221d;
+    --card: #201e1a;
+    --ink: #ece6da;
+    --ink-2: #b5ad9e;
+    --muted: #857d6f;
+    --rule: rgba(236, 230, 218, 0.18);
+    --rule-soft: rgba(236, 230, 218, 0.08);
+    --grid: #2d2b25;
+    --axis: #3f3c34;
+    --stamp: #f0884a;
+    --highlight: rgba(255, 196, 0, 0.24);
+    --tiguan: #4b93ea;
+    --forester: #e0662f;
+    --hiace: #21a777;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1a1916;
+  --paper-2: #24221d;
+  --card: #201e1a;
+  --ink: #ece6da;
+  --ink-2: #b5ad9e;
+  --muted: #857d6f;
+  --rule: rgba(236, 230, 218, 0.18);
+  --rule-soft: rgba(236, 230, 218, 0.08);
+  --grid: #2d2b25;
+  --axis: #3f3c34;
+  --stamp: #f0884a;
+  --highlight: rgba(255, 196, 0, 0.24);
+  --tiguan: #4b93ea;
+  --forester: #e0662f;
+  --hiace: #21a777;
+}
+
+* { box-sizing: border-box; }
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+body { margin: 0; padding-top: var(--bar-height, 54px); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+mark { background: linear-gradient(transparent 12%, var(--highlight) 12%, var(--highlight) 88%, transparent 88%); color: inherit; padding: 0 2px; }
+
+/* Fixed, not sticky: sticky breaks when a viewer wraps the page in its own scroll container. */
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.bar-row { display: flex; align-items: center; gap: 28px; padding: 9px 28px; }
+.brand { font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-decoration: none; }
+.bar nav { display: flex; gap: 18px; overflow-x: auto; flex: 1 1 0; min-width: 0; scrollbar-width: none; }
+.bar nav a { text-decoration: none; color: var(--ink-2); font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+.bar nav a:hover { color: var(--ink); }
+.theme { display: flex; border: 1px solid var(--rule); border-radius: 999px; padding: 2px; }
+.theme button {
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.theme button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+main { max-width: 1120px; margin: 0 auto; padding: 0 28px 96px; }
+section { padding-top: 92px; scroll-margin-top: calc(var(--bar-height, 54px) - 64px); }
+.entry-no { display: block; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stamp); margin-bottom: 12px; }
+h1, h2, h3 { margin: 0; font-family: var(--sans); letter-spacing: -0.005em; text-wrap: balance; }
+h2 { font-size: clamp(32px, 4.4vw, 52px); line-height: 1; font-weight: 780; font-stretch: 75%; margin-bottom: 26px; max-width: 20ch; }
+h3 { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.1; font-weight: 740; font-stretch: 80%; margin: 46px 0 14px; }
+.prose p { font-family: var(--serif); font-size: 19px; line-height: 1.65; max-width: 62ch; margin: 0 0 16px; }
+figure { margin: 0; min-width: 0; }
+.figure { margin: 40px 0 48px; }
+.caption { font-size: 13px; line-height: 1.55; color: var(--ink-2); margin-top: 12px; max-width: 74ch; }
+.fig-title { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 14px; }
+
+/* Masthead: the record card's header row, then the title */
+.hero { padding-top: 54px; }
+.record-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); letter-spacing: 0.04em; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+.stamp { display: inline-block; padding: 4px 10px 3px; border: 1.5px solid var(--stamp); border-radius: 3px; color: var(--stamp); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; transform: rotate(-1.5deg); }
+.hero h1 {
+  margin-top: 34px;
+  font-size: clamp(54px, 10vw, 128px);
+  line-height: 0.9;
+  font-weight: 800;
+  font-stretch: 72%;
+  letter-spacing: -0.01em;
+  max-width: 11ch;
+}
+
+/* Exploded drawing. It scales to the column; the numbered parts list under it carries the names at any width. */
+.drawing { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 8px 0; }
+.drawing svg { display: block; width: 100%; height: auto; color: var(--ink); }
+.drawing .part { fill: var(--card); stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.drawing .detail { fill: none; stroke: var(--ink-2); stroke-width: 1; }
+.drawing .hidden-line { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 6 4; }
+.drawing .centre { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 18 5 3 5; }
+.drawing .rust { fill: var(--forester); }
+.drawing .leader { stroke: var(--ink-2); stroke-width: 1; fill: none; }
+.drawing .leader-end { fill: var(--ink-2); }
+.drawing .balloon { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+.drawing .balloon-no { font-family: var(--mono); font-size: 18px; font-weight: 600; fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.parts { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 28px; }
+.parts li { display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px; font-size: 14px; line-height: 1.4; }
+.parts .no { grid-row: span 2; font-style: normal; width: 24px; height: 24px; border: 1.5px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.parts b { font-weight: 650; }
+.parts span { color: var(--ink-2); font-size: 13px; }
+.parts code, .ledger code, .tray code { font-family: var(--mono); font-size: 0.92em; }
+
+/* Spec plate: three facts in ruled cells, like the plate on a firewall */
+.plate { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 40px 0 8px; border: 1.5px solid var(--ink); border-radius: 6px; }
+.plate div { padding: 14px 18px 16px; }
+.plate div + div { border-left: 1px solid var(--rule); }
+.plate dt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.plate dd { margin: 6px 0 0; font-size: clamp(30px, 3.4vw, 42px); font-weight: 780; font-stretch: 75%; line-height: 1; }
+.plate .note { display: block; margin-top: 8px; font-family: var(--mono); font-size: 12px; font-weight: 400; font-stretch: 100%; line-height: 1.45; color: var(--ink-2); }
+
+/* Planned against actual, on one hour scale */
+.hours { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px 14px; align-items: center; max-width: 780px; }
+.hours .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+.hours .track { display: flex; gap: 2px; height: 26px; }
+.hours .seg { display: flex; align-items: center; padding: 0 10px; border-radius: 4px; color: var(--on-fill); font-family: var(--mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.hours .plan { background: var(--muted); }
+.hours .over { background: var(--forester); }
+.hour-ticks { position: relative; height: 18px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
+.hour-ticks span { position: absolute; left: calc(var(--i) * 25%); transform: translateX(-50%); white-space: nowrap; }
+.hour-ticks span:first-child { transform: none; }
+.hour-ticks span:last-child { transform: translateX(-100%); }
+
+/* The log as a ledger: ruled rows, a ditto where the date repeats, highlighter where the odometer does */
+.table-wrap-ledger { overflow-x: auto; }
+.ledger { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.ledger th { text-align: left; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); padding: 10px 14px; border-bottom: 3px double var(--rule); }
+.ledger td { padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+.ledger .date, .ledger .odo, .ledger .cost { font-family: var(--mono); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ledger .cost, .ledger th.num { text-align: right; }
+.ledger .parts-cell { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+.ledger .ditto { color: var(--muted); }
+.ledger .again { display: inline-block; margin-left: 8px; padding: 1px 6px; border: 1px solid var(--stamp); border-radius: 3px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stamp); vertical-align: 1px; }
+.ledger tfoot td { font-family: var(--mono); font-size: 13px; border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 600; }
+
+/* The bolt tray: one compartment per line in the log */
+.tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; padding: 10px; background: var(--paper-2); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12); }
+.slot { display: grid; grid-template-columns: 34px 1fr; gap: 4px 12px; align-content: start; padding: 12px 14px 13px; background: var(--card); border-radius: 6px; box-shadow: inset 0 0 0 1px var(--rule-soft), 0 1px 0 rgba(0, 0, 0, 0.04); }
+.slot svg { grid-row: span 3; width: 34px; height: 44px; color: var(--ink-2); }
+.slot b { font-size: 14.5px; font-weight: 650; line-height: 1.3; }
+.slot code { color: var(--ink); font-size: 12.5px; line-height: 1.5; }
+.slot .meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
+.slot .meta > span { white-space: nowrap; }
+.slot .car { display: inline-flex; align-items: center; gap: 6px; }
+.slot .car i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.slot.missing { background: transparent; box-shadow: none; border: 1.5px dashed var(--muted); }
+.slot.missing svg { opacity: 0.35; }
+.slot.missing .meta { color: var(--stamp); }
+
+.placeholder { max-width: 62ch; margin: 0 0 16px; padding: 14px 16px; border: 2px dashed var(--stamp); border-radius: 6px; font-family: var(--mono); font-size: 13.5px; color: var(--stamp); }
+
+.legend-row { display: flex; gap: 10px 26px; align-items: center; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-bottom: 14px; }
+.key { display: inline-flex; align-items: center; gap: 8px; }
+.keyline { display: inline-block; width: 18px; height: 2px; border-radius: 1px; flex: none; }
+.keydot { display: inline-block; border-radius: 50%; flex: none; background: var(--muted); }
+.keybar { display: inline-block; width: 26px; height: 3px; border-radius: 2px; flex: none; background: var(--muted); }
+
+.chart { min-height: 40px; }
+details.numbers { margin-top: 14px; font-size: 13px; }
+details.numbers summary { cursor: pointer; color: var(--ink-2); width: max-content; font-family: var(--mono); font-size: 12px; }
+details.numbers table { margin-top: 10px; font-size: 12.5px; border-collapse: collapse; }
+details.numbers th, details.numbers td { text-align: left; padding: 4px 16px 4px 0; border-bottom: 1px solid var(--grid); }
+details.numbers td.num, details.numbers th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+svg[class^="plot-"] { --plot-background: var(--paper); }
+
+.notice { border: 1px solid var(--rule); border-radius: 6px; padding: 12px 16px; margin-top: 16px; color: var(--ink-2); font-size: 14px; }
+[hidden] { display: none !important; }
+
+footer { max-width: 1120px; margin: 0 auto; padding: 28px 28px 56px; border-top: 2px solid var(--ink); font-size: 13px; color: var(--ink-2); }
+footer h2 { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink); }
+footer p { max-width: 90ch; margin: 0; }
+
+@media (max-width: 860px) {
+  .bar-row { gap: 12px; padding: 8px 16px; }
+  .bar nav { display: none; }
+  .brand { flex: 1; }
+  .theme button { padding: 7px 10px; min-height: 40px; }
+  main { padding: 0 16px 72px; }
+  section { padding-top: 72px; }
+  .plate { grid-template-columns: 1fr; }
+  .plate div + div { border-left: 0; border-top: 1px solid var(--rule); }
+  .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .prose p { font-size: 18px; }
+  details.numbers summary { padding: 11px 0; }
+  footer { padding: 24px 16px 48px; }
+}
+@media (max-width: 640px) {
+  .parts { grid-template-columns: 1fr; }
+  .hours { grid-template-columns: 60px minmax(0, 1fr); gap: 8px 10px; }
+  .ledger thead { display: none; }
+  .ledger, .ledger tbody, .ledger tfoot { display: block; }
+  .ledger tr { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "date odo odo" "work work cost" "parts parts parts"; column-gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--rule-soft); }
+  .ledger td { padding: 0; border: 0; }
+  .ledger .date { grid-area: date; }
+  .ledger .odo { grid-area: odo; }
+  .ledger .cost { grid-area: cost; }
+  .ledger .work { grid-area: work; margin-top: 4px; }
+  .ledger .parts-cell { grid-area: parts; margin-top: 2px; }
+  .ledger .ditto:empty { display: none; }
+  .ledger tfoot tr { grid-template-areas: "work work cost"; border-top: 2px solid var(--ink); }
+  .ledger tfoot td { border: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-row">
+    <a class="brand" href="#axle">An hour, on paper</a>
+    <nav aria-label="Sections">
+      <a href="#axle">01 The axle</a>
+      <a href="#bolts">02 Two bolts</a>
+      <a href="#timer">03 A timer</a>
+    </nav>
+    <div class="theme" role="group" aria-label="Colour theme">
+      <button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
+      <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="axle" class="hero">
+    <div class="record-head">
+      <span class="stamp">Service record</span>
+      <span>5 cars</span>
+      <span>174 jobs</span>
+      <span>March 2021 to November 2026</span>
+    </div>
+    <h1>An hour, on paper</h1>
+
+    <figure class="figure">
+      <div class="drawing">
+        <svg viewBox="0 0 1000 300" role="img" aria-labelledby="drawing-title">
+          <title id="drawing-title">Exploded drawing of the Forester's axle job: the CV axle with its boot and splined end, the wheel hub, a washer and the axle nut, laid out along one centre line. Rust marks the splines and the inside of the hub.</title>
+          <line class="centre" x1="20" y1="150" x2="980" y2="150"/>
+          <path class="part" d="M60 143 H300 V157 H60 q-8 -7 0 -14 Z"/>
+          <polygon class="part" points="300,136 311,128 322,131 333,122 344,125 355,116 366,119 377,110 388,113 399,104 410,106 410,194 399,196 388,187 377,190 366,181 355,184 344,175 333,178 322,169 311,172 300,164"/>
+          <rect class="part" x="298" y="134" width="8" height="32" rx="2"/>
+          <path class="part" d="M410 104 C430 96 455 96 470 102 C485 108 495 120 500 128 L500 172 C495 180 485 192 470 198 C455 204 430 204 410 196 Z"/>
+          <path class="detail" d="M428 101 C433 126 433 174 428 199"/>
+          <rect class="part" x="500" y="134" width="100" height="32" rx="2"/>
+          <path class="detail" d="M506 139 H596 M506 145 H596 M506 155 H596 M506 161 H596"/>
+          <g class="rust">
+            <circle cx="518" cy="141" r="1.8"/><circle cx="526" cy="158" r="2.2"/><circle cx="533" cy="137" r="1.5"/><circle cx="541" cy="150" r="2"/>
+            <circle cx="547" cy="163" r="1.6"/><circle cx="555" cy="143" r="2.3"/><circle cx="561" cy="156" r="1.7"/><circle cx="568" cy="138" r="2"/>
+            <circle cx="574" cy="149" r="1.5"/><circle cx="579" cy="162" r="2.1"/><circle cx="586" cy="142" r="1.8"/><circle cx="591" cy="155" r="2.2"/>
+            <circle cx="530" cy="147" r="1.3"/><circle cx="565" cy="147" r="1.4"/><circle cx="582" cy="152" r="1.3"/><circle cx="550" cy="137" r="1.2"/>
+          </g>
+          <rect class="part" x="600" y="139" width="42" height="22" rx="2"/>
+          <path class="detail" d="M606 139 l-4 22 M611 139 l-4 22 M616 139 l-4 22 M621 139 l-4 22 M626 139 l-4 22 M631 139 l-4 22 M636 139 l-4 22 M641 139 l-4 22"/>
+
+          <rect class="part" x="690" y="112" width="72" height="76" rx="6"/>
+          <g class="rust">
+            <circle cx="700" cy="140" r="1.8"/><circle cx="709" cy="159" r="2.1"/><circle cx="718" cy="145" r="1.5"/><circle cx="727" cy="156" r="2"/>
+            <circle cx="736" cy="139" r="1.7"/><circle cx="745" cy="151" r="2.2"/><circle cx="753" cy="161" r="1.5"/><circle cx="713" cy="152" r="1.3"/>
+          </g>
+          <path class="hidden-line" d="M690 134 H800 M690 166 H800"/>
+          <rect class="part" x="752" y="74" width="10" height="14" rx="1"/>
+          <rect class="part" x="752" y="212" width="10" height="14" rx="1"/>
+          <rect class="part" x="762" y="48" width="16" height="204" rx="4"/>
+          <rect class="part" x="778" y="118" width="24" height="64" rx="4"/>
+          <rect class="part" x="778" y="76" width="54" height="10" rx="2"/>
+          <rect class="part" x="778" y="214" width="54" height="10" rx="2"/>
+          <path class="detail" d="M800 76 v10 M806 76 v10 M812 76 v10 M818 76 v10 M824 76 v10 M800 214 v10 M806 214 v10 M812 214 v10 M818 214 v10 M824 214 v10"/>
+
+          <rect class="part" x="852" y="124" width="8" height="52" rx="2"/>
+          <rect class="part" x="880" y="116" width="46" height="68" rx="3"/>
+          <path class="detail" d="M880 133 H926 M880 167 H926 M886 116 V184 M920 116 V184"/>
+
+          <path class="leader" d="M455 97 V50"/><circle class="leader-end" cx="455" cy="97" r="2.5"/>
+          <circle class="balloon" cx="455" cy="32" r="20"/><text class="balloon-no" x="455" y="32">1</text>
+          <path class="leader" d="M560 166 V250"/><circle class="leader-end" cx="560" cy="166" r="2.5"/>
+          <circle class="balloon" cx="560" cy="268" r="20"/><text class="balloon-no" x="560" y="268">2</text>
+          <path class="leader" d="M732 112 L700 50"/><circle class="leader-end" cx="732" cy="112" r="2.5"/>
+          <circle class="balloon" cx="700" cy="32" r="20"/><text class="balloon-no" x="700" y="32">3</text>
+          <path class="leader" d="M903 184 V250"/><circle class="leader-end" cx="903" cy="184" r="2.5"/>
+          <circle class="balloon" cx="903" cy="268" r="20"/><text class="balloon-no" x="903" y="268">4</text>
+        </svg>
+      </div>
+      <ol class="parts">
+        <li><i class="no">1</i><b>CV axle <code>28321SC033</code></b><span>Two fitted on 1 November</span></li>
+        <li><i class="no">2</i><b>Splines</b><span>Where the axle had rusted into the hub</span></li>
+        <li><i class="no">3</i><b>Wheel hub</b><span>Taken out to lube it and hammer it at a good angle</span></li>
+        <li><i class="no">4</i><b>Axle nut <code>902170049</code></b><span>Two, with the axles</span></li>
+      </ol>
+      <figcaption class="caption">The parts in the Forester's axle job, drawn apart along the axle's centre line. Not to scale.</figcaption>
+    </figure>
+
+    <dl class="plate">
+      <div><dt>The Forester's axle</dt><dd>4 hours<span class="note">for a job I'd planned at one</span></dd></div>
+      <div><dt>The Tiguan</dt><dd>86 days<span class="note">off the road, at 239,342 km</span></dd></div>
+      <div><dt>My maintenance log</dt><dd>174 jobs<span class="note">across five cars since March 2021</span></dd></div>
+    </dl>
+
+    <span class="entry-no" style="margin-top: 56px">Entry 01 &middot; The axle</span>
+    <div class="prose">
+      <p>On 1 November I fitted two new CV axles to the Forester, the shafts that drive its wheels. I'd planned on an hour: undo the axle nut, push the axle out of the wheel hub, fit the new one. It took four.</p>
+    </div>
+    <figure class="figure">
+      <div class="hours" role="img" aria-label="Planned: one hour. Actual: four hours, of which three went on the axle stuck in the hub.">
+        <span class="label">Planned</span>
+        <div class="track"><div class="seg plan" style="flex: 1 1 0">1 h</div><div style="flex: 3 1 0"></div></div>
+        <span class="label">Actual</span>
+        <div class="track"><div class="seg plan" style="flex: 1 1 0">1 h</div><div class="seg over" style="flex: 3 1 0">Stuck in the hub, 3 h</div></div>
+        <span></span>
+        <div class="hour-ticks" aria-hidden="true"><span style="--i: 0">0</span><span style="--i: 1">1 h</span><span style="--i: 2">2 h</span><span style="--i: 3">3 h</span><span style="--i: 4">4 h</span></div>
+      </div>
+      <figcaption class="caption">The Forester's axle job on 1 November. I planned one hour, and the rusted hub took three more. The hours aren't in the log.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>The axle had rusted into the hub. In the end I took the wheel hub out so I could lube it and hammer it at a good angle. The Forester is sixteen years old, and the three extra hours all went on that one stuck axle.</p>
+      <p>On an old car, the part tells you very little about how long a job will take. What decides it is how much rust is holding the part in, and you don't find that out until you start taking it apart.</p>
+      <p>I didn't stop when the hour ran out. I kept going because I wanted it done, and that has been my mindset.</p>
+    </div>
+  </section>
+
+  <section id="bolts">
+    <span class="entry-no">Entry 02</span>
+    <h2>Two bolts</h2>
+    <div class="prose">
+      <p>When I unbolted the Tiguan's DPF mount and intake pipe bracket, each was missing a bolt. The DPF is the filter in a diesel's exhaust. The Tiguan is a 2008 and came to me second hand, already old and with a lot of workshop jobs behind it. Somewhere in that history someone put those parts back without their bolts, and nobody knew.</p>
+    </div>
+    <figure class="figure">
+      <div class="fig-title">The bolt tray</div>
+      <div class="tray" id="tray"></div>
+      <figcaption class="caption">The bolts, nuts and screws in my log: seven bought on their own for $165.32, and four that came in a kit or as part of a bigger job. The two dashed slots are the bolts missing from the Tiguan.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>I don't think whoever did it was careless. Mechanics are people, and people make mistakes. So do I. But a workshop gets one go at a job, and then the car leaves. At home the car is still there next time, and I can keep coming back to it.</p>
+    </div>
+
+    <h3>The Forester, 2024</h3>
+    <div class="prose">
+      <p>From 10 August to 18 September 2024, the Forester's odometer read 169,656 km at every visit. In those 39 days the log has the head gasket set and the timing belt kit twice: once on 30 August, and again on 15 September with an engine valve.</p>
+    </div>
+    <p class="placeholder">[Your account goes here: what happened between 30 August and 15 September 2024.]</p>
+    <figure class="figure">
+      <div class="table-wrap-ledger"><table class="ledger" id="forester-ledger"></table></div>
+      <figcaption class="caption">The Forester's log from 10 August to 18 September 2024, as written. The odometer never moved, and the head gasket and timing kit appear twice.</figcaption>
+    </figure>
+
+    <figure class="figure">
+      <div class="legend-row">
+        <span class="key"><i class="keydot" style="width: 7px; height: 7px"></i><i class="keydot" style="width: 20px; height: 20px"></i>Dot size is what that day cost</span>
+        <span class="key"><i class="keybar"></i>Line under a row: odometer unchanged for two weeks or more</span>
+      </div>
+      <div class="chart" id="life-chart" role="img" aria-label="Timeline of every day of work in the log from 2021 to 2026, one row per car. The B200 runs from 2021 to early 2024, the MX-5 through 2024, the Forester in 2024 and 2026, the HiAce in 2026, and the Tiguan from mid 2024 with its densest run between July and October 2026."></div>
+      <figcaption class="caption">Every day of work in my log since March 2021, one dot per day, sized by what that day cost. The Tiguan has 27 days of work in the log, more than any other car.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="life-table"></div></details>
+    </figure>
+  </section>
+
+  <section id="timer">
+    <span class="entry-no">Entry 03</span>
+    <h2>A timer, not a deadline</h2>
+    <div class="prose">
+      <p>My day job is computer work, and it already runs on deadlines. An ETA I won't stop at is just another deadline, and bringing one home doubles the pressure. The garage is meant to balance out the week.</p>
+      <p>So I'm going to set a timer instead. When it goes off, I stop wherever the job has got to. If the car isn't finished, it waits.</p>
+      <p>The Tiguan shows I can afford to leave a car unfinished. It came off the road on 5 August at 239,342 km. On 30 October, 86 days later, it was still at 239,342 km. The log for those weeks has a DPF clean, balance shaft and oil pump parts, and new bolts for the balance shaft, harmonic balancer, tailshaft coupling, front subframe and dogbone mount.</p>
+    </div>
+    <figure class="figure">
+      <div class="fig-title">The 86 days, job by job</div>
+      <div class="table-wrap-ledger"><table class="ledger" id="tiguan-ledger"></table></div>
+      <figcaption class="caption">The Tiguan's log from 5 August to 30 October 2026. Every visit has the same odometer reading.</figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="legend-row">
+        <span class="key"><i class="keyline" style="background: var(--tiguan)"></i>Tiguan</span>
+        <span class="key"><i class="keyline" style="background: var(--forester)"></i>Forester</span>
+        <span class="key"><i class="keyline" style="background: var(--hiace)"></i>HiAce</span>
+      </div>
+      <div class="chart" id="sit-chart" role="img" aria-label="Line chart of kilometres driven from early August 2026. The Tiguan stays at zero until 30 October. The HiAce climbs to 3,220 km by 6 October and the Forester to 1,395 km by 1 November."></div>
+      <figcaption class="caption">Kilometres each car covered while the Tiguan was off the road, counted from each car's first odometer reading after 5 August. Each point is a day I logged a reading.</figcaption>
+      <details class="numbers"><summary>Show the numbers</summary><div class="table-wrap" id="sit-table"></div></details>
+    </figure>
+    <div class="prose">
+      <p>This only works because the Tiguan isn't my only car. If it's the car you need on Monday, the timer turns back into a deadline.</p>
+    </div>
+    <div class="notice" id="offline" hidden>Charts need their libraries from jsDelivr. Connect to the internet and reload this page to see them.</div>
+  </section>
+</main>
+
+<footer>
+  <h2>About the numbers</h2>
+  <p>Every number on this page comes from my maintenance log: 174 jobs across five cars since March 2021, each with its cost and, where I recorded them, a date and an odometer reading. The charts use the 137 jobs that have a date, grouped into 72 days of work. The 37 parts I logged without a date are left out. The hours for the Forester's axle aren't in the log.</p>
+</footer>
+
+<script id="data" type="application/json">{"sessions":[{"car":"B200","date":"2021-03-14","jobs":1,"spend":50.0,"odo":74613},{"car":"B200","date":"2021-05-15","jobs":1,"spend":596.0,"odo":75821},{"car":"B200","date":"2021-05-21","jobs":1,"spend":65.0,"odo":75821},{"car":"B200","date":"2021-05-22","jobs":1,"spend":20.0,"odo":75823},{"car":"B200","date":"2021-05-26","jobs":1,"spend":80.0,"odo":75828},{"car":"B200","date":"2021-06-02","jobs":1,"spend":300.0,"odo":75872},{"car":"B200","date":"2021-06-08","jobs":1,"spend":200.0,"odo":75902},{"car":"B200","date":"2022-02-07","jobs":1,"spend":1200.0,"odo":77298},{"car":"B200","date":"2022-03-17","jobs":2,"spend":810.0,"odo":78000},{"car":"B200","date":"2022-04-08","jobs":1,"spend":621.0,"odo":78100},{"car":"B200","date":"2022-05-30","jobs":1,"spend":80.0,"odo":78577},{"car":"B200","date":"2023-05-21","jobs":6,"spend":290.0,"odo":85692},{"car":"B200","date":"2023-07-05","jobs":1,"spend":400.0,"odo":86846},{"car":"B200","date":"2023-07-19","jobs":1,"spend":20.0,"odo":86900},{"car":"B200","date":"2023-10-15","jobs":2,"spend":405.0,"odo":87751},{"car":"B200","date":"2024-01-26","jobs":1,"spend":50.0,"odo":89172},{"car":"Forester","date":"2024-08-10","jobs":1,"spend":41.0,"odo":169656},{"car":"Forester","date":"2024-08-28","jobs":1,"spend":0.0,"odo":169656},{"car":"Forester","date":"2024-08-30","jobs":5,"spend":882.8,"odo":169656},{"car":"Forester","date":"2024-09-01","jobs":1,"spend":31.44,"odo":169656},{"car":"Forester","date":"2024-09-15","jobs":3,"spend":575.56,"odo":169656},{"car":"Forester","date":"2024-09-16","jobs":2,"spend":77.27,"odo":169656},{"car":"Forester","date":"2024-09-17","jobs":2,"spend":163.04,"odo":169656},{"car":"Forester","date":"2024-09-18","jobs":2,"spend":158.4,"odo":169656},{"car":"Forester","date":"2026-05-09","jobs":3,"spend":1231.17,"odo":171935},{"car":"Forester","date":"2026-05-15","jobs":1,"spend":99.0,"odo":171972},{"car":"Forester","date":"2026-05-26","jobs":1,"spend":38.96,"odo":172141},{"car":"Forester","date":"2026-06-11","jobs":1,"spend":34.28,"odo":172285},{"car":"Forester","date":"2026-08-20","jobs":1,"spend":21.67,"odo":173021},{"car":"Forester","date":"2026-09-18","jobs":2,"spend":240.0,"odo":173619},{"car":"Forester","date":"2026-11-01","jobs":1,"spend":1154.87,"odo":174416},{"car":"HiAce","date":"2026-05-09","jobs":1,"spend":349.53,"odo":126593},{"car":"HiAce","date":"2026-05-17","jobs":1,"spend":0.0,"odo":126593},{"car":"HiAce","date":"2026-08-11","jobs":1,"spend":820.0,"odo":129562},{"car":"HiAce","date":"2026-08-14","jobs":2,"spend":84.2,"odo":129628},{"car":"HiAce","date":"2026-08-20","jobs":1,"spend":21.67,"odo":129866},{"car":"HiAce","date":"2026-08-30","jobs":4,"spend":263.01,"odo":130515},{"car":"HiAce","date":"2026-09-20","jobs":2,"spend":615.1,"odo":132005},{"car":"HiAce","date":"2026-10-03","jobs":4,"spend":127.15,"odo":132695},{"car":"HiAce","date":"2026-10-06","jobs":2,"spend":818.06,"odo":132782},{"car":"MX-5","date":"2024-03-05","jobs":2,"spend":410.0,"odo":55856},{"car":"MX-5","date":"2024-05-12","jobs":6,"spend":282.0,"odo":57496},{"car":"MX-5","date":"2024-06-01","jobs":3,"spend":1192.0,"odo":57646},{"car":"MX-5","date":"2024-06-22","jobs":2,"spend":32.0,"odo":58617},{"car":"MX-5","date":"2024-09-19","jobs":3,"spend":92.0,"odo":60010},{"car":"Tiguan","date":"2024-07-31","jobs":3,"spend":30.24,"odo":225881},{"car":"Tiguan","date":"2024-08-01","jobs":1,"spend":41.0,"odo":225881},{"car":"Tiguan","date":"2024-08-02","jobs":1,"spend":54.99,"odo":225881},{"car":"Tiguan","date":"2024-08-03","jobs":5,"spend":529.77,"odo":225881},{"car":"Tiguan","date":"2024-08-04","jobs":1,"spend":107.02,"odo":225881},{"car":"Tiguan","date":"2024-08-20","jobs":1,"spend":343.12,"odo":226089},{"car":"Tiguan","date":"2024-08-21","jobs":2,"spend":542.95,"odo":226089},{"car":"Tiguan","date":"2024-09-13","jobs":2,"spend":1375.0,"odo":226615},{"car":"Tiguan","date":"2024-09-18","jobs":2,"spend":278.46,"odo":226697},{"car":"Tiguan","date":"2024-10-18","jobs":1,"spend":500.29,"odo":228848},{"car":"Tiguan","date":"2025-03-19","jobs":1,"spend":80.84,"odo":230000},{"car":"Tiguan","date":"2025-08-16","jobs":2,"spend":0.0,"odo":234036},{"car":"Tiguan","date":"2025-10-30","jobs":1,"spend":68.0,"odo":236535},{"car":"Tiguan","date":"2025-11-08","jobs":1,"spend":290.36,"odo":236606},{"car":"Tiguan","date":"2026-03-07","jobs":1,"spend":15.76,"odo":238960},{"car":"Tiguan","date":"2026-03-27","jobs":1,"spend":132.8,"odo":239118},{"car":"Tiguan","date":"2026-06-30","jobs":10,"spend":883.93,"odo":239335},{"car":"Tiguan","date":"2026-07-07","jobs":1,"spend":172.98,"odo":239340},{"car":"Tiguan","date":"2026-07-14","jobs":1,"spend":178.86,"odo":239342},{"car":"Tiguan","date":"2026-07-21","jobs":1,"spend":95.22,"odo":239342},{"car":"Tiguan","date":"2026-08-05","jobs":1,"spend":450.0,"odo":239342},{"car":"Tiguan","date":"2026-09-12","jobs":5,"spend":836.62,"odo":239342},{"car":"Tiguan","date":"2026-09-26","jobs":1,"spend":30.0,"odo":239342},{"car":"Tiguan","date":"2026-10-07","jobs":1,"spend":22.3,"odo":239342},{"car":"Tiguan","date":"2026-10-25","jobs":3,"spend":31.0,"odo":239342},{"car":"Tiguan","date":"2026-10-26","jobs":1,"spend":60.4,"odo":239342},{"car":"Tiguan","date":"2026-10-30","jobs":2,"spend":45.0,"odo":239342}],"still":[{"car":"Tiguan","start":"2024-07-31","end":"2024-08-04","odo":225881,"visits":5},{"car":"Tiguan","start":"2024-08-20","end":"2024-08-21","odo":226089,"visits":2},{"car":"Tiguan","start":"2026-07-14","end":"2026-10-30","odo":239342,"visits":9},{"car":"Forester","start":"2024-08-10","end":"2024-09-18","odo":169656,"visits":8},{"car":"HiAce","start":"2026-05-09","end":"2026-05-17","odo":126593,"visits":2},{"car":"B200","start":"2021-05-15","end":"2021-05-21","odo":75821,"visits":2}],"km":[{"car":"Tiguan","date":"2026-08-05","km":0,"odo":239342},{"car":"Tiguan","date":"2026-09-12","km":0,"odo":239342},{"car":"Tiguan","date":"2026-09-26","km":0,"odo":239342},{"car":"Tiguan","date":"2026-10-07","km":0,"odo":239342},{"car":"Tiguan","date":"2026-10-25","km":0,"odo":239342},{"car":"Tiguan","date":"2026-10-26","km":0,"odo":239342},{"car":"Tiguan","date":"2026-10-30","km":0,"odo":239342},{"car":"HiAce","date":"2026-08-11","km":0,"odo":129562},{"car":"HiAce","date":"2026-08-14","km":66,"odo":129628},{"car":"HiAce","date":"2026-08-20","km":304,"odo":129866},{"car":"HiAce","date":"2026-08-30","km":953,"odo":130515},{"car":"HiAce","date":"2026-09-20","km":2443,"odo":132005},{"car":"HiAce","date":"2026-10-03","km":3133,"odo":132695},{"car":"HiAce","date":"2026-10-06","km":3220,"odo":132782},{"car":"Forester","date":"2026-08-20","km":0,"odo":173021},{"car":"Forester","date":"2026-09-18","km":598,"odo":173619},{"car":"Forester","date":"2026-11-01","km":1395,"odo":174416}],"offRoad":{"start":"2026-08-05","end":"2026-10-30"},"tiguan86":[{"car":"Tiguan","date":"2026-08-05","work":"DPF clean","parts":[],"cost":450.0,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Balance shaft drill, pre-2009, 100 mm","parts":[],"cost":461.85,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"MMHP hex shaft and oil pump bolt","parts":["1000107","03G115105A"],"cost":239.98,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Exhaust clamp and turbo gasket","parts":["1K0253725","1K0253115T"],"cost":68.94,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Balance shaft bolts","parts":["N90977502","N91051201","N91123401","5× N10601402"],"cost":41.9,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Oil pan seal","parts":["JB Weld Ultimate Black RTV"],"cost":23.95,"odo":239342},{"car":"Tiguan","date":"2026-09-26","work":"Engine subframe mount","parts":["1KD199867","1KD199868","3C0199855M"],"cost":30.0,"odo":239342},{"car":"Tiguan","date":"2026-10-07","work":"Harmonic balancer bolts","parts":["4× N91048802"],"cost":22.3,"odo":239342},{"car":"Tiguan","date":"2026-10-25","work":"Tailshaft coupling bolts","parts":["3× M10×45","3× M10×30"],"cost":21.0,"odo":239342},{"car":"Tiguan","date":"2026-10-25","work":"Exhaust pipe connector","parts":["60 × 95 mm"],"cost":5.0,"odo":239342},{"car":"Tiguan","date":"2026-10-25","work":"Exhaust hanger rubber","parts":[],"cost":5.0,"odo":239342},{"car":"Tiguan","date":"2026-10-26","work":"Engine oil","parts":["Castrol Edge 5W-30 LL"],"cost":60.4,"odo":239342},{"car":"Tiguan","date":"2026-10-30","work":"Front subframe bolts","parts":["2× M12×90","4× M12×100"],"cost":30.0,"odo":239342},{"car":"Tiguan","date":"2026-10-30","work":"Dogbone mount bolts","parts":["N10513102","N91066101","N10558002"],"cost":15.0,"odo":239342}],"forester24":[{"car":"Forester","date":"2024-08-10","work":"Front differential","parts":["Nulon 75W-90"],"cost":41.0,"odo":169656},{"car":"Forester","date":"2024-08-28","work":"Rear differential","parts":["Nulon 75W-90"],"cost":null,"odo":169656},{"car":"Forester","date":"2024-08-30","work":"Engine oil","parts":["Castrol Edge 5W-30 A3/B4"],"cost":48.73,"odo":169656},{"car":"Forester","date":"2024-08-30","work":"Oil filter","parts":["Ryco Z436"],"cost":21.56,"odo":169656},{"car":"Forester","date":"2024-08-30","work":"Timing belt + water pump","parts":["Gates 4PK845, Basco Kit"],"cost":375.0,"odo":169656},{"car":"Forester","date":"2024-08-30","work":"Serpentine belt","parts":["Gates 5PK875 + Gates K040317SF"],"cost":33.95,"odo":169656},{"car":"Forester","date":"2024-08-30","work":"Head gasket","parts":["Fel-Pro HS 26415 PT-1 + Durapro HBK8290D"],"cost":403.56,"odo":169656},{"car":"Forester","date":"2024-09-01","work":"Air filter","parts":["Ryco A1527"],"cost":31.44,"odo":169656},{"car":"Forester","date":"2024-09-15","work":"Head gasket","parts":["Fel-Pro HS 26415 PT"],"cost":111.7,"odo":169656},{"car":"Forester","date":"2024-09-15","work":"Engine valve","parts":["Motoku"],"cost":84.8,"odo":169656},{"car":"Forester","date":"2024-09-15","work":"Timing belt + water pump","parts":["AISIN TKF-006 Engine Timing Belt Kit with Water Pump"],"cost":379.06,"odo":169656},{"car":"Forester","date":"2024-09-16","work":"Intake Manifold Gasket","parts":["Fel-Pro MS96106 Intake Manifold Gasket Set"],"cost":28.54,"odo":169656},{"car":"Forester","date":"2024-09-16","work":"Engine oil","parts":["Castrol Edge 5W-30 A3/B4"],"cost":48.73,"odo":169656},{"car":"Forester","date":"2024-09-17","work":"Transmission fluid","parts":["Penrite ATF FS"],"cost":53.51,"odo":169656},{"car":"Forester","date":"2024-09-17","work":"Coolant","parts":["Penrite blue"],"cost":109.53,"odo":169656},{"car":"Forester","date":"2024-09-18","work":"Fuel filter","parts":["Ryco Z931"],"cost":139.9,"odo":169656},{"car":"Forester","date":"2024-09-18","work":"Brake fluid","parts":["BOSCH BF4-1L Brake Fluid DOT 4"],"cost":18.5,"odo":169656}],"bolts":[{"car":"Tiguan","date":"2026-10-30","work":"Dogbone mount bolts","parts":["N10513102","N91066101","N10558002"],"cost":15.0,"odo":239342},{"car":"Tiguan","date":"2026-10-30","work":"Front subframe bolts","parts":["2× M12×90","4× M12×100"],"cost":30.0,"odo":239342},{"car":"Tiguan","date":"2026-10-25","work":"Tailshaft coupling bolts","parts":["3× M10×45","3× M10×30"],"cost":21.0,"odo":239342},{"car":"Tiguan","date":"2026-10-07","work":"Harmonic balancer bolts","parts":["4× N91048802"],"cost":22.3,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Balance shaft bolts","parts":["N90977502","N91051201","N91123401","5× N10601402"],"cost":41.9,"odo":239342},{"car":"Tiguan","date":"2026-09-12","work":"Oil pump bolt","parts":["03G115105A"],"cost":null,"odo":239342},{"car":"Tiguan","date":null,"work":"Subframe mount bolt","parts":["N10558002"],"cost":9.2,"odo":null},{"car":"Tiguan","date":null,"work":"Rear sway bar bracket screw","parts":["N10719301"],"cost":25.92,"odo":null},{"car":"Forester","date":"2026-11-01","work":"Axle nuts","parts":["2× 902170049"],"cost":null,"odo":174416},{"car":"Forester","date":"2026-05-09","work":"Rear strut bottom nut and bolt","parts":["90235000","901000357"],"cost":null,"odo":171935},{"car":"B200","date":"2021-06-02","work":"Transmission pan bolts","parts":["8× new pan bolt, 7 Nm"],"cost":null,"odo":75872}]}</script>
+<script>
+const root = document.documentElement;
+const data = JSON.parse(document.getElementById("data").textContent);
+const css = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+const day = (s) => new Date(`${s}T00:00:00Z`);
+const CARS = ["Tiguan", "Forester", "HiAce", "MX-5", "B200"];
+const CAR_VAR = { Tiguan: "--tiguan", Forester: "--forester", HiAce: "--hiace" };
+const carColour = (car) => css(CAR_VAR[car] ?? "--muted");
+const km = (v) => `${v.toLocaleString("en-AU")} km`;
+const dollars = (v) => v.toLocaleString("en-AU", { style: "currency", currency: "AUD", currencyDisplay: "narrowSymbol", minimumFractionDigits: v % 1 ? 2 : 0 });
+const longDate = (s) => day(s).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const ledgerDate = (s) => day(s).toLocaleDateString("en-AU", { day: "2-digit", month: "short", timeZone: "UTC" });
+const daysBetween = (a, b) => Math.round((day(b) - day(a)) / 864e5);
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") node.className = v;
+    else node.setAttribute(k, v);
+  }
+  node.append(...children.filter((c) => c !== null && c !== undefined));
+  return node;
+}
+
+function partsList(parts) {
+  return parts.flatMap((p, i) => (i ? [" · ", el("code", {}, p)] : [el("code", {}, p)]));
+}
+
+function ledger(table, entries, { doubled = new Set() } = {}) {
+  const head = el("thead", {}, el("tr", {},
+    el("th", {}, "Date"), el("th", {}, "Odometer"), el("th", {}, "Work"), el("th", {}, "Part numbers"), el("th", { class: "num" }, "Cost")));
+  const body = el("tbody");
+  const seen = new Map();
+  entries.forEach((e, i) => {
+    const firstOfDay = i === 0 || entries[i - 1].date !== e.date;
+    const count = (seen.get(e.work) ?? 0) + 1;
+    seen.set(e.work, count);
+    const work = el("td", { class: "work" }, e.work, doubled.has(e.work) && count > 1 ? el("span", { class: "again" }, "again") : null);
+    body.append(el("tr", {},
+      el("td", { class: firstOfDay ? "date" : "date ditto" }, firstOfDay ? ledgerDate(e.date) : ""),
+      el("td", { class: firstOfDay ? "odo" : "odo ditto" }, firstOfDay ? el("mark", {}, km(e.odo)) : ""),
+      work,
+      el("td", { class: "parts-cell" }, ...partsList(e.parts)),
+      el("td", { class: "cost" }, e.cost === null ? "-" : dollars(e.cost))));
+  });
+  const total = entries.reduce((s, e) => s + (e.cost ?? 0), 0);
+  const span = daysBetween(entries[0].date, entries[entries.length - 1].date);
+  const foot = el("tfoot", {}, el("tr", {},
+    el("td", { class: "work", colspan: "4" }, `${entries.length} lines over ${span} days, odometer unchanged`),
+    el("td", { class: "cost" }, dollars(total))));
+  table.replaceChildren(head, body, foot);
+}
+
+const BOLT_GLYPH = '<svg viewBox="0 0 34 44" aria-hidden="true"><path d="M9 4 h16 l4 4 v6 h-24 v-6 z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 14 h8 v26 h-8 z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13 20 l8 -2 M13 24 l8 -2 M13 28 l8 -2 M13 32 l8 -2 M13 36 l8 -2" stroke="currentColor" stroke-width="1"/></svg>';
+
+function slot({ work, parts, car, when, price, missing = false }) {
+  const node = el("div", { class: missing ? "slot missing" : "slot" });
+  node.innerHTML = BOLT_GLYPH;
+  const dot = el("i");
+  dot.style.background = `var(${CAR_VAR[car] ?? "--muted"})`;
+  node.append(
+    el("b", {}, work),
+    parts.length ? el("div", {}, ...partsList(parts)) : el("div"),
+    el("div", { class: "meta" }, el("span", { class: "car" }, dot, `${car}${when ? `, ${when}` : ""}`), el("span", {}, price)));
+  return node;
+}
+
+function tray(container, bolts) {
+  const missing = ["DPF mount bolt", "Intake pipe bracket bolt"].map((work) => slot({ work, parts: [], car: "Tiguan", when: "", price: "found missing", missing: true }));
+  const logged = bolts.map((b) => slot({
+    work: b.work,
+    parts: b.parts,
+    car: b.car,
+    when: b.date ? longDate(b.date) : "no date",
+    price: b.cost === null ? "in a kit" : dollars(b.cost),
+  }));
+  container.replaceChildren(...missing, ...logged);
+}
+
+ledger(document.getElementById("tiguan-ledger"), data.tiguan86);
+ledger(document.getElementById("forester-ledger"), data.forester24, { doubled: new Set(["Head gasket", "Timing belt + water pump"]) });
+tray(document.getElementById("tray"), data.bolts);
+
+function table(container, head, rows) {
+  const t = document.createElement("table");
+  const tr = t.createTHead().insertRow();
+  head.forEach(([label, numeric]) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    if (numeric) th.className = "num";
+    tr.append(th);
+  });
+  const body = t.createTBody();
+  rows.forEach((row) => {
+    const r = body.insertRow();
+    row.forEach((cell, i) => {
+      const td = r.insertCell();
+      td.textContent = cell;
+      if (head[i][1]) td.className = "num";
+    });
+  });
+  container.replaceChildren(t);
+}
+
+table(document.getElementById("life-table"), [["Date", false], ["Car", false], ["Jobs", true], ["Cost", true], ["Odometer", true]],
+  [...data.sessions].sort((a, b) => a.date.localeCompare(b.date)).map((d) => [longDate(d.date), d.car, String(d.jobs), dollars(d.spend), d.odo ? km(d.odo) : "-"]));
+table(document.getElementById("sit-table"), [["Date", false], ["Car", false], ["Odometer", true], ["Since first reading", true]],
+  data.km.map((d) => [longDate(d.date), d.car, km(d.odo), km(d.km)]));
+
+function plotStyle() {
+  return { background: "transparent", color: css("--ink-2"), fontFamily: css("--mono"), fontSize: "11.5px", overflow: "visible" };
+}
+
+function tipOptions() {
+  return { fill: css("--card"), stroke: css("--rule"), fontSize: 12 };
+}
+
+function lifeChart() {
+  const node = document.getElementById("life-chart");
+  const width = node.clientWidth;
+  const narrow = width < 560;
+  const maxSpend = d3.max(data.sessions, (d) => d.spend);
+  const radius = (spend) => 3.5 + (narrow ? 7 : 10) * Math.sqrt(spend / maxSpend);
+  const sessions = data.sessions.map((d) => ({ ...d, t: day(d.date), r: radius(d.spend) })).sort((a, b) => b.spend - a.spend);
+  const still = data.still.filter((d) => daysBetween(d.start, d.end) >= 14);
+  const notes = [
+    { car: "Tiguan", t: day("2026-10-30"), text: "Odometer stuck at 239,342 km" },
+    { car: "Forester", t: day("2026-11-01"), text: "The axle, 1 Nov" },
+    { car: "Forester", t: day("2024-09-18"), text: "2024 teardown" },
+  ];
+  node.replaceChildren(Plot.plot({
+    width,
+    height: 36 + CARS.length * (narrow ? 56 : 64) + 30,
+    marginTop: 36,
+    marginLeft: narrow ? 64 : 76,
+    marginRight: 14,
+    marginBottom: 30,
+    style: plotStyle(),
+    x: { type: "utc", domain: [day("2021-01-01"), day("2027-01-01")], ticks: "year", tickFormat: narrow ? "'%y" : "%Y", label: null },
+    y: { type: "point", domain: CARS, padding: 0.5, label: null },
+    r: { type: "identity" },
+    color: { type: "identity" },
+    marks: [
+      Plot.gridX(d3.utcYears(day("2021-01-01"), day("2027-01-02")), { stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY(CARS, { stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY(still, { y: "car", x1: (d) => day(d.start), x2: (d) => day(d.end), stroke: (d) => carColour(d.car), strokeWidth: 3, strokeLinecap: "round", dy: narrow ? 16 : 19 }),
+      Plot.dot(sessions, { x: "t", y: "car", r: "r", fill: (d) => carColour(d.car), stroke: css("--paper"), strokeWidth: 2 }),
+      Plot.text(notes, { x: "t", y: "car", text: "text", textAnchor: "end", dy: -22, fill: css("--ink-2"), fontSize: 11.5 }),
+      Plot.axisY({ tickSize: 0, tickPadding: 12, fill: css("--ink"), fontSize: 12.5, fontWeight: 600 }),
+      Plot.tip(sessions, Plot.pointer({
+        x: "t",
+        y: "car",
+        title: (d) => [`${d.car}, ${longDate(d.date)}`, `${d.jobs} job${d.jobs > 1 ? "s" : ""}, ${dollars(d.spend)}`, d.odo ? km(d.odo) : "no odometer reading"].join("\n"),
+        ...tipOptions(),
+      })),
+    ],
+  }));
+}
+
+function sitChart() {
+  const node = document.getElementById("sit-chart");
+  const width = node.clientWidth;
+  const narrow = width < 560;
+  const rows = data.km.map((d) => ({ ...d, t: day(d.date) }));
+  const ends = d3.groups(rows, (d) => d.car).map(([, g]) => g[g.length - 1]);
+  const off = data.offRoad;
+  const top = 3600;
+  const endLabel = (d) => (narrow ? `${d.car}\n${km(d.km)}` : `${d.car}, ${km(d.km)}`);
+  node.replaceChildren(Plot.plot({
+    width,
+    height: Math.round(Math.min(420, Math.max(290, width * 0.42))),
+    marginTop: 16,
+    marginLeft: 50,
+    marginRight: narrow ? 92 : 140,
+    marginBottom: 34,
+    style: plotStyle(),
+    x: { type: "utc", domain: [day("2026-07-29"), day("2026-11-06")], ticks: "month", tickFormat: "%b", label: null },
+    y: { domain: [0, top], ticks: [0, 1000, 2000, 3000], tickFormat: (d) => d.toLocaleString("en-AU"), label: "Kilometres driven", labelArrow: "none" },
+    color: { type: "identity" },
+    marks: [
+      Plot.rect([off], { x1: (d) => day(d.start), x2: (d) => day(d.end), y1: 0, y2: top, fill: css("--ink"), fillOpacity: 0.05 }),
+      Plot.text([off], { x: (d) => day(d.start), y: top, text: () => (narrow ? "Tiguan off the road" : "Tiguan off the road, 86 days"), textAnchor: "start", dx: 8, dy: 12, fill: css("--ink-2") }),
+      Plot.gridY([1000, 2000, 3000], { stroke: css("--grid"), strokeOpacity: 1 }),
+      Plot.ruleY([0], { stroke: css("--axis") }),
+      Plot.line(rows, { x: "t", y: "km", z: "car", stroke: (d) => carColour(d.car), strokeWidth: 2, strokeLinejoin: "round", strokeLinecap: "round" }),
+      Plot.dot(rows, { x: "t", y: "km", r: 4.5, fill: (d) => carColour(d.car), stroke: css("--paper"), strokeWidth: 2 }),
+      Plot.text(ends.filter((d) => d.km > 0), { x: "t", y: "km", text: endLabel, textAnchor: "start", lineAnchor: "middle", dx: 10, fill: css("--ink"), fontWeight: 600 }),
+      Plot.text(ends.filter((d) => d.km === 0), { x: "t", y: "km", text: endLabel, textAnchor: "start", lineAnchor: "bottom", dx: 8, dy: -8, fill: css("--ink"), fontWeight: 600 }),
+      Plot.tip(rows, Plot.pointer({
+        x: "t",
+        y: "km",
+        title: (d) => [`${d.car}, ${longDate(d.date)}`, `${km(d.km)} since first reading`, `odometer ${km(d.odo)}`].join("\n"),
+        ...tipOptions(),
+      })),
+    ],
+  }));
+}
+
+function renderCharts() {
+  const ready = typeof Plot !== "undefined" && typeof d3 !== "undefined";
+  document.getElementById("offline").hidden = ready;
+  if (!ready) return;
+  lifeChart();
+  sitChart();
+}
+
+function setTheme(choice) {
+  if (choice === "system") delete root.dataset.theme;
+  else root.dataset.theme = choice;
+  document.querySelectorAll("[data-theme-choice]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choice)));
+  try { localStorage.setItem("icc-report-theme", choice); } catch {}
+  renderCharts();
+}
+
+let saved = "system";
+try { saved = localStorage.getItem("icc-report-theme") ?? "system"; } catch {}
+if (saved !== "system") root.dataset.theme = saved;
+document.querySelectorAll("[data-theme-choice]").forEach((b) => {
+  b.setAttribute("aria-pressed", String(b.dataset.themeChoice === saved));
+  b.addEventListener("click", () => setTheme(b.dataset.themeChoice));
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!root.dataset.theme) renderCharts(); });
+
+const bar = document.querySelector(".bar");
+new ResizeObserver(() => root.style.setProperty("--bar-height", `${bar.offsetHeight}px`)).observe(bar);
+
+renderCharts();
+let lastWidth = innerWidth;
+let resizeTimer;
+addEventListener("resize", () => {
+  if (innerWidth === lastWidth) return;
+  lastWidth = innerWidth;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderCharts, 150);
+});
+</script>
+</body>
+</html>

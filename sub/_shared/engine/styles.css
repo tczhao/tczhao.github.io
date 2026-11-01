@@ -910,6 +910,27 @@ button { font: inherit; color: inherit; }
 .toast[data-open="true"] { transform: translate(-50%, 0); }
 
 /* ==========================================================================
+   Chinese
+
+   Chinese has no italic. A browser asked for one slants the glyphs by a fixed
+   angle, which reads as a rendering fault rather than as emphasis, so on a
+   page whose language is Chinese every italic in these sheets stands upright,
+   and so do em and i, which the browser italicises on its own. :lang() reads
+   the html tag the build writes, so a page that declares no language never
+   matches. Each selector carries it, which also outranks the rule being undone
+   wherever that rule sits, components.css included.
+   ========================================================================== */
+em:lang(zh),
+i:lang(zh),
+.entry__source em:lang(zh),
+.reflect__prompt:lang(zh),
+.reflect__field:lang(zh)::placeholder,
+.empty:lang(zh),
+.gate__answer:lang(zh),
+.note__body--gate:lang(zh),
+.cheat__claim:lang(zh) { font-style: normal; }
+
+/* ==========================================================================
    Narrow: the spine unbinds into a top bar
    ========================================================================== */
 @media (max-width: 60rem) {

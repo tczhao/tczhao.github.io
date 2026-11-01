@@ -6,8 +6,8 @@
  */
 const path = require('path');
 const assert = require('assert');
-const { boot, target, makeEnv, check, report, templateHole, DAY, ENGINE } = require('./harness');
-const { validate, validateConfig } = require('../lib/build');
+const { boot, target, makeEnv, readSite, check, report, templateHole, DAY, ENGINE } = require('./harness');
+const { validate, validateConfig, checkSource, localiseShell } = require('../lib/build');
 const fs = require('fs');
 
 const FULL = path.join(__dirname, 'fixtures', 'full');
@@ -16,6 +16,7 @@ const EVIDENCE = path.join(__dirname, 'fixtures', 'evidence');
 const COMPUTE = path.join(__dirname, 'fixtures', 'compute');
 const COMPUTE_INTRO = path.join(__dirname, 'fixtures', 'compute-intro');
 const WORKED = path.join(__dirname, 'fixtures', 'worked');
+const ZH = path.join(__dirname, 'fixtures', 'zh');
 const T0 = new Date(2026, 7, 5, 9, 0, 0).getTime();     // Wed 5 Aug 2026, local
 
 function todayId(env) {
@@ -1316,6 +1317,385 @@ check('a sentence with nowhere to break is spoken whole rather than cut badly', 
   const unbroken = 'word '.repeat(80).trim() + '.';
   assert.ok(unbroken.length > 200, 'the fixture has to be over the limit to test anything');
   assert.deepStrictEqual(env.window.SPEECH.split(unbroken), [unbroken]);
+});
+
+/* --- A page in another language ------------------------------------------
+   Every string the engine owns has to reach a translated site in that site's
+   language, or the page reads as a half translation. The parts the engine
+   leaves to the browser - dates, the voice, italics - have to be told which
+   language they are working in, and none of it may touch a page that declares
+   no language. */
+
+/* Everything a reader could see or hear: element text with the tags and
+   entities taken out, the document title, and the attributes a hover or a
+   screen reader brings out. The backup dump is skipped because it is the
+   record's own JSON, keys and all, rather than copy. Claude is a name. */
+function englishIn(env) {
+  const seen = [env.document.title || ''];
+  for (const [id, e] of Object.entries(env.els)) {
+    if (id === 'export-text') continue;
+    seen.push(e._text, e._html.replace(/<[^>]*>/g, ' ').replace(/&#?\w+;/g, ' '));
+    for (const m of e._html.matchAll(/\b(?:placeholder|title|aria-label)="([^"]*)"/g)) seen.push(m[1]);
+  }
+  return (seen.join(' ').match(/[A-Za-z]{3,}/g) || []).filter(w => w !== 'Claude');
+}
+
+check('a Chinese page shows no English in any view or after any action', () => {
+  /* Recorded at the first step a word appears, so a failure names the action
+     that let it in rather than every step after it. */
+  const leaks = {};
+  const noted = new Set();
+  const look = (env, step) => {
+    const fresh = [...new Set(englishIn(env))].filter(w => !noted.has(w));
+    fresh.forEach(w => noted.add(w));
+    if (fresh.length) leaks[step] = fresh;
+  };
+  // The clipboard fallback writes to a style object the fake elements lack.
+  const styled = env => {
+    const make = env.document.createElement;
+    env.document.createElement = () => Object.assign(make(), { style: {} });
+    return env;
+  };
+
+  let env = styled(boot(ZH, T0));
+  const id = todayId(env);
+  const seq = env.api.seq();
+  look(env, 'boot');
+
+  for (const v of ['review', 'library', 'cheatsheet', 'journal', 'progress', 'today']) {
+    env.fire('click', target({ view: v }, true));
+    look(env, 'tab ' + v);
+  }
+
+  env.fire('input', target({ elId: 'note-field', id, value: '我先找了两个例子。' }));
+  look(env, 'write a note');
+  env.fire('click', target({ act: 'show-prompt', id }));
+  look(env, 'show the prompt');
+  env.fire('click', target({ act: 'copy-prompt', id }));
+  look(env, 'copy the prompt');
+  env.fire('click', target({ act: 'complete', id }));
+  look(env, 'log the entry');
+
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: seq[0] }));
+  look(env, 'open the first entry');
+  env.fire('click', target({ act: 'lib-open', id: seq[seq.length - 1] }));
+  look(env, 'open the last entry');
+  env.fire('click', target({ act: 'lib-close' }));
+  env.fire('click', target({ act: 'lib-level', level: 'hard' }));
+  env.fire('click', target({ act: 'lib-track', track: 'beta' }));
+  look(env, 'filter the library');
+  env.fire('input', target({ elId: 'lib-search', value: '没有这个词' }));
+  look(env, 'search with no match');
+
+  env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+  env.fire('click', target({ act: 'cheat-open', id: seq[0] }));
+  look(env, 'follow a cheatsheet row');
+
+  env.fire('click', target({ act: 'go', view: 'progress' }));
+  env.fire('click', target({ act: 'export' }));
+  look(env, 'download a backup');
+  env.fire('click', target({ act: 'export-show' }));
+  env.fire('click', target({ act: 'import-open' }));
+  env.document.getElementById('import-field').value = '';
+  env.fire('click', target({ act: 'import-run' }));
+  look(env, 'restore nothing');
+  env.document.getElementById('import-field').value = '{"v":1}';
+  env.fire('click', target({ act: 'import-run' }));
+  look(env, 'restore rubbish');
+  env.document.getElementById('import-field').value = JSON.stringify(env.state());
+  env.fire('click', target({ act: 'import-run' }));
+  look(env, 'restore a backup');
+
+  env.fire('click', target({ view: 'journal' }, true));
+  look(env, 'read the journal');
+  env.els['theme-toggle']._h.click({});
+  look(env, 'switch the theme');
+
+  env = styled(boot(ZH, T0 + DAY, { ...env.store }));
+  look(env, 'a card is due');
+  env.fire('click', target({ act: 'go', view: 'review' }));
+  look(env, 'run the review');
+  env.fire('click', target({ act: 'reveal' }));
+  look(env, 'turn the card');
+  env.fire('click', target({ act: 'grade', grade: 'got', id }));
+  look(env, 'grade the card');
+  env.fire('click', target({ act: 'go', view: 'review' }));
+  look(env, 'nothing left due');
+  env.fire('click', target({ act: 'go', view: 'progress' }));
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  look(env, 'progress and shelf after a review');
+
+  const blocked = boot(ZH, T0, null, e => { e.localStorage.setItem = () => { throw new Error('blocked'); }; });
+  look(blocked, 'storage blocked');
+
+  assert.deepStrictEqual(leaks, {}, 'English reached the page: ' + JSON.stringify(leaks));
+});
+
+check('the Chinese fixture supplies every copy key, in the form the engine calls it', () => {
+  /* The check above can only see the views the fixture turns on. This one
+     reads the engine itself, so a key added for the gate or the forecast book
+     is caught here, and a counted string handed over as plain text - which
+     would fall back to English without complaint - is caught too. */
+  const app = fs.readFileSync(path.join(ENGINE, 'app.js'), 'utf8');
+  const called = new Set([...app.matchAll(/\bsay\('(\w+)'/g)].map(m => m[1]));
+  const read = [...app.matchAll(/\bCOPY\.(\w+)/g)].map(m => m[1]).filter(k => !called.has(k));
+  const shell = ['skipLink', 'stampLabel', 'navLabel', 'themeToggleLabel'];
+  const copy = readSite(ZH).copy;
+  assert.ok(called.size > 30, 'expected the counted and dated copy to go through say(), found ' + called.size);
+  const wrong = [...called].filter(k => typeof copy[k] !== 'function').map(k => k + ' (a function)')
+    .concat([...new Set(read.concat(shell))].filter(k => typeof copy[k] !== 'string' || !copy[k]).map(k => k + ' (a string)'));
+  assert.deepStrictEqual(wrong, [], 'missing or of the wrong kind in the fixture');
+});
+
+check('the Chinese fixture passes the validator the build runs', () => {
+  const src = fs.readFileSync(path.join(ZH, 'content', '01.js'), 'utf8');
+  const win = { LESSONS: [] };
+  new Function('window', src)(win);
+  assert.deepStrictEqual(checkSource('01.js', src).concat(validate(readSite(ZH), win.LESSONS).errs), []);
+});
+
+check('dates on a Chinese page are written in Chinese, and elsewhere in the reader\'s locale', () => {
+  const zh = boot(ZH, T0).els['stamp-date'].textContent;
+  assert.ok(zh.includes('2026年8月5日'), 'the stamp should be a Chinese date, got ' + zh);
+  assert.ok(!/[A-Za-z]/.test(zh), 'a Chinese date has no Latin letters in it, got ' + zh);
+
+  // No language means the browser's own locale.
+  const en = boot(FULL, T0).els['stamp-date'].textContent;
+  assert.strictEqual(en, new Date(2026, 7, 5, 12).toLocaleDateString(undefined,
+    { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }));
+});
+
+/* The voice tests below run against the Chinese fixture. Language comes before
+   every quality tier: a Premium English voice reads nothing of a Chinese page,
+   and zh-HK is Cantonese, which would read a Mandarin page aloud in the wrong
+   spoken language. */
+const zhVoices = list => boot(ZH, T0, null, e => { e.window.speechSynthesis.getVoices = () => list; });
+
+check('a Chinese page reads with a voice in its own language', () => {
+  const env = zhVoices([
+    v('Ava (Premium)', 'en-US', true, true),
+    v('Sinji (Enhanced)', 'zh-HK', true),
+    v('Google 普通话（中国大陆）', 'zh-CN', false)
+  ]);
+  assert.strictEqual(env.window.SPEECH.voice().lang, 'zh-CN');
+});
+
+check('voice tags match with - and _ alike and case ignored', () => {
+  // Android reports zh_CN. It is still an exact match, so it beats a regional
+  // sibling that is better on name.
+  const env = zhVoices([v('Meijia (Enhanced)', 'zh-TW', true), v('Google 普通话', 'ZH_cn', false)]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Google 普通话');
+});
+
+check('without its exact language, a page takes a regional sibling', () => {
+  const env = zhVoices([v('Ava (Premium)', 'en-US', true, true), v('Meijia (Enhanced)', 'zh-TW', true)]);
+  assert.strictEqual(env.window.SPEECH.voice().name, 'Meijia (Enhanced)');
+});
+
+check('a Chinese page with no Chinese voice names its language instead of reading in English', () => {
+  const said = [];
+  const env = boot(ZH, T0, null, e => {
+    e.window.speechSynthesis.getVoices = () => [v('Samantha', 'en-US', true, true)];
+    e.window.speechSynthesis.speak = u => { said.push(u); if (u.onend) u.onend(); };
+  });
+  assert.strictEqual(env.window.SPEECH.voice(), null, 'an English voice must not be chosen for Chinese text');
+  env.window.SPEECH.speak([{ text: '一句话。' }], {});
+  assert.strictEqual(said[0].lang, 'zh-CN', 'the browser is told the language so it can find a voice itself');
+
+  // A page with no language leaves the utterance exactly as it always did.
+  const plain = [];
+  const en = boot(PLAIN, T0, null, e => {
+    e.window.speechSynthesis.getVoices = () => [v('Bubbles', 'en-US', true), v('Zarvox', 'en-US', true)];
+    e.window.speechSynthesis.speak = u => { plain.push(u); if (u.onend) u.onend(); };
+  });
+  en.window.SPEECH.speak([{ text: 'One sentence.' }], {});
+  assert.strictEqual(plain[0].lang, undefined);
+});
+
+check('a long Chinese paragraph is split at its sentence ends', () => {
+  // Chinese puts no space after a full stop, and its marks are not the ASCII
+  // ones, so without these the whole paragraph is one utterance.
+  const env = boot(ZH, T0);
+  const sentences = ['先说结论。', '结论来自材料，材料来自调查！', '没有调查，结论从哪里来？',
+    '有人凭印象；', '有人凭上一次的谈话。'];
+  const para = sentences.join('').repeat(6);
+  assert.ok(para.length > 200, 'the paragraph has to be over the limit to test anything');
+  const chunks = env.window.SPEECH.split(para);
+  assert.strictEqual(chunks.length, sentences.length * 6, 'one utterance per sentence, got ' + chunks.length);
+  assert.deepStrictEqual(chunks.slice(0, sentences.length), sentences);
+});
+
+/* One sentence, 150 characters, commas at 12 25 29 41 52 63 75 90 95 101 112.
+   Sixty Chinese characters is the budget, so the breaks belong after the
+   commas at 52 and at 112: the last one that still fits each time. */
+const LONG_ZH = '一个人要想把一件事情办好，就必须先到实际中去看一看，问一问，把各方面的情况都弄清楚，' +
+  '把主要的和次要的分开，把今天的和明天的分开，然后才能拿出一个办法来，这个办法还要拿到实践中去检验，' +
+  '错了就改，对了就坚持，直到事情真正办成为止，而不是整天坐在办公室里仅仅凭着几份报告和一点零碎的印象就匆匆忙忙地下结论。';
+
+check('a long Chinese sentence breaks at its last comma inside the limit', () => {
+  // Chrome drops an utterance after about fifteen seconds, and sixty Chinese
+  // characters is the thirteen seconds two hundred English letters take.
+  const env = boot(ZH, T0);
+  assert.strictEqual(LONG_ZH.length, 150, 'the fixture sentence has to be 150 characters');
+  const chunks = env.window.SPEECH.split(LONG_ZH);
+  chunks.forEach(c => assert.ok(c.length <= 60, 'an utterance of ' + c.length + ' characters: ' + c));
+  assert.strictEqual(chunks.join(''), LONG_ZH, 'every character is spoken once, in order');
+  assert.deepStrictEqual(chunks.map(c => c.length), [53, 60, 37], 'the last comma that fits, not the first');
+  chunks.slice(0, -1).forEach(c => assert.ok(/，$/.test(c), 'a break should fall after a comma: ' + c));
+});
+
+check('a Chinese run with no pause in it is cut at the limit', () => {
+  // Unlike English, which goes over whole: a cut between two Chinese
+  // characters always falls between syllables, where an English cut could
+  // land inside a word.
+  const env = boot(ZH, T0);
+  const run = '实事求是'.repeat(37) + '的人';
+  assert.strictEqual(run.length, 150);
+  const chunks = env.window.SPEECH.split(run);
+  assert.deepStrictEqual(chunks.map(c => c.length), [60, 60, 30]);
+  assert.strictEqual(chunks.join(''), run);
+});
+
+check('an English sentence quoting a little Chinese keeps the English limit', () => {
+  // The budget counts Chinese characters, not letters, so a few of them in an
+  // English sentence change nothing about where it splits.
+  const env = boot(PLAIN, T0);
+  const sentence = 'The character 道 is usually glossed as way, and the gloss hides most of what the ' +
+    'older texts meant by it, which is closer to the method of doing a thing than to the path you take.';
+  assert.ok(sentence.length > 150 && sentence.length <= 200, 'got ' + sentence.length);
+  assert.deepStrictEqual(env.window.SPEECH.split(sentence), [sentence]);
+});
+
+check('every piece of a long Chinese part still lights up that part', () => {
+  // Highlighting follows the part a chunk came from, so splitting finer must
+  // not move the highlight or announce a part twice.
+  const env = boot(ZH, T0);
+  const lit = [];
+  env.window.SPEECH.speak([{ text: LONG_ZH }, { text: '下一段。' }], { onPart: i => lit.push(i) });
+  assert.ok(env.spoken.length > 2, 'the long part should have gone out in pieces');
+  assert.deepStrictEqual(env.spoken, env.window.SPEECH.split(LONG_ZH).concat(['下一段。']));
+  assert.deepStrictEqual(lit, [0, 1, -1], 'each part lit once, in order, then cleared');
+});
+
+/* Read off the rendered tag rather than a function, because the number on the
+   page is the behaviour. */
+function readTimeOf(dir, entry, pattern) {
+  const env = boot(dir, T0, null, e => { e.window.LESSONS = [entry]; });
+  env.fire('click', target({ act: 'go', view: 'library' }));
+  env.fire('click', target({ act: 'lib-open', id: entry.id }));
+  const m = pattern.exec(env.els['view-library'].innerHTML);
+  assert.ok(m, 'no reading time on ' + entry.id);
+  return +m[1];
+}
+
+check('a Chinese entry of about 1500 characters reads as 5 minutes', () => {
+  /* Shaped like a marginalia entry. Reading time counts five fields, which
+     hold 798 of these characters: 2.7 minutes at 300 a minute, rounded to 3,
+     plus the two minutes the engine gives every entry. A count of spaces sees
+     only a handful of words here and stops at the three-minute floor. */
+  const s = '读书要读出问题来，问题要拿到实践中去回答。';
+  const entry = {
+    id: 'zh-long', track: 'alpha', level: 'easy', title: s, source: '样例出处，第四篇',
+    idea: s.repeat(3), why: s.repeat(20), failureMode: s.repeat(8), worked: s.repeat(29),
+    experiment: s.repeat(5), reflection: s.repeat(2), recall: { q: s, a: s }, deepDive: s
+  };
+  const whole = JSON.stringify(entry).match(/[\u4e00-\u9fff，。]/g).length;
+  assert.ok(whole > 1450 && whole < 1550, 'the entry should be about 1500 characters, got ' + whole);
+  assert.strictEqual(readTimeOf(ZH, entry, /tag--time">约 (\d+) 分钟</), 5);
+});
+
+check('an English entry reads exactly as the word count always made it', () => {
+  // The rule English pages have always had, kept here to hold them to it.
+  const words = l => [l.idea, l.why, l.failureMode, l.experiment, l.reflection].join(' ').split(/\s+/).length;
+  const minutes = l => Math.max(3, Math.round(words(l) / 200) + 2);
+  const long = {
+    id: 'en-long', track: 'one', title: 'En long', source: 'Fixture', idea: 'One idea.',
+    why: 'word '.repeat(1100).trim(), failureMode: 'f', experiment: 'x', reflection: 'r', deepDive: 'd'
+  };
+  assert.strictEqual(readTimeOf(PLAIN, long, /tag--time">(\d+) min</), 8);
+  assert.strictEqual(minutes(long), 8);
+  for (const dir of [FULL, EVIDENCE, WORKED]) {
+    for (const l of boot(dir, T0).window.LESSONS) {
+      assert.strictEqual(readTimeOf(dir, l, /tag--time">(\d+) min</), minutes(l), l.id);
+    }
+  }
+});
+
+check('a Chinese source line puts no space between its prefix and the source', () => {
+  const zh = boot(ZH, T0);
+  zh.fire('click', target({ act: 'go', view: 'library' }));
+  zh.fire('click', target({ act: 'lib-open', id: 'alpha-one' }));
+  assert.ok(zh.els['view-library'].innerHTML.includes('选自<em>样例出处，第一篇</em>'),
+    'got ' + /entry__source[^>]*>(.*?)<\/p>/.exec(zh.els['view-library'].innerHTML)[1]);
+
+  const en = boot(FULL, T0);
+  en.fire('click', target({ act: 'go', view: 'library' }));
+  en.fire('click', target({ act: 'lib-open', id: 'beta-two' }));
+  assert.ok(en.els['view-library'].innerHTML.includes('After <em>Fixture</em>'), 'English keeps its space');
+});
+
+check('the Chinese cheatsheet note runs on with no space after a full stop', () => {
+  const env = boot(ZH, T0);
+  env.fire('click', target({ act: 'go', view: 'cheatsheet' }));
+  const note = /<p class="section__note">(.*?)<\/p>/.exec(env.els['view-cheatsheet'].innerHTML)[1];
+  assert.ok(note.includes('的条目。共 3 条，收录 <b>2</b> 条。另外 1 条没有收进来'), 'got ' + note);
+  assert.ok(!/。 /.test(note), 'a space after 。 is a gap Chinese never sets');
+});
+
+check('the build writes the page language and the Chinese shell copy', () => {
+  const shell = fs.readFileSync(path.join(ENGINE, 'index.html'), 'utf8');
+  const cfg = readSite(ZH);
+  const out = localiseShell(shell, cfg);
+  assert.ok(out.startsWith('<html lang="zh-CN">'), 'the language tag has to open the page');
+  const english = {
+    skipLink: 'Skip to today\'s entry', stampLabel: '>Entry<',
+    navLabel: 'aria-label="Sections"', themeToggleLabel: 'aria-label="Switch colour theme"'
+  };
+  for (const k in english) {
+    assert.ok(out.includes(cfg.copy[k]), k + ' did not reach the shell');
+    assert.ok(!out.includes(english[k]), k + ' left its English behind');
+  }
+});
+
+check('an English shell passes through the build untouched', () => {
+  const shell = fs.readFileSync(path.join(ENGINE, 'index.html'), 'utf8');
+  for (const dir of [FULL, PLAIN, EVIDENCE, WORKED]) {
+    assert.strictEqual(localiseShell(shell, readSite(dir)), shell, path.basename(dir) + ' changed the shell');
+  }
+});
+
+check('a language tag the browser would refuse fails the build', () => {
+  // toLocaleDateString throws on a malformed tag, and it runs on every render,
+  // so a bad tag ships a page with nothing on it. zh_CN is the usual slip.
+  const base = { key: 'x.v1', slug: 'x', name: 'X', tagline: 'x', tracks: [{ id: 'alpha', name: 'Alpha' }] };
+  const langErrs = cfg => validateConfig(cfg).filter(e => /\blang\b/.test(e));
+  assert.deepStrictEqual(langErrs(base), [], 'a site may declare no language');
+  assert.deepStrictEqual(langErrs({ ...base, lang: 'zh-CN' }), []);
+  assert.ok(langErrs({ ...base, lang: 'zh_CN' }).length, 'zh_CN is a POSIX locale, not a language tag');
+  assert.ok(langErrs({ ...base, lang: '' }).length, 'an empty tag is not a language');
+});
+
+check('every italic in the stylesheets stands upright on a Chinese page, and only there', () => {
+  /* Chinese has no italic, so a browser asked for one slants the glyphs and it
+     reads as a rendering fault. Checked against the sheets rather than a list,
+     so an italic added later fails here until it has its counterpart. */
+  const css = ['styles.css', 'components.css']
+    .map(f => fs.readFileSync(path.join(ENGINE, f), 'utf8')).join('\n')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .map(m => ({ sel: m[1].split(',').map(s => s.trim()), body: m[2] }));
+  const zh = s => (s.includes('::') ? s.replace('::', ':lang(zh)::') : s + ':lang(zh)');
+  const italic = rules.filter(r => /font-style:\s*italic/.test(r.body)).flatMap(r => r.sel);
+  const upright = rules.filter(r => /font-style:\s*normal/.test(r.body)).flatMap(r => r.sel);
+
+  assert.ok(italic.length >= 7, 'expected to find the italic rules, found ' + italic.length);
+  for (const s of italic.concat(['em', 'i'])) {
+    assert.ok(upright.includes(zh(s)), s + ' has no upright counterpart under :lang(zh)');
+  }
+  for (const s of upright) {
+    assert.ok(s.includes(':lang(zh)'), s + ' sets font-style: normal on pages that are not Chinese');
+  }
 });
 
 report('engine');

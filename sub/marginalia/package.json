@@ -1,0 +1,11 @@
+{
+  "name": "marginalia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mao's Selected Works read for method, each idea set beside what happened when it was applied",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}

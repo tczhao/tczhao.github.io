@@ -244,4 +244,20 @@ check('the built file is self-contained and under the artifact ceiling', () => {
   assert.ok(html.includes(config.name), 'the site name is missing from the built page');
 });
 
+check('a declared language opens the built pages, and nothing opens one that declares none', () => {
+  /* The tag is what :lang(zh) in the stylesheet and a screen reader's choice of
+   * voice both hang on, so a page that declares a language and ships without it
+   * is read as English. A site that declares none ships a page that opens at
+   * its title, with no html tag at all. */
+  for (const f of [path.join('dist', 'index.html'), 'dev.html']) {
+    const html = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    if (config.lang) {
+      assert.ok(html.startsWith('<html lang="' + config.lang + '">'),
+        f + ' does not open with <html lang="' + config.lang + '">');
+    } else {
+      assert.ok(!/^<html\b/.test(html), f + ' opens with a language the site never declared');
+    }
+  }
+});
+
 report(config ? config.name : 'site');
