@@ -9,6 +9,8 @@ const assert = require('assert');
 const { boot, target, makeEnv, readSite, check, report, templateHole, DAY, ENGINE } = require('./harness');
 const { validate, validateConfig, checkSource, localiseShell } = require('../lib/build');
 const fs = require('fs');
+const os = require('os');
+const { spawnSync } = require('child_process');
 
 const FULL = path.join(__dirname, 'fixtures', 'full');
 const PLAIN = path.join(__dirname, 'fixtures', 'plain');
@@ -1674,6 +1676,55 @@ check('a language tag the browser would refuse fails the build', () => {
   assert.deepStrictEqual(langErrs({ ...base, lang: 'zh-CN' }), []);
   assert.ok(langErrs({ ...base, lang: 'zh_CN' }).length, 'zh_CN is a POSIX locale, not a language tag');
   assert.ok(langErrs({ ...base, lang: '' }).length, 'an empty tag is not a language');
+});
+
+check('the build inlines every script verbatim, even text that reads as a replacement pattern', () => {
+  /* String.replace reads $' $` $& and $$ in a string replacement as patterns,
+     so splicing the scripts in that way let a config or an entry rewrite the
+     page around itself. A profile unit of '$' cut site.js in half and shipped
+     a page that booted with no config. Every other check loads the sources
+     rather than the built file, so this one runs the real build on a site
+     written to contain all four. */
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'daily-build-'));
+  try {
+    const tone = Object.fromEntries(['paper', 'paperRaised', 'paperSunk', 'gridTint', 'rule', 'ruleStrong',
+      'ink', 'inkMuted', 'inkFaint', 'accent', 'accentInk', 'action', 'solid', 'shaky'].map(k => [k, '#808080']));
+    const site = [
+      'window.SITE = {',
+      "  key: 'fixt-dollar.v1', slug: 'fixt-dollar', name: 'Fixture Dollar',",
+      '  tagline: "costs $& or $$ more",',
+      "  tracks: [{ id: 'alpha', name: 'Alpha' }],",
+      "  review: 'none',",
+      "  profile: { fields: [{ id: 'spend', label: 'Spend', unit: '$' }] },",
+      '  palette: ' + JSON.stringify({ light: tone, dark: tone }),
+      '};'
+    ].join('\n');
+    const entry = [
+      '(window.LESSONS = window.LESSONS || []).push({',
+      '  id: "alpha-one", track: "alpha", title: "Alpha one", source: "Fixture",',
+      '  idea: "Priced at $` or $\' and nothing else.", why: "A mechanism.",',
+      '  failureMode: "A failure.", experiment: "Do the thing.",',
+      '  reflection: "What happened?", deepDive: "Help me apply this."',
+      '});'
+    ].join('\n');
+    fs.writeFileSync(path.join(dir, 'site.js'), site);
+    fs.mkdirSync(path.join(dir, 'content'));
+    fs.writeFileSync(path.join(dir, 'content', '01.js'), entry);
+
+    const run = spawnSync(process.execPath, [path.join(__dirname, '..', 'lib', 'build.js')],
+      { cwd: dir, encoding: 'utf8' });
+    assert.strictEqual(run.status, 0, 'the build refused the fixture: ' + run.stderr);
+
+    const html = fs.readFileSync(path.join(dir, 'dist', 'index.html'), 'utf8');
+    assert.ok(html.includes(site), 'site.js did not reach the page byte for byte');
+    assert.ok(html.includes(entry), 'the entry did not reach the page byte for byte');
+    assert.ok(html.includes('<title>Fixture Dollar - costs $& or $$ more</title>'), 'the title was rewritten');
+    for (const [, js] of html.matchAll(/<script>\n([\s\S]*?)\n<\/script>/g)) {
+      assert.doesNotThrow(() => new Function(js), 'an inlined script no longer parses');
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 check('every italic in the stylesheets stands upright on a Chinese page, and only there', () => {

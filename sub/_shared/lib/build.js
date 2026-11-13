@@ -375,10 +375,12 @@ function assemble(cfg, mode) {
       .map(s => `<script src="${s}"></script>`).join('\n');
   }
 
+  /* Functions rather than strings: a string replacement reads $' $` $& and $$
+     as patterns, and what is spliced in here is content that may contain them. */
   let html = shell
-    .replace('<!--STYLES-->', styles)
-    .replace('<!--SCRIPTS-->', scripts)
-    .replace('<title>Daily</title>', `<title>${cfg.name} - ${cfg.tagline}</title>`);
+    .replace('<!--STYLES-->', () => styles)
+    .replace('<!--SCRIPTS-->', () => scripts)
+    .replace('<title>Daily</title>', () => `<title>${cfg.name} - ${cfg.tagline}</title>`);
 
   if (mode === 'dist' && (html.includes('<link rel="stylesheet"') || /<script src=/.test(html))) {
     throw new Error('inlining incomplete - a src/href reference survived');

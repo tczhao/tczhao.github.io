@@ -1,0 +1,11 @@
+{
+  "name": "drivetrain",
+  "version": "1.0.0",
+  "private": true,
+  "description": "How platform work reaches the business - one drill a day, with spaced review",
+  "scripts": {
+    "build": "node ../_shared/lib/build.js",
+    "test": "node ../_shared/test/engine.test.js && node ../_shared/test/site.test.js",
+    "check": "npm run build && npm test"
+  }
+}
